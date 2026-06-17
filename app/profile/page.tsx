@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
@@ -139,6 +139,22 @@ const STUDY_GOALS = [
 
 const RESERVED = ["admin","root","lionade","support","help","ninny"];
 
+// Broken-avatar fallback: a stable DiceBear identicon keyed off a seed so a
+// dead avatar_url (404 / CDN miss) never renders a broken-image glyph.
+const dicebearFallback = (seed: string) =>
+  `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(seed || "lionade")}`;
+
+// One-shot <img onError> guard: swap to the DiceBear fallback exactly once so a
+// fallback that itself fails can't loop.
+function avatarOnError(seed: string) {
+  return (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.dataset.fellBack === "1") return;
+    img.dataset.fellBack = "1";
+    img.src = dicebearFallback(seed);
+  };
+}
+
 const NAV: { key: Section; label: string; Icon: Icon }[] = [
   { key: "overview",        label: "Overview",            Icon: ChartBar },
   { key: "edit-profile",    label: "Edit Profile",        Icon: PencilSimple },
@@ -225,16 +241,17 @@ export default function ProfilePage() {
           {/* Mobile header */}
           <div className="flex items-center justify-between mb-4 md:hidden">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/50"
-                aria-label={`${user.username}'s avatar`}>
-                <img src={avatarUrl} alt={user.username} className="w-9 h-9 rounded-full object-cover" />
+              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/50">
+                <img src={avatarUrl} alt={`${user.username}'s avatar`} onError={avatarOnError(user.username)} className="w-9 h-9 rounded-full object-cover" />
               </div>
               <span className="font-bebas text-xl text-cream tracking-wider">
                 {NAV.find(n => n.key === section)?.label}
               </span>
             </div>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg border border-electric/20 text-cream/60">
+              aria-label={sidebarOpen ? "Close profile menu" : "Open profile menu"}
+              aria-expanded={sidebarOpen}
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-electric/20 text-cream/70 hover:text-cream hover:bg-white/5 transition-colors">
               <List size={22} weight="bold" aria-hidden="true" />
             </button>
           </div>
@@ -249,21 +266,20 @@ export default function ProfilePage() {
                 <div className="p-6 border-b border-electric/10 text-center">
                   <div className="relative w-20 h-20 mx-auto mb-3">
                     <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-electric/50"
-                      aria-label={`${user.username}'s avatar`}
                       style={{ boxShadow: "0 0 20px #4A90D940" }}>
-                      <img src={avatarUrl} alt={user.username} className="w-20 h-20 rounded-full object-cover" />
+                      <img src={avatarUrl} alt={`${user.username}'s avatar`} onError={avatarOnError(user.username)} className="w-20 h-20 rounded-full object-cover" />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-navy
                       flex items-center justify-center font-bebas text-xs text-white"
                       style={{ background: "#4A90D9" }}>{level}</div>
                   </div>
                   <p className="font-bebas text-xl text-cream tracking-wider">@<AnimatedUsername username={user.username} effect={usernameEffect} size="md" /></p>
-                  <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(coins)} Fangs</p>
+                  <p className="text-cream/60 text-xs mt-0.5">Level {level} · {formatCoins(coins)} Fangs</p>
                   <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-500"
+                    <div className="h-full rounded-full motion-safe:transition-all motion-safe:duration-500"
                       style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9)" }} />
                   </div>
-                  <p className="text-cream/30 text-xs mt-1">{statsReady ? `${xpToNext} XP to Level ${level + 1}` : ""}</p>
+                  <p className="text-cream/55 text-xs mt-1 min-h-[1rem]">{statsReady ? `${xpToNext} XP to Level ${level + 1}` : ""}</p>
                 </div>
 
                 {/* Nav */}
@@ -275,7 +291,8 @@ export default function ProfilePage() {
                         transition-all duration-200 mb-0.5 text-left
                         ${section === item.key
                           ? "bg-electric/20 text-electric border border-electric/30"
-                          : "text-cream/50 hover:text-cream hover:bg-white/5"}`}>
+                          : "text-cream/65 hover:text-cream hover:bg-white/5"}`}
+                      aria-current={section === item.key ? "page" : undefined}>
                       <item.Icon size={18} weight={section === item.key ? "fill" : "regular"} color="currentColor" aria-hidden="true" className="w-5 flex-shrink-0" />
                       {item.label}
                     </button>
@@ -320,7 +337,7 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-6">
       <h2 className="font-bebas text-3xl text-cream tracking-wider">{title}</h2>
-      {sub && <p className="text-cream/40 text-sm mt-1">{sub}</p>}
+      {sub && <p className="text-cream/55 text-sm mt-1">{sub}</p>}
     </div>
   );
 }
@@ -336,15 +353,82 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 function SaveToast({ msg, isError = false }: { msg: string; isError?: boolean }) {
   return (
-    <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold
-      ${isError ? "bg-red-400/10 border border-red-400/30 text-red-400" : "bg-green-400/10 border border-green-400/30 text-green-400"}`}>
+    <div role={isError ? "alert" : "status"} aria-live={isError ? "assertive" : "polite"}
+      className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold motion-safe:animate-slide-up
+      ${isError ? "bg-red-400/10 border border-red-400/30 text-red-300" : "bg-green-400/10 border border-green-400/30 text-green-300"}`}>
       <span className="inline-flex items-center gap-1.5">{isError ? <Warning size={16} weight="fill" aria-hidden="true" /> : <Check size={16} weight="bold" aria-hidden="true" />} {msg}</span>
     </div>
   );
 }
 
-const inputCls = "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-electric transition-all";
-const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5";
+const inputCls = "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py-3 text-cream placeholder-cream/35 text-sm focus:outline-none focus:border-electric transition-all";
+const labelCls = "block text-cream/60 text-xs font-bold uppercase tracking-widest mb-1.5";
+
+// ── Accessible confirm dialog ─────────────────────────
+// role=dialog + aria-modal, focuses its first control on open, traps Tab,
+// closes on Escape / backdrop, and restores focus to the trigger on close.
+function ConfirmModal({
+  titleId, title, children, confirmLabel, onConfirm, onCancel,
+}: {
+  titleId: string; title: string; children: React.ReactNode;
+  confirmLabel: string; onConfirm: () => void; onCancel: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const restoreTo = document.activeElement as HTMLElement | null;
+    // Focus the first interactive control inside the dialog.
+    const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    focusables?.[0]?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onCancel(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const items = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(el => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      restoreTo?.focus?.();
+    };
+  }, [onCancel]);
+
+  return (
+    <div
+      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm motion-safe:animate-fade-in"
+      role="dialog" aria-modal="true" aria-labelledby={titleId}
+    >
+      <div ref={panelRef} onClick={(e) => e.stopPropagation()}
+        className="rounded-2xl border border-electric/20 p-6 max-w-md w-full motion-safe:animate-slide-up"
+        style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+        <h3 id={titleId} className="font-bebas text-2xl text-cream tracking-wider mb-2">{title}</h3>
+        <div className="text-cream/70 text-sm mb-5 leading-relaxed">{children}</div>
+        <div className="flex gap-3">
+          <button onClick={onCancel}
+            className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/70 text-sm font-bold hover:bg-white/5 transition-all">
+            Cancel
+          </button>
+          <button onClick={onConfirm}
+            className="flex-1 py-3 rounded-xl font-bold text-sm text-navy transition-all"
+            style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── OVERVIEW ───────────────────────────────────────────
 // Rarity ranking + tier accent (mirrors /badges page tone)
@@ -463,9 +547,9 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             type="button"
             onClick={() => setShareOpen(true)}
             aria-label="Share profile"
-            className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream transition-colors"
+            className="absolute top-3 right-3 z-20 inline-flex items-center justify-center gap-1.5 min-h-[36px] rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/75 hover:text-cream transition-colors"
           >
-            <ShareNetwork size={11} weight="fill" /> Share
+            <ShareNetwork size={11} weight="fill" aria-hidden="true" /> Share
           </button>
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
@@ -489,14 +573,14 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             </div>
 
           <div className="flex-1 text-center sm:text-left min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/40 mb-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mb-1">
               Player Profile
             </p>
             <h1 className="font-bebas text-5xl text-cream tracking-wider leading-none mb-1">
               <AnimatedUsername username={user.username} effect={usernameEffect} nameColor={cosmetics.nameColor} size="lg" className="font-bebas tracking-wider text-5xl" />
             </h1>
             {user.displayName && user.displayName !== user.username && (
-              <p className="text-cream/50 text-sm mb-3">{user.displayName}</p>
+              <p className="text-cream/60 text-sm mb-3">{user.displayName}</p>
             )}
 
             {/* Chips row: streak + accuracy + badges */}
@@ -522,12 +606,16 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             </div>
 
             <div className="mb-1">
-              <div className="flex justify-between text-[10px] font-mono uppercase tracking-[0.2em] text-cream/40 mb-1.5">
+              <div className="flex justify-between text-[10px] font-mono uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                 <span>Level {level}</span>
                 <span>{statsReady ? `${xpToNext} XP to Lvl ${level + 1}` : " "}</span>
               </div>
-              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-500"
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label={`Level ${level} progress`}
+                aria-valuemin={0} aria-valuemax={100}
+                aria-valuenow={statsReady ? Math.round(progress) : undefined}>
+                <div className="h-full rounded-full motion-safe:transition-all motion-safe:duration-500"
                   style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D960" }} />
               </div>
             </div>
@@ -575,7 +663,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             {s.value !== null
               ? <p className={`font-bebas text-3xl leading-none tracking-wider ${s.color}`}>{s.value}</p>
               : <div className="w-14 h-8 bg-white/10 rounded-lg animate-pulse mx-auto" />}
-            <p className="text-cream/50 text-[10px] font-mono uppercase tracking-[0.18em] mt-2">{s.label}</p>
+            <p className="text-cream/60 text-[10px] font-mono uppercase tracking-[0.18em] mt-2">{s.label}</p>
           </Card>
         ))}
       </div>
@@ -599,7 +687,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-gold/20 bg-gold/5">
                 <Lock size={20} weight="regular" color="rgba(240,180,41,0.6)" aria-hidden="true" />
               </div>
-              <p className="text-cream/50 text-sm mb-3">No badges yet</p>
+              <p className="text-cream/60 text-sm mb-3">No badges yet</p>
               <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors">
                 Complete a quiz to earn one
               </Link>
@@ -628,7 +716,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-electric/20 bg-electric/5">
                 <Lightning size={20} weight="regular" color="rgba(74,144,217,0.7)" aria-hidden="true" />
               </div>
-              <p className="text-cream/50 text-sm mb-3">No activity yet</p>
+              <p className="text-cream/60 text-sm mb-3">No activity yet</p>
               <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors">
                 Take your first quiz
               </Link>
@@ -651,7 +739,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
                       </div>
                       <span className="text-cream/75 text-xs truncate">{a.description}</span>
                     </div>
-                    <span className={`font-bebas text-sm flex-shrink-0 tracking-wider ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
+                    <span className={`font-bebas text-sm flex-shrink-0 tracking-wider ${a.amount > 0 ? "text-gold" : "text-cream/55"}`}>
                       {a.amount > 0 ? `+${a.amount}` : "+0"}
                     </span>
                   </div>
@@ -667,18 +755,18 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         <div className="flex justify-between items-baseline mb-1">
           <h3 className="font-bebas text-xl text-cream tracking-wider">BADGE COLLECTION</h3>
           {allBadges.length > 0 && (
-            <span className="text-cream/40 text-xs font-mono uppercase tracking-[0.18em]">
+            <span className="text-cream/60 text-xs font-mono uppercase tracking-[0.18em]">
               {earnedBadges.length} / {allBadges.length}
             </span>
           )}
         </div>
-        <p className="text-cream/40 text-[11px] font-mono uppercase tracking-[0.18em] mb-5">
+        <p className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.18em] mb-5">
           Sorted by rarity
         </p>
 
         {earnedBadges.length === 0 && lockedBadges.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-cream/40 text-sm">Badges will appear here as you earn them.</p>
+            <p className="text-cream/55 text-sm">Badges will appear here as you earn them.</p>
           </div>
         ) : (
           <>
@@ -714,7 +802,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             {/* Locked: same grouping, dimmed via BadgeCard earned=false */}
             {lockedBadges.length > 0 && (
               <div className="border-t border-electric/10 pt-5 mt-5">
-                <p className="text-cream/35 text-[10px] font-bold uppercase tracking-[0.22em] mb-4">
+                <p className="text-cream/55 text-[10px] font-bold uppercase tracking-[0.22em] mb-4">
                   Locked · {lockedBadges.length}
                 </p>
                 {RARITY_TIERS.map(tier => {
@@ -727,7 +815,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
                           className="w-1.5 h-1.5 rounded-full opacity-50"
                           style={{ background: tier.color }}
                         />
-                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/35">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/55">
                           {tier.label} · {items.length}
                         </p>
                       </div>
@@ -866,28 +954,17 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
       {/* Username change confirmation modal */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="rounded-2xl border border-electric/20 p-6 max-w-md w-full mx-4"
-            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
-            <h3 className="font-bebas text-2xl text-cream tracking-wider mb-2">CONFIRM USERNAME CHANGE</h3>
-            <p className="text-cream/60 text-sm mb-4 leading-relaxed">
-              You can only change your username <span className="text-gold font-semibold">once per year</span>. Are you sure you want to change from{" "}
-              <span className="text-electric font-semibold">@{user.username}</span> to{" "}
-              <span className="text-electric font-semibold">@{username.trim().toLowerCase()}</span>?
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-bold hover:bg-white/5 transition-all">
-                Cancel
-              </button>
-              <button onClick={handleSave}
-                className="flex-1 py-3 rounded-xl font-bold text-sm text-navy transition-all"
-                style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-                Confirm Change
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          titleId="confirm-username-title"
+          title="CONFIRM USERNAME CHANGE"
+          confirmLabel="Confirm Change"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={handleSave}
+        >
+          You can only change your username <span className="text-gold font-semibold">once per year</span>. Are you sure you want to change from{" "}
+          <span className="text-electric font-semibold">@{user.username}</span> to{" "}
+          <span className="text-electric font-semibold">@{username.trim().toLowerCase()}</span>?
+        </ConfirmModal>
       )}
 
       <Card>
@@ -906,19 +983,21 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
                 placeholder="your_handle"
                 disabled={usernameLocked}
                 className={inputCls + " pr-28" + (usernameLocked ? " opacity-50 cursor-not-allowed" : "")} />
-              {!usernameLocked && usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>}
-              {!usernameLocked && usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold inline-flex items-center gap-1"><Check size={12} weight="bold" aria-hidden="true" /> Available</span>}
-              {!usernameLocked && usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold inline-flex items-center gap-1"><XIcon size={12} weight="bold" aria-hidden="true" /> Taken</span>}
+              <span role="status" aria-live="polite">
+                {!usernameLocked && usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 text-xs">Checking...</span>}
+                {!usernameLocked && usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-300 text-xs font-semibold inline-flex items-center gap-1"><Check size={12} weight="bold" aria-hidden="true" /> Available</span>}
+                {!usernameLocked && usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-300 text-xs font-semibold inline-flex items-center gap-1"><XIcon size={12} weight="bold" aria-hidden="true" /> Taken</span>}
+              </span>
             </div>
             {usernameLocked && usernameUnlockDate ? (
-              <p className="text-amber-400/70 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
+              <p className="text-amber-300 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
             ) : (
-              <p className="text-cream/25 text-xs mt-1">Usernames can only be changed once per year</p>
+              <p className="text-cream/55 text-xs mt-1">Usernames can only be changed once per year</p>
             )}
           </div>
 
           <div>
-            <label className={labelCls}>Bio <span className={`normal-case font-normal ${bio.length >= 140 ? "text-red-400" : "text-cream/30"}`}>({bio.length}/150)</span></label>
+            <label className={labelCls}>Bio <span className={`normal-case font-normal ${bio.length >= 140 ? "text-red-300" : "text-cream/55"}`}>({bio.length}/150)</span></label>
             <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 150))}
               placeholder="Tell the world who you are..." rows={3}
               className={inputCls + " resize-none"} />
@@ -1045,9 +1124,9 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
             {hasChange ? "Preview" : "Current Avatar"}
           </p>
           {tab === "styles" && selectedSeed ? (
-            <p className="text-cream/40 text-sm mt-0.5 truncate">{currentStyleLabel} &middot; {selectedSeed}</p>
+            <p className="text-cream/60 text-sm mt-0.5 truncate">{currentStyleLabel} &middot; {selectedSeed}</p>
           ) : (
-            <p className="text-cream/40 text-sm mt-0.5">Pick a new one below, then save</p>
+            <p className="text-cream/60 text-sm mt-0.5">Pick a new one below, then save</p>
           )}
         </div>
         {hasChange && (
@@ -1063,11 +1142,11 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
       {toast && <SaveToast msg={toast.msg} isError={toast.err} />}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10 max-w-md mx-auto">
+      <div role="tablist" aria-label="Avatar source" className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10 max-w-md mx-auto">
         {(["styles","create"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all text-center
-              ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors text-center
+              ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/60 hover:text-cream"}`}>
             <span className="inline-flex items-center gap-1.5">{t === "styles" ? <><MaskHappy size={14} weight="fill" aria-hidden="true" /> Styles</> : <><Sparkle size={14} weight="fill" aria-hidden="true" /> Create</>}</span>
           </button>
         ))}
@@ -1080,10 +1159,11 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
           <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-thin mb-5">
             {DICEBEAR_STYLES.map(s => (
               <button key={s.id} onClick={() => { setSelectedStyle(s.id); setSelectedSeed(null); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0 whitespace-nowrap
+                aria-pressed={selectedStyle === s.id}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-colors flex-shrink-0 whitespace-nowrap
                   ${selectedStyle === s.id
                     ? "bg-electric/20 text-electric border border-electric/40"
-                    : "text-cream/40 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                    : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
                 {s.label}
               </button>
             ))}
@@ -1096,10 +1176,12 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
               const isActive = selectedSeed === seed;
               return (
                 <button key={seed} onClick={() => setSelectedSeed(seed)}
-                  className={`aspect-square rounded-2xl overflow-hidden transition-all hover:scale-105 border-2
-                    ${isActive ? "border-amber-400 shadow-lg shadow-amber-400/20 scale-105" : "border-white/10 hover:border-white/20"}`}
+                  aria-pressed={isActive}
+                  aria-label={`Avatar option ${seed}`}
+                  className={`aspect-square rounded-2xl overflow-hidden border-2 motion-safe:transition-transform motion-safe:duration-200 motion-safe:hover:scale-105
+                    ${isActive ? "border-amber-400 shadow-lg shadow-amber-400/20 motion-safe:scale-105" : "border-white/10 hover:border-white/20"}`}
                   style={{ background: "rgba(10,16,32,0.6)" }}>
-                  <img src={url} alt={seed} className="w-full h-full object-cover p-2" loading="lazy" />
+                  <img src={url} alt="" aria-hidden="true" className="w-full h-full object-cover p-2" loading="lazy" />
                 </button>
               );
             })}
@@ -1126,28 +1208,29 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 
           {/* Skin Tone */}
           <div className="mb-5">
-            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Skin Tone</p>
+            <p className="text-cream/65 text-xs font-bold uppercase tracking-widest mb-2">Skin Tone</p>
             <div className="flex gap-2">
               {ADVENTURER_SKIN_TONES.map(s => (
                 <button key={s.value} onClick={() => setAvSkin(s.value)}
-                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avSkin === s.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
-                  style={{ background: `#${s.value}` }}
-                  title={s.label} />
+                  aria-label={`Skin tone: ${s.label}`} aria-pressed={avSkin === s.value} title={s.label}
+                  className={`w-11 h-11 rounded-full motion-safe:transition-transform motion-safe:hover:scale-110 ${avSkin === s.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] motion-safe:scale-110" : ""}`}
+                  style={{ background: `#${s.value}` }} />
               ))}
             </div>
           </div>
 
           {/* Hair Style */}
           <div className="mb-5">
-            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Style</p>
+            <p className="text-cream/65 text-xs font-bold uppercase tracking-widest mb-2">Hair Style</p>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
               {ADVENTURER_HAIR_STYLES.map(h => {
                 const hairPreviewUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}&skinColor=${avSkin}&hair=${h}&hairColor=${avHairColor}&backgroundColor=${avBg}&size=64`;
                 return (
                   <button key={h} onClick={() => setAvHair(h)}
-                    className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all hover:scale-105 border-2
+                    aria-label={`Hair style ${h}`} aria-pressed={avHair === h}
+                    className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border-2 motion-safe:transition-transform motion-safe:hover:scale-105
                       ${avHair === h ? "border-electric shadow-lg shadow-electric/30" : "border-white/10 hover:border-white/20"}`}>
-                    <img src={hairPreviewUrl} alt={h} className="w-full h-full object-cover" />
+                    <img src={hairPreviewUrl} alt="" aria-hidden="true" className="w-full h-full object-cover" />
                   </button>
                 );
               })}
@@ -1156,26 +1239,26 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 
           {/* Hair Color */}
           <div className="mb-5">
-            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Color</p>
+            <p className="text-cream/65 text-xs font-bold uppercase tracking-widest mb-2">Hair Color</p>
             <div className="flex gap-2">
               {ADVENTURER_HAIR_COLORS.map(c => (
                 <button key={c.value} onClick={() => setAvHairColor(c.value)}
-                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avHairColor === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
-                  style={{ background: `#${c.value}` }}
-                  title={c.label} />
+                  aria-label={`Hair color: ${c.label}`} aria-pressed={avHairColor === c.value} title={c.label}
+                  className={`w-11 h-11 rounded-full motion-safe:transition-transform motion-safe:hover:scale-110 ${avHairColor === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] motion-safe:scale-110" : ""}`}
+                  style={{ background: `#${c.value}` }} />
               ))}
             </div>
           </div>
 
           {/* Background Color */}
           <div>
-            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Background Color</p>
+            <p className="text-cream/65 text-xs font-bold uppercase tracking-widest mb-2">Background Color</p>
             <div className="flex gap-2">
               {ADVENTURER_BG_COLORS.map(c => (
                 <button key={c.value} onClick={() => setAvBg(c.value)}
-                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avBg === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
-                  style={{ background: `#${c.value}`, border: c.value === "04080F" ? "2px solid rgba(74,144,217,0.3)" : "none" }}
-                  title={c.label} />
+                  aria-label={`Background color: ${c.label}`} aria-pressed={avBg === c.value} title={c.label}
+                  className={`w-11 h-11 rounded-full motion-safe:transition-transform motion-safe:hover:scale-110 ${avBg === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] motion-safe:scale-110" : ""}`}
+                  style={{ background: `#${c.value}`, border: c.value === "04080F" ? "2px solid rgba(74,144,217,0.3)" : "none" }} />
               ))}
             </div>
           </div>
@@ -1255,7 +1338,7 @@ function PersonalizationSection({ user }: SharedProps) {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="font-bebas text-lg text-cream tracking-wider">YOUR LOCKER</h3>
-            <p className="text-cream/40 text-xs mt-0.5">Equip and swap your owned looks. Changes show on your profile instantly.</p>
+            <p className="text-cream/55 text-xs mt-0.5">Equip and swap your owned looks. Changes show on your profile instantly.</p>
           </div>
           <a href="/shop" className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-electric/15 text-electric border border-electric/30 hover:bg-electric/25 transition-all duration-200">
             <Storefront size={14} weight="regular" aria-hidden="true" /> Shop
@@ -1266,7 +1349,7 @@ function PersonalizationSection({ user }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-1">THEME</h3>
-        <p className="text-cream/40 text-xs mb-4">Switch the whole app between dark and light. Applies instantly.</p>
+        <p className="text-cream/55 text-xs mb-4">Switch the whole app between dark and light. Applies instantly.</p>
         <div className="flex gap-3" role="radiogroup" aria-label="Theme">
           {([
             { id: "dark" as const, label: "Dark", Icon: Moon, swatch: "linear-gradient(135deg, #0D1528, #04080F)" },
@@ -1277,7 +1360,7 @@ function PersonalizationSection({ user }: SharedProps) {
               <button key={t.id} type="button" role="radio" aria-checked={active}
                 onClick={() => autoSave({ theme: t.id })}
                 className={`flex-1 flex items-center gap-3 text-left p-3.5 rounded-xl border font-bold transition-all
-                  ${active ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+                  ${active ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/65 hover:border-white/20"}`}>
                 <span aria-hidden="true" className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center border border-white/15" style={{ background: t.swatch }}>
                   <t.Icon size={18} weight={active ? "fill" : "regular"} className={t.id === "light" ? "text-navy/70" : "text-cream"} />
                 </span>
@@ -1298,7 +1381,7 @@ function PersonalizationSection({ user }: SharedProps) {
           ]).map(f => (
             <button key={f.id} onClick={() => autoSave({ font_size: f.id })}
               className={`flex-1 py-3 rounded-xl border font-bold transition-all
-                ${fontSize === f.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+                ${fontSize === f.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/65 hover:border-white/20"}`}>
               <span className={f.size}>A</span>
               <span className="block text-xs mt-0.5 font-normal normal-case">{f.label}</span>
             </button>
@@ -1308,12 +1391,12 @@ function PersonalizationSection({ user }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">PREFERRED SUBJECTS</h3>
-        <p className="text-cream/40 text-xs mb-3">These appear first in quiz selection</p>
+        <p className="text-cream/55 text-xs mb-3">These appear first in quiz selection</p>
         <div className="flex flex-wrap gap-2">
           {SUBJECTS.map(s => (
             <button key={s} onClick={() => toggleSubject(s)}
               className={`px-4 py-2 rounded-full text-sm font-bold transition-all
-                ${prefSubjects.includes(s) ? "bg-electric/20 text-electric border border-electric/40" : "bg-white/5 text-cream/50 border border-white/10 hover:border-white/20"}`}>
+                ${prefSubjects.includes(s) ? "bg-electric/20 text-electric border border-electric/40" : "bg-white/5 text-cream/65 border border-white/10 hover:border-white/20"}`}>
               {prefSubjects.includes(s) ? "\u2713 " : ""}{s}
             </button>
           ))}
@@ -1437,12 +1520,12 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
             {(["public","private"] as const).map(v => (
               <button key={v} onClick={() => setVisibility(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
-                  ${visibility === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+                  ${visibility === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/65 hover:border-white/20"}`}>
                 <span className="inline-flex items-center gap-1.5">{v === "public" ? <Globe size={14} weight="regular" aria-hidden="true" /> : <Lock size={14} weight="regular" aria-hidden="true" />} {v}</span>
               </button>
             ))}
           </div>
-          <p className="text-cream/40 text-xs mt-2">
+          <p className="text-cream/55 text-xs mt-2">
             {visibility === "private"
               ? "Private profiles are hidden from search and leaderboards."
               : "Public profiles are discoverable in search and on the leaderboard."}
@@ -1457,9 +1540,9 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
           <div key={item.label} className="flex items-center justify-between py-2 border-b border-electric/10 last:border-0">
             <div>
               <p className="text-cream text-sm font-semibold">{item.label}</p>
-              <p className="text-cream/40 text-xs">{item.sub}</p>
+              <p className="text-cream/55 text-xs">{item.sub}</p>
             </div>
-            <Toggle checked={item.val} onChange={item.set} />
+            <Toggle checked={item.val} onChange={item.set} label={item.label} />
           </div>
         ))}
 
@@ -1469,7 +1552,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
             {(["everyone","nobody"] as const).map(v => (
               <button key={v} onClick={() => setDuelFrom(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
-                  ${duelFrom === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+                  ${duelFrom === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/65 hover:border-white/20"}`}>
                 <span className="inline-flex items-center gap-1.5">{v === "everyone" ? <><Sword size={14} weight="fill" aria-hidden="true" /> Everyone</> : <><Prohibit size={14} weight="regular" aria-hidden="true" /> Nobody</>}</span>
               </button>
             ))}
@@ -1489,7 +1572,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-2">YOUR DATA</h3>
-        <p className="text-cream/40 text-sm mb-4">Download a copy of everything Lionade has stored about you</p>
+        <p className="text-cream/55 text-sm mb-4">Download a copy of everything Lionade has stored about you</p>
         <button onClick={downloadData}
           className="px-6 py-2.5 rounded-xl border border-electric/40 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
           <span className="inline-flex items-center gap-2">Download My Data (JSON)</span>
@@ -1568,7 +1651,7 @@ function SecuritySection({ user }: SharedProps) {
                   { ok: pwChecks.number,  label: "One number" },
                   { ok: pwChecks.special, label: "One special character (!@#$%^&*)" },
                 ].map(c => (
-                  <div key={c.label} className={`flex items-center gap-2 text-xs ${c.ok ? "text-green-400" : "text-red-400"}`}>
+                  <div key={c.label} className={`flex items-center gap-2 text-xs ${c.ok ? "text-green-300" : "text-red-300"}`}>
                     {c.ok ? <Check size={14} weight="bold" aria-hidden="true" /> : <XIcon size={14} weight="bold" aria-hidden="true" />}<span>{c.label}</span>
                   </div>
                 ))}
@@ -1580,7 +1663,7 @@ function SecuritySection({ user }: SharedProps) {
             <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
               placeholder="Re-enter new password" className={inputCls} />
             {confirmPw.length > 0 && (
-              <p className={`text-xs font-semibold mt-1 ${pwMatch ? "text-green-400" : "text-red-400"}`}>
+              <p role="status" aria-live="polite" className={`text-xs font-semibold mt-1 ${pwMatch ? "text-green-300" : "text-red-300"}`}>
                 <span className="inline-flex items-center gap-1">{pwMatch ? <><Check size={12} weight="bold" aria-hidden="true" /> Passwords match</> : "Passwords do not match"}</span>
               </p>
             )}
@@ -1596,23 +1679,23 @@ function SecuritySection({ user }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-2">ACTIVE SESSIONS</h3>
-        <p className="text-cream/40 text-sm mb-4">Devices currently signed into your account</p>
+        <p className="text-cream/55 text-sm mb-4">Devices currently signed into your account</p>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-electric/5 border border-electric/20">
           <Laptop size={28} weight="regular" color="currentColor" aria-hidden="true" />
           <div>
             <p className="text-cream text-sm font-semibold">Current Session</p>
-            <p className="text-cream/40 text-xs">This device · Active now</p>
+            <p className="text-cream/55 text-xs">This device · Active now</p>
           </div>
-          <span className="ml-auto text-green-400 text-xs font-bold">● Active</span>
+          <span className="ml-auto text-green-300 text-xs font-bold">● Active</span>
         </div>
-        <p className="text-cream/20 text-xs mt-3">Full session management requires Supabase Auth admin access</p>
+        <p className="text-cream/55 text-xs mt-3">Full session management requires Supabase Auth admin access</p>
       </Card>
 
       <Card>
         <h3 className="font-bebas text-lg text-red-400 tracking-wider mb-2">DANGER ZONE</h3>
-        <p className="text-cream/40 text-sm mb-4">These actions are permanent and cannot be undone</p>
+        <p className="text-cream/55 text-sm mb-4">These actions are permanent and cannot be undone</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="px-6 py-2.5 rounded-xl border border-red-400/30 text-red-400 text-sm font-bold hover:bg-red-400/10 transition-all">
+          className="px-6 py-2.5 rounded-xl border border-red-400/30 text-red-300 text-sm font-bold hover:bg-red-400/10 transition-all">
           <span className="inline-flex items-center gap-2"><Trash size={16} weight="regular" aria-hidden="true" /> Delete Account</span>
         </button>
       </Card>
@@ -1636,14 +1719,28 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
   const router = useRouter();
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const emailLc = email.trim().toLowerCase();
   const matches = confirmText.trim().toLowerCase() === emailLc && emailLc.length > 0;
 
-  // Escape closes
+  // Escape closes + Tab focus trap + restore focus to the trigger on close.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !deleting) onClose(); };
+    const restoreTo = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !deleting) { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const items = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(el => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); restoreTo?.focus?.(); };
   }, [deleting, onClose]);
 
   const handleDelete = async () => {
@@ -1674,11 +1771,11 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
   return (
     <div
       onClick={() => !deleting && onClose()}
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm motion-safe:animate-fade-in"
       role="dialog" aria-modal="true" aria-labelledby="delete-account-title"
     >
-      <div onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl border border-red-400/30 p-6 animate-slide-up"
+      <div ref={panelRef} onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-2xl border border-red-400/30 p-6 motion-safe:animate-slide-up"
         style={{ background: "linear-gradient(135deg, rgba(20,8,14,0.98), rgba(8,4,8,0.98))" }}
       >
         <div className="flex items-center gap-3 mb-3">
@@ -1688,9 +1785,9 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
           <h3 id="delete-account-title" className="font-bebas text-2xl text-red-400 tracking-wider">DELETE ACCOUNT</h3>
         </div>
         <p className="text-cream/80 text-sm mb-2">This permanently removes your account, profile, friends, quiz history, and any Fangs you have on hand.</p>
-        <p className="text-cream/50 text-xs mb-5">This cannot be undone. If you want to come back later you will need to sign up again.</p>
+        <p className="text-cream/60 text-xs mb-5">This cannot be undone. If you want to come back later you will need to sign up again.</p>
 
-        <label className="block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5">
+        <label className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-1.5">
           Type your email to confirm
         </label>
         <p className="font-mono text-cream/60 text-xs mb-2">{email}</p>
@@ -1735,15 +1832,15 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
     <div className="space-y-6 animate-slide-up">
       <SectionHead title="ACTIVITY HISTORY" sub="Your last 30 actions" />
 
-      <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10">
-        <button onClick={() => setView("transactions")}
-          className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all
-            ${view === "transactions" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
+      <div role="tablist" aria-label="Activity view" className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10">
+        <button role="tab" aria-selected={view === "transactions"} onClick={() => setView("transactions")}
+          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors
+            ${view === "transactions" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/60 hover:text-cream"}`}>
           <span className="inline-flex items-center gap-2"><Coins size={16} weight="fill" color="#FFD700" aria-hidden="true" /> Coin Transactions</span>
         </button>
-        <button onClick={() => setView("quizzes")}
-          className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all
-            ${view === "quizzes" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
+        <button role="tab" aria-selected={view === "quizzes"} onClick={() => setView("quizzes")}
+          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors
+            ${view === "quizzes" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/60 hover:text-cream"}`}>
           <span className="inline-flex items-center gap-2"><NotePencil size={16} weight="regular" aria-hidden="true" /> Quiz History</span>
         </button>
       </div>
@@ -1757,7 +1854,7 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
             </div>
           ) : activity.length === 0 ? (
             <Card className="text-center py-10">
-              <p className="text-cream/40 mb-4">No activity yet. Start grinding.</p>
+              <p className="text-cream/60 mb-4">No activity yet. Start grinding.</p>
               <Link href="/quiz" className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">
                 Take a quiz
               </Link>
@@ -1765,7 +1862,7 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
           ) : activity.map((a: any, i: number) => (
             <div key={i} className="flex items-center gap-3 p-4 rounded-xl border border-electric/10 hover:border-electric/30 transition-all"
               style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}>
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-electric/10">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-electric/10 text-electric">
                 {a.type === "duel_win"
                   ? <Sword size={20} weight="fill" color="currentColor" aria-hidden="true" />
                   : a.type === "badge_bonus"
@@ -1774,9 +1871,9 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-cream text-sm font-semibold truncate">{a.description}</p>
-                <p className="text-cream/40 text-xs">{new Date(a.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                <p className="text-cream/55 text-xs">{new Date(a.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
-              <span className={`font-bebas text-lg flex-shrink-0 ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
+              <span className={`font-bebas text-lg flex-shrink-0 ${a.amount > 0 ? "text-gold" : "text-cream/55"}`}>
                 {a.amount > 0 ? `+${a.amount}` : "+0"}
               </span>
             </div>
@@ -1793,11 +1890,11 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
             </div>
           ) : quizHistory.length === 0 ? (
             <Card className="text-center py-10">
-              <p className="text-cream/40">No quizzes yet. Take your first quiz!</p>
+              <p className="text-cream/60">No quizzes yet. Take your first quiz!</p>
               <Link href="/quiz"><button className="mt-4 px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">Start a Quiz</button></Link>
             </Card>
           ) : quizHistory.map((h: any) => {
-            const acc = Math.round((h.correct_answers / h.total_questions) * 100);
+            const acc = h.total_questions > 0 ? Math.round((h.correct_answers / h.total_questions) * 100) : 0;
             return (
               <div key={h.id} className="flex items-center gap-3 p-4 rounded-xl border border-electric/10 hover:border-electric/30 transition-all"
                 style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}>
@@ -1811,13 +1908,13 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream text-sm font-semibold">{h.subject}</p>
-                  <p className="text-cream/40 text-xs">{new Date(h.completed_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                  <p className="text-cream/55 text-xs">{new Date(h.completed_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-cream text-sm font-bold">{h.correct_answers}/{h.total_questions}</p>
-                  <p className="text-cream/40 text-xs">{acc}%</p>
+                  <p className="text-cream/55 text-xs">{acc}%</p>
                 </div>
-                <span className={`font-bebas text-lg flex-shrink-0 ${h.coins_earned > 0 ? "text-gold" : "text-cream/30"}`}>
+                <span className={`font-bebas text-lg flex-shrink-0 ${h.coins_earned > 0 ? "text-gold" : "text-cream/55"}`}>
                   {h.coins_earned > 0 ? `+${h.coins_earned}` : "+0"}
                 </span>
               </div>
@@ -1933,9 +2030,9 @@ function NotificationsSection() {
           <div key={item.key} className={`flex items-center justify-between py-4 ${i < items.length - 1 ? "border-b border-electric/10" : ""}`}>
             <div>
               <p className="text-cream text-sm font-semibold">{item.label}</p>
-              <p className="text-cream/40 text-xs mt-0.5">{item.sub}</p>
+              <p className="text-cream/55 text-xs mt-0.5">{item.sub}</p>
             </div>
-            <Toggle checked={prefs[item.key]} onChange={() => toggle(item.key)} />
+            <Toggle checked={prefs[item.key]} onChange={() => toggle(item.key)} label={item.label} />
           </div>
         ))}
       </Card>
@@ -1977,13 +2074,17 @@ function AboutLionadeSection() {
 }
 
 // ── Toggle component ───────────────────────────────────
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label?: string }) {
   return (
-    <button onClick={() => onChange(!checked)}
-      className={`relative w-12 h-6 rounded-full transition-all duration-300 flex-shrink-0
-        ${checked ? "bg-electric" : "bg-white/20"}`}>
-      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300
-        ${checked ? "left-6" : "left-0.5"}`} />
+    <button type="button" role="switch" aria-checked={checked} aria-label={label}
+      onClick={() => onChange(!checked)}
+      className="relative inline-flex items-center justify-center w-12 h-11 flex-shrink-0 rounded-lg">
+      <span aria-hidden="true"
+        className={`relative block w-12 h-6 rounded-full motion-safe:transition-colors motion-safe:duration-300
+          ${checked ? "bg-electric" : "bg-white/25"}`}>
+        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow motion-safe:transition-all motion-safe:duration-300
+          ${checked ? "left-6" : "left-0.5"}`} />
+      </span>
     </button>
   );
 }

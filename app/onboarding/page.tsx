@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
@@ -91,10 +92,17 @@ interface DiagQuestion {
 export default function OnboardingPage() {
   const { user, isLoading, refreshUser } = useAuth();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
 
   const [ready, setReady] = useState(false);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [finishError, setFinishError] = useState<string | null>(null);
+
+  // Focus target for each step's primary heading. Moving focus here on
+  // step change keeps keyboard + screen-reader users oriented as the
+  // funnel advances (the just-clicked button unmounts on transition).
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
 
   // Step 1: Subjects
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
@@ -155,6 +163,16 @@ export default function OnboardingPage() {
     })();
   }, [user, isLoading, router]);
 
+  // Move focus to the new step's heading on advance so keyboard and
+  // screen-reader users are placed at the top of the fresh content
+  // instead of being stranded on the unmounted button they just clicked.
+  // The diagnostic (step 4) swaps sub-views without a step change, so we
+  // also re-focus when the active question, loading, or results view flips.
+  useEffect(() => {
+    if (!ready) return;
+    stepHeadingRef.current?.focus();
+  }, [step, ready, diagIndex, diagDone, diagLoading]);
+
   // Load diagnostic questions
   const loadDiagnostic = useCallback(async () => {
     if (!selectedSubjects[0]) return;
@@ -211,6 +229,7 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     if (!user) return;
     setSubmitting(true);
+    setFinishError(null);
 
     const educationLevel = levelChoice === "diagnostic" ? getDiagLevel() : "beginner";
 
@@ -227,6 +246,7 @@ export default function OnboardingPage() {
 
     if (error) {
       console.error("[Onboarding] Save failed:", error.message);
+      setFinishError("Something went wrong saving your setup. Please try again.");
       setSubmitting(false);
       return;
     }
@@ -264,10 +284,10 @@ export default function OnboardingPage() {
   // Loading state
   if (isLoading || !ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-          <p className="font-bebas text-xl text-cream/40 tracking-wider">LOADING</p>
+          <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" aria-hidden="true" />
+          <p className="font-bebas text-xl text-cream/60 tracking-wider">LOADING</p>
         </div>
       </div>
     );
@@ -282,20 +302,39 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8">
+      <h1 className="sr-only">Set up your Lionade account</h1>
+
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <button
-            onClick={() => step > 1 && setStep(s => s - 1)}
-            className={`text-cream/40 hover:text-cream text-sm font-syne transition-colors ${step === 1 ? "invisible" : ""}`}
-          >
-            &larr; Back
-          </button>
-          <p className="text-cream/30 text-xs font-syne">Step {step} of {TOTAL_STEPS}</p>
+        <div className="flex items-center justify-between mb-2 min-h-[28px]">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep(s => s - 1)}
+              className="text-cream/60 hover:text-cream text-sm font-syne transition-colors
+                rounded-md px-2 py-1 -ml-2 min-h-[44px] inline-flex items-center
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              &larr; Back
+            </button>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+          <p className="text-cream/55 text-xs font-syne" aria-live="polite">
+            Step {step} of {TOTAL_STEPS}
+          </p>
         </div>
-        <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <div
+          className="w-full h-2.5 rounded-full overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.08)" }}
+          role="progressbar"
+          aria-valuenow={step}
+          aria-valuemin={1}
+          aria-valuemax={TOTAL_STEPS}
+          aria-label={`Onboarding progress, step ${step} of ${TOTAL_STEPS}`}
+        >
           <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
+            className={`h-full rounded-full ${reduceMotion ? "" : "transition-all duration-500 ease-out"}`}
             style={{ width: `${progress * 100}%`, background: "linear-gradient(90deg, #4A90D9, #22C55E)" }}
           />
         </div>
@@ -309,7 +348,7 @@ export default function OnboardingPage() {
         </div>
         <div className="flex-1 rounded-2xl rounded-tl-sm px-5 py-3.5"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <p className="text-cream text-sm font-syne leading-relaxed">
+          <p className="text-cream text-sm font-syne leading-relaxed" aria-live="polite">
             {SPEECHES[step]}
           </p>
         </div>
@@ -321,15 +360,18 @@ export default function OnboardingPage() {
         {/* ═══ STEP 1: SUBJECTS ═══ */}
         {step === 1 && (
           <div>
-            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+            <h2 ref={stepHeadingRef} tabIndex={-1}
+              className="font-bebas text-3xl text-cream tracking-wider text-center mb-6 outline-none">
               WHAT DO YOU WANT TO STUDY?
             </h2>
-            <div className="grid grid-cols-2 gap-3 mb-8">
+            <div className="grid grid-cols-2 gap-3 mb-8" role="group" aria-label="Choose your subjects">
               {SUBJECTS.map(s => {
                 const selected = selectedSubjects.includes(s.label);
                 return (
-                  <button key={s.label} onClick={() => toggleSubject(s.label)}
-                    className={`p-4 rounded-2xl border text-left transition-all duration-200 hover:-translate-y-0.5 ${
+                  <button key={s.label} type="button" onClick={() => toggleSubject(s.label)}
+                    aria-pressed={selected}
+                    className={`p-4 rounded-2xl border text-left transition-all duration-200 motion-safe:hover:-translate-y-0.5
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                       selected
                         ? "border-electric/60 shadow-lg"
                         : "border-white/10 hover:border-white/20"
@@ -342,7 +384,7 @@ export default function OnboardingPage() {
                     <span className="block mb-2" style={{ color: s.color }}>
                       <s.Icon size={28} weight={selected ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                     </span>
-                    <p className={`text-sm font-bold ${selected ? "text-cream" : "text-cream/60"}`}>
+                    <p className={`text-sm font-bold ${selected ? "text-cream" : "text-cream/70"}`}>
                       {s.label}
                     </p>
                     {selected && (
@@ -356,10 +398,12 @@ export default function OnboardingPage() {
               })}
             </div>
             <button
+              type="button"
               onClick={() => setStep(2)}
               disabled={selectedSubjects.length === 0}
-              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+              className="w-full min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                 hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Continue &rarr;
@@ -370,30 +414,33 @@ export default function OnboardingPage() {
         {/* ═══ STEP 2: DAILY GOAL ═══ */}
         {step === 2 && (
           <div>
-            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+            <h2 ref={stepHeadingRef} tabIndex={-1}
+              className="font-bebas text-3xl text-cream tracking-wider text-center mb-6 outline-none">
               HOW MUCH TIME DO YOU HAVE?
             </h2>
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-8" role="group" aria-label="Choose your daily goal">
               {DAILY_GOALS.map(g => {
                 const selected = dailyMinutes === g.minutes;
                 return (
-                  <button key={g.minutes}
+                  <button key={g.minutes} type="button"
                     onClick={() => { setDailyMinutes(g.minutes); setGoalType(g.tag); }}
-                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all duration-200 ${
+                    aria-pressed={selected}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all duration-200
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                       selected
                         ? "border-electric/60 shadow-lg"
                         : "border-white/10 hover:border-white/20"
                     }`}
                     style={{ background: selected ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
                   >
-                    <span className={selected ? "text-electric" : "text-cream/60"}>
+                    <span className={selected ? "text-electric" : "text-cream/70"}>
                       <g.Icon size={28} weight={selected ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                     </span>
                     <div className="flex-1">
-                      <p className={`font-bold text-sm ${selected ? "text-cream" : "text-cream/60"}`}>
+                      <p className={`font-bold text-sm ${selected ? "text-cream" : "text-cream/70"}`}>
                         {g.label} / day
                       </p>
-                      <p className={`text-xs mt-0.5 ${selected ? "text-electric" : "text-cream/30"}`}>
+                      <p className={`text-xs mt-0.5 ${selected ? "text-electric" : "text-cream/55"}`}>
                         {g.tag}
                       </p>
                     </div>
@@ -407,10 +454,12 @@ export default function OnboardingPage() {
               })}
             </div>
             <button
+              type="button"
               onClick={() => setStep(3)}
               disabled={dailyMinutes === 0}
-              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+              className="w-full min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                 hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Continue &rarr;
@@ -421,55 +470,63 @@ export default function OnboardingPage() {
         {/* ═══ STEP 3: LEVEL CHOICE ═══ */}
         {step === 3 && (
           <div>
-            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+            <h2 ref={stepHeadingRef} tabIndex={-1}
+              className="font-bebas text-3xl text-cream tracking-wider text-center mb-6 outline-none">
               FIND YOUR LEVEL
             </h2>
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-8" role="group" aria-label="Choose how to start">
               <button
+                type="button"
                 onClick={() => setLevelChoice("scratch")}
-                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
+                aria-pressed={levelChoice === "scratch"}
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                   levelChoice === "scratch"
                     ? "border-electric/60 shadow-lg"
                     : "border-white/10 hover:border-white/20"
                 }`}
                 style={{ background: levelChoice === "scratch" ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
               >
-                <span className={levelChoice === "scratch" ? "text-electric" : "text-cream/60"}>
+                <span className={levelChoice === "scratch" ? "text-electric" : "text-cream/70"}>
                   <Plant size={32} weight={levelChoice === "scratch" ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className={`font-bold ${levelChoice === "scratch" ? "text-cream" : "text-cream/60"}`}>
+                  <p className={`font-bold ${levelChoice === "scratch" ? "text-cream" : "text-cream/70"}`}>
                     Start from scratch
                   </p>
-                  <p className="text-cream/30 text-xs mt-0.5">
+                  <p className="text-cream/55 text-xs mt-0.5">
                     Begin with the basics and work your way up
                   </p>
                 </div>
               </button>
 
               <button
+                type="button"
                 onClick={() => setLevelChoice("diagnostic")}
-                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
+                aria-pressed={levelChoice === "diagnostic"}
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                   levelChoice === "diagnostic"
                     ? "border-gold/60 shadow-lg"
                     : "border-white/10 hover:border-white/20"
                 }`}
                 style={{ background: levelChoice === "diagnostic" ? "rgba(255,215,0,0.08)" : "rgba(255,255,255,0.03)" }}
               >
-                <span className={levelChoice === "diagnostic" ? "text-gold" : "text-cream/60"}>
+                <span className={levelChoice === "diagnostic" ? "text-gold" : "text-cream/70"}>
                   <Target size={32} weight={levelChoice === "diagnostic" ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className={`font-bold ${levelChoice === "diagnostic" ? "text-cream" : "text-cream/60"}`}>
+                  <p className={`font-bold ${levelChoice === "diagnostic" ? "text-cream" : "text-cream/70"}`}>
                     Find my level
                   </p>
-                  <p className="text-cream/30 text-xs mt-0.5">
+                  <p className="text-cream/55 text-xs mt-0.5">
                     Take a quick 5-question diagnostic quiz
                   </p>
                 </div>
               </button>
             </div>
             <button
+              type="button"
               onClick={async () => {
                 if (levelChoice === "diagnostic") {
                   setStep(4);
@@ -482,8 +539,9 @@ export default function OnboardingPage() {
                 }
               }}
               disabled={!levelChoice || submitting}
-              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+              className="w-full min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                 hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
               {submitting ? "Saving..." : levelChoice === "scratch" ? "Continue →" : "Start Quiz →"}
@@ -495,9 +553,9 @@ export default function OnboardingPage() {
         {step === 4 && (
           <div>
             {diagLoading ? (
-              <div className="text-center py-12">
-                <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin mx-auto mb-3" />
-                <p className="text-cream/40 text-sm">Loading questions...</p>
+              <div className="text-center py-12" role="status" aria-live="polite">
+                <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin mx-auto mb-3" aria-hidden="true" />
+                <p className="text-cream/60 text-sm">Loading questions...</p>
               </div>
             ) : diagDone ? (
               /* Results */
@@ -505,13 +563,14 @@ export default function OnboardingPage() {
                 <div className="flex justify-center mb-4">
                   {resultsIcon(64)}
                 </div>
-                <h2 className="font-bebas text-3xl text-cream tracking-wider mb-2">
+                <h2 ref={stepHeadingRef} tabIndex={-1}
+                  className="font-bebas text-3xl text-cream tracking-wider mb-2 outline-none">
                   {diagScore >= 4 ? "ADVANCED" : diagScore >= 2 ? "INTERMEDIATE" : "BEGINNER"}
                 </h2>
-                <p className="text-cream/40 text-sm mb-2">
+                <p className="text-cream/70 text-sm mb-2">
                   You got {diagScore} out of {diagQuestions.length} correct
                 </p>
-                <p className="text-cream/30 text-xs mb-8">
+                <p className="text-cream/55 text-xs mb-8">
                   {diagScore >= 4
                     ? "Impressive! You'll start with challenging content."
                     : diagScore >= 2
@@ -519,9 +578,11 @@ export default function OnboardingPage() {
                     : "No worries! We'll start with the fundamentals."}
                 </p>
                 <button
+                  type="button"
                   onClick={() => setStep(5)}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                  className="w-full min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                     hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                     inline-flex items-center justify-center gap-2"
                 >
                   Continue →
@@ -530,13 +591,16 @@ export default function OnboardingPage() {
             ) : diagQuestions.length === 0 ? (
               /* No questions available — skip diagnostic */
               <div className="text-center py-8">
-                <p className="text-cream/50 text-sm mb-4">
+                <h2 ref={stepHeadingRef} tabIndex={-1}
+                  className="text-cream/70 text-sm mb-4 outline-none">
                   No diagnostic questions available yet for this subject.
-                </p>
+                </h2>
                 <button
+                  type="button"
                   onClick={() => setStep(5)}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
-                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20"
+                  className="w-full min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 >
                   Continue →
                 </button>
@@ -545,18 +609,18 @@ export default function OnboardingPage() {
               /* Active question */
               <div className="animate-slide-up">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-cream/40 text-xs font-syne">
+                  <p className="text-cream/60 text-xs font-syne">
                     Question {diagIndex + 1} of {diagQuestions.length}
                   </p>
-                  <p className="text-cream/40 text-xs font-syne">
+                  <p className="text-cream/60 text-xs font-syne">
                     Score: <span className="text-cream font-bold">{diagScore}</span>
                   </p>
                 </div>
 
                 {/* Question progress dots */}
-                <div className="flex gap-1.5 mb-5">
+                <div className="flex gap-1.5 mb-5" aria-hidden="true">
                   {diagQuestions.map((_, i) => (
-                    <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-300"
+                    <div key={i} className={`h-1.5 flex-1 rounded-full ${reduceMotion ? "" : "transition-all duration-300"}`}
                       style={{
                         background: i < diagIndex ? "#22C55E"
                           : i === diagIndex ? "#4A90D980"
@@ -569,43 +633,37 @@ export default function OnboardingPage() {
                 {/* Question text */}
                 <div className="rounded-2xl p-5 mb-5"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <p className="text-cream text-sm font-syne leading-relaxed">
+                  <h2 ref={stepHeadingRef} tabIndex={-1}
+                    className="text-cream text-sm font-syne leading-relaxed outline-none">
                     {diagQuestions[diagIndex].question}
-                  </p>
+                  </h2>
                 </div>
 
                 {/* Options */}
-                <div className="space-y-2.5 mb-5">
-                  {diagQuestions[diagIndex].options.map((opt, idx) => {
-                    let border = "rgba(255,255,255,0.1)";
-                    let bg = "rgba(255,255,255,0.03)";
-                    if (diagAnswered && diagCorrect !== null) {
-                      // We don't know which was correct from the UI — just show green/red on selected
-                      // This is fine for a diagnostic
-                    }
-                    return (
-                      <button key={idx} onClick={() => handleDiagAnswer(idx)}
-                        disabled={diagAnswered}
-                        className={`w-full text-left p-4 rounded-xl border transition-all duration-200
-                          ${!diagAnswered ? "hover:-translate-y-0.5 hover:bg-white/5 cursor-pointer" : "cursor-default"}`}
-                        style={{ borderColor: border, background: bg }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5"
-                            style={{ borderColor: "rgba(255,255,255,0.2)" }}>
-                            {String.fromCharCode(65 + idx)}
-                          </span>
-                          <p className="text-cream/80 text-sm font-syne">{opt}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div className="space-y-2.5 mb-5" role="group" aria-label="Answer choices">
+                  {diagQuestions[diagIndex].options.map((opt, idx) => (
+                    <button key={idx} type="button" onClick={() => handleDiagAnswer(idx)}
+                      disabled={diagAnswered}
+                      className={`w-full text-left p-4 rounded-xl border transition-all duration-200
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
+                        ${!diagAnswered ? "motion-safe:hover:-translate-y-0.5 hover:bg-white/5 cursor-pointer" : "cursor-default"}`}
+                      style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5"
+                          style={{ borderColor: "rgba(255,255,255,0.2)" }} aria-hidden="true">
+                          {String.fromCharCode(65 + idx)}
+                        </span>
+                        <p className="text-cream/80 text-sm font-syne">{opt}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
 
                 {/* Feedback + Next */}
                 {diagAnswered && (
                   <div className="animate-slide-up">
-                    <div className="rounded-xl p-3 mb-3 border"
+                    <div className="rounded-xl p-3 mb-3 border" role="status" aria-live="polite"
                       style={{
                         background: diagCorrect ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
                         borderColor: diagCorrect ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
@@ -615,9 +673,10 @@ export default function OnboardingPage() {
                         {diagCorrect ? "Correct!" : "Incorrect"}
                       </p>
                     </div>
-                    <button onClick={nextDiagQuestion}
-                      className="w-full py-3 rounded-xl font-bold text-sm bg-electric text-white
-                        hover:bg-electric/90 transition-all duration-200">
+                    <button type="button" onClick={nextDiagQuestion}
+                      className="w-full min-h-[44px] py-3 rounded-xl font-bold text-sm bg-electric text-white
+                        hover:bg-electric/90 transition-all duration-200
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
                       {diagIndex + 1 >= diagQuestions.length ? "See Results" : "Next Question →"}
                     </button>
                   </div>
@@ -630,10 +689,11 @@ export default function OnboardingPage() {
         {/* ═══ STEP 5: CLASSES ═══ */}
         {step === 5 && (
           <div className="animate-slide-up">
-            <p className="text-center font-bebas text-2xl text-cream tracking-wider mb-2">
+            <h2 ref={stepHeadingRef} tabIndex={-1}
+              className="text-center font-bebas text-2xl text-cream tracking-wider mb-2 outline-none">
               YOUR CLASSES
-            </p>
-            <p className="text-center text-cream/50 text-sm mb-6">
+            </h2>
+            <p className="text-center text-cream/60 text-sm mb-6">
               College class? Cert prep? Add what you're studying for. Skip if none yet.
             </p>
 
@@ -655,8 +715,10 @@ export default function OnboardingPage() {
                         setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, emoji: v } : row));
                       }}
                       placeholder="📐"
-                      className="w-12 rounded-lg bg-white/[0.04] border border-white/[0.08]
-                        focus:border-electric/40 focus:outline-none px-2 py-2 text-[16px] text-center"
+                      aria-label={`Emoji for class ${idx + 1}`}
+                      className="w-12 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70
+                        px-2 py-2 text-[16px] text-center text-cream"
                     />
                     <input
                       value={c.name}
@@ -665,18 +727,20 @@ export default function OnboardingPage() {
                         setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, name: v } : row));
                       }}
                       placeholder="Class name"
-                      className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08]
-                        focus:border-electric/40 focus:outline-none px-3 py-2 text-[14px] text-cream
-                        placeholder:text-cream/30"
+                      aria-label={`Name for class ${idx + 1}`}
+                      className="flex-1 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70
+                        px-3 py-2 text-[14px] text-cream placeholder:text-cream/45"
                     />
                     {classDrafts.length > 1 && (
                       <button
                         type="button"
                         onClick={() => setClassDrafts(d => d.filter((_, i) => i !== idx))}
-                        aria-label="Remove class"
-                        className="grid place-items-center w-9 h-9 rounded-lg text-cream/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+                        aria-label={`Remove class ${idx + 1}`}
+                        className="grid place-items-center w-11 h-11 rounded-lg text-cream/55 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                       >
-                        ✕
+                        <span aria-hidden="true">✕</span>
                       </button>
                     )}
                   </div>
@@ -688,23 +752,32 @@ export default function OnboardingPage() {
                         setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, shortCode: v } : row));
                       }}
                       placeholder="Code (optional)"
-                      className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08]
-                        focus:border-electric/40 focus:outline-none px-3 py-1.5 text-[12px] text-cream
-                        placeholder:text-cream/30"
+                      aria-label={`Code for class ${idx + 1} (optional)`}
+                      className="flex-1 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70
+                        px-3 py-1.5 text-[12px] text-cream placeholder:text-cream/45"
                     />
-                    <div className="flex gap-1">
+                    <div className="flex gap-1" role="group" aria-label={`Color for class ${idx + 1}`}>
                       {CLASS_COLORS.map((col) => (
                         <button
                           key={col}
                           type="button"
                           onClick={() => setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, color: col } : row))}
                           aria-label={`Color ${col}`}
-                          className={`w-5 h-5 rounded-full border-2 transition-transform ${c.color === col ? "scale-110" : "hover:scale-105"}`}
-                          style={{
-                            backgroundColor: col,
-                            borderColor: c.color === col ? "#ffffff80" : "#ffffff10",
-                          }}
-                        />
+                          aria-pressed={c.color === col}
+                          className={`w-7 h-7 grid place-items-center rounded-full transition-transform
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
+                            ${c.color === col ? "motion-safe:scale-110" : "motion-safe:hover:scale-105"}`}
+                        >
+                          <span
+                            className="block w-5 h-5 rounded-full border-2"
+                            style={{
+                              backgroundColor: col,
+                              borderColor: c.color === col ? "#ffffff80" : "#ffffff10",
+                            }}
+                            aria-hidden="true"
+                          />
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -716,12 +789,24 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setClassDrafts(d => [...d, { ...EMPTY_CLASS_DRAFT }])}
-                className="w-full rounded-lg border border-dashed border-white/[0.1] hover:border-white/[0.2]
-                  text-cream/50 hover:text-cream font-mono text-[11px] uppercase tracking-[0.2em]
-                  py-2.5 mb-5 transition-colors"
+                className="w-full min-h-[44px] rounded-lg border border-dashed border-white/[0.1] hover:border-white/[0.2]
+                  text-cream/60 hover:text-cream font-mono text-[11px] uppercase tracking-[0.2em]
+                  py-2.5 mb-5 transition-colors
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 + Another class
               </button>
+            )}
+
+            {finishError && (
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="mb-4 rounded-xl px-4 py-3 text-sm font-syne text-[#FCA5A5]"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)" }}
+              >
+                {finishError}
+              </div>
             )}
 
             <div className="flex items-center gap-2">
@@ -729,9 +814,10 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleFinish}
                 disabled={submitting}
-                className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-white/[0.15]
+                className="flex-1 min-h-[44px] py-3.5 rounded-xl font-bold text-sm border border-white/[0.15]
                   text-cream/70 hover:text-cream hover:border-white/[0.3]
-                  transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 {submitting ? "Saving…" : "Skip for now"}
               </button>
@@ -739,8 +825,9 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleFinish}
                 disabled={submitting}
-                className="flex-1 py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                className="flex-1 min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                   hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                   disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
                 {submitting ? "Saving…" : (
@@ -751,7 +838,7 @@ export default function OnboardingPage() {
                 )}
               </button>
             </div>
-            <p className="text-center text-cream/30 text-[11px] mt-3 font-mono uppercase tracking-[0.2em]">
+            <p className="text-center text-cream/55 text-[11px] mt-3 font-mono uppercase tracking-[0.2em]">
               You can edit or add more classes anytime
             </p>
           </div>

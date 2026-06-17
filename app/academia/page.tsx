@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import useSWR, { useSWRConfig } from "swr";
 import {
@@ -148,7 +148,11 @@ export default function AcademiaPage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-navy text-cream flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+          <div
+            className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent motion-safe:animate-spin"
+            role="status"
+            aria-label="Loading your classroom"
+          />
         </div>
       </ProtectedRoute>
     );
@@ -168,7 +172,7 @@ export default function AcademiaPage() {
           <header className="mb-10">
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block w-6 h-px bg-gold/70" aria-hidden="true" />
-              <GraduationCap size={13} className="text-gold" weight="fill" />
+              <GraduationCap size={13} className="text-gold" weight="fill" aria-hidden="true" />
               <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
                 Academia
               </p>
@@ -187,10 +191,11 @@ export default function AcademiaPage() {
                 onClick={() => setShowCreate(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
                   font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5
-                  transition-transform duration-200 active:scale-[0.98]
-                  shadow-[0_0_24px_rgba(255,215,0,0.18)]"
+                  transition-transform duration-200 motion-safe:active:scale-[0.98]
+                  shadow-[0_0_24px_rgba(255,215,0,0.18)]
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
-                <Plus size={12} weight="bold" /> New class
+                <Plus size={12} weight="bold" aria-hidden="true" /> New class
               </button>
             </div>
           </header>
@@ -231,7 +236,7 @@ export default function AcademiaPage() {
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
                   YOUR CLASSES
                 </h2>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 tabular-nums">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 tabular-nums">
                   {classes.length} {classes.length === 1 ? "class" : "classes"}
                 </span>
               </div>
@@ -267,19 +272,19 @@ export default function AcademiaPage() {
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-electric" aria-hidden="true" />
                   RECENT NOTES
                 </h2>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 tabular-nums">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 tabular-nums">
                   {notes.length}
                 </span>
               </div>
 
               {notes.length === 0 ? (
                 <div className="rounded-[14px] border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center">
-                  <Note size={22} className="text-electric/60 mx-auto mb-2" />
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-2">
+                  <Note size={22} className="text-electric/60 mx-auto mb-2" aria-hidden="true" />
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 mb-2">
                     Quiet for now
                   </p>
-                  <p className="text-[12px] text-cream/60 leading-snug">
-                    No notes yet. Hit <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.1]">⌘K</kbd> anywhere to drop one in.
+                  <p className="text-[12px] text-cream/65 leading-snug">
+                    No notes yet. Hit <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.1] text-cream/80">⌘K</kbd> anywhere to drop one in.
                   </p>
                 </div>
               ) : (
@@ -310,12 +315,13 @@ export default function AcademiaPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+    <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center" role="alert">
       <p className="font-syne text-sm text-red-300 mb-3">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/15 bg-white/5 text-cream/85 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
       >
         <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
         Try again
@@ -379,16 +385,16 @@ function GradeSnapshot() {
           <div className="shrink-0 md:pr-6 md:border-r md:border-white/[0.08]">
             {noGpaYet ? (
               <div className="max-w-[240px]">
-                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/40 mb-1.5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/55 mb-1.5">
                   Term GPA · {scale} scale
                 </p>
-                <p className="text-[13px] text-cream/60 leading-snug">
+                <p className="text-[13px] text-cream/65 leading-snug">
                   Add graded items to a class to see your GPA.
                 </p>
               </div>
             ) : (
               <>
-                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/45 mb-1">
+                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/55 mb-1">
                   Term GPA · {scale} scale
                 </p>
                 <p
@@ -421,8 +427,9 @@ function GradeChip({ cls }: { cls: GpaClass }) {
     <Link
       href={`/classes/${cls.classId}`}
       title={cls.className}
+      aria-label={`${cls.className}${ungraded ? ", no grades yet" : `, ${cls.letter ?? ""} ${cls.currentPct !== null ? `${cls.currentPct.toFixed(0)} percent` : ""}`.trim()}`}
       className="group inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1
-        transition-colors duration-200"
+        transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
       style={{
         borderColor: ungraded ? "rgba(255,255,255,0.1)" : `${cls.classColor}45`,
         backgroundColor: ungraded ? "rgba(255,255,255,0.02)" : `${cls.classColor}12`,
@@ -440,7 +447,7 @@ function GradeChip({ cls }: { cls: GpaClass }) {
         {shortName}
       </span>
       {ungraded ? (
-        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-cream/35">
+        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-cream/55">
           no grades yet
         </span>
       ) : (
@@ -473,6 +480,8 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
   // Day selected in the calendar (drives the agenda view). null = THIS WEEK.
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  // Politely announce optimistic status changes + toggle failures to SR users.
+  const [announce, setAnnounce] = useState("");
 
   // Imported items can land in any month, so refresh every agenda key (not just
   // the visible range's). swrFetcher keys are the full `/api/academia/agenda?...`
@@ -528,8 +537,10 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
         },
         { optimisticData: optimistic, rollbackOnError: true, revalidate: true, populateCache: false },
       );
+      setAnnounce(`${item.title} marked ${statusLabel(next)}.`);
     } catch (e) {
       console.error("[academia:agenda] status toggle failed", e);
+      setAnnounce(`Couldn't update ${item.title}. Try again.`);
     }
   };
 
@@ -545,6 +556,9 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
 
   return (
     <section className="mb-10">
+      {/* SR-only live region for optimistic status changes + toggle failures. */}
+      <p role="status" aria-live="polite" className="sr-only">{announce}</p>
+
       {/* Unified planner header — matches the dot + bebas pattern used by
           GRADE SNAPSHOT / YOUR CLASSES, with the Import affordance right-aligned
           so the two sub-panels below read as one feature. */}
@@ -557,8 +571,9 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
           type="button"
           onClick={() => setShowImport(true)}
           className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em]
-            text-cream/50 hover:text-gold transition-colors rounded-full border border-white/[0.08]
-            hover:border-gold/40 px-3 py-1.5"
+            text-cream/65 hover:text-gold transition-colors rounded-full border border-white/[0.08]
+            hover:border-gold/40 px-3 py-2 min-h-[36px]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
         >
           <CalendarPlus size={12} weight="bold" aria-hidden="true" />
           Import calendar
@@ -579,7 +594,8 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
               <button
                 type="button"
                 onClick={() => setSelectedDay(null)}
-                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 hover:text-cream transition-colors"
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60 hover:text-cream transition-colors
+                  rounded-full px-2 py-1 -mr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
               >
                 Back to week
               </button>
@@ -729,7 +745,7 @@ function AgendaList({
     <div className="space-y-4">
       {groups.map(g => (
         <div key={g.key}>
-          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/40 mb-2">
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/55 mb-2">
             {dayHeading(g.key, todayKey)}
           </p>
           <div className="space-y-2">
@@ -765,10 +781,10 @@ function AgendaRow({
       {item.classEmoji && <span className="text-[14px] shrink-0" aria-hidden="true">{item.classEmoji}</span>}
 
       <div className="min-w-0 flex-1">
-        <p className={`font-syne font-semibold text-[13px] leading-tight truncate ${done ? "text-cream/45 line-through" : "text-cream"}`}>
+        <p className={`font-syne font-semibold text-[13px] leading-tight truncate ${done ? "text-cream/55 line-through" : "text-cream"}`}>
           {item.title}
         </p>
-        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 truncate mt-0.5">
+        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 truncate mt-0.5">
           {item.className}
         </p>
       </div>
@@ -778,7 +794,7 @@ function AgendaRow({
           className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]"
           style={{ color: "#EF4444", borderColor: "#EF444455", backgroundColor: "#EF444412" }}
         >
-          <Target size={10} weight="bold" /> Exam
+          <Target size={10} weight="bold" aria-hidden="true" /> Exam
         </span>
       ) : (
         <StatusButton status={status} color={item.classColor} onClick={() => onCycleStatus(item)} />
@@ -806,16 +822,17 @@ function StatusButton({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Status: ${meta.label}. Tap to advance.`}
+      aria-label={`Status: ${meta.label}. Activate to advance.`}
       title={`${meta.label}. Tap to advance`}
-      className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-colors duration-200"
+      className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] transition-colors duration-200
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
       style={{
         color: active ? color : "rgba(238,244,255,0.55)",
         borderColor: active ? `${color}55` : "rgba(255,255,255,0.12)",
         backgroundColor: active ? `${color}12` : "rgba(255,255,255,0.02)",
       }}
     >
-      <Icon size={11} weight={status === "done" ? "fill" : "bold"} /> {meta.label}
+      <Icon size={11} weight={status === "done" ? "fill" : "bold"} aria-hidden="true" /> {meta.label}
     </button>
   );
 }
@@ -823,11 +840,11 @@ function StatusButton({
 function AgendaEmpty({ selected }: { selected?: boolean }) {
   return (
     <div className="rounded-[14px] border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center">
-      <CalendarBlank size={22} className="text-gold/60 mx-auto mb-2" />
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-2">
+      <CalendarBlank size={22} className="text-gold/60 mx-auto mb-2" aria-hidden="true" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 mb-2">
         {selected ? "Clear day" : "All clear"}
       </p>
-      <p className="text-[12px] text-cream/60 leading-snug">
+      <p className="text-[12px] text-cream/65 leading-snug">
         {selected
           ? "Nothing scheduled for this day."
           : "Nothing due this week. Add an exam date or assignment to see it here."}
@@ -881,7 +898,9 @@ function MonthCalendar({
           <button
             type="button"
             onClick={onToday}
-            className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 hover:text-gold transition-colors px-2 py-1 rounded-full border border-white/[0.1] hover:border-gold/40"
+            aria-label="Jump to current month"
+            className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/65 hover:text-gold transition-colors px-3 py-2 rounded-full border border-white/[0.1] hover:border-gold/40
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
           >
             Today
           </button>
@@ -889,26 +908,28 @@ function MonthCalendar({
             type="button"
             onClick={onPrev}
             aria-label="Previous month"
-            className="grid place-items-center w-7 h-7 rounded-full border border-white/[0.1] text-cream/60 hover:text-cream hover:border-white/[0.25] transition-colors"
+            className="grid place-items-center w-9 h-9 rounded-full border border-white/[0.1] text-cream/70 hover:text-cream hover:border-white/[0.25] transition-colors
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
           >
-            <CaretLeft size={13} weight="bold" />
+            <CaretLeft size={14} weight="bold" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={onNext}
             aria-label="Next month"
-            className="grid place-items-center w-7 h-7 rounded-full border border-white/[0.1] text-cream/60 hover:text-cream hover:border-white/[0.25] transition-colors"
+            className="grid place-items-center w-9 h-9 rounded-full border border-white/[0.1] text-cream/70 hover:text-cream hover:border-white/[0.25] transition-colors
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
           >
-            <CaretRight size={13} weight="bold" />
+            <CaretRight size={14} weight="bold" aria-hidden="true" />
           </button>
         </div>
       </div>
 
       <div className="relative">
         <div className={`transition-opacity duration-200 ${overlay ? "opacity-30" : "opacity-100"}`}>
-          <div className="grid grid-cols-7 gap-1 mb-1">
+          <div className="grid grid-cols-7 gap-1 mb-1" aria-hidden="true">
             {WEEKDAY_LABELS.map((d, i) => (
-              <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/35 py-1">
+              <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/50 py-1">
                 {d}
               </div>
             ))}
@@ -940,8 +961,10 @@ function MonthCalendar({
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5
-                  font-mono text-[9px] uppercase tracking-[0.22em] text-red-300 hover:bg-red-400/15 transition-colors"
+                aria-label="Retry loading calendar events"
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-2
+                  font-mono text-[9px] uppercase tracking-[0.22em] text-red-300 hover:bg-red-400/15 transition-colors
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
               >
                 <ArrowsClockwise size={11} weight="bold" aria-hidden="true" />
                 Couldn&apos;t load events
@@ -975,15 +998,26 @@ function CalendarCell({
   const extra = sorted.length - shown.length;
   const hasItems = sorted.length > 0;
 
+  // Build a text breakdown so screen readers get exam/assignment counts, not
+  // just a color-coded dot they can't see. e.g. "2 exams, 1 assignment".
+  const examCount = sorted.filter(it => it.kind === "exam").length;
+  const assignCount = sorted.length - examCount;
+  const breakdown = [
+    examCount > 0 ? `${examCount} exam${examCount === 1 ? "" : "s"}` : null,
+    assignCount > 0 ? `${assignCount} assignment${assignCount === 1 ? "" : "s"}` : null,
+  ].filter(Boolean).join(", ");
+  const dayLabel = `${cell.label}${isToday ? ", today" : ""}${hasItems ? `, ${breakdown}` : ", nothing scheduled"}`;
+
   return (
     <button
       type="button"
       onClick={onSelect}
       disabled={!interactive || (!hasItems && !inMonth)}
-      aria-label={`${cell.label}${hasItems ? `, ${sorted.length} item${sorted.length === 1 ? "" : "s"}` : ""}`}
+      aria-label={dayLabel}
       aria-pressed={isSelected}
       className={`relative aspect-square rounded-[10px] border p-1 flex flex-col items-center justify-start gap-1
         transition-colors duration-150 will-change-transform
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:z-10
         ${inMonth ? "bg-white/[0.02]" : "bg-transparent opacity-40"}
         ${isSelected ? "border-electric/70 bg-electric/[0.08]" : isToday ? "border-gold/70" : "border-white/[0.06]"}
         ${hasItems ? "hover:bg-white/[0.06]" : "hover:bg-white/[0.03]"}
@@ -1015,7 +1049,7 @@ function CalendarCell({
             )
           ))}
           {extra > 0 && (
-            <span className="font-mono text-[8px] text-cream/45 tabular-nums leading-none">+{extra}</span>
+            <span className="font-mono text-[8px] text-cream/60 tabular-nums leading-none" aria-hidden="true">+{extra}</span>
           )}
         </span>
       )}
@@ -1052,7 +1086,7 @@ function StatTile({
         {value}
       </p>
       {sublabel && (
-        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45 mt-1 truncate">
+        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/55 mt-1 truncate">
           {sublabel}
         </p>
       )}
@@ -1109,7 +1143,8 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
       className="group relative rounded-[14px] border bg-white/[0.03]
         hover:bg-white/[0.05] transition-all duration-200
         p-5 flex flex-col gap-3 overflow-hidden
-        will-change-transform motion-safe:hover:-translate-y-0.5"
+        will-change-transform motion-safe:hover:-translate-y-0.5
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       style={{
         background: `linear-gradient(135deg, ${cls.color}10 0%, ${cls.color}05 100%), rgba(255,255,255,0.03)`,
         borderColor: `${cls.color}28`,
@@ -1138,7 +1173,7 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
               {cls.name}
             </h3>
             {(cls.shortCode || cls.term) && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 truncate mt-0.5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 truncate mt-0.5">
                 {[cls.shortCode, cls.term].filter(Boolean).join(" · ")}
               </p>
             )}
@@ -1158,12 +1193,12 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 mt-auto font-mono text-[10px] uppercase tracking-[0.2em] text-cream/50 tabular-nums">
+      <div className="flex items-center gap-3 mt-auto font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60 tabular-nums">
         <span className="flex items-center gap-1">
-          <Target size={11} weight="bold" /> {cls.examCount} {cls.examCount === 1 ? "exam" : "exams"}
+          <Target size={11} weight="bold" aria-hidden="true" /> {cls.examCount} {cls.examCount === 1 ? "exam" : "exams"}
         </span>
         <span className="flex items-center gap-1">
-          <Note size={11} weight="bold" /> {cls.noteCount} {cls.noteCount === 1 ? "note" : "notes"}
+          <Note size={11} weight="bold" aria-hidden="true" /> {cls.noteCount} {cls.noteCount === 1 ? "note" : "notes"}
         </span>
         {hasPct && (
           <span
@@ -1176,6 +1211,7 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
         <ArrowRight
           size={12}
           weight="bold"
+          aria-hidden="true"
           className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity motion-safe:group-hover:translate-x-0.5"
           style={{ color: cls.color }}
         />
@@ -1193,7 +1229,8 @@ function NoteRow({ note }: { note: RecentNote }) {
       href={`/classes/${note.classId}`}
       className="group relative block rounded-[10px] border border-white/[0.06] bg-white/[0.02]
         hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-200
-        px-3 py-2.5 pl-[14px] overflow-hidden"
+        px-3 py-2.5 pl-[14px] overflow-hidden
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/60"
       style={{ boxShadow: `inset 2px 0 0 0 ${note.classColor}80` }}
     >
       <div className="flex items-center gap-1.5 mb-1">
@@ -1203,13 +1240,13 @@ function NoteRow({ note }: { note: RecentNote }) {
           aria-hidden="true"
         />
         {note.classEmoji && <span className="text-[11px]" aria-hidden="true">{note.classEmoji}</span>}
-        <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 truncate">
+        <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/60 truncate">
           {note.classShortCode || note.className}
         </span>
         {note.pinned && (
-          <PushPin size={10} weight="fill" className="text-gold shrink-0" />
+          <PushPin size={10} weight="fill" className="text-gold shrink-0" aria-label="Pinned" />
         )}
-        <span className="ml-auto font-mono text-[9px] text-cream/30 tabular-nums shrink-0">
+        <span className="ml-auto font-mono text-[9px] text-cream/55 tabular-nums shrink-0">
           {timeAgo(note.updatedAt)}
         </span>
       </div>
@@ -1218,7 +1255,7 @@ function NoteRow({ note }: { note: RecentNote }) {
           {note.title}
         </p>
       )}
-      <p className="text-[12px] text-cream/55 leading-snug line-clamp-2">
+      <p className="text-[12px] text-cream/65 leading-snug line-clamp-2">
         {note.preview}
       </p>
     </Link>
@@ -1231,14 +1268,14 @@ function NoteRow({ note }: { note: RecentNote }) {
 function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
     <div className="rounded-[14px] border border-dashed border-gold/25 bg-gradient-to-br from-gold/[0.04] to-transparent p-10 text-center">
-      <BookOpen size={28} className="text-gold/70 mx-auto mb-3" />
+      <BookOpen size={28} className="text-gold/70 mx-auto mb-3" aria-hidden="true" />
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80 mb-2">
         Blank slate
       </p>
       <h2 className="font-bebas text-[30px] tracking-wider text-cream mb-2 leading-tight">
         No classes yet
       </h2>
-      <p className="text-[13px] text-cream/60 max-w-md mx-auto mb-5 leading-relaxed">
+      <p className="text-[13px] text-cream/65 max-w-md mx-auto mb-5 leading-relaxed">
         Spin up a notebook for each class you&apos;re taking. Drop your exam dates in and
         Lionade builds the study plan around them.
       </p>
@@ -1247,9 +1284,10 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         onClick={onCreate}
         className="inline-flex items-center gap-2 rounded-full bg-gold text-navy
           font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5
-          hover:bg-gold/90 transition-colors shadow-[0_0_24px_rgba(255,215,0,0.22)]"
+          hover:bg-gold/90 transition-colors shadow-[0_0_24px_rgba(255,215,0,0.22)]
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       >
-        <Plus size={12} weight="bold" /> Add your first class
+        <Plus size={12} weight="bold" aria-hidden="true" /> Add your first class
       </button>
     </div>
   );
@@ -1260,13 +1298,14 @@ function CreateTile({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
+      aria-label="Add a new class"
       className="group rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.01]
         hover:bg-gold/[0.04] hover:border-gold/40 transition-colors
-        p-5 flex flex-col items-center justify-center gap-2 text-cream/50 hover:text-gold
-        min-h-[150px]"
+        p-5 flex flex-col items-center justify-center gap-2 text-cream/60 hover:text-gold
+        min-h-[150px] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
     >
       <span className="grid place-items-center w-10 h-10 rounded-full border border-current/30 group-hover:border-gold/60 transition-colors">
-        <Plus size={18} weight="bold" />
+        <Plus size={18} weight="bold" aria-hidden="true" />
       </span>
       <span className="font-mono text-[11px] uppercase tracking-[0.25em]">New class</span>
     </button>
@@ -1289,6 +1328,49 @@ function CreateClassModal({
   const [color, setColor] = useState(PRESET_COLORS[0]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  // Dialog a11y: remember the trigger, lock body scroll, Escape to close,
+  // and restore focus on unmount. The autoFocus on the name input handles
+  // initial focus placement.
+  useEffect(() => {
+    previouslyFocusedRef.current = (document.activeElement as HTMLElement) ?? null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      // Focus trap: keep Tab cycling within the dialog.
+      if (e.key === "Tab" && panelRef.current) {
+        const focusables = panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      previouslyFocusedRef.current?.focus?.();
+    };
+  }, [onClose]);
 
   const submit = async () => {
     if (submitting) return;
@@ -1322,26 +1404,28 @@ function CreateClassModal({
       className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm px-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="create-class-title"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl">
+      <div ref={panelRef} className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl">
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 text-cream/40 hover:text-cream grid place-items-center w-7 h-7 rounded-full hover:bg-white/[0.05]"
+          aria-label="Close dialog"
+          className="absolute top-2 right-2 text-cream/55 hover:text-cream grid place-items-center w-11 h-11 rounded-full hover:bg-white/[0.05]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 transition-colors"
         >
-          <X size={14} weight="bold" />
+          <X size={16} weight="bold" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-2 mb-3">
           <span className="inline-block w-5 h-px bg-gold/70" aria-hidden="true" />
-          <Sparkle size={13} className="text-gold" weight="fill" />
+          <Sparkle size={13} className="text-gold" weight="fill" aria-hidden="true" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.32em] text-gold">
             New class
           </span>
         </div>
-        <h3 className="font-bebas text-[32px] tracking-wider text-cream leading-[0.95] mb-5">
+        <h3 id="create-class-title" className="font-bebas text-[32px] tracking-wider text-cream leading-[0.95] mb-5 pr-10">
           What are you studying?
         </h3>
 
@@ -1352,7 +1436,7 @@ function CreateClassModal({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Organic Chemistry"
-              className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[14px] text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/60"
+              className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[14px] text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40"
               maxLength={80}
             />
           </Field>
@@ -1363,7 +1447,7 @@ function CreateClassModal({
                 value={shortCode}
                 onChange={e => setShortCode(e.target.value.toUpperCase())}
                 placeholder="CHEM 121"
-                className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/60 uppercase"
+                className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40 uppercase"
                 maxLength={20}
               />
             </Field>
@@ -1372,31 +1456,41 @@ function CreateClassModal({
                 value={term}
                 onChange={e => setTerm(e.target.value)}
                 placeholder="Spring 2026"
-                className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/60"
+                className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40"
                 maxLength={30}
               />
             </Field>
           </div>
 
           <Field label="Color">
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_COLORS.map(c => (
+            <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Class color">
+              {PRESET_COLORS.map((c, i) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  aria-label={`Color ${c}`}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                    color === c ? "scale-110 border-cream" : "border-white/[0.2] hover:border-cream/60"
+                  role="radio"
+                  aria-checked={color === c}
+                  aria-label={`Color ${i + 1}${color === c ? ", selected" : ""}`}
+                  className={`grid place-items-center w-9 h-9 rounded-full transition-transform
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 ${
+                    color === c ? "scale-105" : ""
                   }`}
-                  style={{ background: c }}
-                />
+                >
+                  <span
+                    className={`block w-6 h-6 rounded-full border-2 transition-colors ${
+                      color === c ? "border-cream" : "border-white/[0.2] hover:border-cream/60"
+                    }`}
+                    style={{ background: c }}
+                    aria-hidden="true"
+                  />
+                </button>
               ))}
             </div>
           </Field>
 
           {error && (
-            <p className="text-[12px] text-red-400 font-mono">{error}</p>
+            <p role="alert" aria-live="assertive" className="text-[12px] text-red-300 font-mono">{error}</p>
           )}
         </div>
 
@@ -1405,7 +1499,8 @@ function CreateClassModal({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/60 hover:text-cream px-3 py-2"
+            className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/65 hover:text-cream px-3 py-2 rounded-full
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-colors"
           >
             Cancel
           </button>
@@ -1414,7 +1509,8 @@ function CreateClassModal({
             onClick={submit}
             disabled={submitting || name.trim().length < 2}
             className="inline-flex items-center gap-2 rounded-full bg-gold text-navy disabled:opacity-50 disabled:cursor-not-allowed
-              font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors"
+              font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             {submitting ? "Creating…" : "Create"}
           </button>
@@ -1602,6 +1698,10 @@ function sortItems(a: AgendaItem, b: AgendaItem): number {
 
 function nextStatus(s: AssignmentStatus): AssignmentStatus {
   return s === "todo" ? "doing" : s === "doing" ? "done" : "todo";
+}
+
+function statusLabel(s: AssignmentStatus): string {
+  return s === "todo" ? "to do" : s === "doing" ? "doing" : "done";
 }
 
 function timeAgo(dateStr: string): string {

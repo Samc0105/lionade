@@ -167,7 +167,7 @@ export default function ImportCalendarSheet({
       {/* Eyebrow + heading */}
       <div className="flex items-center gap-2 mb-2.5">
         <span className="inline-block w-5 h-px bg-gold/70" aria-hidden="true" />
-        <CalendarPlus size={13} className="text-gold" weight="fill" />
+        <CalendarPlus size={13} className="text-gold" weight="fill" aria-hidden="true" />
         <span className="font-mono text-[9.5px] uppercase tracking-[0.32em] text-gold">
           Import calendar
         </span>
@@ -229,12 +229,12 @@ function PasteStep({
         Paste your calendar feed URL from Canvas, Google Calendar, Outlook, or Apple Calendar.
         We import the assignment and exam dates.
       </p>
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 mb-5">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55 mb-5">
         In Canvas: Calendar then Calendar Feed, copy the link.
       </p>
 
       <label className="block mb-2">
-        <span className="block font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/50 mb-1.5">
+        <span className="block font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55 mb-1.5">
           Feed URL
         </span>
         <input
@@ -246,13 +246,13 @@ function PasteStep({
           onKeyDown={e => { if (e.key === "Enter" && !busy) onPreview(); }}
           placeholder="https://your-school.instructure.com/feeds/calendars/..."
           disabled={busy}
-          className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/60 disabled:opacity-60"
+          className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[13px] text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40 disabled:opacity-60"
         />
       </label>
 
       {phase === "preview-error" && errorMsg && (
-        <div className="flex items-start gap-2 rounded-md border border-red-400/30 bg-red-400/5 px-3 py-2.5 mb-3">
-          <WarningCircle size={15} weight="fill" className="text-red-300 shrink-0 mt-0.5" />
+        <div role="alert" className="flex items-start gap-2 rounded-md border border-red-400/30 bg-red-400/5 px-3 py-2.5 mb-3">
+          <WarningCircle size={15} weight="fill" className="text-red-300 shrink-0 mt-0.5" aria-hidden="true" />
           <p className="font-syne text-[12.5px] text-red-200 leading-snug">
             {errorMsg} Try a different link.
           </p>
@@ -265,16 +265,17 @@ function PasteStep({
           onClick={onPreview}
           disabled={busy || url.trim().length === 0}
           className="inline-flex items-center gap-2 rounded-full bg-gold text-navy disabled:opacity-50 disabled:cursor-not-allowed
-            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors"
+            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1426]"
         >
           {busy ? (
             <>
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-navy/40 border-t-navy animate-spin" />
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-navy/40 border-t-navy motion-safe:animate-spin" aria-hidden="true" />
               Reading feed
             </>
           ) : (
             <>
-              <ArrowsClockwise size={12} weight="bold" /> Preview
+              <ArrowsClockwise size={12} weight="bold" aria-hidden="true" /> Preview
             </>
           )}
         </button>
@@ -314,8 +315,8 @@ function PreviewStep({
           nothing to import
         </h3>
         <div className="rounded-[14px] border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center mb-4">
-          <CalendarBlank size={22} className="text-gold/60 mx-auto mb-2" />
-          <p className="text-[12.5px] text-cream/60 leading-snug">
+          <CalendarBlank size={22} className="text-gold/60 mx-auto mb-2" aria-hidden="true" />
+          <p className="text-[12.5px] text-cream/65 leading-snug">
             No upcoming dates found in that feed.
           </p>
         </div>
@@ -323,9 +324,10 @@ function PreviewStep({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/70 hover:text-cream px-3 py-2 transition-colors"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/70 hover:text-cream px-3 py-2 rounded-full transition-colors
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
           >
-            <ArrowLeft size={12} weight="bold" /> Try another link
+            <ArrowLeft size={12} weight="bold" aria-hidden="true" /> Try another link
           </button>
         </div>
       </div>
@@ -344,19 +346,20 @@ function PreviewStep({
           type="button"
           onClick={onToggleAll}
           disabled={committing}
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55 hover:text-gold transition-colors shrink-0 disabled:opacity-50"
+          className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/65 hover:text-gold transition-colors shrink-0 disabled:opacity-50
+            rounded-full px-2 py-1 -mr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
         >
           {allOn ? "Clear all" : "Select all"}
         </button>
       </div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-4" role="status" aria-live="polite">
         {selectedCount} of {events.length} selected
         {truncated ? " · Showing first 200" : ""}
       </p>
 
       {/* Class selector — imported events attach to one class. */}
       <div className="mb-4">
-        <span className="block font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/50 mb-2">
+        <span className="block font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55 mb-2">
           Add to class
         </span>
         <div className="flex flex-wrap gap-2">
@@ -369,7 +372,9 @@ function PreviewStep({
                 onClick={() => onSelectClass(c.id)}
                 disabled={committing}
                 aria-pressed={active}
-                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 transition-colors disabled:opacity-50"
+                aria-label={`Add to ${c.name}`}
+                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 transition-colors disabled:opacity-50
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
                 style={{
                   borderColor: active ? `${c.color}80` : "rgba(255,255,255,0.1)",
                   backgroundColor: active ? `${c.color}1f` : "rgba(255,255,255,0.02)",
@@ -404,15 +409,17 @@ function PreviewStep({
               onClick={() => onToggleEvent(i)}
               disabled={committing}
               aria-pressed={on}
+              aria-label={`${ev.title}, ${formatDate(ev.date)}${on ? ", selected" : ""}`}
               className={`w-full flex items-center gap-3 rounded-[10px] border px-3 py-2.5 text-left transition-colors disabled:opacity-50
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50
                 ${on
                   ? "border-gold/35 bg-gold/[0.06]"
                   : "border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04]"}`}
             >
               {on
-                ? <CheckCircle size={17} weight="fill" className="text-gold shrink-0" />
-                : <Circle size={17} weight="bold" className="text-cream/35 shrink-0" />}
-              <span className="font-mono text-[10px] tabular-nums text-cream/55 shrink-0 w-[58px]">
+                ? <CheckCircle size={17} weight="fill" className="text-gold shrink-0" aria-hidden="true" />
+                : <Circle size={17} weight="bold" className="text-cream/45 shrink-0" aria-hidden="true" />}
+              <span className="font-mono text-[10px] tabular-nums text-cream/60 shrink-0 w-[58px]">
                 {formatDate(ev.date)}
               </span>
               <span className={`font-syne text-[13px] leading-tight truncate ${on ? "text-cream" : "text-cream/65"}`}>
@@ -424,8 +431,8 @@ function PreviewStep({
       </div>
 
       {errorMsg && (
-        <div className="flex items-start gap-2 rounded-md border border-red-400/30 bg-red-400/5 px-3 py-2.5 mt-3">
-          <WarningCircle size={15} weight="fill" className="text-red-300 shrink-0 mt-0.5" />
+        <div role="alert" className="flex items-start gap-2 rounded-md border border-red-400/30 bg-red-400/5 px-3 py-2.5 mt-3">
+          <WarningCircle size={15} weight="fill" className="text-red-300 shrink-0 mt-0.5" aria-hidden="true" />
           <p className="font-syne text-[12.5px] text-red-200 leading-snug">{errorMsg}</p>
         </div>
       )}
@@ -435,27 +442,29 @@ function PreviewStep({
           type="button"
           onClick={onBack}
           disabled={committing}
-          className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/60 hover:text-cream px-3 py-2 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-cream/65 hover:text-cream px-3 py-2 rounded-full transition-colors disabled:opacity-50
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
         >
-          <ArrowLeft size={12} weight="bold" /> Different link
+          <ArrowLeft size={12} weight="bold" aria-hidden="true" /> Different link
         </button>
         <button
           type="button"
           onClick={onCommit}
           disabled={!canImport || committing}
           className="inline-flex items-center gap-2 rounded-full bg-gold text-navy disabled:opacity-50 disabled:cursor-not-allowed
-            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors"
+            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 hover:bg-gold/90 transition-colors
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1426]"
         >
           {committing ? (
             <>
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-navy/40 border-t-navy animate-spin" />
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-navy/40 border-t-navy motion-safe:animate-spin" aria-hidden="true" />
               Importing
             </>
           ) : (
             <>
               Import {selectedCount} {selectedCount === 1 ? "event" : "events"}
               {selectedClass ? ` to ${shorten(selectedClass.name)}` : ""}
-              <ArrowRight size={12} weight="bold" />
+              <ArrowRight size={12} weight="bold" aria-hidden="true" />
             </>
           )}
         </button>
