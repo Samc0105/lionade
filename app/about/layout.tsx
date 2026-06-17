@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { cdnUrl } from "@/lib/cdn";
 import { absoluteUrl } from "@/lib/site-config";
 
-const OG_IMAGE = "https://d1745aj99cclbu.cloudfront.net/logo-full.png";
+const OG_IMAGE = cdnUrl("/logo-full.png");
 
 // Server-side metadata for a client-rendered page. The client `page.tsx`
 // handles all interactivity; this layout exists solely to emit SEO tags
@@ -9,7 +10,7 @@ const OG_IMAGE = "https://d1745aj99cclbu.cloudfront.net/logo-full.png";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "About Lionade, the Gen Z study-rewards app that turns studying into a game. Earn Fangs, master any exam, duel friends, climb the leaderboard.",
+    "About Lionade (not lemonade), the Gen Z study-rewards app that turns studying into a game. Earn Fangs, master any exam, duel friends, climb the leaderboard.",
   alternates: { canonical: "/about" },
   openGraph: {
     title: "About · Lionade",

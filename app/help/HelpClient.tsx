@@ -39,9 +39,9 @@ function FaqItem({ faq, defaultOpen }: { faq: Faq; defaultOpen: boolean }) {
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold/70 mb-2">
             {faq.category}
           </p>
-          <h3 className="font-bebas text-2xl sm:text-3xl tracking-wider text-cream group-hover:text-gold transition-colors duration-150">
+          <h2 className="font-bebas text-2xl sm:text-3xl tracking-wider text-cream group-hover:text-gold transition-colors duration-150">
             {faq.question}
-          </h3>
+          </h2>
         </div>
         <span
           aria-hidden
@@ -135,13 +135,13 @@ export default function HelpClient() {
               autoCapitalize="off"
               spellCheck={false}
               aria-label="Search the help center"
-              className="flex-1 bg-transparent outline-none text-cream placeholder:text-cream/35 text-base"
+              className="flex-1 bg-transparent outline-none text-cream placeholder:text-cream/55 text-base"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="text-cream/40 hover:text-cream text-xs font-mono uppercase tracking-[0.22em] transition-colors"
+                className="text-cream/55 hover:text-cream text-xs font-mono uppercase tracking-[0.22em] transition-colors"
               >
                 Clear
               </button>
@@ -201,9 +201,9 @@ export default function HelpClient() {
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold/70 mb-3">
               Nothing here
             </p>
-            <h3 className="font-bebas text-3xl tracking-wider text-cream mb-3">
+            <h2 className="font-bebas text-3xl tracking-wider text-cream mb-3">
               NO MATCHES FOUND
-            </h3>
+            </h2>
             <p className="text-cream/60 text-sm max-w-md mx-auto">
               Try a different keyword, switch to All, or ask us directly.
             </p>

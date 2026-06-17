@@ -47,7 +47,7 @@ export default function HelpPage() {
             The answers to the questions we get most often. Search by keyword, filter by topic, or scroll the whole list. If you do not find what you need, the contact form is one tap away.
           </p>
 
-          <div className="mt-9 inline-flex items-center gap-6 text-xs font-mono uppercase tracking-[0.22em] text-cream/40">
+          <div className="mt-9 inline-flex items-center gap-6 text-xs font-mono uppercase tracking-[0.22em] text-cream/55">
             <span>
               <span className="text-gold">{FAQS.length}</span> answers
             </span>
@@ -92,7 +92,7 @@ export default function HelpPage() {
               CONTACT SUPPORT
             </button>
           </Link>
-          <p className="mt-6 text-cream/40 text-xs font-mono uppercase tracking-[0.22em]">
+          <p className="mt-6 text-cream/55 text-xs font-mono uppercase tracking-[0.22em]">
             support@getlionade.com
           </p>
         </section>

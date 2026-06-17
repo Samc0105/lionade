@@ -22,9 +22,10 @@
  */
 
 import { createElement } from "react";
-import { SITE_URL, SUPPORT_EMAIL, absoluteUrl } from "@/lib/site-config";
+import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site-config";
+import { cdnUrl } from "@/lib/cdn";
 
-const LOGO_URL = absoluteUrl("/logo-icon.png");
+const LOGO_URL = cdnUrl("/logo-icon.png");
 
 const SCHEMA = [
   {

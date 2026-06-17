@@ -48,7 +48,7 @@ export default function ContactPage() {
   };
 
   const inputCls =
-    "w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-electric/60 focus:bg-white/[0.05] transition-all";
+    "w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-cream placeholder-cream/55 text-sm focus:outline-none focus:border-electric/60 focus:bg-white/[0.05] transition-all";
   const labelCls = "block font-mono text-[10px] uppercase tracking-[0.28em] text-cream/50 mb-2";
 
   return (
@@ -87,7 +87,7 @@ export default function ContactPage() {
             style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
           >
             <EnvelopeSimple size={20} weight="duotone" color="#4C96E1" aria-hidden="true" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Email</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Email</p>
             <p className="text-cream text-sm font-semibold mt-1 break-all">{SUPPORT_EMAIL}</p>
           </a>
           <a
@@ -98,7 +98,7 @@ export default function ContactPage() {
             style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
           >
             <XLogo size={20} weight="duotone" color="#F0B429" aria-hidden="true" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Follow</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Follow</p>
             <p className="text-cream text-sm font-semibold mt-1">@getlionade</p>
           </a>
           <Link
@@ -107,7 +107,7 @@ export default function ContactPage() {
             style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
           >
             <Lifebuoy size={20} weight="duotone" color="#A78BFA" aria-hidden="true" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Team</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Team</p>
             <p className="text-cream text-sm font-semibold mt-1">About Lionade</p>
           </Link>
         </section>
@@ -138,7 +138,7 @@ export default function ContactPage() {
                 >
                   <span className="text-2xl block mb-2">{item.icon}</span>
                   <p className="text-cream text-sm font-bold">{item.label}</p>
-                  <p className="text-cream/40 text-xs mt-0.5">{item.hint}</p>
+                  <p className="text-cream/55 text-xs mt-0.5">{item.hint}</p>
                 </button>
               );
             })}
@@ -277,7 +277,7 @@ export default function ContactPage() {
               {sending ? "Sending..." : "Send Message"}
             </button>
 
-            <p className="text-cream/35 text-xs text-center leading-relaxed pt-1">
+            <p className="text-cream/55 text-xs text-center leading-relaxed pt-1">
               Real humans read these. Lionade is small, so feedback shapes what we ship next.
             </p>
           </div>

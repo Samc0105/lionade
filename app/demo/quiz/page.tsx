@@ -225,14 +225,14 @@ export default function DemoPage() {
             <p className="text-cream/50 text-sm leading-relaxed mb-2">
               5 general knowledge questions. 15 seconds each.
             </p>
-            <p className="text-cream/30 text-xs mb-8">
-              No account required — just tap and play.
+            <p className="text-cream/55 text-xs mb-8">
+              No account required. Just tap and play.
             </p>
 
             <div className="space-y-3 text-left mb-8">
               {([
                 { Icon: null as PhosphorIcon | null, emoji: "⏱", text: "15-second timer per question" },
-                { Icon: Target as PhosphorIcon, emoji: null, text: "Multiple choice — pick your best answer" },
+                { Icon: Target as PhosphorIcon, emoji: null, text: "Multiple choice. Pick your best answer." },
                 { Icon: ChartBar as PhosphorIcon, emoji: null, text: "See your score at the end" },
               ] as { Icon: PhosphorIcon | null; emoji: string | null; text: string }[]).map((item) => (
                 <div
@@ -269,7 +269,7 @@ export default function DemoPage() {
 
             <Link
               href="/login"
-              className="block text-cream/30 text-xs mt-5 hover:text-electric transition-colors"
+              className="block text-cream/55 text-xs mt-5 hover:text-electric transition-colors"
             >
               Already have an account? Log in
             </Link>
@@ -288,9 +288,9 @@ export default function DemoPage() {
             {/* Header: progress + timer */}
             <div className="px-6 pt-5 pb-3">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-cream/40 text-xs font-bold uppercase tracking-widest">
+                <span className="text-cream/55 text-xs font-bold uppercase tracking-widest">
                   Question {currentQ + 1}{" "}
-                  <span className="text-cream/20">/ {totalQuestions}</span>
+                  <span className="text-cream/55">/ {totalQuestions}</span>
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-lg">⏱</span>
@@ -366,7 +366,7 @@ export default function DemoPage() {
                       " bg-red-400/15 border-red-400/50 text-red-400";
                   } else {
                     btnClass +=
-                      " bg-white/3 border-white/10 text-cream/30";
+                      " bg-white/3 border-white/10 text-cream/55";
                   }
                 } else if (selected === idx) {
                   btnClass +=
@@ -502,7 +502,7 @@ export default function DemoPage() {
                 <span className="font-bebas text-3xl text-cream">
                   {score}/{totalQuestions}
                 </span>
-                <span className="text-cream/30 text-xs">correct</span>
+                <span className="text-cream/55 text-xs">correct</span>
               </div>
             </div>
 

@@ -71,7 +71,7 @@ export default function DemoPage() {
     description:
       "Study app that pays you for focused minutes. Earn Fangs from studying, master any topic with AI tutoring, build vocab with spaced repetition, and compete on a live leaderboard.",
     url: absoluteUrl("/demo"),
-    image: "https://d1745aj99cclbu.cloudfront.net/logo-full.png",
+    image: cdnUrl("/logo-full.png"),
     offers: {
       "@type": "Offer",
       price: "0",
@@ -200,7 +200,7 @@ function Hero() {
         </Link>
       </div>
 
-      <div className="mt-10 inline-flex items-center gap-5 text-[11px] font-mono uppercase tracking-[0.24em] text-cream/40">
+      <div className="mt-10 inline-flex items-center gap-5 text-[11px] font-mono uppercase tracking-[0.24em] text-cream/55">
         <span><span className="text-gold">FREE</span> TO START</span>
         <span className="h-3 w-px bg-cream/15" />
         <span>WEB + IOS</span>
@@ -267,7 +267,7 @@ function TourSection({
 
       <div className={flipped ? "lg:order-1" : "lg:order-2"}>
         <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-gold/70 mb-3">
-          {section.eyebrow} <span className="text-cream/30 mx-2">/</span> <span className="text-electric/80">{section.label}</span>
+          {section.eyebrow} <span className="text-cream/55 mx-2">/</span> <span className="text-electric/80">{section.label}</span>
         </p>
         <h2 className="font-bebas text-5xl sm:text-6xl tracking-wider leading-[0.95] text-cream">
           {section.title}
@@ -276,7 +276,7 @@ function TourSection({
           {section.body}
         </p>
 
-        <div className="mt-7 flex items-center gap-3 text-[11px] font-mono tracking-[0.22em] uppercase text-cream/40">
+        <div className="mt-7 flex items-center gap-3 text-[11px] font-mono tracking-[0.22em] uppercase text-cream/55">
           <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-electric/10 text-electric font-bold tabular-nums">
             {String(index + 1).padStart(2, "0")}
           </span>
@@ -379,20 +379,20 @@ function DashboardMockup() {
           </span>
           <FangIcon size={22} />
         </div>
-        <p className="text-cream/45 text-xs mt-1.5">Worth $12.84 in cash payout</p>
+        <p className="text-cream/55 text-xs mt-1.5">Worth $12.84 in cash payout</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="rounded-xl border border-electric/20 p-4 bg-electric/5">
-          <p className="text-cream/40 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">Today</p>
-          <p className="font-bebas text-2xl text-cream tracking-wider">47<span className="text-cream/40 text-base ml-1">MIN</span></p>
+          <p className="text-cream/55 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">Today</p>
+          <p className="font-bebas text-2xl text-cream tracking-wider">47<span className="text-cream/55 text-base ml-1">MIN</span></p>
           <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
             <div className="h-full rounded-full bg-electric" style={{ width: "78%" }} />
           </div>
         </div>
         <div className="rounded-xl border border-green-400/20 p-4 bg-green-400/5">
-          <p className="text-cream/40 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">This Week</p>
-          <p className="font-bebas text-2xl text-cream tracking-wider">5/7<span className="text-cream/40 text-base ml-1">DAYS</span></p>
+          <p className="text-cream/55 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">This Week</p>
+          <p className="font-bebas text-2xl text-cream tracking-wider">5/7<span className="text-cream/55 text-base ml-1">DAYS</span></p>
           <div className="mt-2 flex gap-1">
             {[1, 1, 1, 1, 1, 0, 0].map((d, i) => (
               <div
@@ -429,7 +429,7 @@ function MasteryMockup() {
           </div>
           <div>
             <span className="font-bebas text-lg text-cream tracking-wider">MASTERY MODE</span>
-            <p className="text-cream/40 text-[10px] font-mono tracking-[0.22em] uppercase">AWS SEC SPECIALTY</p>
+            <p className="text-cream/55 text-[10px] font-mono tracking-[0.22em] uppercase">AWS SEC SPECIALTY</p>
           </div>
         </div>
         <span className="text-purple-300 text-xs font-bold tabular-nums">47%</span>
@@ -491,7 +491,7 @@ function MasteryMockup() {
           <CheckCircle size={14} weight="fill" className="text-green-400" aria-hidden="true" />
           <span>28 of 60 concepts mastered</span>
         </div>
-        <span className="text-cream/40 font-mono tracking-wider">~ 4 HRS LEFT</span>
+        <span className="text-cream/55 font-mono tracking-wider">~ 4 HRS LEFT</span>
       </div>
     </GlassCard>
   );
@@ -507,7 +507,7 @@ function WordBankMockup() {
           </div>
           <span className="font-bebas text-lg text-cream tracking-wider">WORD BANK REVIEW</span>
         </div>
-        <span className="text-cream/40 text-[10px] font-mono tracking-[0.22em] uppercase">3 OF 12 DUE</span>
+        <span className="text-cream/55 text-[10px] font-mono tracking-[0.22em] uppercase">3 OF 12 DUE</span>
       </div>
 
       <div className="rounded-2xl p-6 mb-4 text-center relative overflow-hidden border border-electric/15"
@@ -518,17 +518,17 @@ function WordBankMockup() {
       >
         <p className="font-mono text-[10px] tracking-[0.32em] uppercase text-electric/70 mb-3">TERM</p>
         <p className="font-bebas text-4xl text-cream tracking-wider mb-1">LOAD BALANCER</p>
-        <p className="text-cream/40 text-xs">Networking · saved 9 days ago</p>
+        <p className="text-cream/55 text-xs">Networking · saved 9 days ago</p>
 
         <div className="my-5 h-px w-16 bg-gradient-to-r from-transparent via-electric/40 to-transparent mx-auto" />
 
         <p className="text-cream/85 text-sm leading-relaxed max-w-sm mx-auto">
           What does it mean?
         </p>
-        <p className="text-cream/40 text-xs mt-2">Tap to flip and rate your confidence</p>
+        <p className="text-cream/55 text-xs mt-2">Tap to flip and rate your confidence</p>
       </div>
 
-      <p className="text-cream/40 text-[10px] font-mono tracking-[0.28em] uppercase text-center mb-3">HOW WELL DID YOU KNOW IT?</p>
+      <p className="text-cream/55 text-[10px] font-mono tracking-[0.28em] uppercase text-center mb-3">HOW WELL DID YOU KNOW IT?</p>
       <div className="grid grid-cols-3 gap-2.5">
         <button className="py-3 rounded-xl border border-red-400/25 bg-red-400/8 text-red-300 text-xs font-bold tracking-wider">
           AGAIN
@@ -549,7 +549,7 @@ function WordBankMockup() {
           <FangIcon />
           <span><span className="text-gold font-bold">+8</span> per review</span>
         </span>
-        <span className="text-cream/40 font-mono tracking-wider">RETENTION 94%</span>
+        <span className="text-cream/55 font-mono tracking-wider">RETENTION 94%</span>
       </div>
     </GlassCard>
   );
@@ -565,7 +565,7 @@ function PartyMockup() {
           </div>
           <div>
             <span className="font-bebas text-lg text-cream tracking-wider">SKETCHY SUBJECTS</span>
-            <p className="text-cream/40 text-[10px] font-mono tracking-[0.22em] uppercase">ROOM LION 9X4Q</p>
+            <p className="text-cream/55 text-[10px] font-mono tracking-[0.22em] uppercase">ROOM LION 9X4Q</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/15 border border-red-400/30">
@@ -606,7 +606,7 @@ function PartyMockup() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-cream/40 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">ROOM</p>
+          <p className="text-cream/55 text-[10px] font-mono tracking-[0.24em] uppercase mb-1">ROOM</p>
           {[
             { name: "Chen", points: 1840, status: "drawing", color: "#F0B429" },
             { name: "Riya", points: 1620, status: "guessed", color: "#4ade80" },
@@ -625,7 +625,7 @@ function PartyMockup() {
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-cream/85 text-[11px] font-semibold leading-tight truncate">{p.name}</p>
-                <p className="text-cream/40 text-[9px] font-mono tabular-nums">{p.points.toLocaleString()}</p>
+                <p className="text-cream/55 text-[9px] font-mono tabular-nums">{p.points.toLocaleString()}</p>
               </div>
               {p.status === "guessed" && (
                 <CheckCircle size={12} weight="fill" className="text-green-400" aria-hidden="true" />
@@ -637,7 +637,7 @@ function PartyMockup() {
 
       <div className="mt-4 pt-3 border-t border-white/8 flex items-center justify-between text-xs">
         <span className="text-cream/50">Round 3 of 5</span>
-        <span className="text-cream/40 inline-flex items-center gap-1.5">
+        <span className="text-cream/55 inline-flex items-center gap-1.5">
           <FangIcon />
           <span><span className="text-gold font-bold">+120</span> if you guess first</span>
         </span>
@@ -662,7 +662,7 @@ function LeaderboardMockup() {
           </div>
           <div>
             <span className="font-bebas text-lg text-cream tracking-wider">GLOBAL LADDER</span>
-            <p className="text-cream/40 text-[10px] font-mono tracking-[0.22em] uppercase">WEEKLY FANGS</p>
+            <p className="text-cream/55 text-[10px] font-mono tracking-[0.22em] uppercase">WEEKLY FANGS</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-500/15 border border-green-400/30">
@@ -689,7 +689,7 @@ function LeaderboardMockup() {
               )}
             </div>
             <p className="font-bebas text-cream text-sm tracking-wider text-center truncate w-full">{p.name}</p>
-            <p className="text-cream/40 text-[10px] font-mono tracking-wider truncate w-full text-center">{p.school}</p>
+            <p className="text-cream/55 text-[10px] font-mono tracking-wider truncate w-full text-center">{p.school}</p>
             <div className="inline-flex items-center gap-1 text-xs font-bold tabular-nums mt-1" style={{ color: p.color }}>
               {p.fangs.toLocaleString()}
               <FangIcon size={11} />
@@ -740,7 +740,7 @@ function LeaderboardMockup() {
           <ChartLineUp size={14} weight="bold" className="text-electric" aria-hidden="true" />
           <span>Resets in 2d 14h</span>
         </span>
-        <span className="text-cream/40 font-mono tracking-wider">12,408 GRINDERS</span>
+        <span className="text-cream/55 font-mono tracking-wider">12,408 GRINDERS</span>
       </div>
     </GlassCard>
   );
@@ -800,7 +800,7 @@ function CtaStripe() {
             </Link>
           </div>
 
-          <p className="mt-7 text-[11px] font-mono tracking-[0.24em] uppercase text-cream/40">
+          <p className="mt-7 text-[11px] font-mono tracking-[0.24em] uppercase text-cream/55">
             NO CARD <span className="text-cream/20 mx-2">·</span> CASH OUT AT $5 <span className="text-cream/20 mx-2">·</span> CANCEL ANY TIME
           </p>
         </div>
@@ -812,7 +812,7 @@ function CtaStripe() {
 function FooterMicro() {
   return (
     <div className="mt-10 text-center">
-      <p className="text-cream/35 text-xs">
+      <p className="text-cream/55 text-xs">
         Already have an account?{" "}
         <Link href="/login" className="text-electric hover:text-electric-light transition-colors font-semibold">
           Log in

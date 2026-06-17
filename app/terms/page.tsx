@@ -194,7 +194,7 @@ export default function TermsPage() {
           {/* Sticky TOC */}
           <aside className="hidden lg:block">
             <div className="sticky top-24">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mb-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mb-4">
                 Contents
               </p>
               <nav className="space-y-2.5">

@@ -70,7 +70,7 @@ export default function AboutPage() {
             Lionade is the first study app that turns focused minutes into real money. We made it because every student we know was already grinding. The least we could do was put a price on the hours.
           </p>
 
-          <div className="mt-10 inline-flex items-center gap-6 text-xs font-mono uppercase tracking-[0.22em] text-cream/40">
+          <div className="mt-10 inline-flex items-center gap-6 text-xs font-mono uppercase tracking-[0.22em] text-cream/55">
             <span><span className="text-gold">Web</span> + <span className="text-electric">iOS</span></span>
             <span className="h-3 w-px bg-cream/15" />
             <span>Live since May 2026</span>
@@ -178,7 +178,7 @@ export default function AboutPage() {
           <p className="text-cream/80 text-base sm:text-lg leading-relaxed">
             We built Lionade because we were the customer first. We were the students putting in the hours with nothing to show for it but a transcript. If you study with us, you are not a user. You are a teammate. Every feature on this site exists because someone studying for something real asked for it. Keep asking. We are listening.
           </p>
-          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45">
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55">
             The Lionade team
           </p>
         </section>
@@ -208,7 +208,7 @@ export default function AboutPage() {
               OPEN DASHBOARD
             </button>
           </Link>
-          <p className="mt-6 text-cream/40 text-xs">
+          <p className="mt-6 text-cream/55 text-xs">
             No credit card. Free Fangs from your first session.
           </p>
         </section>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createElement } from "react";
 import { absoluteUrl, SITE_URL } from "@/lib/site-config";
+import { cdnUrl } from "@/lib/cdn";
 import { POSTS, getPostBySlug, type ContentBlock } from "../posts";
 
 /**
@@ -20,7 +21,7 @@ import { POSTS, getPostBySlug, type ContentBlock } from "../posts";
  * callouts and the CTA at the bottom).
  */
 
-const OG_IMAGE = "https://d1745aj99cclbu.cloudfront.net/logo-full.png";
+const OG_IMAGE = cdnUrl("/logo-full.png");
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ slug: p.slug }));
@@ -92,7 +93,7 @@ function ArticleJsonLd({ post, url }: { post: ReturnType<typeof getPostBySlug>; 
       name: "Lionade",
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/logo-icon.png"),
+        url: cdnUrl("/logo-icon.png"),
       },
     },
     image: OG_IMAGE,
@@ -185,7 +186,7 @@ function renderBlock(block: ContentBlock, idx: number) {
             {block.text}
           </p>
           {block.cite ? (
-            <cite className="block mt-2 text-xs text-cream/40 not-italic font-mono">
+            <cite className="block mt-2 text-xs text-cream/55 not-italic font-mono">
               {block.cite}
             </cite>
           ) : null}
@@ -246,7 +247,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         {/* Back link */}
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1.5 text-cream/40 hover:text-cream/70 text-xs font-mono tracking-[0.2em] uppercase mb-8 transition-colors"
+          className="inline-flex items-center gap-1.5 text-cream/55 hover:text-cream/80 text-xs font-mono tracking-[0.2em] uppercase mb-8 transition-colors"
         >
           <span aria-hidden>←</span> BACK TO BLOG
         </Link>
@@ -261,7 +262,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               {post.title}
             </span>
           </h1>
-          <div className="flex items-center gap-3 text-[11px] font-mono tracking-[0.2em] uppercase text-cream/40">
+          <div className="flex items-center gap-3 text-[11px] font-mono tracking-[0.2em] uppercase text-cream/55">
             <span>{formatDate(post.publishedAt)}</span>
             <span aria-hidden>·</span>
             <span>{post.readingMinutes} MIN READ</span>
@@ -305,16 +306,16 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               Try Mastery Mode
             </button>
           </Link>
-          <p className="mt-5 text-[11px] font-mono tracking-[0.2em] uppercase text-cream/30">
+          <p className="mt-5 text-[11px] font-mono tracking-[0.2em] uppercase text-cream/55">
             FREE TO START ·{" "}
-            <Link href="/pricing" className="underline hover:text-cream/60">
+            <Link href="/pricing" className="underline hover:text-cream">
               SEE PLANS
             </Link>
           </p>
         </div>
 
         {/* Byline */}
-        <p className="mt-10 text-center text-xs text-cream/30 font-mono tracking-[0.2em] uppercase">
+        <p className="mt-10 text-center text-xs text-cream/55 font-mono tracking-[0.2em] uppercase">
           WRITTEN BY THE LIONADE TEAM
         </p>
       </article>

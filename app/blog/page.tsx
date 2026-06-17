@@ -27,7 +27,7 @@ export default function BlogIndexPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
         <div className="text-center mb-14 animate-slide-up">
-          <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-cream/40 mb-3">
+          <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-cream/55 mb-3">
             STUDY SMARTER, EARN MORE
           </p>
           <h1 className="font-bebas text-6xl sm:text-7xl tracking-wider leading-none">
@@ -66,7 +66,7 @@ export default function BlogIndexPage() {
                     background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
                   }}
                 >
-                  <div className="flex items-center gap-3 mb-3 text-[10px] sm:text-[11px] font-mono tracking-[0.25em] uppercase text-cream/40">
+                  <div className="flex items-center gap-3 mb-3 text-[10px] sm:text-[11px] font-mono tracking-[0.25em] uppercase text-cream/55">
                     <span className="text-electric/80">{post.category}</span>
                     <span aria-hidden>·</span>
                     <span>{formatDate(post.publishedAt)}</span>

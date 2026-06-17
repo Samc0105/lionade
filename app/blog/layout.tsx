@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { cdnUrl } from "@/lib/cdn";
 import { absoluteUrl } from "@/lib/site-config";
 
-const OG_IMAGE = "https://d1745aj99cclbu.cloudfront.net/logo-full.png";
+const OG_IMAGE = cdnUrl("/logo-full.png");
 
 export const metadata: Metadata = {
   title: "Blog",
