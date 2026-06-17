@@ -14,8 +14,8 @@ BEGIN
     ALTER TABLE profiles ADD COLUMN selected_subjects JSONB;
   END IF;
 
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'daily_target') THEN
-    ALTER TABLE profiles ADD COLUMN daily_target INTEGER;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'daily_target_minutes') THEN
+    ALTER TABLE profiles ADD COLUMN daily_target_minutes INTEGER;
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'onboarding_completed') THEN

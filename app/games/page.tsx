@@ -724,7 +724,7 @@ export default function GamesPage() {
         <FeatureGate feature="games.roardle" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
-            <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
+            <button onClick={backToMenu} type="button" className="text-cream/55 text-sm mb-4 px-2 py-1 -ml-2 rounded hover:text-cream transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"><span aria-hidden="true">←</span> Back</button>
             <h2 className="font-bebas text-4xl text-cream tracking-wider text-center mb-1">
               <RevealText text="ROARDLE" color="#EEF4FF" charDelay={0.06} />
             </h2>
@@ -768,11 +768,13 @@ export default function GamesPage() {
                 </span>
               </div>
             )}
-            {roardleError && (
-              <p className="text-red-400 text-xs text-center mb-2 animate-slide-up font-syne font-semibold">
-                {roardleError}
-              </p>
-            )}
+            <p
+              role="alert"
+              aria-live="assertive"
+              className={`text-red-300 text-xs text-center mb-2 font-syne font-semibold min-h-[1rem] ${roardleError ? "animate-slide-up" : ""}`}
+            >
+              {roardleError}
+            </p>
 
             {/* Grid */}
             <div className="space-y-2 mb-6">
@@ -816,7 +818,7 @@ export default function GamesPage() {
 
             {/* Result */}
             {roardleOver && (
-              <div className="text-center mb-6 animate-slide-up">
+              <div role="status" aria-live="polite" className="text-center mb-6 animate-slide-up">
                 {roardleWon && (
                   <Confetti
                     trigger={true}
@@ -870,7 +872,7 @@ export default function GamesPage() {
                     </p>
                   );
                 })()}
-                <button onClick={backToMenu} className="mt-4 btn-gold px-6 py-2 rounded-lg text-sm">Play Again</button>
+                <button onClick={backToMenu} type="button" className="mt-4 btn-gold px-6 py-2 rounded-lg text-sm transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Play Again</button>
               </div>
             )}
 
@@ -879,18 +881,21 @@ export default function GamesPage() {
               {kbRows.map((row, ri) => (
                 <div key={ri} className="flex justify-center gap-1">
                   {ri === 2 && (
-                    <button onClick={submitRoardleGuess}
-                      className="px-3 py-3 rounded-lg text-xs font-bold"
+                    <button onClick={submitRoardleGuess} type="button"
+                      aria-label="Submit guess"
+                      className="min-h-[44px] px-3 py-3 rounded-lg text-xs font-bold transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                       style={{ background: "var(--game-key-bg, rgba(255,255,255,0.1))", color: "var(--game-key-text, #EEF4FF)" }}>
                       ENTER
                     </button>
                   )}
                   {row.split("").map(key => {
                     const s = kbStatus[key];
+                    const stateLabel = s === "correct" ? ", correct position" : s === "present" ? ", in word, wrong position" : s === "absent" ? ", not in word" : "";
                     return (
-                      <button key={key}
+                      <button key={key} type="button"
                         onClick={() => { if (roardleInput.length < wordLength && !roardleOver) setRoardleInput(prev => prev + key); }}
-                        className="w-9 h-11 sm:w-10 sm:h-12 rounded-lg font-bebas text-base transition-all"
+                        aria-label={`Letter ${key}${stateLabel}`}
+                        className="w-9 h-11 sm:w-10 sm:h-12 rounded-lg font-bebas text-base transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                         style={{
                           background: s === "correct" ? "#22C55E" : s === "present" ? "#EAB308" : s === "absent" ? "rgba(255,255,255,0.05)" : "var(--game-key-bg, rgba(255,255,255,0.1))",
                           color: s && s !== "unused" ? "#fff" : "var(--game-key-text, #EEF4FF)",
@@ -900,10 +905,11 @@ export default function GamesPage() {
                     );
                   })}
                   {ri === 2 && (
-                    <button onClick={() => setRoardleInput(prev => prev.slice(0, -1))}
-                      className="px-3 py-3 rounded-lg text-xs font-bold"
+                    <button onClick={() => setRoardleInput(prev => prev.slice(0, -1))} type="button"
+                      aria-label="Delete last letter"
+                      className="min-h-[44px] px-3 py-3 rounded-lg text-xs font-bold transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                       style={{ background: "var(--game-key-bg, rgba(255,255,255,0.1))", color: "var(--game-key-text, #EEF4FF)" }}>
-                      ⌫
+                      <span aria-hidden="true">⌫</span>
                     </button>
                   )}
                 </div>
@@ -924,19 +930,25 @@ export default function GamesPage() {
         <FeatureGate feature="games.flashcards" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
-            <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
+            <button onClick={backToMenu} type="button" className="text-cream/55 text-sm mb-4 px-2 py-1 -ml-2 rounded hover:text-cream transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"><span aria-hidden="true">←</span> Back</button>
 
             {!fcOver ? (
               <>
-                <p className="text-cream/30 text-xs text-center mb-6">{fcIdx + 1} / {fcCards.length}</p>
+                <p className="text-cream/55 text-xs text-center mb-6 font-mono tabular-nums" aria-live="polite">{fcIdx + 1} / {fcCards.length}</p>
 
-                {/* Card */}
-                <div onClick={() => setFcFlipped(!fcFlipped)}
-                  className="relative w-full aspect-[3/2] rounded-2xl cursor-pointer mb-6 transition-transform duration-500"
+                {/* Card — keyboard reachable: Enter/Space flips it. */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={fcFlipped}
+                  aria-label={fcFlipped ? `Answer: ${card?.def}. Press to flip back.` : `Term: ${card?.term}. Press to reveal the answer.`}
+                  onClick={() => setFcFlipped(!fcFlipped)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFcFlipped(f => !f); } }}
+                  className="relative w-full aspect-[3/2] rounded-2xl cursor-pointer mb-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-4 focus-visible:ring-offset-navy"
                   style={{ perspective: "1000px" }}>
                   <div className="w-full h-full relative" style={{
                     transformStyle: "preserve-3d",
-                    transition: "transform 0.5s",
+                    transition: reduced ? "none" : "transform 0.5s",
                     transform: fcFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
                   }}>
                     {/* Front */}
@@ -961,16 +973,16 @@ export default function GamesPage() {
                   </div>
                 </div>
 
-                <p className="text-cream/20 text-xs text-center mb-4">{fcFlipped ? "Did you know it?" : "Tap to flip"}</p>
+                <p className="text-cream/45 text-xs text-center mb-4 font-syne">{fcFlipped ? "Did you know it?" : "Tap or press Enter to flip"}</p>
 
                 {fcFlipped && (
-                  <div className="flex gap-3">
-                    <button onClick={() => fcAnswer(false)} className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
-                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#EF4444" }}>
+                  <div className="flex gap-3 animate-slide-up">
+                    <button onClick={() => fcAnswer(false)} type="button" className="flex-1 min-h-[44px] py-3 rounded-xl font-bold text-sm transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                      style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.4)", color: "#FCA5A5" }}>
                       Didn&apos;t Know
                     </button>
-                    <button onClick={() => fcAnswer(true)} className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
-                      style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", color: "#22C55E" }}>
+                    <button onClick={() => fcAnswer(true)} type="button" className="flex-1 min-h-[44px] py-3 rounded-xl font-bold text-sm transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                      style={{ background: "rgba(34,197,94,0.14)", border: "1px solid rgba(34,197,94,0.4)", color: "#86EFAC" }}>
                       Knew It!
                     </button>
                   </div>
@@ -987,7 +999,7 @@ export default function GamesPage() {
               const headline = isMastered ? "MASTERED ALL" : isStrong ? "STRONG RECALL" : pct >= 50 ? "DECENT RECALL" : "ROOM TO GROW";
               const headlineColor = isMastered ? "#FFD700" : isStrong ? "#FDE68A" : pct >= 50 ? "#A78BFA" : "rgba(238,244,255,0.55)";
               return (
-                <div className="text-center animate-slide-up">
+                <div role="status" aria-live="polite" className="text-center animate-slide-up">
                   {shouldConfetti && (
                     <Confetti
                       trigger={true}
@@ -1012,14 +1024,14 @@ export default function GamesPage() {
                   <p className="font-bebas text-6xl text-gold mb-1 tabular-nums">
                     <CountUp value={pct} duration={900} withDigitReveal /><span>%</span>
                   </p>
-                  <p className="text-cream/40 text-sm mb-4">{fcKnew} / {fcCards.length} known</p>
+                  <p className="text-cream/55 text-sm mb-4 tabular-nums">{fcKnew} / {fcCards.length} known</p>
                   {fangsEarned !== null && (
                     <div className="flex items-center justify-center gap-1.5 mb-6">
                       <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                       <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                     </div>
                   )}
-                  <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Back to Games</button>
+                  <button onClick={backToMenu} type="button" className="btn-gold px-6 py-2 rounded-lg text-sm transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Back to Games</button>
                 </div>
               );
             })()}
@@ -1037,21 +1049,22 @@ export default function GamesPage() {
         <FeatureGate feature="games.timeline" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
-            <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
+            <button onClick={backToMenu} type="button" className="text-cream/55 text-sm mb-4 px-2 py-1 -ml-2 rounded hover:text-cream transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"><span aria-hidden="true">←</span> Back</button>
             <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-1">
               <RevealText text="TIMELINE DROP" color="#EEF4FF" charDelay={0.045} />
             </h2>
-            <p className="text-cream/30 text-xs text-center mb-6">Drag events into chronological order (earliest first)</p>
+            <p className="text-cream/55 text-xs text-center mb-6 font-syne">Drag events into chronological order (earliest first)</p>
 
-            <div className="space-y-2 mb-6" data-timeline-list>
+            <ol className="space-y-2 mb-6" data-timeline-list aria-label="Events to order, earliest first">
               {tlOrder.map((eventIdx, pos) => {
                 const ev = tlEvents[eventIdx];
                 const isCorrect = tlSubmitted && ev.year === [...tlEvents].sort((a, b) => a.year - b.year)[pos]?.year;
                 const isDragging = dragIdx === pos;
                 return (
-                  <div
+                  <li
                     key={eventIdx}
                     data-row-pos={pos}
+                    aria-label={`Position ${pos + 1}: ${ev.event}${tlSubmitted ? (isCorrect ? ", correct" : ", incorrect") : ""}`}
                     onPointerDown={(e) => {
                       if (tlSubmitted) return;
                       e.currentTarget.setPointerCapture(e.pointerId);
@@ -1081,13 +1094,13 @@ export default function GamesPage() {
                       border: `1px solid ${tlSubmitted ? (isCorrect ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)") : isDragging ? "rgba(255,215,0,0.45)" : "var(--game-card-border, rgba(255,255,255,0.08))"}`,
                       boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.35)" : undefined,
                     }}>
-                    <span className="font-bebas text-lg text-cream/30 w-6 pointer-events-none">{pos + 1}</span>
+                    <span className="font-bebas text-lg text-cream/50 w-6 pointer-events-none tabular-nums">{pos + 1}</span>
                     <div className="flex-1 pointer-events-none">
                       <p className="text-cream text-sm font-semibold">{ev.event}</p>
-                      {tlSubmitted && <p className="text-cream/40 text-xs mt-0.5">{ev.date}</p>}
+                      {tlSubmitted && <p className="text-cream/55 text-xs mt-0.5">{ev.date}</p>}
                     </div>
                     {tlSubmitted && (
-                      <span className="text-lg flex items-center pointer-events-none">
+                      <span className="text-lg flex items-center pointer-events-none" style={{ color: isCorrect ? "#86EFAC" : "#FCA5A5" }}>
                         {isCorrect ? (
                           <Check size={20} weight="bold" aria-hidden="true" />
                         ) : (
@@ -1095,13 +1108,13 @@ export default function GamesPage() {
                         )}
                       </span>
                     )}
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ol>
 
             {!tlSubmitted ? (
-              <button onClick={submitTimeline} className="btn-gold w-full py-3 rounded-xl text-sm">Submit Order</button>
+              <button onClick={submitTimeline} type="button" className="btn-gold w-full py-3 rounded-xl text-sm transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Submit Order</button>
             ) : (() => {
               // Tier-themed treatment matches Pardy Final Tally: gold confetti
               // on perfect (all correct), no celebration on a sub-50% miss.
@@ -1115,7 +1128,7 @@ export default function GamesPage() {
               const headline = isPerfect ? "PERFECT ORDER" : tlScore > 0 ? "TIMELINE LOCKED IN" : "TOUGH ROUND";
               const headlineColor = isPerfect ? "#FFD700" : tlScore > 0 ? "#86EFAC" : "#FCA5A5";
               return (
-                <div className="text-center animate-slide-up">
+                <div role="status" aria-live="polite" className="text-center animate-slide-up">
                   {shouldConfetti && (
                     <Confetti
                       trigger={true}
@@ -1142,7 +1155,7 @@ export default function GamesPage() {
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
-                <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Back to Games</button>
+                <button onClick={backToMenu} type="button" className="btn-gold px-6 py-2 rounded-lg text-sm transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Back to Games</button>
                 </div>
               );
             })()}
@@ -1198,7 +1211,7 @@ export default function GamesPage() {
   const GameMini = ({ id }: { id: GameMode }) => {
     if (id === "roardle") {
       return (
-        <div className="roardle-mini flex items-center">
+        <div className="roardle-mini flex items-center" aria-hidden="true">
           <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>R</span>
           <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>O</span>
           <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>A</span>
@@ -1207,7 +1220,7 @@ export default function GamesPage() {
     }
     if (id === "flashcards") {
       return (
-        <div className="flashcards-mini">
+        <div className="flashcards-mini" aria-hidden="true">
           <div className="flashcards-mini-inner">
             <div className="flashcards-face flashcards-face-front">Q</div>
             <div className="flashcards-face flashcards-face-back">A</div>
@@ -1441,27 +1454,32 @@ export default function GamesPage() {
               })()}
             </div>
             {g.id === "roardle" && (
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-1 mt-3" role="group" aria-label="Word length">
                 {[4, 5, 6].map(len => (
                   <button
                     key={len}
+                    type="button"
                     onClick={() => setWordLength(len)}
-                    className="transition-all duration-200 active:scale-90"
-                    style={wordLength === len ? {
-                      width: 32, height: 32,
-                      background: g.color, color: "#fff",
-                      fontSize: "12px", fontWeight: 800,
-                      border: "none",
-                      boxShadow: `0 2px 10px ${hexToRgba(g.color, 0.5)}`,
-                    } : {
-                      width: 32, height: 32,
-                      background: "rgba(255,255,255,0.04)", color: "rgba(238,244,255,0.35)",
-                      fontSize: "12px", fontWeight: 700,
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
+                    aria-pressed={wordLength === len}
                     aria-label={`${len} letters`}
+                    className="grid place-items-center w-11 h-11 rounded-md transition-all duration-200 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                   >
-                    {len}
+                    <span
+                      className="grid place-items-center rounded-md"
+                      style={wordLength === len ? {
+                        width: 32, height: 32,
+                        background: g.color, color: "#fff",
+                        fontSize: "12px", fontWeight: 800,
+                        boxShadow: `0 2px 10px ${hexToRgba(g.color, 0.5)}`,
+                      } : {
+                        width: 32, height: 32,
+                        background: "rgba(255,255,255,0.04)", color: "rgba(238,244,255,0.5)",
+                        fontSize: "12px", fontWeight: 700,
+                        border: "1px solid rgba(255,255,255,0.12)",
+                      }}
+                    >
+                      {len}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -1472,10 +1490,20 @@ export default function GamesPage() {
           </div>
           <div className="flex items-center justify-end flex-shrink-0 pr-4 sm:pr-6">
             <button
+              type="button"
               onClick={canPlay ? g.start : undefined}
               disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-              title={isMaxed ? "Daily limit hit — resets at midnight" : undefined}
-              className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:cursor-not-allowed inline-flex items-center gap-2"
+              title={isMaxed ? "Daily limit hit. Resets at midnight." : undefined}
+              aria-label={
+                isMaxed
+                  ? `${g.name} maxed for today, resets at midnight`
+                  : continuable
+                    ? `Resume ${g.name}`
+                    : g.kind === "multi"
+                      ? `Host ${g.name}`
+                      : `Play ${g.name}`
+              }
+              className="font-syne font-bold text-xs sm:text-sm min-h-[44px] px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:cursor-not-allowed inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               style={{
                 background: isMaxed ? "rgba(60,40,40,0.55)" : g.color,
                 color: isMaxed ? "#FCA5A5" : "#fff",
@@ -1630,6 +1658,7 @@ export default function GamesPage() {
                   </div>
                   <button
                     type="button"
+                    aria-label="Resume your in-progress Roardle round"
                     onClick={() => {
                       const r = roardleResume;
                       setRoardleResume(null);
@@ -1642,7 +1671,7 @@ export default function GamesPage() {
                       setFangsEarned(null);
                       setGame("roardle");
                     }}
-                    className="font-syne font-bold text-xs px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0"
+                    className="font-syne font-bold text-xs min-h-[40px] px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                     style={{
                       background: "#00BFFF",
                       color: "#04080F",
@@ -1654,11 +1683,12 @@ export default function GamesPage() {
                   </button>
                   <button
                     type="button"
+                    aria-label="Discard your in-progress Roardle round and start fresh"
                     onClick={() => {
                       setRoardleResume(null);
                       void apiPost("/api/quiz/state", { game_type: "roardle", state: null });
                     }}
-                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40 hover:text-cream/85 transition-colors flex-shrink-0 hidden sm:inline"
+                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 px-1.5 py-1 rounded hover:text-cream transition-colors flex-shrink-0 hidden sm:inline focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                   >
                     Start fresh
                   </button>
@@ -1701,6 +1731,7 @@ export default function GamesPage() {
                   </div>
                   <button
                     type="button"
+                    aria-label="Resume your in-progress Timeline round"
                     onClick={() => {
                       const t = timelineResume;
                       setTimelineResume(null);
@@ -1711,7 +1742,7 @@ export default function GamesPage() {
                       setFangsEarned(null);
                       setGame("timeline");
                     }}
-                    className="font-syne font-bold text-xs px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0"
+                    className="font-syne font-bold text-xs min-h-[40px] px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                     style={{
                       background: "#00C851",
                       color: "#04080F",
@@ -1723,11 +1754,12 @@ export default function GamesPage() {
                   </button>
                   <button
                     type="button"
+                    aria-label="Discard your in-progress Timeline round and start fresh"
                     onClick={() => {
                       setTimelineResume(null);
                       void apiPost("/api/quiz/state", { game_type: "timeline", state: null });
                     }}
-                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40 hover:text-cream/85 transition-colors flex-shrink-0 hidden sm:inline"
+                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 px-1.5 py-1 rounded hover:text-cream transition-colors flex-shrink-0 hidden sm:inline focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                   >
                     Start fresh
                   </button>
@@ -1789,10 +1821,12 @@ export default function GamesPage() {
           })()}
 
           {/* ═══ TABS ═══ */}
-          <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }} role="tablist" aria-label="Game source">
             {(["quickplay", "library"] as TabMode[]).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className="px-6 py-2.5 rounded-xl font-bebas text-sm tracking-wider transition-all"
+              <button key={t} onClick={() => setTab(t)} type="button"
+                role="tab"
+                aria-selected={tab === t}
+                className="min-h-[44px] px-6 py-2.5 rounded-xl font-bebas text-sm tracking-wider transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 style={tab === t ? {
                   background: "rgba(255,215,0,0.1)",
                   border: "1px solid rgba(255,215,0,0.35)",
@@ -1823,7 +1857,7 @@ export default function GamesPage() {
           {tab === "library" && !pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <label
-                className="games-ticket cursor-pointer block relative rounded-[6px] overflow-hidden"
+                className="games-ticket cursor-pointer block relative rounded-[6px] overflow-hidden focus-within:ring-2 focus-within:ring-gold focus-within:ring-offset-2 focus-within:ring-offset-navy"
                 style={{
                   background: `linear-gradient(90deg, ${hexToRgba("#FFD700", 0.06)} 0%, #0c0a14 60%)`,
                   border: "1.5px dashed rgba(255,215,0,0.45)",
@@ -1846,15 +1880,15 @@ export default function GamesPage() {
                       UPLOAD YOUR STUDY MATERIAL
                     </p>
                     <p className="text-cream/40 text-xs sm:text-[13px] font-syne mt-1.5">
-                      Drop a PDF to stamp this ticket — generate custom games from your notes
+                      Drop a PDF to stamp this ticket and generate custom games from your notes
                     </p>
                     {pdfProcessing && (
-                      <div className="flex items-center gap-2 mt-3">
-                        <div className="w-3.5 h-3.5 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-                        <span className="text-cream/55 text-xs font-syne">Processing PDF with AI...</span>
+                      <div className="flex items-center gap-2 mt-3" role="status" aria-live="polite">
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 border-electric border-t-transparent ${reduced ? "" : "animate-spin"}`} aria-hidden="true" />
+                        <span className="text-cream/65 text-xs font-syne">Processing PDF with AI...</span>
                       </div>
                     )}
-                    {pdfError && <p className="text-red-400 text-xs mt-2 font-syne">{pdfError}</p>}
+                    {pdfError && <p role="alert" className="text-red-300 text-xs mt-2 font-syne">{pdfError}</p>}
                   </div>
                   <span
                     className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 transition-all flex-shrink-0 inline-flex items-center gap-1.5"
@@ -1902,8 +1936,10 @@ export default function GamesPage() {
                       </p>
                     </div>
                     <button
+                      type="button"
+                      aria-label="Remove uploaded study material"
                       onClick={() => { setPdfContent(null); setPdfName(null); if (typeof window !== "undefined") { localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); } }}
-                      className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 px-1.5 py-1 rounded hover:text-red-300 transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                     >
                       Remove
                     </button>

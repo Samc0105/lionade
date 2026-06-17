@@ -529,6 +529,9 @@ export default function QuizPage() {
       setCurrentResult(null);
       setPhase("quiz");
     } catch {
+      // A failed question fetch must never strand the user on a blank quiz —
+      // surface the failure and drop cleanly back to subject selection.
+      toastError("Could not load questions. Check your connection and try again.");
       setPhase("select");
     }
   };
@@ -710,7 +713,10 @@ export default function QuizPage() {
           {/* ── Blitz Mode Card ── */}
           <div className="animate-slide-up mb-6" style={{ animationDelay: "0.05s" }}>
             <button
+              type="button"
               onClick={() => setBlitzMode(!blitzMode)}
+              aria-pressed={blitzMode}
+              aria-label="Blitz mode: 2x Fangs and XP with a shorter 10 second timer"
               className={`quiz-blitz-card w-full p-4 rounded-2xl border transition-all duration-300 text-left flex items-center gap-4 cursor-pointer${blitzMode ? " blitz-active" : ""}`}
               style={{
                 background: blitzMode
@@ -746,7 +752,10 @@ export default function QuizPage() {
               ]).map(({ d, label, color, desc, mult }) => (
                 <button
                   key={d}
+                  type="button"
                   onClick={() => setDifficulty(d)}
+                  aria-pressed={difficulty === d}
+                  aria-label={`${label} difficulty, ${mult} Fangs. ${desc}`}
                   className={`quiz-diff-card relative p-4 rounded-2xl border-2 transition-all duration-300 text-left cursor-pointer hover:-translate-y-0.5${difficulty === d ? ` diff-selected diff-${d === "easy" ? "green" : d === "medium" ? "yellow" : "red"}` : ""}`}
                   style={{
                     background: difficulty === d
@@ -964,12 +973,59 @@ export default function QuizPage() {
   }
 
   // ── Loading ───────────────────────────────────────────────
+  // A real skeleton of the quiz card (not a bare spinner) so the transition
+  // into the question feels continuous and never flashes a blank/broken card.
   if (phase === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full border-2 border-electric border-t-transparent animate-spin mx-auto mb-4" />
-          <p className="font-bebas text-2xl text-electric tracking-widest">LOADING QUESTIONS...</p>
+      <div className="min-h-screen pt-20" role="status" aria-live="polite" aria-busy="true">
+        <span className="sr-only">Loading questions</span>
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          {/* Header row skeleton */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-md bg-white/10 animate-pulse" aria-hidden="true" />
+              <div>
+                <div className="h-5 w-28 rounded bg-white/10 animate-pulse mb-2" aria-hidden="true" />
+                <div className="flex gap-1">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="h-1.5 w-2 rounded-full bg-white/10 animate-pulse" aria-hidden="true" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="h-7 w-20 rounded-full bg-white/10 animate-pulse" aria-hidden="true" />
+          </div>
+
+          {/* Card skeleton */}
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden mb-6 animate-pulse" aria-hidden="true" />
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-14 h-14 rounded-full border-2 border-electric/70 border-t-transparent animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            </div>
+            <div
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6"
+              aria-hidden="true"
+            >
+              <div className="h-3 w-24 rounded bg-white/10 animate-pulse motion-reduce:animate-none mx-auto mb-4" />
+              <div className="h-5 w-3/4 rounded bg-white/10 animate-pulse motion-reduce:animate-none mx-auto mb-2" />
+              <div className="h-5 w-1/2 rounded bg-white/10 animate-pulse motion-reduce:animate-none mx-auto" />
+            </div>
+            <div className="grid grid-cols-1 gap-3" aria-hidden="true">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-14 rounded-xl border border-white/10 bg-white/[0.03] animate-pulse motion-reduce:animate-none"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                />
+              ))}
+            </div>
+            <p className="font-bebas text-lg text-electric/80 tracking-[0.22em] text-center mt-6">
+              LOADING QUESTIONS
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -998,9 +1054,9 @@ export default function QuizPage() {
                     </span>
                   )}
                 </div>
-                <div className="flex gap-1 mt-1">
+                <div className="flex gap-1 mt-1" role="img" aria-label={`Question ${currentIndex + 1} of ${questions.length}`}>
                   {questions.map((_, i) => (
-                    <div key={i} className="h-1.5 rounded-full transition-all duration-300"
+                    <div key={i} aria-hidden="true" className="h-1.5 rounded-full transition-all duration-300"
                       style={{
                         width: i === currentIndex ? "20px" : "8px",
                         background: i < currentIndex
@@ -1011,14 +1067,15 @@ export default function QuizPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-3 text-sm" role="status" aria-live="polite">
               {/* Active booster icons */}
               {activeBoosters.length > 0 && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" aria-label="Active boosters">
                   {activeBoosters.map((b) => {
                     const BoosterIcon = BOOSTER_ICONS[b.booster_effect] ?? Rocket;
+                    const boosterLabel = b.booster_effect.replace(/_/g, " ");
                     return (
-                      <span key={b.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-sm booster-active" title={b.booster_effect}
+                      <span key={b.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-sm booster-active" title={boosterLabel} aria-label={`Active booster: ${boosterLabel}`}
                         style={{ background: "rgba(74,144,217,0.1)", border: "1px solid rgba(74,144,217,0.3)" }}>
                         <BoosterIcon size={16} weight="fill" aria-hidden="true" />
                       </span>
@@ -1026,10 +1083,10 @@ export default function QuizPage() {
                   })}
                 </div>
               )}
-              <span className="text-green-400 font-bold inline-flex items-center gap-1">{correctCount} <Check size={14} weight="bold" aria-hidden="true" /></span>
-              <span className="text-red-400 font-bold inline-flex items-center gap-1">{wrongCount} <XIcon size={14} weight="bold" aria-hidden="true" /></span>
-              <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
-                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+              <span className="text-green-400 font-bold inline-flex items-center gap-1" aria-label={`${correctCount} correct`}>{correctCount} <Check size={14} weight="bold" aria-hidden="true" /></span>
+              <span className="text-red-400 font-bold inline-flex items-center gap-1" aria-label={`${wrongCount} wrong`}>{wrongCount} <XIcon size={14} weight="bold" aria-hidden="true" /></span>
+              <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1" aria-label={`${totalCoins} Fangs earned this quiz`}>
+                <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
                 <span className="font-bebas text-lg text-gold">{totalCoins}</span>
               </div>
             </div>
@@ -1337,7 +1394,7 @@ function ResultsScreen({
             boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
           }}
         >
-          <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">ANSWER BREAKDOWN</h3>
+          <h2 className="font-bebas text-xl text-cream tracking-wider mb-4">ANSWER BREAKDOWN</h2>
           <div className="flex gap-1.5 mb-4">
             {answers.map((a, i) => (
               <div
@@ -1450,7 +1507,7 @@ function ResultsScreen({
               }}
             >
               <Check size={40} weight="bold" color="#2ECC71" aria-hidden="true" className="mb-3" />
-              <h3 className="font-bebas text-2xl text-cream tracking-wider mb-1">FLAWLESS RUN</h3>
+              <h2 className="font-bebas text-2xl text-cream tracking-wider mb-1">FLAWLESS RUN</h2>
               <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
                 No mistakes to review. Every answer landed. Keep the streak going.
               </p>
@@ -1465,7 +1522,7 @@ function ResultsScreen({
               }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bebas text-xl text-cream tracking-wider">REVIEW MISTAKES</h3>
+                <h2 className="font-bebas text-xl text-cream tracking-wider">REVIEW MISTAKES</h2>
                 <span className="text-[#E74C3C] text-xs font-bold uppercase tracking-widest">{mistakes.length}</span>
               </div>
               {/* Scrollable box so a long mistake list doesn't stretch the

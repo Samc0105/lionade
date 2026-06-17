@@ -168,8 +168,8 @@ export default function QuizCard({
           >
             {difficultyLabel}
           </span>
-          <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
-            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+          <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1" aria-label={`${coinReward} Fangs per correct answer`}>
+            <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold leading-none">+{coinReward}</span>
           </div>
         </div>
@@ -187,11 +187,13 @@ export default function QuizCard({
         />
       </div>
 
-      {/* Timer Number */}
-      <div className="flex justify-center mb-6">
+      {/* Timer Number — exposed as a timer region; the visible glyph is
+          decorative so AT reads a single coherent "N seconds remaining". */}
+      <div className="flex justify-center mb-6" role="timer" aria-label={`${timeLeft} seconds remaining`}>
         <div
           className="font-bebas text-5xl leading-none transition-all"
           style={{ color: timerColor, textShadow: `0 0 15px ${timerColor}80` }}
+          aria-hidden="true"
         >
           {timeLeft}
         </div>
@@ -213,7 +215,7 @@ export default function QuizCard({
       </div>
 
       {/* Options */}
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3" role="group" aria-label="Answer choices. Press 1 to 4 or A to D to answer.">
         {question.options.map((option, index) => {
           let optionClass =
             "w-full text-left px-5 py-4 rounded-xl border transition-all duration-300 font-semibold text-sm ";
@@ -268,13 +270,27 @@ export default function QuizCard({
             ? { whileHover: { y: -2 }, whileTap: { scale: 0.98 } }
             : {};
 
+          // Spell out the option + its post-answer state for screen readers,
+          // since the colour/icon cues are visual-only.
+          const stateSuffix = isThisCorrectReveal
+            ? ". Correct, your answer"
+            : isThisWrongReveal
+              ? ". Incorrect, your answer"
+              : revealed && index === result?.correctIndex
+                ? ". Correct answer"
+                : "";
+          const ariaLabel = `Option ${optionLabel}: ${option}${stateSuffix}`;
+
           return (
             <motion.button
               key={index}
+              type="button"
               onClick={() => handleSelect(index)}
               disabled={revealed || waiting}
               aria-keyshortcuts={`${index + 1} ${optionLabel}`}
-              className={`${optionClass} quiz-option-enter`}
+              aria-label={ariaLabel}
+              aria-pressed={index === selected}
+              className={`${optionClass} quiz-option-enter min-h-[44px]`}
               style={{ animationDelay: `${index * 60}ms` }}
               animate={animateProps}
               transition={transitionProps}
@@ -323,7 +339,7 @@ export default function QuizCard({
 
       {/* Explanation + Next */}
       {revealed && result?.explanation && (
-        <div className="mt-4 p-4 rounded-xl border border-electric/20 bg-electric/5 animate-slide-up">
+        <div className="mt-4 p-4 rounded-xl border border-electric/20 bg-electric/5 animate-slide-up" role="status" aria-live="polite">
           <div className="flex items-start gap-2.5">
             <span className="text-lg flex-shrink-0 inline-flex items-center justify-center">
               <Lightbulb size={20} weight="regular" color="#4A90D9" aria-hidden="true" />
@@ -335,8 +351,10 @@ export default function QuizCard({
 
       {revealed && (
         <button
+          type="button"
           onClick={handleSkip}
-          className="quiz-next-pill mt-4 w-full py-3.5 rounded-full font-bebas tracking-[0.18em] text-base text-navy cursor-pointer"
+          aria-keyshortcuts="Enter Space"
+          className="quiz-next-pill mt-4 w-full py-3.5 rounded-full font-bebas tracking-[0.18em] text-base text-navy cursor-pointer transition-[transform,filter] duration-200 hover:scale-[1.01] hover:brightness-105 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
           style={{
             background: "linear-gradient(135deg, #FFD700 0%, #EAB308 100%)",
             boxShadow: "0 0 24px rgba(255,215,0,0.22), 0 4px 14px rgba(0,0,0,0.25)",

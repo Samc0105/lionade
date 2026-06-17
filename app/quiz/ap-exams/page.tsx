@@ -47,10 +47,17 @@ export default function ApExamsPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
+  // Flash-of-zero guard: until history settles (success OR failure) we render a
+  // skeleton in the score slot instead of "Not attempted yet", so a returning
+  // student never sees a false "Not attempted" flash on their best subjects.
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    getQuizHistory(user.id, 200).then(setQuizHistory).catch(() => {});
+    getQuizHistory(user.id, 200)
+      .then(setQuizHistory)
+      .catch(() => {})
+      .finally(() => setHistoryLoaded(true));
   }, [user]);
 
   const getBestScore = (topicName: string): { correct: number; total: number } | null => {
@@ -126,7 +133,14 @@ export default function ApExamsPage() {
                     Test Prep
                   </span>
                   <div className="pt-3 border-t border-white/5">
-                    {best ? (
+                    {!historyLoaded ? (
+                      <>
+                        <div className="h-3 w-16 rounded bg-white/10 animate-pulse motion-reduce:animate-none" />
+                        <div className="w-full h-1.5 bg-white/5 rounded-full mt-1.5 overflow-hidden">
+                          <div className="h-full w-1/3 rounded-full bg-white/10 animate-pulse motion-reduce:animate-none" />
+                        </div>
+                      </>
+                    ) : best ? (
                       <>
                         <p className="text-cream/50 text-[11px]">
                           Best: <span className="font-bold text-cream/70">{best.correct}/{best.total}</span>
@@ -139,7 +153,7 @@ export default function ApExamsPage() {
                         </div>
                       </>
                     ) : (
-                      <p className="text-cream/30 text-[11px]">Not attempted yet</p>
+                      <p className="text-cream/45 text-[11px]">Not attempted yet</p>
                     )}
                   </div>
                 </button>

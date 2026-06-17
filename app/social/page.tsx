@@ -219,6 +219,9 @@ export default function SocialPage() {
   // Feed + circle leaderboard
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [circle, setCircle] = useState<CircleRank[]>([]);
+  // Flipped when the sessionStorage seed restores a prior feed/circle snapshot
+  // on a cold hard reload, so feedHydrated is true even before the first fetch.
+  const [feedSeeded, setFeedSeeded] = useState(false);
 
   // Challenge modal
   const [challengeTarget, setChallengeTarget] = useState<Friend | null>(null);
@@ -238,6 +241,7 @@ export default function SocialPage() {
   const [sendingNudge, setSendingNudge] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const msgInputRef = useRef<HTMLInputElement>(null);
 
   // userStats is fetched purely so the navbar/dashboard SWR cache stays
   // hot. The social page itself doesn't currently render the viewer's own
@@ -264,8 +268,8 @@ export default function SocialPage() {
       if (Array.isArray(c.friends)) { setFriends(c.friends); setFriendsHydrated(true); }
       if (Array.isArray(c.pendingRequests)) setPendingRequests(c.pendingRequests);
       if (Array.isArray(c.outgoingRequests)) setOutgoingRequests(c.outgoingRequests);
-      if (Array.isArray(c.feed)) setFeed(c.feed);
-      if (Array.isArray(c.circle)) setCircle(c.circle);
+      if (Array.isArray(c.feed)) { setFeed(c.feed); setFeedSeeded(true); }
+      if (Array.isArray(c.circle)) { setCircle(c.circle); setFeedSeeded(true); }
       if (c.nudgeState) { setNudgeStateCached(c.nudgeState); setNudgeCacheSeeded(true); }
     } catch { /* ignore — corrupt cache won't block fresh fetches */ }
   }, [user?.id]);
@@ -360,7 +364,11 @@ export default function SocialPage() {
 
   // ── Load activity feed + circle leaderboard ───────────────
   // Perf 2026-05-17: manual setInterval(30s) → SWR refreshInterval (cached).
-  const { mutate: mutateFeed } = useSWR(
+  // `feedData` is captured so feedHydrated can gate the feed/circle empty
+  // states: without it the "board's empty" copy flashed before the first
+  // fetch resolved (the flash-of-empty equivalent of flash-of-zero). The
+  // sessionStorage seed below sets feedSeeded for cold hard reloads.
+  const { data: feedData, mutate: mutateFeed } = useSWR(
     user?.id ? `social-feed/${user.id}` : null,
     () => apiGet<{ feed: FeedItem[]; circle: CircleRank[] }>("/api/social/feed"),
     {
@@ -377,6 +385,10 @@ export default function SocialPage() {
       },
     }
   );
+  // True once the feed/circle payload exists in the SWR cache OR the
+  // sessionStorage seed restored a prior snapshot. Empty states only render
+  // after this flips true.
+  const feedHydrated = feedData !== undefined || feedSeeded;
   const loadFeed = useCallback(async () => {
     await mutateFeed();
   }, [mutateFeed]);
@@ -441,6 +453,20 @@ export default function SocialPage() {
       toastError("Couldn't send challenge. Try again.");
     }
   }, [challengeTarget, challengeWager, sendingChallenge]);
+
+  // Esc closes the nudge / challenge modals (matches the Add-Friend modal).
+  // Guarded by the in-flight flags so a mid-send keypress can't dismiss the
+  // sheet while the request resolves.
+  useEffect(() => {
+    if (!nudgeTarget && !challengeTarget) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (nudgeTarget && !sendingNudge) setNudgeTarget(null);
+      if (challengeTarget && !sendingChallenge) setChallengeTarget(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [nudgeTarget, challengeTarget, sendingNudge, sendingChallenge]);
 
   // ── Load notifications for social panel ─────────────────────
   // Perf 2026-05-17: manual setInterval(15s) → SWR refreshInterval (cached).
@@ -549,6 +575,13 @@ export default function SocialPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Focus management — when a thread is opened, move keyboard focus into the
+  // message input so a keyboard user lands ready to type. Keyed on the friend
+  // id so it re-focuses on every thread switch, not on each new message.
+  useEffect(() => {
+    if (selectedFriend?.id) msgInputRef.current?.focus();
+  }, [selectedFriend?.id]);
+
   // ── Realtime messages ──────────────────────────────────────
   useEffect(() => {
     if (!user?.id || !selectedFriend) return;
@@ -585,6 +618,9 @@ export default function SocialPage() {
     if (res.ok && res.data?.message) {
       appendMessage(res.data.message);
       setMsgInput("");
+    } else {
+      console.error("[social:message] failed", res.error);
+      toastError("Couldn't send message. Try again.");
     }
     setSending(false);
   }, [user?.id, selectedFriend, msgInput, sending, appendMessage]);
@@ -766,19 +802,21 @@ export default function SocialPage() {
 
             {/* Friends search + Add-friend trigger (top-right, opens modal) */}
             <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+              <label htmlFor="social-friend-search" className="sr-only">Search friends</label>
               <input
+                id="social-friend-search"
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search friends..."
-                className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/15 focus:outline-none focus:border-white/20 transition"
+                className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/45 focus:outline-none focus:border-electric/40 focus-visible:ring-2 focus-visible:ring-electric/30 transition"
               />
               <button
                 type="button"
                 onClick={() => setShowAddFriendModal(true)}
                 aria-label="Add friend"
                 title="Add friend"
-                className="flex-shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                className="flex-shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center transition-all hover:scale-105 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F]"
                 style={{
                   background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                   color: "#04080F",
@@ -789,27 +827,36 @@ export default function SocialPage() {
             </div>
 
             {/* Tab toggle: Friends / Lobbies / Notifications */}
-            <div className="flex border-b border-white/[0.06]">
+            <div className="flex border-b border-white/[0.06]" role="tablist" aria-label="Social sections">
               <button
+                role="tab"
+                aria-selected={activeTab === "friends"}
                 onClick={() => setActiveTab("friends")}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "friends" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+                className={`flex-1 min-h-[44px] py-2.5 text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/60 ${activeTab === "friends" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream"}`}
               >
                 Friends
               </button>
               <button
+                role="tab"
+                aria-selected={activeTab === "lobbies"}
                 onClick={() => setActiveTab("lobbies")}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "lobbies" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+                className={`flex-1 min-h-[44px] py-2.5 text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/60 ${activeTab === "lobbies" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream"}`}
               >
                 Lobbies
               </button>
               <button
+                role="tab"
+                aria-selected={activeTab === "notifs"}
                 onClick={() => { setActiveTab("notifs"); loadSocialNotifs(); }}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${activeTab === "notifs" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+                className={`flex-1 min-h-[44px] py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/60 ${activeTab === "notifs" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream"}`}
               >
                 Notifs
                 {(socialUnreadCount ?? 0) > 0 && (
-                  <span className="absolute top-1.5 ml-1 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center px-1 text-[9px] font-bold"
-                    style={{ background: "#EF4444", color: "#fff" }}>
+                  <span
+                    className="absolute top-1.5 ml-1 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center px-1 text-[9px] font-bold"
+                    style={{ background: "#EF4444", color: "#fff" }}
+                    aria-label={`${socialUnreadCount} unread notifications`}
+                  >
                     {socialUnreadCount}
                   </span>
                 )}
@@ -842,7 +889,8 @@ export default function SocialPage() {
                           router.push(n.action_url);
                         }
                       }}
-                      className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
+                      aria-label={`${n.read ? "" : "Unread. "}${n.title}`}
+                      className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/50 transition-colors"
                       style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
                     >
                       <span className="flex-shrink-0 mt-0.5 text-cream">
@@ -856,8 +904,8 @@ export default function SocialPage() {
                         <p className={`text-xs font-semibold ${n.read ? "text-cream/50" : "text-cream"}`}>
                           {n.title}
                         </p>
-                        {n.message && <p className="text-[10px] text-cream/25 mt-0.5 truncate">{n.message}</p>}
-                        <p className="text-[9px] text-cream/15 mt-1">
+                        {n.message && <p className="text-[10px] text-cream/45 mt-0.5 truncate">{n.message}</p>}
+                        <p className="text-[9px] text-cream/35 mt-1">
                           {(() => {
                             const diff = Date.now() - new Date(n.created_at).getTime();
                             const mins = Math.floor(diff / 60000);
@@ -905,11 +953,13 @@ export default function SocialPage() {
                           </p>
                         </div>
                         <button onClick={() => handleRequest(req.friendshipId, "accept")}
-                          className="text-green-400 text-[10px] font-bold px-2 py-1 rounded bg-green-400/10 hover:bg-green-400/20 transition">
+                          aria-label={`Accept friend request from ${req.username}`}
+                          className="text-green-400 text-[10px] font-bold px-2 py-1 rounded bg-green-400/10 hover:bg-green-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400/60 transition">
                           Accept
                         </button>
                         <button onClick={() => handleRequest(req.friendshipId, "decline")}
-                          className="text-cream/55 px-1.5 py-1 rounded hover:text-cream/50 transition inline-flex items-center">
+                          aria-label={`Decline friend request from ${req.username}`}
+                          className="text-cream/55 w-7 h-7 grid place-items-center rounded hover:text-cream hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition">
                           <XIcon size={12} weight="bold" aria-hidden="true" />
                         </button>
                       </div>
@@ -960,7 +1010,7 @@ export default function SocialPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddFriendModal(true)}
-                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-transform active:scale-95"
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-transform hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F]"
                         style={{
                           background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                           color: "#04080F",
@@ -980,7 +1030,8 @@ export default function SocialPage() {
                   <button
                     key={friend.id}
                     onClick={() => setSelectedFriend(friend)}
-                    className="social-friend-row w-full text-left px-4 py-3 flex items-center gap-3 will-change-transform hover:bg-white/[0.04]"
+                    aria-label={`Open chat with ${friend.username}${friend.is_online ? ", online now" : ""}${friend.unreadCount > 0 ? `, ${friend.unreadCount} unread` : ""}`}
+                    className="social-friend-row w-full text-left px-4 py-3 flex items-center gap-3 will-change-transform hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/50"
                     style={isSelected ? {
                       background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(74,144,217,0.03) 100%)",
                       borderLeft: "2px solid #4A90D9",
@@ -989,7 +1040,6 @@ export default function SocialPage() {
                     {/* Avatar in tinted circular chip — green ring when online, neutral otherwise. */}
                     <div
                       className="relative flex-shrink-0 grid place-items-center w-11 h-11 rounded-full"
-                      aria-label={`${friend.username}'s avatar`}
                       style={{
                         background: friend.is_online
                           ? "linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.06) 100%)"
@@ -1028,9 +1078,10 @@ export default function SocialPage() {
                       </p>
                     </div>
 
-                    {/* Unread badge */}
+                    {/* Unread badge (count already in the row's aria-label) */}
                     {friend.unreadCount > 0 && (
                       <div className="flex-shrink-0 min-w-[20px] h-5 rounded-full flex items-center justify-center px-1.5 font-bold text-[10px]"
+                        aria-hidden="true"
                         style={{
                           background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                           color: "#04080F",
@@ -1193,7 +1244,8 @@ export default function SocialPage() {
                             if (friend) { setChallengeTarget(friend); setChallengeWager(25); }
                           }}
                           disabled={!friends.find(f => f.id === rival.userId)}
-                          className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric hover:text-cream transition-colors disabled:opacity-30"
+                          aria-label={`Challenge ${rival.username} to an arena match`}
+                          className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 rounded px-1 py-0.5 transition-colors disabled:opacity-30"
                         >
                           challenge now →
                         </button>
@@ -1260,7 +1312,7 @@ export default function SocialPage() {
                                 style={{ "--polaroid-tilt": tilts[i] } as React.CSSProperties}
                               >
                                 <div className="relative w-[102px] h-[102px] mb-2 bg-[#0a1020] overflow-hidden">
-                                  <img src={c.avatarUrl ?? ""} alt={c.username} className="w-[102px] h-[102px] object-cover" />
+                                  <img src={avatarFor(c.username, c.avatarUrl)} alt="" className="w-[102px] h-[102px] object-cover" />
                                   {i === 0 && c.coinsThisWeek > 0 && (
                                     <div className="absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "#FFD700" }}>
                                       <Crown size={14} weight="fill" color="#04080F" aria-hidden="true" />
@@ -1282,13 +1334,13 @@ export default function SocialPage() {
                                   <button
                                     type="button"
                                     onClick={() => { setChallengeTarget(friendObj); setChallengeWager(25); }}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:brightness-125 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/70 focus-visible:ring-offset-1 focus-visible:ring-offset-[#04080F]"
                                     style={{
                                       background: "rgba(239, 68, 68, 0.1)",
                                       border: "1px solid rgba(239, 68, 68, 0.3)",
                                       color: "#EF4444",
                                     }}
-                                    aria-label={`Challenge ${c.username}`}
+                                    aria-label={`Challenge ${c.username} to an arena match`}
                                     title="Challenge"
                                   >
                                     <Sword size={14} weight="fill" aria-hidden="true" />
@@ -1297,11 +1349,12 @@ export default function SocialPage() {
                                     type="button"
                                     onClick={() => canNudge && setNudgeTarget({ id: c.userId, username: c.username })}
                                     disabled={!canNudge}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed"
+                                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:brightness-125 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-[#04080F] disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:brightness-100"
                                     style={{
                                       background: alreadyNudged ? "rgba(34, 197, 94, 0.1)" : "rgba(249, 115, 22, 0.1)",
                                       border: `1px solid ${alreadyNudged ? "rgba(34, 197, 94, 0.3)" : "rgba(249, 115, 22, 0.3)"}`,
                                       color: alreadyNudged ? "#22C55E" : "#F97316",
+                                      ["--tw-ring-color" as string]: alreadyNudged ? "rgba(34,197,94,0.7)" : "rgba(249,115,22,0.7)",
                                     }}
                                     aria-label={alreadyNudged ? `Already nudged ${c.username} today` : `Nudge ${c.username}`}
                                     title={alreadyNudged ? "Nudged today" : nudgeState.remaining === 0 ? "No nudges left today" : "Nudge"}
@@ -1322,12 +1375,38 @@ export default function SocialPage() {
                   <section className="relative">
                     <div className="flex items-baseline justify-between mb-5">
                       <h2 className="font-bebas text-lg text-cream tracking-[0.15em]">FEED</h2>
-                      <button onClick={loadFeed} className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 hover:text-electric transition-colors">
+                      <button
+                        type="button"
+                        onClick={loadFeed}
+                        aria-label="Refresh activity feed"
+                        className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 rounded px-1 py-0.5 transition-colors"
+                      >
                         refresh ↻
                       </button>
                     </div>
 
-                    {feed.length === 0 ? (
+                    {!feedHydrated && feed.length === 0 ? (
+                      /* First feed fetch in flight — skeleton posts, never the
+                         "board's empty" copy (flash-of-empty guard). */
+                      <div className="relative pl-10" aria-hidden="true">
+                        <div className="social-rail" />
+                        <ul className="space-y-3">
+                          {[0, 1, 2].map(i => (
+                            <li key={i} className="relative rounded-[6px] pl-12 pr-4 py-3.5"
+                              style={{
+                                background: "linear-gradient(135deg, #0f1629 0%, #0a1020 100%)",
+                                border: "1px solid rgba(255,255,255,0.06)",
+                              }}>
+                              <div className="absolute left-3 top-3.5 w-6 h-6 rounded-full bg-white/[0.06] animate-pulse" />
+                              <div className="space-y-2">
+                                <div className="h-3 w-3/4 rounded bg-white/[0.06] animate-pulse" />
+                                <div className="h-2.5 w-24 rounded bg-white/[0.04] animate-pulse" />
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : feed.length === 0 ? (
                       <div className="py-14 text-center border-y border-white/[0.05]">
                         <PushPinSimple size={28} weight="regular" color="rgba(255,255,255,0.2)" className="mx-auto mb-3" aria-hidden="true" />
                         <p className="text-cream/60 text-sm italic font-serif mb-1">
@@ -1363,10 +1442,9 @@ export default function SocialPage() {
                                 {/* Timeline dot + avatar */}
                                 <div
                                   className="absolute left-3 top-3.5 w-6 h-6 rounded-full overflow-hidden border-2"
-                                  aria-label={`${item.friendUsername}'s avatar`}
                                   style={{ borderColor: meta.pin }}
                                 >
-                                  <img src={item.friendAvatarUrl ?? ""} alt={item.friendUsername} className="w-5 h-5 rounded-full object-cover" />
+                                  <img src={avatarFor(item.friendUsername, item.friendAvatarUrl)} alt="" className="w-5 h-5 rounded-full object-cover" />
                                 </div>
 
                                 <div className="flex items-start gap-3">
@@ -1375,7 +1453,7 @@ export default function SocialPage() {
                                       <span className="text-cream">{item.friendUsername}</span>
                                       <span className="text-cream/60 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
                                     </p>
-                                    <p className="text-cream/25 text-[10px] mt-1 font-mono uppercase tracking-wider">
+                                    <p className="text-cream/40 text-[10px] mt-1 font-mono uppercase tracking-wider">
                                       {meta.label} · {timeAgo(item.createdAt)}
                                     </p>
                                   </div>
@@ -1409,17 +1487,25 @@ export default function SocialPage() {
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
                   <div className="flex items-center gap-3">
                     {/* Back button on mobile */}
-                    <button onClick={() => setSelectedFriend(null)} className="sm:hidden text-cream/60 mr-1 hover:text-cream/60 transition">
-                      ←
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFriend(null)}
+                      aria-label="Back to friends list"
+                      className="sm:hidden grid place-items-center w-9 h-9 -ml-1 mr-0.5 rounded-full text-lg leading-none text-cream/60 hover:text-cream hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 transition-colors"
+                    >
+                      <span aria-hidden="true">←</span>
                     </button>
-                    <div className="relative" aria-label={`${selectedFriend.username}'s avatar`}>
-                      <img src={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt={selectedFriend.username} className="w-9 h-9 rounded-full object-cover" />
+                    <div className="relative">
+                      <img src={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt="" className="w-9 h-9 rounded-full object-cover" />
                       {selectedFriend.is_online && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
                     </div>
                     <div>
-                      <p className="text-cream font-semibold text-sm">{selectedFriend.username}</p>
+                      <p className="text-cream font-semibold text-sm">
+                        {selectedFriend.username}
+                        {selectedFriend.is_online && <span className="sr-only"> (online now)</span>}
+                      </p>
                       {(() => {
                         const tier = getEloTier(selectedFriend.arena_elo);
                         return (
@@ -1437,7 +1523,8 @@ export default function SocialPage() {
                     <button
                       type="button"
                       onClick={() => { setChallengeTarget(selectedFriend); setChallengeWager(25); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+                      aria-label={`Challenge ${selectedFriend.username} to an arena match`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:brightness-125 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F]"
                       style={{
                         background: "rgba(239,68,68,0.1)",
                         border: "1px solid rgba(239,68,68,0.25)",
@@ -1452,15 +1539,21 @@ export default function SocialPage() {
                       type="button"
                       onClick={() => setSelectedFriend(null)}
                       aria-label="Close chat"
-                      className="grid place-items-center w-8 h-8 rounded-full text-cream/40 hover:text-cream hover:bg-white/[0.06] transition-colors"
+                      className="grid place-items-center w-8 h-8 rounded-full text-cream/40 hover:text-cream hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 transition-colors"
                     >
-                      <XIcon size={16} weight="bold" />
+                      <XIcon size={16} weight="bold" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
 
                 {/* Messages area */}
-                <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                <div
+                  ref={chatContainerRef}
+                  className="flex-1 overflow-y-auto px-5 py-4 space-y-3"
+                  role="log"
+                  aria-live="polite"
+                  aria-label={`Conversation with ${selectedFriend.username}`}
+                >
                   {/* "Say hi" only renders once THIS thread's fetch has resolved
                       empty — opening an existing conversation stays blank (no
                       flash) until the messages land. */}
@@ -1541,29 +1634,38 @@ export default function SocialPage() {
 
                 {/* Input */}
                 <div className="px-4 py-3 border-t border-white/[0.06] flex-shrink-0">
-                  <div className="flex gap-2">
+                  <form
+                    className="flex gap-2"
+                    onSubmit={e => { e.preventDefault(); sendMessage(); }}
+                  >
+                    <label htmlFor="social-msg-input" className="sr-only">
+                      Message {selectedFriend.username}
+                    </label>
                     <input
+                      ref={msgInputRef}
+                      id="social-msg-input"
                       type="text"
                       value={msgInput}
                       onChange={e => setMsgInput(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                       placeholder={`Message ${selectedFriend.username}`}
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck={true}
-                      className="social-msg-input flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:border-electric/40 transition"
+                      className="social-msg-input flex-1 min-w-0 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:border-electric/40 transition"
                     />
                     <button
-                      onClick={sendMessage}
+                      type="submit"
                       disabled={!msgInput.trim() || sending}
-                      className="px-5 py-2.5 rounded-xl font-bold text-sm transition-transform active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed will-change-transform"
+                      aria-label={sending ? "Sending message" : `Send message to ${selectedFriend.username}`}
+                      className="px-5 py-2.5 rounded-xl font-bold text-sm transition-transform active:scale-95 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:brightness-100 will-change-transform"
                       style={{
                         background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                         color: "#04080F",
                       }}>
-                      Send
+                      {sending ? "Sending…" : "Send"}
                     </button>
-                  </div>
+                  </form>
                 </div>
               </>
               </FeatureGate>
@@ -1577,8 +1679,11 @@ export default function SocialPage() {
             className="fixed inset-0 z-[60] flex items-center justify-center px-4"
             onClick={() => !sendingNudge && setNudgeTarget(null)}
           >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Nudge ${nudgeTarget.username}`}
               className="relative w-full max-w-sm rounded-2xl border border-orange-500/25 p-6 animate-slide-up"
               style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
               onClick={e => e.stopPropagation()}
@@ -1604,11 +1709,13 @@ export default function SocialPage() {
                     key={p.key}
                     onClick={() => sendNudge(p.key)}
                     disabled={sendingNudge}
-                    className="w-full text-left px-4 py-3 rounded-lg transition-all active:scale-[0.98] disabled:opacity-40"
+                    aria-label={`Send nudge: ${p.label}`}
+                    className="w-full text-left px-4 py-3 rounded-lg transition-all hover:brightness-125 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1020] disabled:opacity-40 disabled:hover:brightness-100"
                     style={{
                       background: `${p.accent}10`,
                       border: `1px solid ${p.accent}30`,
                       color: p.accent,
+                      ["--tw-ring-color" as string]: `${p.accent}99`,
                     }}
                   >
                     <span className="font-syne text-sm font-semibold">{p.label}</span>
@@ -1617,9 +1724,10 @@ export default function SocialPage() {
               </div>
 
               <button
+                type="button"
                 onClick={() => setNudgeTarget(null)}
                 disabled={sendingNudge}
-                className="w-full py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/60 hover:bg-white/5 transition-all disabled:opacity-40"
+                className="w-full py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/70 hover:text-cream hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-all disabled:opacity-40"
               >
                 {sendingNudge ? "Sending…" : "Cancel"}
               </button>
@@ -1633,8 +1741,11 @@ export default function SocialPage() {
             className="fixed inset-0 z-[60] flex items-center justify-center px-4"
             onClick={() => !sendingChallenge && setChallengeTarget(null)}
           >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Challenge ${challengeTarget.username} to an arena match`}
               className="relative w-full max-w-sm rounded-2xl border border-red-500/25 p-6 animate-slide-up"
               style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
               onClick={e => e.stopPropagation()}
@@ -1655,8 +1766,11 @@ export default function SocialPage() {
                   {[10, 25, 50, 100].map(w => (
                     <button
                       key={w}
+                      type="button"
                       onClick={() => setChallengeWager(w)}
-                      className={`py-2 rounded-lg text-sm font-bold transition-all ${challengeWager === w ? "text-navy" : "text-cream/60 hover:text-cream"}`}
+                      aria-pressed={challengeWager === w}
+                      aria-label={`Wager ${w} Fangs`}
+                      className={`min-h-[44px] py-2 rounded-lg text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1020] ${challengeWager === w ? "text-navy" : "text-cream/60 hover:text-cream"}`}
                       style={challengeWager === w
                         ? { background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)" }
                         : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
@@ -1669,16 +1783,18 @@ export default function SocialPage() {
 
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => setChallengeTarget(null)}
                   disabled={sendingChallenge}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/60 hover:bg-white/5 transition-all disabled:opacity-40"
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/70 hover:text-cream hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-all disabled:opacity-40"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={sendChallenge}
                   disabled={sendingChallenge}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all active:scale-95 inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1020] inline-flex items-center justify-center gap-2"
                   style={{
                     background: "linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)",
                     color: "#FFF",
@@ -1729,8 +1845,8 @@ export default function SocialPage() {
                     setAddError("");
                     setAddSuccess("");
                   }}
-                  aria-label="Close"
-                  className="text-cream/55 hover:text-cream/50 transition p-1"
+                  aria-label="Close add friend dialog"
+                  className="grid place-items-center w-8 h-8 rounded-full text-cream/55 hover:text-cream hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 transition-colors"
                 >
                   <XIcon size={18} weight="bold" aria-hidden="true" />
                 </button>
@@ -1746,7 +1862,9 @@ export default function SocialPage() {
                     aria-hidden="true"
                   />
                   <div className="flex gap-2">
+                    <label htmlFor="social-add-friend-input" className="sr-only">Search for a username to add as a friend</label>
                     <input
+                      id="social-add-friend-input"
                       type="text"
                       value={addUsername}
                       onChange={(e) => handleAddUsernameChange(e.target.value)}
@@ -1756,11 +1874,16 @@ export default function SocialPage() {
                       }}
                       autoFocus
                       placeholder="Search username..."
+                      role="combobox"
+                      aria-expanded={showDropdown && addUsername.trim().length >= 2}
+                      aria-controls="social-add-friend-results"
+                      aria-autocomplete="list"
                       className="flex-1 bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2.5 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/40 transition"
                     />
                     <button
+                      type="button"
                       onClick={addFriend}
-                      className="px-4 py-2.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+                      className="px-4 py-2.5 rounded-lg text-xs font-bold transition-all hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1020]"
                       style={{
                         background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                         color: "#04080F",
@@ -1773,6 +1896,9 @@ export default function SocialPage() {
                   {/* Autocomplete dropdown */}
                   {showDropdown && addUsername.trim().length >= 2 && (
                     <div
+                      id="social-add-friend-results"
+                      role="listbox"
+                      aria-label="Username search results"
                       className="absolute left-0 right-0 top-full mt-1 rounded-lg overflow-hidden z-50 max-h-64 overflow-y-auto"
                       style={{
                         background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
@@ -1781,8 +1907,8 @@ export default function SocialPage() {
                       }}
                     >
                       {searchLoading ? (
-                        <div className="flex items-center justify-center gap-2 py-4">
-                          <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+                        <div className="flex items-center justify-center gap-2 py-4" role="status">
+                          <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" aria-hidden="true" />
                           <span className="text-cream/55 text-xs">Searching...</span>
                         </div>
                       ) : searchResults.length === 0 ? (
@@ -1818,7 +1944,7 @@ export default function SocialPage() {
                                   type="button"
                                   onClick={() => acceptFromSearch(u)}
                                   aria-label={`Accept friend request from ${u.username}`}
-                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-green-400/10 text-green-400 hover:bg-green-400/20 transition inline-flex items-center gap-1"
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-green-400/10 text-green-400 hover:bg-green-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400/60 transition inline-flex items-center gap-1"
                                 >
                                   <CheckCircle size={12} weight="fill" aria-hidden="true" />
                                   Accept
@@ -1843,7 +1969,7 @@ export default function SocialPage() {
                                   type="button"
                                   onClick={() => sendRequestTo(u.username)}
                                   aria-label={`Add ${u.username} as a friend`}
-                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded transition inline-flex items-center gap-1 active:scale-95"
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded transition inline-flex items-center gap-1 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0c1020]"
                                   style={{
                                     background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                                     color: "#04080F",
@@ -1860,8 +1986,8 @@ export default function SocialPage() {
                     </div>
                   )}
                 </div>
-                {addError && <p className="text-red-400 text-xs mt-2">{addError}</p>}
-                {addSuccess && <p className="text-green-400 text-xs mt-2">{addSuccess}</p>}
+                {addError && <p className="text-red-400 text-xs mt-2" role="alert">{addError}</p>}
+                {addSuccess && <p className="text-green-400 text-xs mt-2" role="status">{addSuccess}</p>}
               </div>
 
               {/* Sent Requests list */}
@@ -1901,9 +2027,10 @@ export default function SocialPage() {
                             </p>
                           </div>
                           <button
+                            type="button"
                             onClick={() => cancelRequest(req.friendshipId)}
                             aria-label={`Undo friend request to ${req.username}`}
-                            className="text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded bg-red-400/10 hover:bg-red-400/20 transition inline-flex items-center gap-1"
+                            className="text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded bg-red-400/10 hover:bg-red-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 transition inline-flex items-center gap-1"
                           >
                             <XIcon size={10} weight="bold" aria-hidden="true" />
                             Undo

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   level        INTEGER NOT NULL DEFAULT 1,
   goal_type          TEXT,
   selected_subjects  JSONB,
-  daily_target       INTEGER,
+  daily_target_minutes INTEGER,
   onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()

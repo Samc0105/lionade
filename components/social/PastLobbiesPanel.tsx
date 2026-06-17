@@ -9,7 +9,7 @@
 // re-focused. No realtime here; this is a "where did I just leave?" surface.
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { apiGet } from "@/lib/api-client";
@@ -120,7 +120,7 @@ export default function PastLobbiesPanel({ router }: Props) {
           <button
             type="button"
             onClick={() => mutate()}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F] font-syne text-xs font-bold transition-colors"
           >
             <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
             Try again
@@ -155,7 +155,7 @@ export default function PastLobbiesPanel({ router }: Props) {
           <button
             type="button"
             onClick={() => router.push("/games/party")}
-            className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider"
+            className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all hover:brightness-125 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04080F]"
             style={{ background: "rgba(168,85,247,0.18)", color: "#E9D5FF", border: "1px solid rgba(168,85,247,0.4)" }}
           >
             Open Party
@@ -208,6 +208,7 @@ function EmptyMicro({ text }: { text: string }) {
 }
 
 function RoomRow({ row, onTap }: { row: HistoryRow; onTap: (row: HistoryRow) => void }) {
+  const reduceMotion = useReducedMotion();
   const Icon = ((row.game_type && GAME_ICON[row.game_type]) ?? GameController) as React.ComponentType<{
     size?: number;
     weight?: "fill" | "regular" | "bold";
@@ -221,9 +222,11 @@ function RoomRow({ row, onTap }: { row: HistoryRow; onTap: (row: HistoryRow) => 
 
   return (
     <motion.button
-      whileHover={disabled ? undefined : { x: 2 }}
+      type="button"
+      whileHover={disabled || reduceMotion ? undefined : { x: 2 }}
       onClick={() => onTap(row)}
-      className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-white/[0.04]"
+      aria-label={`${title}, ${status.text}${disabled ? " (closed)" : ", tap to re-enter"}`}
+      className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric/50"
       style={{
         background: "rgba(255,255,255,0.02)",
         border: "1px solid rgba(255,255,255,0.05)",

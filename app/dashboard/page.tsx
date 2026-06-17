@@ -454,6 +454,8 @@ function DashboardContent() {
         .dash-lift { transition: transform 220ms cubic-bezier(.2,.7,.2,1), box-shadow 220ms ease; will-change: transform; }
         .dash-lift:hover { transform: translate3d(0, -2px, 0); }
         @media (prefers-reduced-motion: reduce) {
+          .dash-card-hover:hover { transform: none !important; }
+          .dash-lift:hover { transform: none !important; }
           .animate-slide-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .hero-aurora { animation: none !important; }
           .bet-idle-pulse { animation: none !important; }
@@ -524,8 +526,8 @@ function DashboardContent() {
           {/* ═══ 2) Circular Stats Row ═══ */}
           <FeatureGate feature="dashboard.circular_stats" compact>
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            <Link href="/wallet" className="press-feedback inline-block">
-              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <span className="text-cream/30">{"—"}</span>} label={dailyProgressReady ? `+${todayCoins} today` : "— today"} color="#FFD700" />
+            <Link href="/wallet" aria-label="View your wallet and Fangs balance" className="press-feedback inline-block rounded-full">
+              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <span className="text-cream/30">{"—"}</span>} label={dailyProgressReady ? `+${todayCoins} today` : "— today"} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${statsReady && streak >= 1 ? "streak-fire-glow" : ""}`}
@@ -542,7 +544,7 @@ function DashboardContent() {
             </div>
             <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
             <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={subjectsLoading ? <span className="text-cream/30">{"—"}</span> : <CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
-            <Link href="/leaderboard" className="press-feedback inline-block">
+            <Link href="/leaderboard" aria-label={eloRank ? `View leaderboard, your rank is number ${eloRank}` : "View leaderboard"} className="press-feedback inline-block rounded-full">
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
           </div>
@@ -624,7 +626,7 @@ function DashboardContent() {
                   "rounded-tr-[24px] rounded-bl-[24px] rounded-tl-[8px] rounded-br-[8px]",
                 ];
                 return (
-                  <div key={mission.id} className={`${shapes[i]} p-4 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] group`}
+                  <div key={mission.id} className={`${shapes[i]} p-4 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] dash-card-hover group`}
                     style={{
                       // Bucket A consistency: idle missions now carry a low-opacity
                       // wash of their own mission.color so the card's identity reads
@@ -688,8 +690,9 @@ function DashboardContent() {
 
                     {/* Claim button */}
                     {mission.completed && !mission.claimed && (
-                      <button onClick={() => claimMission(mission.id)}
-                        className="w-full py-1.5 rounded-full text-[11px] font-bold text-navy transition-all duration-200 active:scale-95 breathe-glow"
+                      <button type="button" onClick={() => claimMission(mission.id)}
+                        aria-label={`Claim ${mission.title} reward: ${mission.coinReward} Fangs and ${mission.xpReward} XP`}
+                        className="w-full py-1.5 rounded-full text-[11px] font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
                         style={{ background: `linear-gradient(90deg, ${mission.color}, ${mission.color}CC)` }}>
                         Claim Reward
                       </button>
@@ -901,7 +904,7 @@ function DashboardContent() {
                     <div className="flex flex-wrap items-center gap-3">
                       <div>
                         <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Stake</span>
-                        <div className="flex gap-1.5">
+                        <div className="flex gap-1.5" role="group" aria-label="Choose stake amount">
                           {[10, 25, 50].map(amt => (
                             <button key={amt} onClick={() => setBetStake(amt)}
                               className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
@@ -913,7 +916,7 @@ function DashboardContent() {
                       </div>
                       <div>
                         <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Target</span>
-                        <div className="flex gap-1.5">
+                        <div className="flex gap-1.5" role="group" aria-label="Choose target score">
                           {[7, 8, 9, 10].map(t => (
                             <button key={t} onClick={() => setBetTarget(t)}
                               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-2xl text-[11px] font-bold transition-all duration-200 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
@@ -939,8 +942,9 @@ function DashboardContent() {
                         </span>
                       </div>
                     </div>
-                    <button onClick={placeBet} disabled={placingBet || coins < betStake}
-                      className="mt-3 w-full py-2.5 rounded-full font-bebas tracking-[0.22em] uppercase text-[13px] transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                    <button type="button" onClick={placeBet} disabled={placingBet || coins < betStake}
+                      aria-label={coins < betStake ? "Not enough Fangs to place this bet" : `Run it back: stake ${betStake} Fangs on ${betTarget} out of 10`}
+                      className="mt-3 w-full py-2.5 rounded-full font-bebas tracking-[0.22em] uppercase text-[13px] transition-all duration-200 hover:enabled:brightness-110 active:enabled:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
                       {placingBet ? "Placing..." : coins < betStake ? "Not enough Fangs" : `Run it back · ${betStake} Fangs`}
                     </button>
@@ -960,10 +964,12 @@ function DashboardContent() {
                       <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Stake</span>
                       <div className="flex gap-1.5">
                         {[10, 25, 50].map(amt => (
-                          <button key={amt} onClick={() => setBetStake(amt)}
-                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                          <button key={amt} type="button" onClick={() => setBetStake(amt)}
+                            aria-pressed={betStake === amt}
+                            aria-label={`Stake ${amt} Fangs`}
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 active:scale-95 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/80 hover:bg-white/[0.1]"}`}
                             style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                            {amt} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" />
+                            {amt} <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-4 h-4 object-contain inline" />
                           </button>
                         ))}
                       </div>
@@ -972,11 +978,13 @@ function DashboardContent() {
                       <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Target</span>
                       <div className="flex gap-1.5">
                         {[7, 8, 9, 10].map(t => (
-                          <button key={t} onClick={() => setBetTarget(t)}
-                            className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-2xl text-[11px] font-bold transition-all duration-200 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                          <button key={t} type="button" onClick={() => setBetTarget(t)}
+                            aria-pressed={betTarget === t}
+                            aria-label={`Target ${t} out of 10, ${BET_MULTIPLIERS[t]} times payout`}
+                            className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-2xl text-[11px] font-bold transition-all duration-200 active:scale-95 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/80 hover:bg-white/[0.1]"}`}
                             style={betTarget === t ? { background: "linear-gradient(90deg, #4A90D9, #6AABF0)", boxShadow: "0 0 8px rgba(74,144,217,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                            <span className="leading-none">{t}/10</span>
-                            <span className={`font-mono leading-none text-[8.5px] tracking-[0.18em] uppercase ${betTarget === t ? "text-navy/70" : "text-gold/70"}`}>
+                            <span className="leading-none" aria-hidden="true">{t}/10</span>
+                            <span className={`font-mono leading-none text-[8.5px] tracking-[0.18em] uppercase ${betTarget === t ? "text-navy/70" : "text-gold/70"}`} aria-hidden="true">
                               {BET_MULTIPLIERS[t]}x
                             </span>
                           </button>
@@ -996,8 +1004,9 @@ function DashboardContent() {
                       </span>
                     </div>
                   </div>
-                  <button onClick={placeBet} disabled={placingBet || coins < betStake}
-                    className="mt-3 w-full py-2.5 rounded-full font-bebas tracking-[0.22em] uppercase text-[13px] transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                  <button type="button" onClick={placeBet} disabled={placingBet || coins < betStake}
+                    aria-label={coins < betStake ? "Not enough Fangs to place this bet" : `Place bet: stake ${betStake} Fangs on ${betTarget} out of 10`}
+                    className="mt-3 w-full py-2.5 rounded-full font-bebas tracking-[0.22em] uppercase text-[13px] transition-all duration-200 hover:enabled:brightness-110 active:enabled:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
                     {placingBet ? "Placing..." : coins < betStake ? "Not enough Fangs" : `Place Bet · ${betStake} Fangs`}
                   </button>
@@ -1032,7 +1041,7 @@ function DashboardContent() {
                     const completed = ub?.completed ?? false;
                     const claimed = ub?.claimed ?? false;
                     return (
-                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] dash-card-hover"
                         style={{ background: "linear-gradient(135deg, rgba(255,215,0,0.10), rgba(255,215,0,0.03))", border: completed && !claimed ? "1px solid rgba(255,215,0,0.35)" : "1px solid rgba(255,215,0,0.18)", boxShadow: completed && !claimed ? "0 0 16px rgba(255,215,0,0.12)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
@@ -1051,7 +1060,9 @@ function DashboardContent() {
                           </div>
                         </div>
                         {completed && !claimed && (
-                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 active:scale-95 breathe-glow"
+                          <button type="button" onClick={() => claimBounty(bounty.id)}
+                            aria-label={`Claim ${bounty.title} reward: ${bounty.coin_reward} Fangs and ${bounty.xp_reward} XP`}
+                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
                             style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.3)" }}>
                             Claim Reward
                           </button>
@@ -1078,7 +1089,7 @@ function DashboardContent() {
                     const completed = ub?.completed ?? false;
                     const claimed = ub?.claimed ?? false;
                     return (
-                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] dash-card-hover"
                         style={{ background: "linear-gradient(135deg, rgba(155,89,182,0.10), rgba(155,89,182,0.03))", border: completed && !claimed ? "1px solid rgba(155,89,182,0.35)" : "1px solid rgba(155,89,182,0.20)", boxShadow: completed && !claimed ? "0 0 16px rgba(155,89,182,0.12)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #9B59B6, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
@@ -1097,7 +1108,9 @@ function DashboardContent() {
                           </div>
                         </div>
                         {completed && !claimed && (
-                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 active:scale-95 breathe-glow"
+                          <button type="button" onClick={() => claimBounty(bounty.id)}
+                            aria-label={`Claim ${bounty.title} reward: ${bounty.coin_reward} Fangs and ${bounty.xp_reward} XP`}
+                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
                             style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)" }}>
                             Claim Reward
                           </button>
@@ -1247,6 +1260,37 @@ function DashboardContent() {
                     const totalCorrect = weeklyChart.reduce((s, d) => s + d.correct, 0);
                     const totalCoins = weeklyChart.reduce((s, d) => s + d.coins, 0);
 
+                    // No-flash-of-zero: while the chart fetch is in flight with no
+                    // cached data yet, the bar branch below would render literal
+                    // 0 questions / 0% accuracy / 0 earned for one paint. Render a
+                    // pulse skeleton of the bar grid + summary row instead, until
+                    // either cached data arrives (keepPreviousData) or the fetch
+                    // resolves.
+                    if (weeklyChartData === undefined && weeklyChart.length === 0) {
+                      return (
+                        <div className="relative z-10" aria-hidden="true">
+                          <div className="flex items-end justify-between gap-2 sm:gap-3" style={{ height: 240 }}>
+                            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                              <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                                <div className="w-full flex items-end justify-center gap-1.5" style={{ height: 200 }}>
+                                  <div className="rounded-t-md bg-white/[0.05] animate-pulse" style={{ width: "42%", height: `${28 + ((i * 11) % 55)}%` }} />
+                                  <div className="rounded-t-md bg-white/[0.03] animate-pulse" style={{ width: "42%", height: `${18 + ((i * 7) % 45)}%` }} />
+                                </div>
+                                <div className="h-2.5 w-6 rounded bg-white/[0.05] mt-1 animate-pulse" />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/[0.04]">
+                            <div className="flex items-center gap-5 sm:gap-7">
+                              <div className="h-7 w-24 rounded bg-white/[0.05] animate-pulse" />
+                              <div className="h-7 w-20 rounded bg-white/[0.05] animate-pulse" />
+                            </div>
+                            <div className="h-7 w-20 rounded bg-white/[0.05] animate-pulse" />
+                          </div>
+                        </div>
+                      );
+                    }
+
                     // Resolved week with zero activity (DB zero-fills all 7 days):
                     // swap the zero-monument chart + punitive "0% accuracy" row for
                     // an intentional invite. While the fetch is in flight
@@ -1268,15 +1312,22 @@ function DashboardContent() {
 
                     return (
                       <>
-                        {/* Bar chart — taller than v0 since we now own the empty space */}
-                        <div className="flex items-end justify-between gap-2 sm:gap-3 relative z-10" style={{ height: 240 }}>
+                        {/* Bar chart — taller than v0 since we now own the empty space.
+                            role="img" + label gives screen readers the week summary the
+                            purely-visual bars otherwise hide. */}
+                        <div
+                          className="flex items-end justify-between gap-2 sm:gap-3 relative z-10"
+                          style={{ height: 240 }}
+                          role="img"
+                          aria-label={`Last 7 days: ${totalWeek} questions answered, ${totalWeek > 0 ? Math.round((totalCorrect / totalWeek) * 100) : 0}% accuracy, ${totalCoins} Fangs earned.`}
+                        >
                           {weeklyChart.map((d, i) => {
                             const isToday = i === weeklyChart.length - 1;
                             const qHeight = (d.questions / maxQ) * 100;
                             const cHeight = (d.correct / maxQ) * 100;
 
                             return (
-                              <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                              <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative" aria-hidden="true">
                                 {/* Tooltip on hover */}
                                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-20"
                                   style={{ minWidth: 110 }}>
@@ -1361,9 +1412,21 @@ function DashboardContent() {
                   <h2 className="font-bebas text-xl text-cream tracking-wider">THIS WEEK</h2>
                   <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">View All &rarr;</span>
                 </Link>
-                <Link href="/leaderboard" className="block rounded-[20px] p-4 space-y-2 dash-lift"
+                <Link href="/leaderboard" aria-label="View the full weekly leaderboard" className="block rounded-[20px] p-4 space-y-2 dash-lift"
                   style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
-                  {leaderboard.length > 0 ? (
+                  {leaderboard.length === 0 && leaderboardData === undefined ? (
+                    /* No-flash-of-zero: skeleton rows while the weekly board loads,
+                       so the "no activity yet" empty state never flashes on cold load. */
+                    <div className="space-y-2" aria-hidden="true">
+                      {[0, 1, 2].map(i => (
+                        <div key={i} className="flex items-center gap-2.5 py-1.5 px-2">
+                          <div className="w-4 h-4 rounded-full bg-white/[0.06] animate-pulse" />
+                          <div className="h-3 flex-1 rounded bg-white/[0.05] animate-pulse" style={{ maxWidth: `${70 - i * 12}%` }} />
+                          <div className="h-3 w-10 rounded bg-white/[0.05] animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : leaderboard.length > 0 ? (
                     <>
                       {leaderboard.slice(0, 3).map((entry) => {
                         const medalColor = entry.rank === 1 ? "#FFD700" : entry.rank === 2 ? "#C0C0C0" : "#CD7F32";
@@ -1413,7 +1476,22 @@ function DashboardContent() {
                   <h2 className="font-bebas text-xl text-cream tracking-wider">RECENT ACTIVITY</h2>
                   <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Quiz &rarr;</span>
                 </Link>
-                {recentQuizzes.length > 0 ? (
+                {recentQuizzes.length === 0 && recentQuizzesData === undefined ? (
+                  /* No-flash-of-zero: skeleton rows while quiz history loads, so the
+                     "No activity yet" empty state only shows once the fetch resolves. */
+                  <div className="space-y-1" aria-hidden="true">
+                    {[0, 1, 2].map(i => (
+                      <div key={i} className="flex items-center gap-3 py-2.5 px-3">
+                        <div className="w-7 h-7 rounded-full bg-white/[0.06] flex-shrink-0 animate-pulse" />
+                        <div className="flex-1 min-w-0">
+                          <div className="h-3 w-20 rounded bg-white/[0.05] mb-1.5 animate-pulse" />
+                          <div className="h-2 w-14 rounded bg-white/[0.03] animate-pulse" />
+                        </div>
+                        <div className="h-3 w-12 rounded bg-white/[0.05] animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                ) : recentQuizzes.length > 0 ? (
                   <div className="space-y-1">
                     {recentQuizzes.map((quiz, i) => {
                       const RecentIcon = SUBJECT_ICONS[quiz.subject] ?? DefaultSubjectIcon;
@@ -1455,9 +1533,22 @@ function DashboardContent() {
               {/* Achievements */}
               <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>
                 <Link href="/profile" className="flex items-baseline justify-between mb-3 group">
-                  <h2 className="font-bebas text-xl text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/30 text-xs font-mono ml-1">{achievements.length}/8</span></h2>
+                  <h2 className="font-bebas text-xl text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/30 text-xs font-mono ml-1">{achievementsData === undefined ? "—" : `${achievements.length}/8`}</span></h2>
                   <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Profile &rarr;</span>
                 </Link>
+                {achievementsData === undefined ? (
+                  /* No-flash-of-zero: skeleton tiles while achievements load, so the
+                     grid never flashes all-locked then pops unlocked ones in. */
+                  <div className="grid grid-cols-4 gap-2" aria-hidden="true">
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+                      <div key={i} className="flex flex-col items-center p-2 rounded-xl animate-pulse"
+                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                        <div className="w-10 h-10 rounded-lg bg-white/[0.05]" />
+                        <div className="h-2 w-10 rounded bg-white/[0.04] mt-1.5" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                 <div className="grid grid-cols-4 gap-2">
                   {([
                     { key: "first_quiz",    illustration: "ach-first-steps",     name: "First Steps" },
@@ -1482,7 +1573,7 @@ function DashboardContent() {
                       >
                         {unlocked ? (
                           <img
-                            src={`/illustrations/${ach.illustration}.png`}
+                            src={cdnUrl(`/illustrations/${ach.illustration}.png`)}
                             alt=""
                             width={40}
                             height={40}
@@ -1498,11 +1589,12 @@ function DashboardContent() {
                             className="mx-auto my-2"
                           />
                         )}
-                        <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/60" : "text-cream/55"}`}>{ach.name}</span>
+                        <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/70" : "text-cream/60"}`}>{ach.name}</span>
                       </div>
                     );
                   })}
                 </div>
+                )}
               </div>
 
               {/* Ninny's Notes — computed from real stats, no mock copy.
