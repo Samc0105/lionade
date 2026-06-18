@@ -98,6 +98,9 @@ interface ShopItem {
   // Shop overhaul (2026-06-09) — visible-but-locked. The renderer shows a
   // muted "Soon" pill + disabled buy; the server also blocks the purchase.
   comingSoon?: boolean;
+  // Optional custom art (public/shop/*.png) rendered in the icon slot instead
+  // of the Phosphor fallback — used for the coming-soon teasers.
+  previewImg?: string;
 }
 
 interface PremiumItem {
@@ -200,6 +203,8 @@ interface ItemChrome {
   // soon" (voice_ninny_classic + boost_mastery_hint_pack), so we never let the
   // user click Buy and hit a server error.
   comingSoon?: boolean;
+  // Custom art shown in the icon slot for coming-soon teasers (public/shop/*.png).
+  previewImg?: string;
 }
 
 const ITEM_CHROME: Record<string, ItemChrome> = {
@@ -228,7 +233,7 @@ const ITEM_CHROME: Record<string, ItemChrome> = {
   boost_brain_freeze: { Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
   boost_score_boost: { Icon: TrendUp, iconWeight: "regular", iconColor: "#94A3B8" },
   // Server blocks this one ("coming soon") — surface as locked, never buyable.
-  boost_mastery_hint_pack: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", comingSoon: true },
+  boost_mastery_hint_pack: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", comingSoon: true, previewImg: "/shop/mastery-hint-pack.png" },
   boost_streak_shield_3pack: { Icon: Shield, iconWeight: "fill", iconColor: "#A855F7" },
   // Avatar auras (canonical ids)
   aura_solar: { Icon: Sphere, iconWeight: "fill", iconColor: "#FACC15" },
@@ -242,7 +247,7 @@ const ITEM_CHROME: Record<string, ItemChrome> = {
   aura_void: { Icon: CircleNotch, iconWeight: "bold", iconColor: "#A855F7" },
   aura_prismatic: { Icon: Rainbow, iconWeight: "fill", iconColor: "#A855F7" },
   // Voice skin — server blocks ("coming soon"), surface as locked.
-  voice_ninny_classic: { Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7", comingSoon: true },
+  voice_ninny_classic: { Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7", comingSoon: true, previewImg: "/shop/voice-ninny-classic.png" },
   // Username effects
   name_fx_rainbow: { Icon: Rainbow, iconWeight: "fill" },
   name_fx_fire: { Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
@@ -779,11 +784,15 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
               the existing Phosphor icon. Both occupy the same vertical slot so
               there is no layout shift between previewable + fallback cards. */}
           <div className="shop-item-icon">
-            {preview ?? (
+            {preview ?? (item.previewImg ? (
+              <div className="h-16 flex items-center">
+                <img src={item.previewImg} alt="" aria-hidden="true" className="h-16 w-16 object-contain" />
+              </div>
+            ) : (
               <div className="h-16 flex items-center">
                 <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
               </div>
-            )}
+            ))}
           </div>
           <div className="flex items-center gap-1.5">
             {item.comingSoon && (
