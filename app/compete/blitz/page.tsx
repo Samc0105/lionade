@@ -76,7 +76,7 @@ function incrementDailyPlays() {
 export default function CompeteBlitzPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { stats, isLoading: statsLoading, mutate: mutateStats } = useUserStats(user?.id);
+  const { stats, mutate: mutateStats } = useUserStats(user?.id);
 
   const [phase, setPhase] = useState<Phase>("setup");
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
@@ -378,7 +378,7 @@ export default function CompeteBlitzPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {/* No flash-of-zero: render a skeleton dash until stats resolve. */}
                     <div className="text-center">
-                      {statsLoading && stats === null ? (
+                      {stats === null ? (
                         <div className="mx-auto h-7 w-12 rounded-md bg-cream/10 motion-safe:animate-pulse" aria-hidden="true" />
                       ) : (
                         <p className="font-bebas text-2xl text-cream/80">{(stats?.coins ?? 0).toLocaleString()}</p>
@@ -386,7 +386,7 @@ export default function CompeteBlitzPage() {
                       <p className="text-cream/55 text-[9px] font-syne mt-1">Total Fangs</p>
                     </div>
                     <div className="text-center">
-                      {statsLoading && stats === null ? (
+                      {stats === null ? (
                         <div className="mx-auto h-7 w-12 rounded-md bg-cream/10 motion-safe:animate-pulse" aria-hidden="true" />
                       ) : (
                         <p className="font-bebas text-2xl text-cream/80">{stats?.streak ?? 0}</p>

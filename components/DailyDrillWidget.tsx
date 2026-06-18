@@ -106,10 +106,10 @@ export default function DailyDrillWidget() {
             <ClaimBanner
               variant="electric"
               size="panel"
-              ariaLabel="Daily Drill ready — 5 questions you missed"
+              ariaLabel="Daily Drill ready. 5 questions you missed."
               icon={<Brain size={18} weight="fill" />}
               title="Drill 5 questions you missed before"
-              description="Quick spaced-repetition review — keep your streak fed"
+              description="Quick spaced-repetition review. Keep your streak fed."
               meta={<>5Q &middot; 3 MIN</>}
             >
               <span className="sr-only">Open the daily drill</span>
@@ -348,9 +348,18 @@ function DrillModal({
           coinsEarned: r.data.coinsEarned,
           perfect: !!r.data.perfect,
         });
+      } else {
+        // Fallback: never strand the user on the final question. Show local
+        // results so they always reach the results screen even if /complete
+        // failed. selectedIndex carries no client-side correctness, so the
+        // local score is a 0-floor; the server is canonical when it succeeds.
+        const localScore = allPicks.filter(a => a.wasCorrect).length;
+        setDone({ score: localScore, total: allPicks.length, coinsEarned: 0, perfect: localScore === allPicks.length });
       }
     } catch (e) {
       console.error("[DailyDrill submit]", e);
+      const localScore = allPicks.filter(a => a.wasCorrect).length;
+      setDone({ score: localScore, total: allPicks.length, coinsEarned: 0, perfect: localScore === allPicks.length });
     } finally {
       setSubmitting(false);
     }

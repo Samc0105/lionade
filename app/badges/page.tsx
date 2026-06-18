@@ -187,7 +187,7 @@ export default function BadgesPage() {
                       key={r.id}
                       onClick={() => setRarityFilter(r.id)}
                       aria-pressed={active}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                         active
                           ? "bg-electric/15 border-electric/50 text-cream"
                           : "bg-white/5 border-white/10 text-cream/65 hover:bg-white/10 hover:text-cream"
@@ -204,7 +204,7 @@ export default function BadgesPage() {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as SortMode)}
-                  className="bg-white/[0.04] border border-white/10 text-cream text-xs font-semibold px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-electric/40 cursor-pointer"
+                  className="bg-white/[0.04] border border-white/10 text-cream text-xs font-semibold px-2.5 py-1.5 rounded-lg focus:border-electric/40 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                   aria-label="Sort badges"
                 >
                   {SORT_LABELS.map(s => (
@@ -229,10 +229,10 @@ export default function BadgesPage() {
           <div className="text-center py-20 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(74,144,217,0.08)" }}>
             <X size={40} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-3" aria-hidden="true" />
             <p className="font-bebas text-2xl text-cream/50 tracking-wider mb-1">Badges didn&apos;t load</p>
-            <p className="text-cream/30 text-sm mb-5">Something hiccuped on our end. Refresh to try again.</p>
+            <p className="text-cream/55 text-sm mb-5">Something hiccuped on our end. Refresh to try again.</p>
             <button
               onClick={() => window.location.reload()}
-              className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold hover:brightness-110 transition-all"
+              className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold hover:brightness-110 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               Refresh
             </button>
@@ -241,10 +241,10 @@ export default function BadgesPage() {
           <div className="text-center py-16 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(74,144,217,0.08)" }}>
             <MagnifyingGlass size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-3" aria-hidden="true" />
             <p className="font-bebas text-xl text-cream/55 tracking-wider mb-1">No badges match those filters</p>
-            <p className="text-cream/30 text-xs mb-4">Try a different rarity or clear your search.</p>
+            <p className="text-cream/55 text-xs mb-4">Try a different rarity or clear your search.</p>
             <button
               onClick={() => { setRarityFilter("all"); setQuery(""); }}
-              className="inline-block px-5 py-2 rounded-xl border border-electric/30 text-electric text-xs font-bold hover:bg-electric/10 transition-all"
+              className="inline-block px-5 py-2 rounded-xl border border-electric/30 text-electric text-xs font-bold hover:bg-electric/10 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               Reset filters
             </button>

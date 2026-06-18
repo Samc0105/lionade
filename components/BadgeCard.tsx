@@ -25,8 +25,11 @@ export default function BadgeCard({ badge, size = "md", earned = true }: BadgeCa
 
   return (
     <div
-      className={`relative rounded-xl border transition-all duration-300 hover:-translate-y-1
-        hover:shadow-lg ${classes.card} ${earned ? "cursor-pointer" : "opacity-40 grayscale"}`}
+      className={`relative rounded-xl border transition-all duration-300 ${classes.card} ${
+        earned
+          ? "cursor-pointer hover:-translate-y-1 hover:shadow-lg"
+          : ""
+      }`}
       style={{
         borderColor: earned ? `${rarityColor}60` : "#4A90D920",
         background: earned
@@ -43,8 +46,9 @@ export default function BadgeCard({ badge, size = "md", earned = true }: BadgeCa
         />
       )}
 
-      {/* Icon */}
-      <div className={`${classes.icon} mb-2 ${earned ? "" : "grayscale"}`}>
+      {/* Icon — locked cards desaturate + dim the ICON only (never the text)
+          so the name + description stay above the contrast floor. */}
+      <div className={`${classes.icon} mb-2 ${earned ? "" : "grayscale opacity-40"}`}>
         {badge.icon}
       </div>
 
@@ -63,7 +67,7 @@ export default function BadgeCard({ badge, size = "md", earned = true }: BadgeCa
 
       {/* Description */}
       {size !== "sm" && (
-        <p className={`${classes.desc} text-cream/50 leading-snug`}>
+        <p className={`${classes.desc} text-cream/55 leading-snug`}>
           {badge.description}
         </p>
       )}

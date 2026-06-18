@@ -429,7 +429,9 @@ export default function LearnPage() {
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">MASTERY</h2>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
-                    {mastery.length} {mastery.length === 1 ? "subject" : "subjects"} · weakest first
+                    {historyLoading
+                      ? <span className="skeleton-shimmer rounded h-3 w-28 inline-block align-middle" aria-hidden="true" />
+                      : <>{mastery.length} {mastery.length === 1 ? "subject" : "subjects"} · weakest first</>}
                   </p>
                 </div>
 

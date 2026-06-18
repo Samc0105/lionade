@@ -325,7 +325,7 @@ function StrengthsList({ stats }: { stats: SubjectStat[] }) {
         <h3 className="font-bebas text-sm tracking-[0.2em] text-cream/85">STRENGTHS</h3>
       </div>
       {stats.length === 0 ? (
-        <p className="text-cream/40 text-[12.5px]">
+        <p className="text-cream/55 text-[12.5px]">
           Answer some questions in Mastery Mode to see your strengths.
         </p>
       ) : (
@@ -347,7 +347,7 @@ function WeaknessesList({ stats }: { stats: SubjectStat[] }) {
         <h3 className="font-bebas text-sm tracking-[0.2em] text-cream/85">WEAK SPOTS</h3>
       </div>
       {stats.length === 0 ? (
-        <p className="text-cream/40 text-[12.5px]">
+        <p className="text-cream/55 text-[12.5px]">
           No clear weak spots yet. Keep going for at least 3 attempts per subtopic.
         </p>
       ) : (
@@ -376,7 +376,7 @@ function StatRow({ stat, barColor }: { stat: SubjectStat; barColor: string }) {
           style={{ width: `${Math.max(2, stat.masteryPct)}%`, backgroundColor: barColor }}
         />
       </div>
-      <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/35 mt-1">
+      <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 mt-1">
         {stat.correct} / {stat.attempts} answered
       </div>
     </li>
@@ -446,11 +446,11 @@ function Heatmap({ heatmap }: { heatmap: Array<{ date: string; value: number }> 
         )}
       </div>
       <div className="flex items-center justify-end gap-1.5 mt-3">
-        <span className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-cream/35">less</span>
+        <span className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-cream/45">less</span>
         {[0, 1, 2, 3, 4].map(b => (
           <span key={b} className="w-2.5 h-2.5 rounded-[2px]" style={{ background: cellColor(b) }} />
         ))}
-        <span className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-cream/35">more</span>
+        <span className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-cream/45">more</span>
       </div>
     </section>
   );
