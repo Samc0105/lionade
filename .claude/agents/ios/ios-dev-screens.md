@@ -22,6 +22,8 @@ Every `.tsx` file under `~/Desktop/lionade-ios/app/`. That includes:
 
 1. **Every screen wraps content in the safe-area-aware top-level container.** Use `SafeAreaView` from `react-native-safe-area-context` OR rely on the parent navigation's `headerShown: false` + manual top padding via `useSafeAreaInsets()`.
 
+   **Layout standard:** the content container uses `paddingHorizontal: SCREEN_GUTTER` (`lib/theme.ts`) — never flush to edge, never a one-off `0/4` gutter (see `~/Desktop/lionade-ios/CLAUDE.md` "LAYOUT STANDARD").
+
 2. **Pushed screens get `components/BackButton.tsx`** at the top. Semantic-parent based (not history). The map lives in the BackButton itself — when adding a new screen, you must add its parent to that map.
 
 3. **Tab screens DON'T get a BackButton.** Tabs are roots.

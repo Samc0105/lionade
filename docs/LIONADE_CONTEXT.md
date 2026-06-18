@@ -118,7 +118,7 @@ docs/                    # PROJECT.md, TEAM.md, ARCHITECTURE.md, FEATURES.md, TH
 
 | Table | Purpose |
 |-------|---------|
-| `profiles` | User data: username, display_name, avatar_url, bio, coins, xp, streak, max_streak, level, education_level, study_goal, selected_subjects, daily_target, onboarding_completed, is_public, show_on_leaderboard, is_online, last_seen, arena_elo |
+| `profiles` | User data: username, display_name, avatar_url, bio, coins, xp, streak, max_streak, level, education_level, study_goal, selected_subjects, daily_target_minutes, onboarding_completed, is_public, show_on_leaderboard, is_online, last_seen, arena_elo |
 | `questions` | Question bank: subject, topic, difficulty, question text, options (JSON), correct_answer, coin_reward, explanation |
 | `quiz_sessions` | Quiz attempts: user_id, subject, total_questions, correct_answers, coins_earned, xp_earned, completed_at |
 | `user_answers` | Per-question records: quiz_session_id, question_id, selected_answer, is_correct, time_taken, points_earned |

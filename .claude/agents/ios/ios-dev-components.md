@@ -29,6 +29,8 @@ Examples that live here:
 
 2. **Use NativeWind class strings where possible** (Tailwind utilities). Drop to inline `style={{}}` only when NativeWind can't express it (rare).
 
+   **Layout standard:** cards/banners/buttons sit INSIDE the screen gutter — use `SCREEN_GUTTER` (`lib/theme.ts`), no negative insets that push a widget to the edge; contain CTAs (`alignSelf` + `borderRadius`), never flush to edge (see `~/Desktop/lionade-ios/CLAUDE.md` "LAYOUT STANDARD").
+
 3. **`backdrop-blur` doesn't exist in NativeWind native.** Use `expo-blur` `<BlurView>` as a wrapper.
 
 4. **No `:hover`.** Use `active:` pseudo or `Pressable` with `style={({pressed})=> ...}`.

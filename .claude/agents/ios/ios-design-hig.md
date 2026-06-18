@@ -28,6 +28,8 @@ These divergences are intentional — making iOS feel native is more valuable th
 
 Tokens live in `tailwind.config.js`. NativeWind class names like `bg-navy`, `text-cream`, `text-gold` are available.
 
+**Layout standard:** use `SCREEN_GUTTER` (`lib/theme.ts`), never flush to edge — every screen insets content by the gutter; full-bleed only for hero/CDN media (see `~/Desktop/lionade-ios/CLAUDE.md` "LAYOUT STANDARD").
+
 ## iOS-specific design patterns to use
 
 ### Grouped lists (Profile, Settings, Edit Profile)

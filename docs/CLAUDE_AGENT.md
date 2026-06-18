@@ -56,6 +56,9 @@ Currency is called **Fangs** (not coins, not tokens).
 - No separate CSS files
 - All animations must respect `prefers-reduced-motion`
 
+### iOS Layout Standard (never flush to edge)
+On iOS, nothing renders flush to the device edge. Every screen's scroll/content container insets its content by `SCREEN_GUTTER` (= 20, or `SCREEN_GUTTER_TIGHT` = 16 for dense screens) from `~/Desktop/lionade-ios/lib/theme.ts` — section labels, rows, text, cards, buttons all align to the gutter, never to the raw edge and never to a one-off `paddingHorizontal: 0/4`. Pick one gutter per screen; full-bleed is allowed only for deliberate hero images / CDN media. The full rule + good/bad examples live in `~/Desktop/lionade-ios/CLAUDE.md` under "LAYOUT STANDARD (non-negotiable)" (auto-loaded every iOS session). This is Sam's recurring complaint ("stop creating things all the way to your left") — treat it as a hard rule.
+
 ### Dependencies
 Check `package.json` before installing anything. Prefer: framer-motion, lucide-react, SWR, Tailwind.
 
@@ -121,6 +124,7 @@ These files should never be modified without explicit instruction:
 - [ ] `ALTER TABLE … ENABLE ROW LEVEL SECURITY;` after every public `CREATE TABLE`?
 - [ ] `npm run lint:migrations` passes?
 - [ ] New pages match Lionade aesthetic?
+- [ ] **(iOS) Content uses `SCREEN_GUTTER`, never flush to edge (see iOS CLAUDE.md)?**
 - [ ] Using shared user data hook?
 - [ ] Works in both dark and light themes?
 - [ ] **Agent routing followed per [LIONADE_WORKFLOW.md](LIONADE_WORKFLOW.md)?**

@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
+      // Bound the outbound LLM call (matches vocab/define + vocab/translate) so a hung
+      // Anthropic socket can't tie up the serverless invocation until the platform
+      // timeout. AbortError is handled by this route's outer try/catch (generic 500).
+      signal: AbortSignal.timeout(20_000),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
