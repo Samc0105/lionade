@@ -131,7 +131,7 @@ function FormShell() {
         studyIntensity,
       });
       if (!r.ok) {
-        toastError(r.error || "Couldn't save — try again.");
+        toastError(r.error || "Couldn't save. Try again.");
         setSubmitting(false);
         return;
       }
@@ -272,7 +272,7 @@ function FormShell() {
                 schoolType === "college"      ? "What's your major?" :
                                                  "What are you focused on?"
               }
-              subtitle="Optional. One short phrase — Ninny uses this for context."
+              subtitle="Optional. One short phrase. Ninny uses this for context."
             >
               <FieldLabel label="Field">
                 <input

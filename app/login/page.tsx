@@ -355,7 +355,7 @@ export default function LoginPage() {
       if (username.trim().length < 3) { setError("Username must be at least 3 characters"); return false; }
       if (RESERVED_USERNAMES.includes(username.trim())) { setError("That username is not available"); return false; }
       if (usernameStatus === "taken") { setError("That username is already taken"); return false; }
-      if (usernameStatus === "checking") { setError("Please wait — checking username availability"); return false; }
+      if (usernameStatus === "checking") { setError("Please wait, checking username availability"); return false; }
       if (!password) { setError("Password is required"); return false; }
       if (!pwStrong) { setError("Password doesn't meet all requirements"); return false; }
       if (!confirmPassword) { setError("Please confirm your password"); return false; }
@@ -756,7 +756,7 @@ export default function LoginPage() {
                       {error && <ErrorBox msg={error} />}
                       <button onClick={nextStep} type="button"
                         className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 mt-2">
-                        Next — About You →
+                        Next: About You →
                       </button>
                     </div>
                   )}
@@ -796,7 +796,7 @@ export default function LoginPage() {
                         </button>
                         <button onClick={nextStep} type="button"
                           className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20">
-                          Next — Your Goals →
+                          Next: Your Goals →
                         </button>
                       </div>
                     </div>
@@ -805,7 +805,7 @@ export default function LoginPage() {
                   {/* Step 3: Goals + Summary */}
                   {step === 3 && (
                     <div className="space-y-4 animate-slide-up">
-                      <p className="text-cream/60 text-xs mb-4">Almost done — set your goals</p>
+                      <p className="text-cream/60 text-xs mb-4">Almost done. Set your goals.</p>
                       <div>
                         <label className={labelCls}>Primary Study Goal</label>
                         <div className="relative">

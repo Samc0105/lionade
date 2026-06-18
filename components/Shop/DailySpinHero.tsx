@@ -183,7 +183,7 @@ export default function DailySpinHero() {
               SPIN THE WHEEL
             </h2>
             <p className="text-cream/60 text-sm sm:text-base mb-2 leading-relaxed">
-              One free spin every 24 hours. Mostly good — Fangs, boosters, even
+              One free spin every 24 hours. Mostly good: Fangs, boosters, even
               the jackpot.
             </p>
             <p className="text-gold/85 text-xs sm:text-sm font-semibold tracking-wide mb-6">
@@ -264,9 +264,9 @@ const INFO_ROWS: { color: string; chance: string; label: string; desc: string; t
   { color: "#A855F7", chance: "15%",  label: "Free Booster",  desc: "A random booster lands in your inventory.",          tone: "win" },
   { color: "#0EA5E9", chance: "12%",  label: "Big Fangs",     desc: "500–1,000 Fangs. Heavy bag.",                        tone: "win" },
   { color: "#F59E0B", chance: "5%",   label: "Mega Fangs",    desc: "Flat 2,000 Fangs.",                                  tone: "win" },
-  { color: "#EF4444", chance: "3%",   label: "Streak Shield", desc: "One free streak save — protects you for 1 day.",     tone: "win" },
+  { color: "#EF4444", chance: "3%",   label: "Streak Shield", desc: "One free streak save, protects you for 1 day.",     tone: "win" },
   { color: "#EC4899", chance: "3%",   label: "Rare Cosmetic", desc: "A surprise rare item. Already own them all? Falls back to 1,000 Fangs.", tone: "win" },
-  { color: "#475569", chance: "8%",   label: "BUST",          desc: "−500 Fangs flat. Better luck tomorrow. Caps at 0 — never goes negative.", tone: "bad" },
+  { color: "#475569", chance: "8%",   label: "BUST",          desc: "−500 Fangs flat. Better luck tomorrow. Caps at 0, never goes negative.", tone: "bad" },
   { color: "#7F1D1D", chance: "2%",   label: "TAX MAN",       desc: "−33% of your current Fangs. Scales with your stash. The brutal one.", tone: "bad" },
   { color: "#FFD700", chance: "2%",   label: "JACKPOT",       desc: "10,000 Fangs. Yes, really.",                         tone: "jackpot" },
 ];
@@ -350,7 +350,7 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
         {/* Body — scrollable list of every outcome */}
         <div className="overflow-y-auto px-6 py-4">
           <p className="text-cream/60 text-sm leading-relaxed mb-4">
-            One free spin every 24 hours. The result is rolled on the server —
+            One free spin every 24 hours. The result is rolled on the server,
             no client tampering possible. Below: every slot, the odds, and what
             it does.
           </p>
@@ -392,7 +392,7 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
               <span className="text-cream font-semibold">Pro</span> +25% on
               positive payouts ·{" "}
               <span className="text-cream font-semibold">Platinum</span> +50%.
-              Bust and Tax Man are the same for everyone — the gamble is the
+              Bust and Tax Man are the same for everyone. The gamble is the
               gamble.
             </p>
           </div>

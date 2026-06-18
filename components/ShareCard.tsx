@@ -114,7 +114,7 @@ export default function ShareCard({ open, onClose, card, shareTitle = "Lionade" 
         }
       }
       downloadBlob(blob, `${slug}.png`);
-      toastSuccess("Image downloaded — post it anywhere.", { duration: 3000 });
+      toastSuccess("Image downloaded. Post it anywhere.", { duration: 3000 });
     } finally {
       setBusy(false);
     }

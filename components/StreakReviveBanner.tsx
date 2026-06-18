@@ -108,9 +108,9 @@ export default function StreakReviveBanner() {
       <ClaimBanner
         variant="ember"
         size="panel"
-        ariaLabel="Streak revive — limited-time window"
+        ariaLabel="Streak revive: limited-time window"
         icon={<Fire size={26} weight="fill" />}
-        eyebrow="Streak broke — last chance"
+        eyebrow="Streak broke. Last chance."
         title={<>Bring back your <span className="text-gold">{previousStreak}-day</span> streak</>}
         description={<>You&apos;ve got <Countdown remainingMs={remainingMs} /> to revive it. After that, it&apos;s gone for good.</>}
         onDismiss={onDismiss}

@@ -158,7 +158,7 @@ function QuickNotePanel({ onClose }: { onClose: () => void }) {
       if (landedClass) {
         toastSuccess(`Filed under ${landedClass.name}`, { duration: 3000 });
       } else if (r.data.aiCategorized && classes.length > 0) {
-        toastInfo("Saved as unfiled — Ninny couldn't match a class.");
+        toastInfo("Saved as unfiled. Ninny couldn't match a class.");
       } else {
         toastInfo("Saved as unfiled.");
       }

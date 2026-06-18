@@ -555,7 +555,7 @@ export default function Navbar() {
                   <div className="relative hidden sm:block">
                     <Link
                       href="/wallet"
-                      aria-label="Fangs balance — open wallet"
+                      aria-label="Fangs balance, open wallet"
                       className="h-8 inline-flex items-center gap-1.5 rounded-full px-3
                         bg-white/[0.04] border border-white/[0.08]
                         cursor-pointer transition-colors duration-200
@@ -641,7 +641,7 @@ export default function Navbar() {
                     return (
                       <button
                         onClick={() => setShowStreakModal(true)}
-                        aria-label={`Streak${displayedStreak ? ` — ${displayedStreak} days` : ""}`}
+                        aria-label={`Streak${displayedStreak ? `, ${displayedStreak} days` : ""}`}
                         className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-full px-3
                           bg-white/[0.04] border border-white/[0.08]
                           cursor-pointer group relative transition-colors duration-200
@@ -847,7 +847,7 @@ export default function Navbar() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={toggleDropdown}
-                      aria-label={`${user.username} — open menu`}
+                      aria-label={`${user.username}, open menu`}
                       aria-expanded={showDropdown}
                       data-open={showDropdown ? "true" : "false"}
                       className="nav-avatar-btn w-8 h-8 rounded-full

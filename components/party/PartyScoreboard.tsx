@@ -119,7 +119,7 @@ export default function PartyScoreboard({
                       color: "#E9D5FF",
                       border: "1px solid rgba(168,85,247,0.35)",
                     }}
-                    title="Joined mid-round — will play next round"
+                    title="Joined mid-round, will play next round"
                   >
                     <span aria-hidden="true">{"\u{1F441}"}</span>SPECTATING
                   </span>

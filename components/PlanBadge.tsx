@@ -26,7 +26,7 @@ export default function PlanBadge() {
   return (
     <Link
       href="/settings/subscription"
-      aria-label={`${plan} subscription — manage`}
+      aria-label={`${plan} subscription, manage`}
       className={`
         h-8 inline-flex items-center gap-1 rounded-full
         font-mono text-[9.5px] uppercase tracking-[0.22em]

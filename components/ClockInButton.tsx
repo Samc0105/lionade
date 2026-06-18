@@ -98,7 +98,7 @@ export default function ClockInButton() {
   const claim = async () => {
     if (submitting) return;
     if (data && !data.available) {
-      toastInfo("Daily already claimed — come back when the timer ends.");
+      toastInfo("Daily already claimed. Come back when the timer ends.");
       return;
     }
     setSubmitting(true);
@@ -142,7 +142,7 @@ export default function ClockInButton() {
         }
         void mutate(); // refresh status → flips to cooldown
       } else if (r.data.reason === "on_cooldown") {
-        toastInfo("Daily already claimed — come back when the timer ends.");
+        toastInfo("Daily already claimed. Come back when the timer ends.");
         void mutate();
       } else {
         toastError("Couldn't claim. Try again.");

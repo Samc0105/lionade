@@ -101,7 +101,7 @@ export default function SyllabusUpload({ classId }: Props) {
       setPhase("idle");
       setProgressPct(0);
       const msg = /bucket|not.?found/i.test(upload.error.message)
-        ? "Storage bucket missing — ask the team to create the `class-syllabi` bucket."
+        ? "Storage bucket missing. Ask the team to create the `class-syllabi` bucket."
         : "Upload failed. Try again.";
       setError(msg);
       toastError(msg);
@@ -169,7 +169,7 @@ export default function SyllabusUpload({ classId }: Props) {
         <div className="min-w-0 flex-1">
           <p className="text-[13px] text-cream/85 truncate">
             <span className="font-syne font-semibold text-cream">Syllabus parsed</span>{" "}
-            <span className="text-cream/50">— {syllabus.parsedTopics.length} topics, {syllabus.parsedExams.length} exams</span>
+            <span className="text-cream/50">{syllabus.parsedTopics.length} topics, {syllabus.parsedExams.length} exams</span>
           </p>
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/40 truncate">
             {syllabus.filename}

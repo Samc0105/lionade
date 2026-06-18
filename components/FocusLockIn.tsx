@@ -74,7 +74,7 @@ export default function FocusLockIn() {
           onStart={(duration) => {
             setPhase({ kind: "running", duration, startedAt: Date.now() });
             setOpen(false);
-            toastInfo(`Locked in for ${duration} minutes. No fangs lost if you bail — just the bonus.`);
+            toastInfo(`Locked in for ${duration} minutes. No fangs lost if you bail, just the bonus.`);
           }}
         />
       )}
@@ -167,7 +167,7 @@ function PickerPanel({
         </button>
       </div>
       <p className="text-[12.5px] text-cream/65 mb-3 leading-snug">
-        Pick a session length. Finish it, get the Fang chest. Bail early — no penalty, no bonus.
+        Pick a session length. Finish it, get the Fang chest. Bail early: no penalty, no bonus.
       </p>
       <ul className="flex flex-col gap-2">
         {PRESETS.map(p => (
@@ -384,7 +384,7 @@ function CompletionModal({
           </div>
         ) : (
           <p className="text-cream/50 text-[12px] mb-4">
-            (Daily session cap hit — bonus skipped, but the focus still counts.)
+            (Daily session cap hit. Bonus skipped, but the focus still counts.)
           </p>
         )}
 

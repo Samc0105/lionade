@@ -41,7 +41,7 @@ export default function ProUpgradeNudge() {
         icon={<Crown size={20} weight="fill" />}
         eyebrow="Lionade Pro"
         title="Earn 1.5× Fangs on everything"
-        description="Same grind, bigger payout — plus 3 Mastery exams and zero popup ads. $6.99/mo."
+        description="Same grind, bigger payout, plus 3 Mastery exams and zero popup ads. $6.99/mo."
         primaryAction={{ label: "See Pro", href: "/pricing" }}
         onDismiss={() => setDismissed(true)}
         dismissLabel="Dismiss Pro upgrade"
