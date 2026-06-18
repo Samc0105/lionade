@@ -23,6 +23,19 @@ const REWARD_CAP = 200;
 
 type RouteCtx = { params: { id: string } };
 
+/**
+ * True when an RPC call failed because the function doesn't exist yet (the
+ * migration hasn't been applied). PostgREST surfaces this as PGRST202; Postgres
+ * uses SQLSTATE 42883 (undefined_function). Lets the route fall back to the
+ * prior behavior so it's safe to merge before the migration is applied.
+ */
+function isMissingFunction(err: { code?: string; message?: string } | null): boolean {
+  if (!err) return false;
+  if (err.code === "PGRST202" || err.code === "42883") return true;
+  const m = (err.message ?? "").toLowerCase();
+  return m.includes("could not find the function") || m.includes("does not exist");
+}
+
 export async function POST(req: NextRequest, { params }: RouteCtx) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
@@ -74,37 +87,80 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
     const nowIso = new Date().toISOString();
 
-    // Close the session
-    await supabaseAdmin
+    // Atomic close-CLAIM: only the caller that actually flips active->abandoned
+    // proceeds to credit. The .eq("status","active") makes this a compare-and-set,
+    // so two concurrent /complete calls (double-tap "End session", or a client
+    // retry of a slow first request) cannot both pass — the read-gate at line 57
+    // is NOT atomic, so without this both callers would read status==='active',
+    // both flip the row, and both credit. The loser here gets claimed===null and
+    // returns the already-closed summary WITHOUT crediting.
+    const { data: claimed } = await supabaseAdmin
       .from("mastery_sessions")
       .update({
         status: "abandoned",
         ended_at: nowIso,
         last_active_at: nowIso,
       })
-      .eq("id", sessionId);
+      .eq("id", sessionId)
+      .eq("status", "active")
+      .select("id")
+      .maybeSingle();
 
-    // Grant Fangs if earned. The session is already closed above (the
-    // idempotency gate), so credit through the atomic update_user_coins RPC
-    // (no lost-update race + keeps fangs_cashable in sync); the audit row is a
-    // separate insert since the RPC only touches the balance columns.
+    if (!claimed) {
+      // Lost the race: another /complete already closed this session. Do NOT
+      // credit (the winner did). Purge the active pin and report already-closed.
+      void clearActiveSession(userId);
+      return NextResponse.json({
+        alreadyClosed: true,
+        sessionId,
+        questionsAnswered: session.questions_answered,
+        correctCount: session.correct_count,
+        activeSeconds: session.active_seconds,
+      });
+    }
+
+    // Grant Fangs if earned. We WON the atomic close-claim above, so exactly one
+    // caller reaches here per session — that (not merely "the session is closed")
+    // is what prevents a double credit. Credit + audit-log atomically through
+    // credit_user_coins_logged (balance + coin_transactions row commit or roll
+    // back together — kills the dual-ledger drift where a failed audit insert
+    // left coins incremented with no ledger row).
     if (coinsEarned > 0) {
-      const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+      const description = `Mastery session (${session.correct_count}/${session.questions_answered} correct)`;
+      const { error: creditErr } = await supabaseAdmin.rpc("credit_user_coins_logged", {
         p_user_id: userId,
         p_delta: coinsEarned,
-        p_min_balance: 0,
         p_source: "cashable",
+        p_type: "mastery_session",
+        p_description: description,
       });
-      if (creditErr) {
-        // Session is already closed (can't retry the grant); log loudly.
-        console.error("[mastery/complete] credit:", creditErr.message);
-      } else {
-        await supabaseAdmin.from("coin_transactions").insert({
-          user_id: userId,
-          amount: coinsEarned,
-          type: "mastery_session",
-          description: `Mastery session (${session.correct_count}/${session.questions_answered} correct)`,
+
+      if (creditErr && isMissingFunction(creditErr)) {
+        // Migration not applied yet — fall back to the prior two-step path so
+        // this route is safe to merge before the RPC exists.
+        const { error: legacyErr } = await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: userId,
+          p_delta: coinsEarned,
+          p_min_balance: 0,
+          p_source: "cashable",
         });
+        if (legacyErr) {
+          console.error("[mastery/complete] credit:", legacyErr.message);
+          coinsEarned = 0;
+        } else {
+          await supabaseAdmin.from("coin_transactions").insert({
+            user_id: userId,
+            amount: coinsEarned,
+            type: "mastery_session",
+            description,
+          });
+        }
+      } else if (creditErr) {
+        // Atomic RPC failed — balance AND ledger both rolled back, nothing
+        // half-written. Session is already closed (can't retry); log and report
+        // zero so the client total reflects what was actually granted.
+        console.error("[mastery/complete] credit:", creditErr.message);
+        coinsEarned = 0;
       }
     }
 

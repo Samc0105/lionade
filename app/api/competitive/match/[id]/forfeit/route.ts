@@ -59,12 +59,16 @@ export async function POST(
       return NextResponse.json({ alreadyCompleted: true, match });
     }
 
-    // Atomic claim active → completing (same claim /complete uses).
+    // Atomic claim active|completing → completing (same claim /complete uses).
+    // Accepting 'completing' makes a row stranded by a prior settle throw
+    // RESUMABLE here too — the retry re-runs the idempotent settler, so no
+    // double Fang/ELO. Terminal rows are short-circuited above and never reach
+    // the claim.
     const { data: claimed } = await supabaseAdmin
       .from("competitive_matches")
       .update({ status: "completing" })
       .eq("id", matchId)
-      .eq("status", "active")
+      .in("status", ["active", "completing"])
       .select("id")
       .maybeSingle();
     if (!claimed) {

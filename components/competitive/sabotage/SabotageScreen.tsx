@@ -13,8 +13,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
-import { useSettle } from "../useSettle";
-import ResultCard from "../ResultCard";
+import type { MatchSettleProps } from "../useSettle";
 import {
   ATTACK_META,
   ATTACK_COSTS,
@@ -51,7 +50,11 @@ interface ActiveEffect {
   until: number;
 }
 
-export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch; selfId: string }) {
+export default function SabotageScreen({
+  loaded,
+  selfId,
+  settle,
+}: { loaded: LoadedMatch; selfId: string } & Pick<MatchSettleProps, "settle" | "result">) {
   const matchId = loaded.match.id;
   const rounds = loaded.rounds as unknown as Round[];
   const enemyTeam = useMemo(
@@ -59,7 +62,10 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
     [loaded.match, selfId],
   );
   const { on, send } = useMatchChannel(matchId, selfId, enemyTeam);
-  const { settle, result } = useSettle(matchId);
+  // Settlement is owned by the SHELL (single useSettle hook). This screen only
+  // triggers the rounds-exhausted settle via the passed-in `settle`; the shell
+  // renders the lone ResultCard once its hook's result lands.
+  const settledRef = useRef(false);
 
   const [roundIdx, setRoundIdx] = useState(0);
   const [score, setScore] = useState(0);
@@ -233,14 +239,17 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
 
   // settle when finished — the outcome is recomputed server-side from
   // competitive_responses (the /answer route scored every pick); no score map.
+  // The settledRef guard fires this AT MOST ONCE even if the shell re-renders
+  // and hands a new `settle` closure (the hook itself is also idempotent).
   useEffect(() => {
-    if (!finished) return;
+    if (!finished || settledRef.current) return;
+    settledRef.current = true;
     settle();
   }, [finished, settle]);
 
-  if (result) {
-    return <ResultCard result={result} selfId={selfId} teamA={loaded.match.team_a} />;
-  }
+  // The SHELL renders the lone ResultCard once its hook holds a result (it
+  // replaces this screen in the play surface). We only show the brief settling
+  // interstitial in the window after finished fires but before that result.
   if (finished) {
     return (
       <div className="flex-1 flex items-center justify-center text-center px-6">

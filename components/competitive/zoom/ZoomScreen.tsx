@@ -6,8 +6,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
-import { useSettle } from "../useSettle";
-import ResultCard from "../ResultCard";
+import type { MatchSettleProps } from "../useSettle";
 import CountUp from "@/components/CountUp";
 import FangBurst from "../FangBurst";
 import Countdown from "../Countdown";
@@ -24,12 +23,18 @@ interface Round {
   reveal_sec: number;
 }
 
-export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; selfId: string }) {
+export default function ZoomScreen({
+  loaded,
+  selfId,
+  settle,
+}: { loaded: LoadedMatch; selfId: string } & Pick<MatchSettleProps, "settle" | "result">) {
   const matchId = loaded.match.id;
   const rounds = loaded.rounds as unknown as Round[];
   const opponentIds = loaded.match.team_a.includes(selfId) ? loaded.match.team_b : loaded.match.team_a;
   const { on, send } = useMatchChannel(matchId, selfId, opponentIds);
-  const { settle, result } = useSettle(matchId);
+  // Settlement is owned by the SHELL (single useSettle hook). This screen only
+  // triggers the rounds-exhausted settle; the shell renders the ResultCard.
+  const settledRef = useRef(false);
 
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
@@ -134,12 +139,14 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   }, [started, elapsed, revealMs, locked, finished, feedback, advance]);
 
   useEffect(() => {
-    if (!finished) return;
+    if (!finished || settledRef.current) return;
+    settledRef.current = true;
     // Outcome is recomputed server-side from competitive_responses; no score map.
     settle();
   }, [finished, settle]);
 
-  if (result) return <ResultCard result={result} selfId={selfId} teamA={loaded.match.team_a} />;
+  // The SHELL renders the lone ResultCard once its hook holds a result; this
+  // screen shows only the brief settling interstitial until then.
   if (finished) return <SettlingMsg />;
   if (!round) return <p className="text-cream/60 text-center flex-1 flex items-center justify-center">No rounds loaded.</p>;
 
