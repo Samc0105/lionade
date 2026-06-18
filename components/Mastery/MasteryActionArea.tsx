@@ -29,15 +29,21 @@ export interface LiveQuestion {
  * Optional return shape from onAnswer — when present, the option-card animation
  * uses it to flash green (correct) or shake red (wrong). The page's doAnswer
  * already has these from the /answer response, so it just propagates them.
+ *
+ * On a failed submit the page returns `{ ok: false }` so the option body can
+ * clear its picked/outcome state and re-enable the buttons for a retry (instead
+ * of stranding the user with permanently-disabled options). A successful submit
+ * returns the AnswerOutcome (wasCorrect + correctIndex) for the reveal animation.
  */
 export type AnswerOutcome = { wasCorrect: boolean; correctIndex: number };
+export type AnswerResult = AnswerOutcome | { ok: false } | void;
 
 interface Props {
   pending: { type: "teach" | "question" | "socratic"; [k: string]: unknown } | null;
   liveQuestion: LiveQuestion | null;    // only populated when pending.type === 'question'
   disabled?: boolean;
   onContinue: () => Promise<void> | void;
-  onAnswer: (selectedIndex: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
+  onAnswer: (selectedIndex: number) => Promise<AnswerResult> | AnswerResult;
   onSocraticSubmit: (reply: string) => Promise<void> | void;
   /**
    * Optional initial value for the socratic textarea. Used by the parent page
@@ -79,7 +85,7 @@ export default function MasteryActionArea({
 function QuestionOptions(props: {
   q: LiveQuestion;
   disabled?: boolean;
-  onAnswer: (i: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
+  onAnswer: (i: number) => Promise<AnswerResult> | AnswerResult;
 }) {
   return <QuestionOptionsBody key={props.q.questionId} {...props} />;
 }
@@ -89,7 +95,7 @@ function QuestionOptionsBody({
 }: {
   q: LiveQuestion;
   disabled?: boolean;
-  onAnswer: (i: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
+  onAnswer: (i: number) => Promise<AnswerResult> | AnswerResult;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -104,7 +110,17 @@ function QuestionOptionsBody({
       const result = await onAnswer(i);
       if (result && typeof result === "object" && "wasCorrect" in result) {
         setOutcome(result);
+      } else if (result && typeof result === "object" && "ok" in result && result.ok === false) {
+        // Submit failed (network / 401 / 409 / 500). The page surfaced the
+        // error banner; here we reset the per-question UI so the options
+        // re-enable and the user can retry their pick.
+        setPicked(null);
+        setOutcome(null);
       }
+    } catch {
+      // onAnswer threw — same recovery path: re-enable the buttons.
+      setPicked(null);
+      setOutcome(null);
     } finally { setSubmitting(false); }
   };
 
@@ -255,10 +271,15 @@ function SocraticInput({
     setSubmitting(true);
     try {
       await onSubmit(trimmed);
+      // Only clear on success. onSubmit throws on a failed /socratic call so
+      // the typed reasoning stays put for a retry (the page also surfaces an
+      // inline error banner).
       setText("");
       onChange?.("");
-    }
-    finally { setSubmitting(false); }
+    } catch {
+      // Submit failed — keep the textarea populated. Swallow so there's no
+      // unhandled rejection; the page already showed the error.
+    } finally { setSubmitting(false); }
   };
 
   const canSend = !disabled && !submitting && text.trim().length > 0;

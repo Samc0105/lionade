@@ -27,7 +27,7 @@
 // and renders the resulting outcome over the whole play surface.
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -205,7 +205,19 @@ function Shell({
 
   // The shell-initiated endings (End match / Forfeit). `result` here is the
   // shell's own outcome — when set it takes over the whole play surface.
-  const { settle, forfeit, result, settling } = useSettle(matchId ?? "");
+  // `settleError` surfaces a failed /complete or /forfeit inline (instead of
+  // the button silently re-enabling and looking like it did nothing).
+  const { settle, forfeit, result, settling, error: settleError } = useSettle(matchId ?? "");
+
+  // Focus-management refs for the two role="alertdialog" overlays. We mirror the
+  // ConfirmModal pattern: trap Tab inside the panel, move focus to the SAFE
+  // (non-destructive) button on open, restore focus to the trigger on close, and
+  // let Escape fire the safe action (cancel). KEEP WAITING / KEEP PLAYING are the
+  // safe buttons; END MATCH / FORFEIT are the destructive ones.
+  const oppPanelRef = useRef<HTMLDivElement | null>(null);
+  const oppSafeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const exitPanelRef = useRef<HTMLDivElement | null>(null);
+  const exitSafeBtnRef = useRef<HTMLButtonElement | null>(null);
 
   // ── Opponent grace timer. We only treat the opponent as "gone" once they've
   // been absent for OPPONENT_GRACE_MS, measured from opponentLastSeen. A brief
@@ -252,12 +264,64 @@ function Shell({
 
   const confirmForfeit = async () => {
     await forfeit(); // POST /forfeit → forfeited-loss (both played) or voided
-    setExitPrompt(false);
+    // Leave the prompt open on failure so the inline error + retry button show;
+    // useSettle clears no result, so a re-press just retries.
   };
+
+  // KEEP PLAYING — the safe action for the exit prompt (also fired by Escape).
+  const cancelExit = () => setExitPrompt(false);
 
   const endAbandonedMatch = async () => {
     await settle(); // POST /complete → settle (both played enough) or voided
   };
+
+  // KEEP WAITING — the safe action for the opponent panel (also fired by
+  // Escape). Snoozes the panel for one more grace window.
+  const keepWaiting = () => setSnoozeUntil(Date.now() + OPPONENT_GRACE_MS);
+
+  // ── Dialog focus management (mirrors components/ConfirmModal.tsx) ──
+  // Trap Tab within the open dialog + route Escape to the safe action. Only one
+  // of the two overlays is ever open at a time, but we guard each independently.
+  useEffect(() => {
+    if (!showOpponentPanel && !exitPrompt) return;
+    const onKey = (e: KeyboardEvent) => {
+      const panel = showOpponentPanel ? oppPanelRef.current : exitPanelRef.current;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (showOpponentPanel) keepWaiting();
+        else cancelExit();
+        return;
+      }
+      if (e.key !== "Tab" || !panel) return;
+      const items = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showOpponentPanel, exitPrompt]);
+
+  // Move focus to the SAFE button on open + restore to the trigger on close.
+  // rAF avoids a layout race with the entrance animation.
+  useEffect(() => {
+    if (!showOpponentPanel) return;
+    const restoreTo = document.activeElement as HTMLElement | null;
+    const id = requestAnimationFrame(() => oppSafeBtnRef.current?.focus());
+    return () => { cancelAnimationFrame(id); restoreTo?.focus?.(); };
+  }, [showOpponentPanel]);
+
+  useEffect(() => {
+    if (!exitPrompt) return;
+    const restoreTo = document.activeElement as HTMLElement | null;
+    const id = requestAnimationFrame(() => exitSafeBtnRef.current?.focus());
+    return () => { cancelAnimationFrame(id); restoreTo?.focus?.(); };
+  }, [exitPrompt]);
 
   const showConnectivity = !!matchId && !!selfId;
 
@@ -374,6 +438,7 @@ function Shell({
             aria-label="Opponent disconnected"
           >
             <motion.div
+              ref={oppPanelRef}
               initial={reduce ? false : { scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 240, damping: 22 }}
@@ -399,14 +464,23 @@ function Shell({
                 </button>
                 {/* "Wait" snoozes the panel for one more grace window. It
                     reappears if they're still gone, and clears for good the
-                    moment they return (snooze auto-resets on presence). */}
+                    moment they return (snooze auto-resets on presence). This is
+                    the SAFE action — focused on open + fired by Escape. */}
                 <button
-                  onClick={() => setSnoozeUntil(Date.now() + OPPONENT_GRACE_MS)}
+                  ref={oppSafeBtnRef}
+                  onClick={keepWaiting}
                   className="font-bebas tracking-wider px-6 py-2.5 rounded-xl btn-outline text-sm"
                 >
                   KEEP WAITING
                 </button>
               </div>
+              {/* Failed /complete — surfaced inline so the re-enabled END MATCH
+                  button doesn't look like it did nothing. */}
+              {settleError && !settling && (
+                <p className="text-red-400 font-syne text-xs leading-relaxed mt-4" role="alert">
+                  {settleError}
+                </p>
+              )}
               <p className="text-cream/35 font-syne text-[11px] leading-relaxed mt-4">
                 Ending now scores the match. If they never played a round, it
                 voids with no rank change.
@@ -432,6 +506,7 @@ function Shell({
             aria-label="Forfeit match?"
           >
             <motion.div
+              ref={exitPanelRef}
               initial={reduce ? false : { scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 240, damping: 22 }}
@@ -454,13 +529,22 @@ function Shell({
                 >
                   {settling ? "FORFEITING..." : "FORFEIT & LEAVE"}
                 </button>
+                {/* KEEP PLAYING — the SAFE action: focused on open + fired by Escape. */}
                 <button
-                  onClick={() => setExitPrompt(false)}
+                  ref={exitSafeBtnRef}
+                  onClick={cancelExit}
                   className="font-bebas tracking-wider px-6 py-2.5 rounded-xl btn-outline text-sm"
                 >
                   KEEP PLAYING
                 </button>
               </div>
+              {/* Failed /forfeit — surfaced inline so the re-enabled FORFEIT
+                  button doesn't look like it did nothing. */}
+              {settleError && !settling && (
+                <p className="text-red-400 font-syne text-xs leading-relaxed mt-4" role="alert">
+                  {settleError}
+                </p>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -62,6 +62,11 @@ interface ForfeitResponse {
 export function useSettle(matchId: string) {
   const [result, setResult] = useState<MatchOutcome | null>(null);
   const [settling, setSettling] = useState(false);
+  // Surfaced when /complete or /forfeit fails (!ok || !data). Without this the
+  // screen just silently re-enabled its button and the player was stranded with
+  // no idea the request failed. The shell reads this to show an inline retry
+  // message instead of a button that appears to do nothing.
+  const [error, setError] = useState<string | null>(null);
 
   // Normal end-of-match settlement (rounds exhausted) AND the path the present
   // player uses to END a match an opponent abandoned. POST /complete may now
@@ -71,12 +76,16 @@ export function useSettle(matchId: string) {
     async () => {
       if (settling || result) return;
       setSettling(true);
+      setError(null);
       const { ok, data } = await apiPost<CompleteResponse>(
         `/api/competitive/match/${matchId}/complete`,
         {},
       );
       setSettling(false);
-      if (!ok || !data) return;
+      if (!ok || !data) {
+        setError("Couldn't end the match, try again");
+        return;
+      }
       if (data.voided) {
         setResult({ kind: "voided", reason: data.reason });
       } else if (data.winnerTeam) {
@@ -95,12 +104,16 @@ export function useSettle(matchId: string) {
     async () => {
       if (settling || result) return;
       setSettling(true);
+      setError(null);
       const { ok, data } = await apiPost<ForfeitResponse>(
         `/api/competitive/match/${matchId}/forfeit`,
         {},
       );
       setSettling(false);
-      if (!ok || !data) return;
+      if (!ok || !data) {
+        setError("Couldn't end the match, try again");
+        return;
+      }
       if (data.voided) {
         setResult({ kind: "voided", reason: data.reason });
       } else if (data.forfeited && data.result) {
@@ -110,5 +123,5 @@ export function useSettle(matchId: string) {
     [matchId, settling, result],
   );
 
-  return { settle, forfeit, result, settling };
+  return { settle, forfeit, result, settling, error };
 }

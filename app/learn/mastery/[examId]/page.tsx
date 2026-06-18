@@ -13,12 +13,13 @@ const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false }
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import SubtopicRail, { type SubtopicRailItem } from "@/components/Mastery/SubtopicRail";
 import MasteryMessage, { type MessageShape } from "@/components/Mastery/MasteryMessage";
-import MasteryActionArea, { type LiveQuestion } from "@/components/Mastery/MasteryActionArea";
+import MasteryActionArea, { type LiveQuestion, type AnswerOutcome } from "@/components/Mastery/MasteryActionArea";
 import { useActiveTime } from "@/components/Mastery/useActiveTime";
 import SessionReportFab from "@/components/Mastery/StudySheetButton";
 import NinnyThinking, { MasteryNotesFooter } from "@/components/Mastery/NinnyThinking";
 import type { ThinkingContext } from "@/lib/mastery/thinking-phrases";
 import { apiGet, apiPost, swrFetcher } from "@/lib/api-client";
+import { readStoredSessionSync } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useHeartbeat } from "@/lib/use-heartbeat";
 import type { StudySheetInput, SubtopicSummary } from "@/components/Mastery/studySheetPdf";
@@ -113,9 +114,16 @@ export default function MasterySessionPage() {
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
+  const [bootRetrying, setBootRetrying] = useState(false);
   const [celebrateKey, setCelebrateKey] = useState(0);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+
+  // Recoverable, in-session action error (a /next, /answer, or /socratic call
+  // failed). Surfaced as an inline banner above the action area with a retry
+  // affordance. Distinct from bootError, which is a hard "couldn't start" wall.
+  // Init null (not "") so the banner never flashes empty before data lands.
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Tier 3 refresh-resumable scratch state — restored from
   // /api/mastery/sessions/:id/state on mount and re-saved (debounced) on
@@ -125,24 +133,50 @@ export default function MasterySessionPage() {
   const stateHydratedRef = useRef(false);
   const partialDraftRef = useRef<string>("");
   const stateSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Latest debounced /state payload + endpoint, kept current so the unmount
+  // cleanup can flush it (the timer is cleared on unmount before it would
+  // otherwise fire). Null when no save is pending.
+  const pendingStateSaveRef = useRef<{ path: string; body: Record<string, unknown> } | null>(null);
+
+  // Resolve active session (idempotent POST). Shared by the mount effect and
+  // the bootError "Try again" button so a transient resolve failure isn't a
+  // dead end. Returns whether it succeeded so callers can manage retry UI.
+  const resolveSession = useCallback(async (): Promise<boolean> => {
+    if (!examId) return false;
+    const r = await apiPost<{ sessionId: string; resumed: boolean }>(
+      `/api/mastery/exams/${examId}/sessions`, {},
+    );
+    if (!r.ok || !r.data?.sessionId) {
+      setBootError(r.error || "Couldn't start session");
+      return false;
+    }
+    setBootError(null);
+    setSessionId(r.data.sessionId);
+    return true;
+  }, [examId]);
 
   // Resolve active session on mount (idempotent)
   useEffect(() => {
     if (!examId) return;
     let cancelled = false;
     (async () => {
-      const r = await apiPost<{ sessionId: string; resumed: boolean }>(
-        `/api/mastery/exams/${examId}/sessions`, {},
-      );
-      if (cancelled) return;
-      if (!r.ok || !r.data?.sessionId) {
-        setBootError(r.error || "Couldn't start session");
-        return;
-      }
-      setSessionId(r.data.sessionId);
+      const ok = await resolveSession();
+      if (cancelled) void ok; // resolveSession's setState is harmless post-unmount; nothing else to undo
     })();
     return () => { cancelled = true; };
-  }, [examId]);
+  }, [examId, resolveSession]);
+
+  // bootError "Try again" handler — re-runs the resolve and shows a pending
+  // state on the button while in flight.
+  const retryBoot = useCallback(async () => {
+    if (bootRetrying) return;
+    setBootRetrying(true);
+    try {
+      await resolveSession();
+    } finally {
+      setBootRetrying(false);
+    }
+  }, [bootRetrying, resolveSession]);
 
   // Heartbeat (mastery-specific elapsed-time tracker)
   useActiveTime(sessionId);
@@ -226,24 +260,63 @@ export default function MasterySessionPage() {
     partialDraftRef.current = draft;
     if (!sessionId) return;
     if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
-    stateSaveTimerRef.current = setTimeout(() => {
-      const currentQuestionId = (data?.session.pending as { questionId?: string } | null)?.questionId ?? null;
-      void apiPost(`/api/mastery/sessions/${sessionId}/state`, {
+    const currentQuestionId = (data?.session.pending as { questionId?: string } | null)?.questionId ?? null;
+    // Stage the latest payload so the unmount flush can fire it if the user
+    // navigates away inside the debounce window.
+    pendingStateSaveRef.current = {
+      path: `/api/mastery/sessions/${sessionId}/state`,
+      body: {
         current_question_id: currentQuestionId,
         partial_answer: partialDraftRef.current || null,
         answered_count: data?.session.questionsAnswered ?? 0,
         correct_count: data?.session.correctCount ?? 0,
-      });
+      },
+    };
+    stateSaveTimerRef.current = setTimeout(() => {
+      const staged = pendingStateSaveRef.current;
+      pendingStateSaveRef.current = null;
+      if (staged) {
+        // Re-read the draft at fire time so the body reflects the freshest
+        // keystroke (it may have advanced since this save was staged).
+        staged.body.partial_answer = partialDraftRef.current || null;
+        void apiPost(staged.path, staged.body);
+      }
     }, 500);
   }, [sessionId, data?.session.pending, data?.session.questionsAnswered, data?.session.correctCount]);
 
-  // Flush the pending save on unmount so the last 500ms of keystrokes
-  // aren't lost when the user navigates away.
+  // Flush the pending save on unmount so the last (up to 500ms) of keystrokes
+  // aren't lost when the user navigates away. clearTimeout alone would discard
+  // them; here we fire the staged payload immediately via fetch keepalive so
+  // it survives the navigation/teardown. The auth token is read synchronously
+  // from storage (apiPost's async getSession() can't complete during teardown).
   useEffect(() => {
     return () => {
       if (stateSaveTimerRef.current) {
         clearTimeout(stateSaveTimerRef.current);
         stateSaveTimerRef.current = null;
+      }
+      if (prefetchRearmTimerRef.current) {
+        clearTimeout(prefetchRearmTimerRef.current);
+        prefetchRearmTimerRef.current = null;
+      }
+      const staged = pendingStateSaveRef.current;
+      pendingStateSaveRef.current = null;
+      if (staged && typeof window !== "undefined") {
+        staged.body.partial_answer = partialDraftRef.current || null;
+        const token = readStoredSessionSync()?.access_token;
+        try {
+          void fetch(staged.path, {
+            method: "POST",
+            keepalive: true,
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(staged.body),
+          });
+        } catch {
+          // Best-effort flush — nothing actionable if the browser refuses it.
+        }
       }
     };
   }, []);
@@ -284,6 +357,18 @@ export default function MasterySessionPage() {
   const [queue, setQueue] = useState<QueuedQuestion[]>([]);
   const queueInFlightRef = useRef(false);
 
+  // Cold-cache backoff guard. If a refill returns zero NEW usable questions
+  // (cold AI cache, or everything got de-duped against avoidIds), the
+  // warming effect would otherwise re-fire instantly — queue.length is still
+  // < 2, so its dependency never changes — and tight-loop the (expensive,
+  // Claude-backed) prefetch endpoint. We stamp a cooldown deadline on a
+  // zero-yield refill and a monotonically-increasing "re-arm" counter that
+  // the warming effect waits on, so a cold cache can't spin the endpoint.
+  const prefetchCoolUntilRef = useRef(0);
+  const prefetchRearmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [prefetchRearm, setPrefetchRearm] = useState(0);
+  const PREFETCH_COOLDOWN_MS = 8000;
+
   const refillQueue = useCallback(
     async (strategy: "next" | "reinforce", lastSubtopicId?: string) => {
       if (!sessionId || queueInFlightRef.current) return;
@@ -294,12 +379,30 @@ export default function MasterySessionPage() {
           `/api/mastery/sessions/${sessionId}/prefetch`,
           { strategy, lastSubtopicId, count: 5, avoidIds },
         );
+        let addedCount = 0;
         if (r.ok && r.data?.questions?.length) {
           const fresh = r.data.questions;
           setQueue(prev => {
             const seen = new Set(prev.map(q => q.questionId));
-            return [...prev, ...fresh.filter(q => !seen.has(q.questionId))];
+            const additions = fresh.filter(q => !seen.has(q.questionId));
+            addedCount = additions.length;
+            return additions.length ? [...prev, ...additions] : prev;
           });
+        }
+        if (addedCount > 0) {
+          // Real progress: clear any cooldown so warming resumes immediately.
+          prefetchCoolUntilRef.current = 0;
+        } else {
+          // Zero new questions: back off so the warming effect can't re-fire
+          // until the cooldown elapses. Schedule a single re-arm tick that
+          // changes the effect's dependency so it re-evaluates exactly once
+          // after the window (rather than spinning).
+          prefetchCoolUntilRef.current = Date.now() + PREFETCH_COOLDOWN_MS;
+          if (prefetchRearmTimerRef.current) clearTimeout(prefetchRearmTimerRef.current);
+          prefetchRearmTimerRef.current = setTimeout(
+            () => setPrefetchRearm(n => n + 1),
+            PREFETCH_COOLDOWN_MS,
+          );
         }
       } finally {
         queueInFlightRef.current = false;
@@ -309,13 +412,18 @@ export default function MasterySessionPage() {
   );
 
   // Kick off the first pre-fetch once the session is live. The effect re-fires
-  // if the queue drops below 2, which keeps it warm across turns.
+  // if the queue drops below 2, which keeps it warm across turns. The cooldown
+  // ref (set when a refill yields zero new questions) prevents a cold cache
+  // from tight-looping the prefetch endpoint: while inside the cooldown the
+  // effect no-ops, and a scheduled re-arm tick (prefetchRearm) re-evaluates it
+  // once the window elapses.
   useEffect(() => {
     if (!sessionId || !data) return;
     if (queue.length >= 2) return;
+    if (Date.now() < prefetchCoolUntilRef.current) return;
     void refillQueue("next");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId, data?.session.id, queue.length]);
+  }, [sessionId, data?.session.id, queue.length, prefetchRearm]);
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const [busy, setBusy] = useState(false);
@@ -351,12 +459,22 @@ export default function MasterySessionPage() {
     async (opts?: { preferredQuestionId?: string }) => {
       if (!sessionId || busy) return;
       setBusy(true);
+      setActionError(null);
       try {
         const body: Record<string, unknown> = {};
         if (opts?.preferredQuestionId) body.preferredQuestionId = opts.preferredQuestionId;
         const r = await apiPost<NextResponse>(
           `/api/mastery/sessions/${sessionId}/next`, body,
         );
+        if (!r.ok) {
+          // /next failed (commonly a 500 when AI generation hiccups). Surface a
+          // recoverable banner with a retry affordance instead of silently
+          // swallowing it behind a background mutate(). On a 409 (session no
+          // longer active / stale state) resync the snapshot too.
+          setActionError(r.error || "Ninny couldn't load the next step. Try again.");
+          if (r.status === 409) void mutate();
+          return;
+        }
         if (r.ok && r.data?.kind === "celebrate") setCelebrateKey(k => k + 1);
         if (r.ok && r.data?.kind === "question" && r.data.message && r.data.challengeToken && r.data.subtopicId) {
           const msg = r.data.message;
@@ -414,18 +532,33 @@ export default function MasterySessionPage() {
     socraticProbeMessage: MessageShape | null;
   };
 
-  const doAnswer = useCallback(async (selectedIndex: number) => {
-    if (!sessionId || !liveQuestion || busy) return;
+  const doAnswer = useCallback(async (selectedIndex: number): Promise<AnswerOutcome | { ok: false }> => {
+    if (!sessionId || !liveQuestion || busy) return { ok: false };
     // Snapshot subtopic BEFORE mutating; after the optimistic update,
     // liveQuestion might be about to change.
     const answeredSubtopicId = data?.session.pending?.subtopicId ?? null;
     setBusy(true);
+    setActionError(null);
     try {
       const r = await apiPost<AnswerResponse>(
         `/api/mastery/sessions/${sessionId}/answer`,
         { selectedIndex, challengeToken: liveQuestion.challengeToken },
       );
-      if (!r.ok || !r.data) return;
+      if (!r.ok || !r.data) {
+        // Submit failed: 500 (record error), 401 (expired auth), 409 (no
+        // pending / token mismatch), or a network drop. Surface an inline
+        // banner AND return { ok: false } so QuestionOptionsBody clears its
+        // picked/outcome state and re-enables the buttons for a retry. On a
+        // 409 the client's `pending` is stale, so resync via mutate() — the
+        // question may have already been consumed server-side.
+        setActionError(
+          r.status === 409
+            ? "That question already moved on. Reloading the latest step."
+            : r.error || "Couldn't record that answer. Try again.",
+        );
+        if (r.status === 409) void mutate();
+        return { ok: false };
+      }
       const ans = r.data;
       // Capture the outcome to return to QuestionOptions for its
       // green/red feedback animation. Returned at end of try block.
@@ -506,13 +639,32 @@ export default function MasterySessionPage() {
   const doSocratic = async (reply: string) => {
     if (!sessionId || busy) return;
     setBusy(true);
+    setActionError(null);
     try {
-      await apiPost(`/api/mastery/sessions/${sessionId}/socratic`, { reply });
-      // Clear the persisted partial answer — the user just submitted, so the
-      // draft is no longer "in progress". We keep the row so answered_count
-      // / correct_count survive; only the textarea draft is cleared. Fire-
-      // and-forget; not critical to await.
+      const r = await apiPost(`/api/mastery/sessions/${sessionId}/socratic`, { reply });
+      if (!r.ok) {
+        // Submit failed (500, 401, 409 no-probe-pending, 429 rate-limit, or a
+        // network drop). Surface a banner and THROW so SocraticInput.send's
+        // setText("") never runs — the user's typed reasoning stays in the
+        // textarea for a retry. We deliberately do NOT clear partialDraftRef
+        // or post partial_answer:null until we've confirmed success, so a
+        // failed submit never wipes the persisted draft either. On a 409
+        // (probe already consumed) resync so the UI reflects the real state.
+        setActionError(
+          r.status === 429
+            ? "Easy there. Give Ninny a moment before sending again."
+            : r.error || "Couldn't send your reasoning. Try again.",
+        );
+        if (r.status === 409) void mutate();
+        throw new Error(r.error || "socratic failed");
+      }
+      // Success only: clear the persisted partial answer — the user just
+      // submitted, so the draft is no longer "in progress". We keep the row so
+      // answered_count / correct_count survive; only the textarea draft is
+      // cleared. Fire-and-forget; not critical to await. Also drop any staged
+      // unmount-flush payload so it can't re-post the now-stale draft.
       partialDraftRef.current = "";
+      pendingStateSaveRef.current = null;
       if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
       void apiPost(`/api/mastery/sessions/${sessionId}/state`, {
         partial_answer: null,
@@ -537,9 +689,20 @@ export default function MasterySessionPage() {
         <div className="max-w-[720px] mx-auto px-6 py-24 text-center">
           <h1 className="font-bebas text-3xl tracking-wider mb-3">Couldn't load this session</h1>
           <p className="text-[14px] text-cream/70 mb-6">{bootError}</p>
-          <Link href={backHref} className="inline-block rounded-md font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
-            {classIdContext ? "Back to Class" : "Back to Mastery Mode"}
-          </Link>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={retryBoot}
+              disabled={bootRetrying}
+              aria-busy={bootRetrying}
+              className="inline-flex items-center min-h-[40px] rounded-full bg-gold text-navy hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              {bootRetrying ? "Retrying" : "Try again"}
+            </button>
+            <Link href={backHref} className="inline-block rounded-md font-mono text-[11px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+              {classIdContext ? "Back to Class" : "Back to Mastery Mode"}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -791,16 +954,50 @@ export default function MasterySessionPage() {
                   {sessionId && <MasteryNotesFooter sessionId={sessionId} />}
                 </div>
               ) : (
-                <MasteryActionArea
-                  pending={data.session.pending}
-                  liveQuestion={liveQuestion}
-                  disabled={busy}
-                  onContinue={doNext}
-                  onAnswer={doAnswer}
-                  onSocraticSubmit={doSocratic}
-                  socraticInitial={socraticInitial}
-                  onSocraticChange={persistMasteryState}
-                />
+                <>
+                  {actionError && (
+                    <div
+                      role="alert"
+                      className="mb-3 flex items-start gap-3 rounded-[8px] border border-[#EF4444]/40 bg-[#EF4444]/[0.08] px-4 py-3"
+                    >
+                      <p className="flex-1 text-[13px] leading-relaxed text-cream/90">{actionError}</p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {/* When nothing is pending, the only way to recover a
+                            failed /next is to re-ask for it. For question /
+                            socratic states the user retries by re-picking or
+                            re-sending, so we just offer dismiss there. */}
+                        {!data.session.pending && (
+                          <button
+                            type="button"
+                            onClick={() => { void doNext(); }}
+                            disabled={busy}
+                            className="rounded-full bg-gold text-navy hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed font-mono text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-1 focus-visible:ring-offset-navy"
+                          >
+                            Try again
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setActionError(null)}
+                          aria-label="Dismiss error"
+                          className="rounded-full border border-white/[0.15] text-cream/55 hover:text-cream hover:border-white/[0.3] font-mono text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-1 focus-visible:ring-offset-navy"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <MasteryActionArea
+                    pending={data.session.pending}
+                    liveQuestion={liveQuestion}
+                    disabled={busy}
+                    onContinue={doNext}
+                    onAnswer={doAnswer}
+                    onSocraticSubmit={doSocratic}
+                    socraticInitial={socraticInitial}
+                    onSocraticChange={persistMasteryState}
+                  />
+                </>
               )}
             </div>
           </section>

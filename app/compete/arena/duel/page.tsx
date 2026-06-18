@@ -152,6 +152,11 @@ function ArenaPage() {
   const [me, setMe] = useState<ArenaPlayer | null>(null);
   const [opponent, setOpponent] = useState<ArenaPlayer | null>(null);
   const [myElo, setMyElo] = useState<number | null>(null);
+  // Which slot I occupy in the match (player1 vs player2). Computed once at load
+  // from match.player1_id === me, then used in the results phase to read MY own
+  // already-computed result object (points / ELO) instead of always reading
+  // player1's. null until a match is loaded.
+  const [iAmP1, setIAmP1] = useState<boolean | null>(null);
 
   // Matchmaking
   const [searchTime, setSearchTime] = useState(0);
@@ -337,6 +342,7 @@ function ArenaPage() {
     setQuestions(qs);
 
     const isP1 = data.match.player1_id === user?.id || data.player1?.id === user?.id;
+    setIAmP1(isP1);
     const meData = isP1 ? data.player1 : data.player2;
     const opData = isP1 ? data.player2 : data.player1;
 
@@ -616,6 +622,7 @@ function ArenaPage() {
     setPhase("lobby");
     setMatchId(null);
     setOpponent(null);
+    setIAmP1(null);
     setQuestions([]);
     setCurrentQ(0);
     setSelected(null);
@@ -844,7 +851,7 @@ function ArenaPage() {
                       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
                         aria-label={`${c.challengerName}'s avatar`}
                         style={{ border: "2px solid rgba(239,68,68,0.4)" }}>
-                        <img src={c.challengerAvatar ?? ""} alt={c.challengerName} className="w-12 h-12 rounded-full object-cover" />
+                        <img src={avatarFor(c.challengerName, c.challengerAvatar)} alt={c.challengerName} className="w-12 h-12 rounded-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-cream font-bold text-sm truncate">{c.challengerName}</p>
@@ -1393,40 +1400,19 @@ function ArenaPage() {
   // PHASE: RESULTS
   // ═══════════════════════════════════════════════════════════
   if (phase === "results") {
-    const iAmP1 = matchResult ? (me?.id === undefined ? true : true) : true;
-    const myRes = matchResult
-      ? (matchResult.winnerId === null
-        ? matchResult.player1 // draw, pick either
-        : matchResult.player1) // we need to figure out which one is us
-      : null;
-    const opRes = matchResult
-      ? (matchResult.winnerId === null
-        ? matchResult.player2
-        : matchResult.player2)
-      : null;
+    // Pick MY result object by the slot I actually occupy (player1 vs player2),
+    // computed at load as iAmP1. The /complete payload keys player1 → match
+    // player1_id and player2 → player2_id, so this maps me to my own row. We
+    // then read MY signed eloChange directly — the server already computed it.
+    const myRes = matchResult ? (iAmP1 ? matchResult.player1 : matchResult.player2) : null;
 
-    // Determine if I won based on the match result
+    // Determine if I won based on the match result (winnerId is my id when I won).
     const iWon = matchResult ? matchResult.winnerId === me?.id : myTotalPoints > opTotalPoints;
     const isDraw = matchResult ? matchResult.isDraw : myTotalPoints === opTotalPoints;
 
-    // Figure out which player is me in the result
-    // The match API returns player1 and player2 in order. We know if we're player1 or player2.
-    // For simplicity, use our running tallies which are accurate.
-    const myEloChange = matchResult
-      ? (iWon ? Math.abs(matchResult.player1.eloChange) : isDraw ? 0 : -Math.abs(matchResult.player1.eloChange))
-      : 0;
-
-    // Best effort ELO change — use whichever player has positive change if we won
-    let displayEloChange = 0;
-    if (matchResult) {
-      if (iWon) {
-        displayEloChange = matchResult.player1.eloChange > 0 ? matchResult.player1.eloChange : matchResult.player2.eloChange;
-      } else if (isDraw) {
-        displayEloChange = 0;
-      } else {
-        displayEloChange = matchResult.player1.eloChange < 0 ? matchResult.player1.eloChange : matchResult.player2.eloChange;
-      }
-    }
+    // My own ELO delta, already signed by the server. No positive/negative
+    // heuristic — just display the value attributed to my slot.
+    const displayEloChange = myRes?.eloChange ?? 0;
 
     return (
       <ProtectedRoute>
