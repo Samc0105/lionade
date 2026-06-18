@@ -115,13 +115,22 @@ resource "aws_s3_bucket_public_access_block" "user_uploads" {
   restrict_public_buckets = true
 }
 
+# SSE-KMS with the shared customer-managed CMK (defined + imported in storage.tf).
+# bucket_key_enabled = true uses S3 Bucket Keys so KMS request cost stays near-zero.
+# SAFE on the live note-images pilot: S3 applies this default encryption transparently
+# on presigned PUTs that don't specify encryption, so no app-code change is required to
+# write KMS-encrypted objects. The matching kms:GenerateDataKey/Decrypt grant for the
+# uploads_web role is added below; the deny-unencrypted-PutObject *policy* is deferred to
+# the app-cutover pass (it would require the presign to send the x-amz-sse header).
 resource "aws_s3_bucket_server_side_encryption_configuration" "user_uploads" {
   bucket = aws_s3_bucket.user_uploads.id
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.s3.arn
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -258,12 +267,25 @@ resource "aws_iam_role_policy" "uploads_web" {
   role  = aws_iam_role.uploads_web[0].id
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Sid      = "PutGetOnly"
-      Effect   = "Allow"
-      Action   = ["s3:PutObject", "s3:GetObject"]
-      Resource = "${aws_s3_bucket.user_uploads.arn}/*"
-    }]
+    Statement = [
+      {
+        Sid      = "PutGetOnly"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject"]
+        Resource = "${aws_s3_bucket.user_uploads.arn}/*"
+        # Covers every reserved per-user prefix: note-images/<uid>/, syllabi/<uid>/,
+        # resumes/<uid>/ (reserved ahead of the resume-retention feature), avatars/<uid>/.
+      },
+      {
+        # Required now that user_uploads is SSE-KMS: presigned PUT must wrap a data key
+        # and presigned GET must decrypt it. Without this the dormant pilot would 403 the
+        # moment it is activated. Scoped to the single Lionade S3 CMK.
+        Sid      = "UseKmsForUploads"
+        Effect   = "Allow"
+        Action   = ["kms:GenerateDataKey", "kms:Decrypt"]
+        Resource = aws_kms_key.s3.arn
+      }
+    ]
   })
 }
 
@@ -539,15 +561,25 @@ variable "alert_email" {
 resource "aws_budgets_budget" "monthly" {
   name         = "lionade-monthly"
   budget_type  = "COST"
-  limit_amount = "25"
+  limit_amount = "20" # Sam's stated ceiling. NOTE: Budgets only ALERTS, it does not stop spend.
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
+  # Forecast >80% — the early warning (fires before you actually cross the line).
   notification {
     comparison_operator        = "GREATER_THAN"
     threshold                  = 80
     threshold_type             = "PERCENTAGE"
     notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  # Actual >50% — a mid-month heads-up well before the ceiling.
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 50
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
     subscriber_email_addresses = [var.alert_email]
   }
 
