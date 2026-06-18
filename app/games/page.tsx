@@ -42,6 +42,8 @@ import {
   FileText,
   PaintBrush,
   MicrophoneStage,
+  Timer,
+  Backspace,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 
@@ -763,7 +765,7 @@ export default function GamesPage() {
                     color: "#FDE68A",
                   }}
                 >
-                  <span aria-hidden="true">📚</span>
+                  <BookOpen size={11} weight="fill" aria-hidden="true" />
                   <span className="truncate">from {pdfName}</span>
                 </span>
               </div>
@@ -909,7 +911,7 @@ export default function GamesPage() {
                       aria-label="Delete last letter"
                       className="min-h-[44px] px-3 py-3 rounded-lg text-xs font-bold transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                       style={{ background: "var(--game-key-bg, rgba(255,255,255,0.1))", color: "var(--game-key-text, #EEF4FF)" }}>
-                      <span aria-hidden="true">⌫</span>
+                      <Backspace size={16} weight="fill" aria-hidden="true" className="inline-block align-middle" />
                     </button>
                   )}
                 </div>
@@ -1548,7 +1550,7 @@ export default function GamesPage() {
             >
               {isMaxed ? (
                 <>
-                  <span aria-hidden="true">{"⏱"}</span>
+                  <Timer size={14} weight="fill" aria-hidden="true" />
                   Maxed
                 </>
               ) : continuable ? (
@@ -1625,7 +1627,7 @@ export default function GamesPage() {
                       }}
                       title={`${streak} consecutive days with at least one ticket pulled`}
                     >
-                      <span aria-hidden="true">🔥</span>
+                      <Fire size={12} weight="fill" aria-hidden="true" />
                       {streak}-day run
                     </span>
                   );

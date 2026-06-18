@@ -10,6 +10,7 @@
 // All driven by the `players` already in client state — nothing is re-fetched.
 
 import { motion, useReducedMotion } from "framer-motion";
+import { Crown, Eye } from "@phosphor-icons/react";
 import CountUp from "@/components/CountUp";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
@@ -92,10 +93,10 @@ export default function PartyScoreboard({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span
-                  className="font-bebas text-xs tracking-wider w-5 text-center"
+                  className="font-bebas text-xs tracking-wider w-5 text-center inline-flex items-center justify-center"
                   style={{ color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(238,244,255,0.4)" }}
                 >
-                  {isLeader ? "👑" : i + 1}
+                  {isLeader ? <Crown size={13} weight="fill" aria-hidden="true" /> : i + 1}
                 </span>
                 <span className="font-syne text-sm text-cream/85 truncate">
                   <AnimatedUsername
@@ -121,7 +122,7 @@ export default function PartyScoreboard({
                     }}
                     title="Joined mid-round, will play next round"
                   >
-                    <span aria-hidden="true">{"\u{1F441}"}</span>SPECTATING
+                    <Eye size={11} weight="fill" aria-hidden="true" />SPECTATING
                   </span>
                 )}
               </div>

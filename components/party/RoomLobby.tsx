@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, Eye, Lightning, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
+import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, Eye, HandPointing, Lightning, MaskHappy, Medal, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
@@ -1256,7 +1256,14 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
             boxShadow: alreadyNudgedThisWindow ? "none" : "0 4px 20px rgba(236,72,153,0.35)",
           }}
         >
-          {alreadyNudgedThisWindow ? "NUDGE SENT · NEXT TURN IN A SEC" : "👉 NUDGE THE HOST"}
+          {alreadyNudgedThisWindow ? (
+            "NUDGE SENT · NEXT TURN IN A SEC"
+          ) : (
+            <span className="inline-flex items-center justify-center gap-2">
+              <HandPointing size={18} weight="fill" aria-hidden="true" />
+              NUDGE THE HOST
+            </span>
+          )}
         </motion.button>
       )}
 
@@ -1291,7 +1298,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
             <div className="flex flex-wrap items-center gap-2">
               {recapTop.map((p, i) => {
                 const isMe = p.user_id === meUserId;
-                const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                const medalColor = i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : "#CD7F32";
                 return (
                   <span
                     key={p.user_id}
@@ -1301,7 +1308,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
                       border: isMe ? `1px solid ${lastMeta.accent}59` : "1px solid rgba(255,255,255,0.1)",
                     }}
                   >
-                    <span className="text-sm" aria-hidden="true">{medal}</span>
+                    <Medal size={16} weight="fill" aria-hidden="true" style={{ color: medalColor }} />
                     <span className="font-syne text-xs text-cream/85 truncate max-w-[120px]">
                       {p.username ?? "Player"}
                       {isMe && <span className="text-cream/45 ml-1">you</span>}

@@ -25,6 +25,8 @@ import {
   BookOpen,
   GlobeHemisphereWest,
   ArrowsClockwise,
+  StarFour,
+  type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth";
 import { swrFetcher } from "@/lib/api-client";
@@ -41,10 +43,10 @@ const SORTS: { id: DiscoverSort; label: string }[] = [
   { id: "cloned", label: "Most cloned" },
 ];
 
-const KINDS: { id: DiscoverKind; label: string; emoji: string }[] = [
-  { id: "all", label: "All", emoji: "✦" },
-  { id: "general", label: "General", emoji: "📚" },
-  { id: "language", label: "Language", emoji: "🌍" },
+const KINDS: { id: DiscoverKind; label: string; Icon: PhosphorIcon }[] = [
+  { id: "all", label: "All", Icon: StarFour },
+  { id: "general", label: "General", Icon: BookOpen },
+  { id: "language", label: "Language", Icon: GlobeHemisphereWest },
 ];
 
 const PAGE_SIZE = 20;
@@ -112,6 +114,7 @@ export default function DiscoverTab({ onCloned }: Props) {
         <div className="flex gap-1.5 flex-wrap" role="group" aria-label="Filter by bank kind">
           {KINDS.map(k => {
             const isActive = kindFilter === k.id;
+            const KindIcon = k.Icon;
             return (
               <button
                 key={k.id}
@@ -124,7 +127,7 @@ export default function DiscoverTab({ onCloned }: Props) {
                     : "bg-white/5 border-white/10 text-cream/70 hover:bg-white/10 hover:text-cream"
                 }`}
               >
-                <span aria-hidden="true">{k.emoji}</span>
+                <KindIcon size={13} weight="fill" aria-hidden="true" />
                 {k.label}
               </button>
             );

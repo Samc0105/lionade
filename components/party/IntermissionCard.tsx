@@ -8,6 +8,7 @@
 // accent flavors.
 
 import { useReducedMotion } from "framer-motion";
+import { Crown } from "@phosphor-icons/react";
 
 interface Player {
   user_id: string;
@@ -96,10 +97,14 @@ export default function IntermissionCard({
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span
-                    className="font-bebas text-[11px] w-5 text-center"
+                    className="font-bebas text-[11px] w-5 text-center inline-flex items-center justify-center"
                     style={{ color: isLeader ? "#FFD700" : "rgba(238,244,255,0.45)" }}
                   >
-                    {isLeader ? "👑" : `#${i + 1}`}
+                    {isLeader ? (
+                      <Crown size={13} weight="fill" aria-hidden="true" />
+                    ) : (
+                      `#${i + 1}`
+                    )}
                   </span>
                   <span className="font-syne text-sm text-cream/90 truncate">
                     {p.username ?? "Player"}

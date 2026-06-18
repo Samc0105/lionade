@@ -26,6 +26,7 @@ import {
   type MeterState,
 } from "@/lib/competitive/sabotage-economy";
 import { SABOTAGE_EVENTS, type SabotageAttackKind } from "@/lib/competitive/channels";
+import { Snowflake } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import FangBurst from "../FangBurst";
@@ -359,7 +360,10 @@ export default function SabotageScreen({
           <p className="text-cream/90 text-xl sm:text-2xl lg:text-3xl leading-snug font-medium">{round.question}</p>
           {hasEffect("freeze") && (
             <div className="absolute inset-0 rounded-2xl flex items-center justify-center bg-[#00BFFF]/10 backdrop-blur-sm">
-              <span className="font-bebas text-3xl text-[#00BFFF] tracking-widest">❄ FROZEN</span>
+              <span className="font-bebas text-3xl text-[#00BFFF] tracking-widest inline-flex items-center gap-2">
+                <Snowflake size={28} weight="fill" aria-hidden="true" />
+                FROZEN
+              </span>
             </div>
           )}
         </div>

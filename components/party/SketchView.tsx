@@ -22,6 +22,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Fire, LinkSimple, Pause, PencilSimple, Play } from "@phosphor-icons/react";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
@@ -1747,7 +1748,7 @@ export default function SketchView({
               return (
                 <span className={`font-syne text-xs italic inline-flex items-center gap-1.5 ${isActive ? "text-cream/85" : isThinking ? "text-cream/45" : "text-cream/60"}`}>
                   {isActive && (
-                    <span aria-hidden="true" className="text-purple-300">✏</span>
+                    <PencilSimple size={13} weight="fill" aria-hidden="true" className="text-purple-300" />
                   )}
                   {drawerLabel} {verb}
                   <span aria-hidden="true" className="inline-flex items-center gap-0.5 ml-0.5">
@@ -2117,12 +2118,12 @@ export default function SketchView({
               boxShadow: "0 0 28px rgba(168,85,247,0.12)",
             }}
           >
-            <span
+            <PencilSimple
+              size={48}
+              weight="fill"
               aria-hidden="true"
-              className={`inline-block text-5xl mb-4 ${reduced ? "" : "pa-pencil-write"}`}
-            >
-              {"✏️"}
-            </span>
+              className={`inline-block mb-4 text-[#A855F7] ${reduced ? "" : "pa-pencil-write"}`}
+            />
             <p className="font-bebas text-[11px] text-cream/55 tracking-[0.3em] mb-2">
               PICKING A WORD
             </p>
@@ -2271,8 +2272,12 @@ export default function SketchView({
                 }}
                 aria-label={pausedAt !== null ? "Resume the round" : "Pause the round"}
               >
-                <span aria-hidden="true" className="mr-1">
-                  {pausedAt !== null ? "▶" : "⏸"}
+                <span aria-hidden="true" className="mr-1 inline-flex align-middle">
+                  {pausedAt !== null ? (
+                    <Play size={12} weight="fill" />
+                  ) : (
+                    <Pause size={12} weight="fill" />
+                  )}
                 </span>
                 {pausedAt !== null ? "RESUME" : "PAUSE"}
               </button>
@@ -2292,7 +2297,9 @@ export default function SketchView({
                 }}
                 aria-label="Invite a friend mid-game"
               >
-                <span aria-hidden="true" className="mr-1">{"\u{1F517}"}</span>
+                <span aria-hidden="true" className="mr-1 inline-flex align-middle">
+                  <LinkSimple size={12} weight="bold" />
+                </span>
                 INVITE
               </button>
             )}
@@ -2316,7 +2323,9 @@ export default function SketchView({
                     boxShadow: "0 0 24px rgba(255,215,0,0.25)",
                   }}
                 >
-                  <span aria-hidden="true" className="mr-2">{"⏸"}</span>
+                  <span aria-hidden="true" className="mr-2 inline-flex align-middle">
+                    <Pause size={22} weight="fill" />
+                  </span>
                   PAUSED by {pausedByName ?? "host"}
                 </div>
               </div>
@@ -2489,7 +2498,9 @@ export default function SketchView({
                         </>
                       ) : m.variant === "close" ? (
                         <span className="text-amber-300 font-semibold">
-                          <span aria-hidden="true" className="mr-0.5">🔥</span> so close!
+                          <span aria-hidden="true" className="mr-0.5 inline-flex align-middle">
+                            <Fire size={13} weight="fill" />
+                          </span> so close!
                         </span>
                       ) : (
                         <>
