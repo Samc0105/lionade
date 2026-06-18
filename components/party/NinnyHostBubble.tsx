@@ -4,7 +4,6 @@
 // few seconds. Pure UI — the parent owns when to show it.
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { cdnUrl } from "@/lib/cdn";
 
 interface Props {
   message: string | null;
@@ -33,7 +32,7 @@ export default function NinnyHostBubble({ message, align = "left" }: Props) {
             }}
           >
             <img
-              src={cdnUrl("/ninny.png")}
+              src="/hello.png"
               alt="Ninny"
               className="w-full h-full object-cover"
               onError={(e) => {
