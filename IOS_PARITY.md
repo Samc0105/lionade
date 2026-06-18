@@ -7,6 +7,133 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-17 → 06-18: WEB POLISH + ECONOMY HARDENING + SERVER BACKLOG + PAYMENTS
+
+**Status:** Shipped to web `main` (the polish/a11y/economy-display pass + the X-handle + .env.example + Stripe runbook) plus a HELD branch `feat/server-backlog` (the Mastery/Arena server backlog, migrations UNAPPLIED). Several items are SHARED-BACKEND (iOS hits the same API/DB and inherits the fix once the migrations are applied) — those need no iOS client work but ARE gated on the same migrations. The client-side items have iOS counterparts to mirror in a future batch. Owner: `vp-ios` to schedule the client mirrors; the shared-backend rows are inherited.
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Quiz rewards — server-authoritative** | ✅ web sends `deriveReward:true` + RAW correct count; server derives Fangs/XP from validated score + difficulty + blitz + server-read boosters and IGNORES client values (closed a self-grant vector) | 🟡 **parity item** — iOS still sends client `coinsEarned`/`xpEarned`; the shared `/api/save-quiz-results` now clamps the legacy path to a server-derived ceiling (so iOS is bounded + never under-paid), but iOS should adopt `deriveReward` + send raw correct count for full server derivation. Backend ready; iOS client change pending |
+| **coin_transactions type constraint widening + Fang IAP credit** | ✅ migration `20260618130000` widens `coin_transactions_type_check` (was rejecting 10 types the app writes incl. `fang_iap_purchase`/`competitive_match`) | ✅ SHARED-BACKEND — iOS inherits automatically once the migration is applied (any iOS path writing those ledger types stops silently failing). No iOS client work |
+| **Mastery server backlog** (`/next` two-tab idempotency, atomic `/complete` close + credit) | ✅ on `feat/server-backlog` (migrations `20260618120000` + `20260618130000`, UNAPPLIED) | ✅ SHARED-BACKEND — iOS Mastery hits the same routes/RPCs; inherits the idempotency + atomic-credit fixes once migrations applied. No iOS client work |
+| **Arena settle hardening** (single settle source-of-truth, atomic per-user credit/ELO, disconnect fairness, stale-`completing` recovery) | ✅ on `feat/server-backlog` | 🟡 SHARED-BACKEND for the server settle (`settle_competitive_credit`, `/complete` recovery — iOS inherits); the CLIENT refactors (single `useSettle` in the match shell, duel `subscribeResilient` channel, opponent-disconnect UI) are web-only and have iOS counterparts to mirror in a future batch |
+| **Web "perfect everything" a11y + UX + visual polish** (Dashboard, Quiz, Social, Ninny, Paths, Wallet, Pricing, Vocab, Classes, Compete, Settings, Mastery, static pages) | ✅ WCAG 2.1 AA pass: single `<main>` landmark, focus-trap/Escape on modals, contrast floor, reduced-motion gating, form labels, live regions, em-dashes stripped; flash-of-zero + silent-failure fixes; bundle lazy-loading | 🟡 **parity item** — the DOM-specific fixes (nested `<main>`, em-dash copy) are 🚫 N/A on native, but the accessibility PRINCIPLES have iOS equivalents (VoiceOver labels/roles, Dynamic Type, reduce-motion, focus order) — a dedicated `ios-design-accessibility` pass should mirror the contrast/focus/reduced-motion improvements |
+| **Stripe Pro/Platinum checkout + Fang-pack purchase** | ✅ code complete (blocked on Sam's Stripe config — see `docs/specs/stripe-go-live-runbook.md`) | 🚫 N/A by design — web-only digital-goods sales (Apple anti-steering 3.1.1). iOS must use Apple IAP / StoreKit, which is NOT built; iOS subscription management is the StoreKit manage-subscription deep-link only |
+
+**Migrations gating the shared-backend rows:** `20260617120000_fk_perf_indexes.sql`, `20260618120000_mastery_server_backlog.sql`, `20260618130000_coin_tx_types_and_competitive_settle.sql` (all RUN MANUALLY, UNAPPLIED). **Note:** the iOS-side claims in the older batch sections below were authored by a prior session and are tracked-as-reported (not re-verified against `~/Desktop/lionade-ios` this pass).
+
+---
+
+## 2026-06-16: SECURITY + OPS SUITE — IAM, vault, SOC monitoring, onboarding gate, key-rotation, audit export, feature kill-switch (web-only admin; mostly NO iOS work)
+
+**Status:** Shipped on branch `feat/admin-team-management` (7 commits, NOT pushed; awaiting Sam's review + 4 manual migrations + env vars). A full security-operations layer in `/admin`. Every commit reviewed (security + quality + edge-safety) PASS, `tsc --noEmit` clean throughout. Almost all of it is a **web-only admin surface with no iOS counterpart** (no iOS admin console). The ONE platform-neutral piece is the feature kill-switch's public `/api/feature-flags` endpoint, which iOS could consume later to show maintenance states (a real future parity item, flagged 🟡 below, not N/A).
+
+| Surface | Web | iOS |
+|---|---|---|
+| Team management console (`/admin/team`) | ✅ provision (`@getlionade.com` via Cloudflare Email Routing + optional Supabase account), offboard (soft/hard), reset, suspend/reactivate, audit timeline | 🚫 N/A (no iOS admin console) |
+| MFA-enforcement cron (`/api/cron/team-mfa-enforce`) | ✅ founder/engineer/support auto-suspended without verified TOTP in a 7-day grace | 🚫 N/A (server cron, no client surface) |
+| Forced-password + TOTP onboarding gate (`/onboard/*`, `TeamGate`) | ✅ provisioned staff forced to set a password + enroll TOTP; zero-network for normal users | 🚫 N/A (gates the web staff login; iOS has no staff console) |
+| Shared credential vault (`/admin/vault`) + AES-256-GCM key rotation | ✅ encrypted at rest (key env-only), masked-with-reveal, audited `vault_reveal`, re-keyable via `/api/admin/vault/rotate` | 🚫 N/A (no iOS admin console) |
+| SOC monitoring console (`/admin/security`) | ✅ live active-users, L7 traffic timeseries, scanner/bot/brute-force threat feed, IP denylist (DDoS-safe edge telemetry) | 🚫 N/A (server + admin-only; Vercel handles network-layer DDoS) |
+| Audit-log export (`/api/admin/audit-log/export`) | ✅ CSV/JSON, date/action/user filters, formula-injection-hardened | 🚫 N/A (admin tooling) |
+| Feature kill-switch / maintenance mode (`/admin/features`) | ✅ NEW hierarchical 3-state (live / warning [usable + dismissible banner] / maintenance [screen + 503]); scheduled + auto-clearing windows (`starts_at`/`ends_at`, no cron); client `FeatureGate` + server `assertFeatureLive`; fail-open; staff bypass; global status banner; 62-node catalog across all major surfaces | ✅ SHIPPED (built + verified `tsc`0/`expo export`, iOS-reviewed PASS; in the lionade-ios working tree, held for the next batched EAS build). Native `lib/feature-flags.ts` consumes the public `/api/feature-flags` with the SAME dot-keys; `FeatureGate` + `MaintenanceScreen` + `FeatureWarningBanner` + a global `MaintenanceGate feature="site"`; gates dashboard/learn/academia/social/compete+modes/games/party+modes/leaderboard/shop. Server enforcement free (web 503s). Fail-open. Intentional gaps: NO staff bypass (no iOS admin signal); `ancestorsOf`/`featureChain` local copy pending `@lionade/core/features` graduation. PokerFace party mode + Map Pin not gated (web-only / scaffold). |
+| SOC alerts cron (`/api/cron/security-alerts`) | ✅ NEW every 10 min; emails support@ on high-threat IPs or traffic spikes; deduped, fail-open | 🚫 N/A (server cron, no client surface) |
+
+**Env-gated:** every secret is read at call time; the whole suite compiles and ships dormant, degrading to clear 503s until configured. **Pending Sam:** run migrations `20260616121503_team_management.sql`, `20260616130000_shared_credentials.sql`, `20260616140000_security_monitoring.sql`, `20260616150000_feature_flags.sql`, `20260616160000_feature_flags_v2.sql` manually; add env vars `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID`/`CLOUDFLARE_EMAIL_ROUTING_DOMAIN`, `CREDENTIAL_ENCRYPTION_KEY` (+ `CREDENTIAL_ENCRYPTION_KEY_PREVIOUS` only during a rotation), `INTERNAL_TELEMETRY_SECRET` (`CRON_SECRET` already exists); then push. Portfolio docs: `lib/team/README.md`, `lib/vault/README.md`, `lib/security/README.md`, `lib/features/README.md`.
+
+---
+
+## 2026-06-15: WEB→iOS PARITY BATCH 4 (verified-extended ranks + scaffolded-gated; commits held for next build)
+
+**Status:** Batch-4 closes the longer tail of the 108-rank backlog. Two kinds of work this wave: (a) **verified-extended** rows — features that audited as already-present-but-needing-extension on iOS, now confirmed ✅ at web parity after the extension pass (Coach ranks 16-18; dashboard ranks 38/73/76-84/90-93; social 54/97-100; party 101-103; leaderboard cosmetics 58/59/104; classes 40/41; pardy 53; roardle 105; notifications/subscription 107/108); and (b) **scaffolded-gated** rows — features whose iOS surface is built but cannot fully function until a native dep / 4-player realtime lands (OCR 19-21 awaiting Apple Vision wire-in; Map Pin 13 scaffold awaiting `react-native-maps`; 2v2 Squad 14 documented-gap awaiting 4-player realtime). All verified-extended rows reviewed PASS; gated rows marked 🟡 with the explicit blocker. `tsc --noEmit` clean (exit 0). Commits held for the next batched EAS build (consistent with the build-22 hold). Owner: `vp-ios` (`ios-dev-screens` integrator + `ios-dev-components` for the leaf widgets). Chain: `ios-dev-*` → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer`.
+
+| Rank | Surface | Web | iOS |
+|---|---|---|---|
+| 16-18 | Coach hub (resume/cover-letter/interview prompts) | ✅ web Coach surfaces | ✅ verified-extended — iOS Coach hub now at parity for the non-AI prompt scaffolding (resume intake, cover-letter, interview-prompt rows). The OpenAI Socratic/analysis calls stay server-side (Pro-tier); the iOS surface presents the same flow, AI send paths inherit the same gating as the web Pro routes |
+| 38 | Dashboard — daily-target ring/progress | ✅ web dashboard daily-target | ✅ verified-extended at parity in `app/(tabs)/index.tsx` Today section |
+| 73 | Dashboard — weekly activity chart | ✅ web weekly chart | ✅ verified-extended at parity (windowed activity, iOS-local aggregator per the Phase-C audit) |
+| 76-84 | Dashboard — stat orbs / Fangs / streak / level / subjects / rank cluster | ✅ web dashboard stats | ✅ verified-extended — the iOS dashboard stat cluster (tappable orbs + detail windows) confirmed at web parity for the data each surfaces |
+| 90-93 | Dashboard — missions / bounties / daily-bet / progress cards | ✅ web dashboard cards | ✅ verified-extended — `MissionsCard` / `BountiesCard` / `DailyBetCard` / Progress at parity in the Today section (Daily Bet home restored on Dashboard per the build-13 web-parity decision) |
+| 54 | Social — feed / activity | ✅ web social feed | ✅ verified-extended — `useSocialFeed`-backed feed confirmed at parity (audit had over-reported this as a gap) |
+| 97-100 | Social — friends / DM / nudge / challenge | ✅ web social interactions | ✅ verified-extended — friend list, DM thread, nudge, and challenge actions confirmed at web parity |
+| 101-103 | Party — lobby / room-privacy / invite surfaces | ✅ web party | ✅ verified-extended — open/friends/closed privacy, lobby, and invite (mid-game + toast) surfaces confirmed at parity (builds on Batch-2 party work) |
+| 58-59 | Leaderboard — tier tint / rank cosmetics | ✅ web Elo-tier row tint (ranks 4+) | ✅ verified-extended — iOS leaderboard rows tinted by Elo tier on the Elo ladders, matching web's `app/leaderboard/page.tsx` inlined helper |
+| 104 | Leaderboard — podium / your-position cosmetics | ✅ web podium + your-position | ✅ verified-extended — top-20-anchored podium + gold-tinted your-rank highlight confirmed at parity (builds on build-13 leaderboard work) |
+| 40-41 | Classes — index / detail / note editor | ✅ web Academia class flow | ✅ verified-extended — `app/classes/index.tsx` + `app/classes/[id].tsx` + note editor confirmed at parity (builds on Batch-1/Batch-3 class work) |
+| 53 | Pardy (game) | ✅ web `/games/pardy` | ✅ verified-extended — iOS Pardy board / modal / tally confirmed at parity (includes the Skip-marks-tile-attempted fix so the FINAL TALLY screen is reachable) |
+| 105 | Roardle — duplicate-aware scoring | ✅ web standard-Wordle two-pass `getRowStatuses` | ✅ verified-extended — iOS Roardle (`app/games.tsx`) adopts the same duplicate-aware row scorer (greens first, yellows up to each letter's remaining count, surplus duplicates gray); closes the naive-`includes()` mirror-needed flag from the 2026-05-29 web Roardle row |
+| 107 | Notifications inbox | 🟡 web component-only | ✅ verified-extended — iOS `/notifications` full route confirmed at parity (iOS is AHEAD; web should match iOS) |
+| 108 | Subscription management | ✅ `/settings/subscription` | ✅ verified-extended — iOS uses the Apple StoreKit manage-subscription deep-link (App Store anti-steering compliant; no in-app IAP purchase flow by design) |
+| 19-21 | OCR — photo-to-syllabus / photo-to-study-set | ✅ web on-device tesseract.js → shared parse route | 🟡 **SCAFFOLDED-GATED.** iOS capture surface (`expo-image-picker`) + the `rawText` POST path are scaffolded; the OCR step is a no-op until **Apple Vision** text recognition is wired in. Same outcome + same shared `/api/mastery/parse` + `/api/classes/[id]/syllabus` rawText route as web; $0 (on-device). Flip the gate → wire Apple Vision `VNRecognizeTextRequest` → enable scan |
+| 13 | Map Pin Drop (competitive mode) | ✅ web map-pin competitive mode | 🟡 **SCAFFOLDED-GATED.** iOS mode scaffold (mode entry + scoring shell) is in place; the map render + pin interaction await the **`react-native-maps`** dependency (not in tree). Reuses the same competitive-mode backend contract; flip the gate → install `react-native-maps` → mount the map component |
+| 14 | 2v2 Squad format | ✅ web duo create/join/solo-auto-pair toggle (`party_code` queue) | 🟡 **DOCUMENTED-GAP.** iOS reuses the exact `party_code` 2v2 queue contract (platform-neutral backend); the native duo toggle UI + **4-player realtime** lockstep are NOT built. The 1v1 flow is unchanged. Awaiting the 4-player realtime layer before the native 2v2 toggle ships |
+
+**Verified-extended vs scaffolded-gated:** the 16 verified-extended rows were features the 5-area audit had flagged as gaps but which audited as already-present-needing-extension on iOS; they are now confirmed ✅ at web parity after the extension pass (no new screen, the existing surface reached parity). The 3 scaffolded-gated rows (OCR 19-21, Map Pin 13, 2v2 Squad 14) have their iOS surface built but cannot fully function until the named native dep / realtime layer lands — marked 🟡 with the explicit blocker so a future audit reads them as deliberately-gated, not missed.
+**Native modules:** OCR needs Apple Vision (`Vision.framework` via a native module, not yet wired); Map Pin needs `react-native-maps` (absent); 2v2 needs the 4-player realtime layer. No new dependency was added this wave — the gated rows are scaffolded against future installs.
+**Realtime:** no new channels this wave. 2v2 Squad's 4-player lockstep is the one outstanding realtime need (tracked as the documented gap).
+**Cross-link:** these rows complete iOS-side state for the larger backlog items flagged in the 2026-06-14 sprint "Remaining" list (Map Pin, 2v2 Squad, photo-OCR) and the build-13 / 2026-05-29 leaderboard + Roardle notes. Recorded in `IOS_PORTING_LOG.md` (Batch 4).
+
+---
+
+## 2026-06-15: WEB→iOS PARITY BATCH 2 (14 features ported + integrated; commits held for next build)
+
+**Status:** Batch-2 port wave shipped on iOS and wired into the live screens (wallet, leaderboard, settings hub + sub-screens, quiz, party, onboarding, mastery create modal, class detail). All 14 reviewed PASS; central integration + reviewer SHOULD-FIX polish applied; `tsc --noEmit` clean (exit 0, after regenerating `.expo/types/router.d.ts` for the new `/settings/appearance` route). Commits held for the next batched EAS build (consistent with the build-22 hold). Owner: `vp-ios` (`ios-dev-screens` integrator + `ios-dev-components` for the leaf widgets). Three rows are deliberately iOS-AHEAD extensions (wallet top-earners, leaderboard friends scope, mastery weight editor) — flagged below.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Wallet — balance trend viz | ✅ `/wallet` inline-SVG `BalanceSparkline` (running-balance reconstruction) | ✅ `app/wallet.tsx` `BalanceSparkline` Skia port (single Path, first-render stroke reveal mirroring web's stroke-dash); same running-balance math from the transaction list |
+| Wallet — top earners breakdown | 🚫 no web counterpart | ✅ **iOS-AHEAD** `TopEarners` in `app/wallet.tsx` (`topEarners(txs)` aggregates earn-side transactions into the top sources with proportional bars; native-forward summary, no web equivalent yet) |
+| Leaderboard — friends scope + rank/gap | ✅ `app/leaderboard/page.tsx` pinned "Your Position" + "Your next move" overtake callout | ✅ `app/leaderboard.tsx` rank + gap-to-above pinned card; **iOS-AHEAD** Everyone/Friends scope toggle (client-side filter over the fetched top-50, re-ranked within the circle; web has no friends tab yet). Friends rows expose true global standing in the VoiceOver label (`Nth overall`) |
+| Settings — Appearance | ✅ `/settings/appearance` (theme / font size / personalization pointers) | ✅ `app/settings/appearance.tsx` reachable: new nav Row in `app/settings/index.tsx` (`color-palette-outline`) + BackButton `"/settings/appearance" → "/settings"`. Theme info-only (dark-only on native), font-size deep-links to iOS Settings (Dynamic Type), Haptics is the real persisted control |
+| Settings — Account | ✅ `/settings/account` (username yearly-lock / email / password / connected accounts / sessions / avatar) | ✅ `app/settings/account.tsx` — per-card immediate-save (SavedTick), same auth + `/api/*` paths web uses. AvatarCard re-seeds to the username once `useUserStats` resolves if untouched (reviewer fix) |
+| Settings — Data & Usage | ✅ `/settings/data` (storage / history / Ninny usage / export) | ✅ `app/settings/data.tsx` |
+| Quiz — resume interrupted session | ✅ in-progress quiz resume | ✅ `app/quiz.tsx` cross-platform resume (persisted state incl. `questions[]` so resume doesn't refetch; explicit prompt, not auto-resume; cleared on finish + "Start fresh") |
+| Quiz — per-question explanation | ✅ `QuizCard` post-reveal `result.explanation` card | ✅ `app/quiz.tsx` server-returned explanation shown post-reveal for the current question |
+| Quiz — Missions & Bet float | ✅ `components/Quiz/MissionsBetFloat.tsx` (floating pill → missions + daily bet) | ✅ `components/quiz/MissionsBetFloat.tsx` (idle-fade pill, gold badge, progress-tick pulse; reads `useMissions` + `useDailyBet`). Inner scroll uses `BottomSheetScrollView` so it doesn't race the sheet drag (reviewer fix) |
+| ConfirmSheet (destructive confirm) | ✅ `components/ConfirmModal.tsx` | ✅ `components/ConfirmSheet.tsx` — native bottom-sheet replacement for `Alert.alert` destructive prompts; async `onConfirm` with busy state + auto-dismiss on success (1:1 behavior port) |
+| Party — mid-game invite | ✅ `components/party/MidGameInviteModal.tsx` | ✅ `components/party/MidGameInviteSheet.tsx` — host invites a friend mid-round (late joiners enter as spectators then play next round). Native Share sheet + big selectable room CODE (no expo-clipboard in tree) |
+| Party — incoming invite toast | ✅ `components/party/PartyInviteToast.tsx` | ✅ `components/party/PartyInviteToast.tsx` — global layout-mounted toast, one-tap JOIN on any screen; reuses the existing `notifs-${userId}` channel (zero extra Realtime channels) |
+| Party — room-code share | ✅ web copies full URL to clipboard | ✅ room-code share via native Share sheet + selectable code fallback (RoomLobby / MidGameInviteSheet; expo-clipboard absent by design) |
+| Onboarding — diagnostic placement quiz | ✅ web onboarding placement diagnostic | ✅ `app/onboarding.tsx` `DiagnosticView` (live + curated-fallback questions, local grading for fallback rows, scored level result). Selection tracker moved from a module-level singleton into a component-local `useRef` cleared on question advance (reviewer fix) |
+| Mastery — exam-modal weight editor | 🚫 web seeds weights from Ninny parse, not user-editable inline | ✅ **iOS-AHEAD** `components/NewMasteryExamModal.tsx` editable subtopic weights (±0.05 step, drop a subtopic) before create; re-normalized to a 0..1 fraction for the create route's weight-sum check |
+| Class — exam countdown banner | ✅ `components/Class/ExamCountdown.tsx` (live H/M/S, final-hours red, class-code headline) | ✅ `components/Class/ExamCountdown.tsx` extracted standalone now wired at the `app/classes/[id].tsx` call site (replaces the dead inline copy). Gains optional `accent?: string` (default `#4A90D9`) driven by `cls.color` for the per-class wash/border/digits (reviewer fix) |
+
+**Reviewer SHOULD-FIX items applied this pass:** (1) leaderboard `globalRank` now read into the friends a11y label (was assigned-but-unused); (2) account AvatarCard re-seeds once the username resolves; (3) MissionsBetFloat inner scroll → `BottomSheetScrollView`; (4) onboarding `lastChosen` singleton → component-local `useRef`; (5) ExamCountdown `accent` prop + `cls.color` wiring (extracted component now actually mounted; dead inline `ExamCountdown`/`UnitDisplay`/`GlassCard` import removed from `classes/[id].tsx`).
+
+**AsyncStorage keys touched:** quiz resume state key (`app/quiz.tsx`). Appearance haptics pref reuses the existing `DEVICE_PREFS_KEY` (no new key). No other persistent device keys.
+**Native modules:** wallet `BalanceSparkline` uses `@shopify/react-native-skia` (already installed). MissionsBetFloat / PartyInviteToast use Reanimated. No new dependency.
+**Realtime:** PartyInviteToast adds NO new channel — it rides the existing `notifs-${userId}` postgres_changes channel (web parity).
+**iOS-AHEAD note:** wallet top-earners, leaderboard friends scope, and the mastery weight editor have no current web counterpart. They are forward extensions (not drift); if/when web adds them, reconcile to a shared design rather than treating these as gaps.
+**Route-types note:** the new `app/settings/appearance.tsx` route required regenerating the gitignored `.expo/types/router.d.ts` (done) so `router.push("/settings/appearance")` type-checks without an `as never` cast.
+
+---
+
+## 2026-06-15: WEB→iOS PARITY BATCH 1 (12 features ported + integrated; commits held for next build)
+
+**Status:** Batch-1 port wave shipped on iOS and integrated into the live screens (Ninny dispatcher, dashboard, root layout, Mastery session, vocab, BackButton). `tsc --noEmit` clean. Commits held for the next batched EAS build (consistent with the build-22 hold). Owner: `vp-ios` (`ios-dev-screens` integrator + `ios-dev-components` for the leaf widgets). Each component was written + reviewed PASS before this integration pass.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Shop cosmetics surface | ✅ `/shop` "The Lion's Den" (catalog-driven coin store, cosmetics/boosters/inventory) | ✅ `app/shop.tsx` (registered route; reachable from dashboard QuickActionsRow + Home parent in BackButton) |
+| Classes index | ✅ Academia hub class list | ✅ `app/classes/index.tsx` (NEW; registered in root Stack alongside `classes/[id]`; BackButton parent → "Academia") |
+| Ninny — Match mode | ✅ `components/Ninny/MatchMode.tsx` (tap-to-pair terms/definitions) | ✅ `components/ninny/MatchView.tsx` wired into the `/learn/ninny` dispatcher (`activeMode === "match"` → `pairs={generated_content.match}`); `MODE_DEFS.match.active = true` |
+| Ninny — Fill Blank mode | ✅ `components/Ninny/FillBlankMode.tsx` | ✅ `components/ninny/FillBlankView.tsx` wired (`fill` → `questions={generated_content.fillBlank}`); coming-soon chip retired |
+| Ninny — Ordering mode | ✅ `components/Ninny/OrderingMode.tsx` (drag-reorder) | ✅ `components/ninny/OrderingView.tsx` wired (`ordering` → `questions={generated_content.ordering}`); native long-press-drag (gesture-handler + Reanimated) + tap-to-swap a11y fallback |
+| Ninny — Blitz mode | ✅ `components/Ninny/BlitzMode.tsx` (60s MCQ sprint) | ✅ `components/ninny/BlitzView.tsx` wired (`blitz` → `questions={generated_content.blitz ?? multipleChoice}` fallback); `modeItemCount` extended to cover all 4 new modes for the empty-set + abandon-penalty guards |
+| ProUpgradeNudge | ✅ dashboard `ProUpgradeNudge` (free-tier only, `usePlan()` gate) | ✅ `components/ProUpgradeNudge.tsx` mounted in `app/(tabs)/index.tsx` "Today" section (self-gating on `useAuthEmail().plan`; CTA → in-app `/pricing`, no anti-steering out-link) |
+| ClaimBanner | ✅ shared `ClaimBanner` (purple/gold variants) | ✅ `components/ClaimBanner.tsx` available as a leaf component (consumed by ProUpgradeNudge-style surfaces; no standalone screen mount required) |
+| Vocab — per-bank streak pill | ✅ `components/Vocab/BankStreakPill.tsx` | ✅ `components/vocab/BankStreakPill.tsx` rendered in `app/learn/vocab.tsx` for the active bank (reads `useVocabStreaks()` row by `bankId`; `size="sm"`, hidden until a streak row resolves so no flash-of-zero) |
+| Mastery — NotesScratchpad | ✅ `components/Mastery/MasteryNotesScratchpad.tsx` (per-question quick notes, local) | ✅ `components/mastery/NotesScratchpad.tsx` mounted beneath the active question card in `app/mastery/[examId].tsx` (`sessionId={hook.sessionId}`, `questionId={pendingQuestionId}`; AsyncStorage `mastery_notes_<sessionId>`) |
+| Mastery — SubtopicRail | ✅ `components/Mastery/SubtopicRail.tsx` (right-rail subtopic mastery) | ✅ `components/mastery/SubtopicRail.tsx` replaces the inline subtopic `.map` in `SubtopicSheet` (kept inside `BottomSheetScrollView`, `hideHeader` since the sheet renders its own header); adds the smooth bar + <95%→≥95% celebration halo |
+| ActiveSessionToast | ✅ `components/ActiveSessionToast.tsx` (slide-in rejoin prompt) | ✅ `components/ActiveSessionToast.tsx` mounted in `app/_layout.tsx` overlay layer next to `OtaUpdateBanner` (self-gating on `profiles.active_session`; party/arena/mastery/drill/quiz; 5s auto-vanish, per-pointer dismiss) |
+
+**AsyncStorage keys touched:** `mastery_notes_<sessionId>` (NotesScratchpad). No other persistent device keys.
+**Native modules:** OrderingView uses already-installed `react-native-gesture-handler` + `react-native-reanimated` (no new dependency). ActiveSessionToast/SubtopicRail use Reanimated.
+**Realtime:** ActiveSessionToast reads `profiles.active_session` via SWR (30s poll + focus). The realtime fast-path channel is owned by `ios-dev-realtime` and can mutate the `active-session/<userId>` SWR key when wired (not part of this batch).
+**Vocab parity correction:** Word Banks / Vocab is NO LONGER web-only on iOS — `app/learn/vocab.tsx` + 6 vocab components (AddWordForm, CreateBankSheet, DiscoverTab, ReviewQueue, WordList, BankStreakPill) have shipped. Older batch rows below that say "the eventual iOS port" / "if/when Word Banks ports to iOS" are point-in-time records; treat Vocab V1 as ✅ shipped on iOS.
+
+---
+
 ## 2026-06-14: WEB→iOS PARITY SPRINT (sectioned port; commits held for next build)
 
 **Status:** Ongoing section-by-section port closing web↔iOS feature gaps (driven by a 5-area parity audit, 48 gaps found). iOS commits held for the next batched EAS build. Each section: full port, `tsc` clean, committed. Owner: `vp-ios` + `admin`.
@@ -976,7 +1103,7 @@ Owner: `quality-docs-writer` (web).
 
 1. **Compete tier-from-ELO fix MUST be checked on iOS.** Web's `/compete` had a hardcoded `CURRENT_TIER_INDEX=8` and `TIERS` ranges keyed on win counts; the fix computes tier from real arena ELO (new users = Bronze, locked tiers above) with ELO-threshold ranges, plus live stats from `/api/me/elo-rank` + `profiles.arena_wins`. If the iOS Compete tab renders tiers, the same hardcode may exist there. Audit before any tier UI ships.
 2. **No-flash-of-zero gating should be the house pattern on iOS surfaces too.** Web now gates stat displays on a loaded flag (`statsReady` / `statsLoaded`) with neutral placeholders, so the `coins:0` auth seed and 0% accuracy never flash for loading or brand-new users. iOS screens reading the same profile seed are exposed to the same class of bug.
-3. **ReviewQueue empty-bank distinction** (true empty bank shows an onboarding state, not a confetti "all done" celebration) applies if/when Word Banks ports to iOS.
+3. **ReviewQueue empty-bank distinction** (true empty bank shows an onboarding state, not a confetti "all done" celebration). **UPDATE 2026-06-15: Word Banks HAS shipped on iOS** (`app/learn/vocab.tsx` + 6 vocab components incl. `ReviewQueue`); this is no longer a hypothetical "if/when" — verify the iOS `ReviewQueue` carries the empty-bank distinction.
 
 Web-side bug fixes riding along (no iOS counterpart today): arena hub 45s no-opponents timeout was unreachable via stale closure (infinite SEARCHING), duel matchmaking 60s timeout + honest dead-end + dequeue, 0-question duel error card instead of blank page.
 
@@ -1898,33 +2025,33 @@ Deliberate no-row decision. Added 8-second `AbortSignal.timeout()` on the three 
 | Learn → Mastery | `/learn/mastery` + `/[examId]` | `/mastery` + `/mastery/[examId]` | ✅ | ✅ | **Orchestrator integration completed 2026-05-14** — all 3 pending states wired (question + teach + socratic). New: Continue button for teach mode, multiline text-input + Send for socratic mode. `masteryAPI.submitSocratic` added to core. |
 | **Practice** | | | | | |
 | Quiz hub | `/quiz` | `/quiz` | ✅ | ✅ | full flow on iOS — **wired to `@lionade/core/api/quiz.quizAPI.saveResults`** (2nd shared-core consumer) |
-| AP Exams quiz | `/quiz/ap-exams` | (n/a) | ✅ | 🚫 | FOLD into `/quiz` as filter on both platforms |
+| AP Exams quiz | `/quiz/ap-exams` | `/quiz/ap-exams` (`app/quiz/ap-exams.tsx`) | ✅ | ✅ | **PORTED 2026-06-14 sprint** — NEW `app/quiz/ap-exams.tsx` (10-subject Test-Prep grid, Phosphor→Ionicons, same colors); "Test Prep" subject card routes here → deep-links `/quiz?subject=Test Prep`. Stale "🚫 FOLD into /quiz" corrected — the standalone picker shipped on both platforms. |
 | Arena | `/arena` | `/arena` | ✅ | ✅ | **NEW iOS shipped 2026-05-14** — full 4-phase flow wired (lobby → queue → prematch → playing → results). 2535 lines. Real-time-ish via HTTP polling (1s cap 30s). Server-judged timer, wager picker (10/25/50/100), opponent abandon handling, race-safe complete claim, idempotent retry. Challenge-a-friend typed in `arenaAPI` but UI deferred (social-screen wiring pending). |
 | **Competitive** | | | | | |
 | Duel | `/duel` | `app/duel.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 5-phase flow (invite → loading → countdown → battle → results), simulated bot opponents, Supabase-direct duels persistence + winner Fangs payout |
 | Compete tab | `/compete` | `(tabs)/compete` | ✅ | ✅ | ELO hero, 4 game modes, top 3 leaderboard |
 | Leaderboard | `/leaderboard` | `/leaderboard` | ✅ | ✅ | top 50 with podium |
 | **Classes** | | | | | |
-| Classes index | `/classes` | (none) | ✅ | ❌ | port pending — iOS detail exists, no list |
-| Class detail | `/classes/[id]` | `/classes/[id]` | ✅ | 🟡 | iOS has countdown + notes; missing syllabus upload, flashcards, grade tracker |
+| Classes index | `/classes` | `/classes` (`app/classes/index.tsx`) | ✅ | ✅ | **PORTED Batch-1 2026-06-15** — `app/classes/index.tsx` (NEW class list, registered in root Stack, BackButton parent → "Academia"). Stale `❌ port pending — no list` corrected. |
+| Class detail | `/classes/[id]` | `/classes/[id]` | ✅ | ✅ | **CLOSED 2026-06-15 (verified-extended rank 40-41).** iOS has countdown (Batch-2 standalone `ExamCountdown` wired with per-class accent) + notes + note editor (Batch-3) + syllabus upload (2026-05-13 `SyllabusUploadSheet`) + grade tracker (2026-05-13 `GradeTracker`) + flashcards (2026-05-13 `FlashcardStudy`). Stale "missing syllabus upload, flashcards, grade tracker" corrected — all three shipped. |
 | Syllabus upload | `components/Class/SyllabusUpload.tsx` | `components/Class/SyllabusUploadSheet.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 1671 lines. 5-stage sheet (source→preview→upload→parse→result). 3 on-ramps: camera, photo library, PDF picker. Photos auto-rendered to single-page PDF via expo-print on-device (matches server's PDF-only requirement). Upload via Supabase Storage direct + `classesAPI.uploadSyllabus()` JSON register call (no FormData added to createApiClient). Integrated as banner in `app/classes/[id].tsx`. |
-| Exam countdown | `components/Class/ExamCountdown.tsx` | inline in academia tab | ✅ | 🟡 | iOS has inline countdown; standalone component port pending |
+| Exam countdown | `components/Class/ExamCountdown.tsx` | `components/Class/ExamCountdown.tsx` | ✅ | ✅ | **CLOSED Batch-2 2026-06-15** — extracted standalone `ExamCountdown` now wired at the `app/classes/[id].tsx` call site (replaces the dead inline copy); gained optional `accent?` (default `#4A90D9`) driven by `cls.color`. Stale "standalone component port pending" corrected. |
 | Grade tracker | `components/Class/GradeTracker.tsx` | `components/Class/GradeTracker.tsx` | ✅ | ✅ | **NEW iOS shipped 2026-05-13** — 1867 lines. Tap-to-expand collapsed shell on class detail. Hero + list + add/edit modal. Semantic letter colors (A=green, B=electric, C=yellow, D/F=red — NOT gold per manifesto). 4 typed core methods (listGrades, createGrade, updateGrade, deleteGrade). |
 | Flashcard study | `components/Class/FlashcardStudy.tsx` | `components/Class/FlashcardStudy.tsx` | ✅ | ✅ | **NEW iOS shipped 2026-05-13** — 1073 lines. Full-screen study modal with spring-physics flip animation, semantic confidence colors (Again=red/Hard=amber/Good=green/Easy=electric — no gold), Light/Medium haptics per rating. 2 typed core methods (listFlashcards, rateFlashcard). |
 | **Academia** | | | | | |
 | Academia hub | `/academia` | `(tabs)/academia` | ✅ | ✅ | classes grid, countdown, notes, empty state |
 | **Social** | | | | | |
-| Social tab | `/social` | `(tabs)/social` | ✅ | 🟡 | friends list works; friend DM not implemented |
+| Social tab | `/social` | `(tabs)/social` | ✅ | ✅ | **CLOSED 2026-06-15 (verified-extended ranks 54, 97-100).** `useSocialFeed`-backed feed + friend list + DM thread + nudge + challenge all confirmed at web parity. Stale "friend DM not implemented" corrected — DM thread shipped. |
 | **Identity** | | | | | |
 | Profile | `/profile` | `(tabs)/profile` | ✅ | ✅ | hero portrait, 4 stat tiles, 3 segments |
 | Badges | `/badges` | `/badges` | ✅ | ✅ | full gallery with rarity rings |
 | Study DNA | `/study-dna` | `app/study-dna.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 1059 lines, uses canonical `/api/study-dna` endpoint, identity card, strengths/weaknesses, heatmap, native iOS share sheet (no canvas hack), triple empty-states |
 | **Economy** | | | | | |
-| Shop | `/shop` | `/shop` | ✅ | 🟡 | iOS has Daily Spin hero; cosmetics + boosters stubbed "Coming soon" |
-| Daily Spin | `app/api/spin/roll` + `lib/spin.ts` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | 🟡 | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core`. **DROPPED ✅→🟡 2026-06-11 (commit `d3f59ae`):** web rebalanced the spin (jackpot 5000→3000, mega 1500→1000, bust/tax softened, EV ~300→~220–245/day). Fang VALUES are server-authoritative (`lib/spin.ts`), so the economy is ALREADY correct for iOS on the wire — but the iOS **vendored `spin-rng.ts` is STALE** (jackpot label "10,000 Fangs", mega "2,000F", old weights), so the iOS wheel DISPLAYS the wrong odds + jackpot while the server awards rebalanced values. `ios-shared-core` must re-sync `spin-rng.ts` (same pass as the stale `shop-catalog.ts`). See Sub-row D of the dated 2026-06-11 shop-overhaul entry. |
+| Shop | `/shop` | `/shop` (`app/shop.tsx`) | ✅ | 🟡 | **Route PORTED Batch-1 2026-06-15** (`app/shop.tsx` registered + reachable from QuickActionsRow). **Cosmetic/booster tabs scaffolded Batch-3.** STILL 🟡: the catalog is partly stubbed pending the `shop-catalog.ts` re-sync (`ios-shared-core`). Stale "cosmetics + boosters stubbed Coming soon" updated to reflect the tabs now exist, catalog re-sync is the remaining piece. |
+| Daily Spin | `app/api/spin/roll` + `lib/spin.ts` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | 🟡 | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core`. **RE-SYNC SHIPPED Batch-1 2026-06-15 → back to ✅-on-display:** web rebalanced the spin 2026-06-11 (jackpot 5000→3000, mega 1500→1000, bust/tax softened, EV ~300→~220–245/day; commit `d3f59ae`). Fang VALUES were always server-authoritative (`lib/spin.ts`) so the economy was correct on the wire; the iOS **vendored `spin-rng.ts` was STALE** (showed jackpot "10,000 Fangs", mega "2,000F", old weights). Batch-1 re-synced `spin-rng.ts` (the foundation re-sync pass, alongside the `shop-catalog.ts` re-sync) so the iOS wheel now DISPLAYS the rebalanced odds + jackpot matching the server. Remaining 🟡 on the Shop surface is the cosmetics/booster catalog re-sync, not the spin. |
 | Wallet | `/wallet` | `/wallet` | ✅ | ✅ | balance + lifetime + transaction history |
 | **Settings** | | | | | |
-| Settings | `app/settings/[section]/` (6-section route-based hub, immediate-save) | `/settings` (single-page list) | ✅ | 🟡 | **Web 6-section overhaul 2026-06-11** (Account · Privacy · Notifications · Data & Usage · Subscription · Danger Zone; immediate-save "Saved ✓"; expanded `profiles.preferences` contract; deactivate / scheduled-delete + cancel / session history / data export / connected accounts / avatar editor; migration `060` pending). iOS still on its 2026-05-14 Apple-HIG one-page list + 2026-05-23 build-11 hub. **iOS port pending — see the dated 2026-06-11 entry for the grouped sub-rows.** The preference-contract changes are shared via `@lionade/core` (`ios-shared-core`); the screens + lifecycle flows are native rebuilds. |
+| Settings | `app/settings/[section]/` (6-section route-based hub, immediate-save) | `/settings` hub + `/settings/appearance` + `/settings/account` + `/settings/data` | ✅ | ✅ | **CLOSED Batch-2 2026-06-15.** Web's 6-section overhaul (2026-06-11: Account · Privacy · Notifications · Data & Usage · Subscription · Danger Zone; immediate-save "Saved ✓") is now matched on iOS: Appearance reachable via new nav Row + BackButton path, Account with per-card immediate-save (SavedTick) + avatar re-seed, Data & Usage (`app/settings/data.tsx`). Subscription is the StoreKit deep-link (see Subscription row). Stale "iOS port pending / single-page list" corrected. Preference-contract still shared via `@lionade/core`. |
 | App Icon picker | (web-only N/A) | `app/app-icon.tsx` | 🚫 | ✅ | **NEW iOS shipped 2026-05-14** — Pro/Platinum tier perk. 5 variants (Default/Midnight/Wildfire/Platinum/Void). AsyncStorage persistence, Pro-lock upgrade Alert routing to /pricing. Native switch stubbed (applies on next EAS rebuild with `react-native-change-icon`). |
 | Security | (web-only, distributed) | `app/security.tsx` | 🟡 | ✅ | **NEW iOS shipped 2026-05-14** — 941 lines. Sign-in method detection (Email/Apple via app_metadata.provider). Change Password modal (current/new/confirm + strength meter + show/hide). Biometric lock (Face ID/Touch ID via expo-local-authentication, only renders if hardware+enrolled). Active sessions: this device + Sign out everywhere (supabase.auth.signOut({ scope: 'global' })). 2FA stub. Data export → POST /api/account/export with 404-graceful fallback. |
 | Edit Profile | `/profile` (mixed) | `app/edit-profile.tsx` | 🟡 | ✅ | **NEW iOS shipped 2026-05-14** — 1202 lines. Avatar picker (library upload via expo-image-picker → Supabase Storage avatars/${userId}.jpg, regenerate DiceBear, remove). Username with 365-day cooldown via `profileAPI.changeUsername`. Display name (1-50). Bio (0-150, graceful degrade if bio column missing). Debounced availability check. Sticky save bar. Dirty-state confirm-discard. |
@@ -1934,29 +2061,42 @@ Deliberate no-row decision. Added 8-second `AbortSignal.timeout()` on the three 
 | **Gamification** | | | | | |
 | Games hub | `/games` | `app/games.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 2081 lines, 4 games: Blitz (routes to /quiz), Roardle (fully ported wordle), Flash Cards (fully ported), Timeline Drop (tap-to-swap instead of HTML5 drag). PDF library upload dropped (RN-incompatible). Single electric hero, rest in neutral grouped list per manifesto. **Roardle bug-fix 2026-05-29 (web-only, staged not committed; iOS paused):** web Roardle in `app/games/page.tsx` gained physical-keyboard input (scoped `window` keydown — letters/Backspace/Enter, ignores Cmd/Ctrl/Alt + text fields, cleans up on leave/over; on-screen keyboard preserved) and the correct standard-Wordle duplicate-letter scoring (two-pass `getRowStatuses`: greens first, yellows only up to each letter's remaining count, surplus duplicates gray; grid + keyboard-state + win/lose all use it) plus a non-color tile cue (aria-label + ●/◐/○). Mechanics only — Lionade science `WORD_BANK` + "Roardle" name kept, no NYT content. **iOS parity: 🟡 mirror-needed when iOS resumes** — iOS already has its own fully-ported Roardle (`app/games.tsx`); it should adopt the same duplicate-aware row scorer (verify the iOS port doesn't have the same naive `includes()` bug). The physical-keyboard fix is web-specific (iOS is touch + on-screen keyboard). |
 | **AI / Ninny modes** | | | | | |
-| Chat panel | `components/Ninny/ChatPanel.tsx` | partial via mastery session | ✅ | 🟡 | audit in Week 2 |
-| Multiple choice | `Ninny/MultipleChoiceMode.tsx` | partial | ✅ | 🟡 | audit |
-| Flashcards | `Ninny/FlashcardsMode.tsx` | partial | ✅ | 🟡 | audit |
-| Match | `Ninny/MatchMode.tsx` | partial | ✅ | 🟡 | audit |
-| Fill blank | `Ninny/FillBlankMode.tsx` | partial | ✅ | 🟡 | audit |
-| True/False | `Ninny/TrueFalseMode.tsx` | partial | ✅ | 🟡 | audit |
-| Ordering | `Ninny/OrderingMode.tsx` | partial | ✅ | 🟡 | audit |
-| Blitz | `Ninny/BlitzMode.tsx` | partial | ✅ | 🟡 | audit |
+| Chat panel | `components/Ninny/ChatPanel.tsx` | `components/ninny/ChatView.tsx` (mounted in `/learn/ninny` via "Ask" pill → bottom sheet) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED).** Opens scoped to the active material (materialId/title/subject); read-only history loads via `apiGet` (no model call). **AI-COST-GATED:** the live send hits server-side `/api/ninny/chat` (OpenAI billed per message) so the send button ships DISABLED with an honest "Chat is coming soon on iOS" hint; starter chips inert. Bubble layout / typing indicator / auto-scroll / error card all present. Flip the gate → enable send + wire `apiPost("/api/ninny/chat", …)`. |
+| Multiple choice | `Ninny/MultipleChoiceMode.tsx` | `components/ninny/MultipleChoiceView.tsx` (base mode) | ✅ | ✅ | base Ninny mode, always present in the dispatcher; verify-extended confirmed at parity 2026-06-15 |
+| Flashcards | `Ninny/FlashcardsMode.tsx` | `components/ninny/FlashcardView.tsx` | ✅ | ✅ | verify-extended confirmed at parity 2026-06-15 |
+| Match | `Ninny/MatchMode.tsx` | `components/ninny/MatchView.tsx` | ✅ | ✅ | **PORTED Batch-1 2026-06-15** — wired into the dispatcher (`activeMode === "match"`); `MODE_DEFS.match.active = true`, coming-soon chip retired. Stale "partial / audit" corrected. |
+| Fill blank | `Ninny/FillBlankMode.tsx` | `components/ninny/FillBlankView.tsx` | ✅ | ✅ | **PORTED Batch-1 2026-06-15** — wired (`fill` → `generated_content.fillBlank`); coming-soon chip retired. Stale "partial / audit" corrected. |
+| True/False | `Ninny/TrueFalseMode.tsx` | `components/ninny/TrueFalseView.tsx` | ✅ | ✅ | verify-extended confirmed at parity 2026-06-15 |
+| Ordering | `Ninny/OrderingMode.tsx` | `components/ninny/OrderingView.tsx` | ✅ | ✅ | **PORTED Batch-1 2026-06-15** — wired (`ordering`); native long-press-drag + tap-to-swap a11y fallback. Stale "partial / audit" corrected. |
+| Blitz | `Ninny/BlitzMode.tsx` | `components/ninny/BlitzView.tsx` | ✅ | ✅ | **PORTED Batch-1 2026-06-15** — wired (`blitz` → `generated_content.blitz ?? multipleChoice` fallback); `modeItemCount` extended for empty-set + abandon-penalty guards. Stale "partial / audit" corrected. |
 | **Cross-cutting widgets** | | | | | |
 | Focus Lock-In | `components/FocusLockIn.tsx` | `components/FocusLockIn.tsx` | ✅ | ✅ | BUILT on iOS |
-| Focus music toggle | `components/FocusMusicToggle.tsx` | (none) | ✅ | ❌ | port pending (Batch D) |
+| Focus music toggle | `components/FocusMusicToggle.tsx` | `components/FocusMusicToggle.tsx` (mounted on Dashboard) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED).** Full floating pill + station-picker sheet + idle-fade + AsyncStorage persistence; self-gates when signed out. **NATIVE-GATED:** `expo-av` not installed, so playback is a no-op (station saves, "Audio coming soon" hint shown). Wire `useStationPlayback` + add `UIBackgroundModes:["audio"]` when expo-av lands. |
 | Clock-in button | `components/ClockInButton.tsx` | `components/ClockInButton.tsx` + `ClockInToast.tsx` (hook on `loginBonusAPI`) | ✅ | ✅ | **shared-core wired** via `use-clock-in` |
 | Daily Drill widget | `components/DailyDrillWidget.tsx` | `DailyDrillCard.tsx` + `DailyDrillModal.tsx` (hook on `dailyDrillAPI`) | ✅ | ✅ | **shared-core wired** via `use-daily-drill` |
 | Duel invite | `components/DuelInvite.tsx` | inline in `app/duel.tsx` InvitePhase | ✅ | ✅ | folded into the single Duel route file |
 | Quick note shortcut | `components/QuickNoteShortcut.tsx` | `components/QuickNoteFab.tsx` | ✅ | ✅ | BUILT on iOS |
 | Notifications | (component-only) | `/notifications` (full route) | 🟡 | ✅ | web should match iOS, not other way |
-| Daily bet | (web?) | `DailyBetCard.tsx` | ? | ✅ | verify web has parity |
-| Missions | (web?) | `MissionsCard.tsx` | ? | ✅ | verify web has parity |
-| Bounties | (web?) | `BountiesCard.tsx` | ? | ✅ | verify web has parity |
+| Daily bet | `DailyBetCard` (web dashboard) | `DailyBetCard.tsx` (Dashboard Today section) | ✅ | ✅ | **Verified-extended rank 90-93 2026-06-15** — Daily Bet home restored on the iOS Dashboard per the build-13 web-parity decision (web Compete doesn't carry it). Stale "? verify web has parity" resolved: both platforms have it on Dashboard. |
+| Missions | `MissionsCard` (web dashboard) | `MissionsCard.tsx` | ✅ | ✅ | **Verified-extended rank 90-93 2026-06-15** — at parity in the Today section. Stale "? verify" resolved. |
+| Bounties | `BountiesCard` (web dashboard) | `BountiesCard.tsx` | ✅ | ✅ | **Verified-extended rank 90-93 2026-06-15** — at parity in the Today section. Stale "? verify" resolved. |
 | Streak revive | server: `/api/streak-revive` | `StreakReviveBanner.tsx` + `use-streak-revive` (on `streakReviveAPI`) | ✅ | ✅ | **shared-core wired** via `use-streak-revive` |
-| Claim/upgrade banner + Pro nudge | `components/ClaimBanner.tsx` (shell) + `ProUpgradeNudge.tsx`; applied to DailyReady/StreakRevive/ClockIn/DailyDrill | (none — iOS has native DailyReady/StreakRevive/ClockIn/DailyDrill equivalents but no shared `ClaimBanner` shell or Free→Pro nudge) | ✅ | ❌ pending | **NEW 2026-05-17** — web introduced one reusable `ClaimBanner` + a free-tier `ProUpgradeNudge` (`usePlan` → /pricing). iOS port: extract an equivalent shared banner in `@lionade/core`/native and add a Pro nudge on the iOS dashboard. Underlying claim APIs already shared (loginBonus/streakRevive/dailyDrill) — this is a presentational-shell + one new nudge port only. |
+| Claim/upgrade banner + Pro nudge | `components/ClaimBanner.tsx` (shell) + `ProUpgradeNudge.tsx`; applied to DailyReady/StreakRevive/ClockIn/DailyDrill | `components/ClaimBanner.tsx` (leaf) + `components/ProUpgradeNudge.tsx` (mounted on Dashboard) | ✅ | ✅ | **CLOSED Batch-1 2026-06-15** — `ProUpgradeNudge` mounted in `app/(tabs)/index.tsx` "Today" section (self-gating on `useAuthEmail().plan`; CTA → in-app `/pricing`, no anti-steering out-link); `ClaimBanner` shipped as an available leaf component (no standalone screen mount needed since iOS has native DailyReady/StreakRevive/ClockIn/DailyDrill surfaces). Stale "❌ pending" corrected. |
 | Back affordance | `components/BackButton.tsx` (route-based) on all pushed pages | `components/BackButton.tsx` (route-based) on all 21 pushed screens | ✅ | ✅ | **NEW cross-platform shipped 2026-05-15** — single shared component per repo; semantic-parent map (NOT history); renders null on roots/tabs/funnels. iOS replaced ~21 ad-hoc disc/chevron controls (3 local `BackButton` copies + `BackChip` deleted). Native swipe-back kept. `edit-profile` discard-guard + arena/duel/quiz in-match abandon controls preserved (restyled, not replaced). |
 | Limelight bottom-nav highlight | `components/Navbar.tsx` (framer-motion `layoutId="navLimelight"` shared-layout backdrop + `"navLimelightBeam"` top beam, conditionally rendered inside the active `<Link>`) | `app/(tabs)/_layout.tsx` (one `Animated.View` driven by `useSharedValue` + `withSpring` translateX against `state.index * cellW`, cellW from `onLayout`) | ✅ | ✅ | **NEW cross-platform shipped 2026-05-19** — single travelling gold pill springs to the active tab instead of per-cell static gold backdrop. Both platforms reuse existing `ACCENT_BG` / `ACCENT_BORDER` rgba(255,215,0,…) tokens — zero design-token drift. Reduced-motion: framer's `useReducedMotion()` → `{duration:0}` on web, Reanimated's `useReducedMotion()` → `withTiming(target,{duration:0})` on iOS. Web is hydration-safe: active state is pathname-driven so DOM tree is invariant SSR === first client render. iOS preserves haptics + `tabPress`/`defaultPrevented` guard + `accessibilityRole/State/Label`. |
+| **Batch 3 (mounted 2026-06-15)** | | | | | |
+| Poker Face (party) | `components/party/PokerFaceView.tsx` | `components/party/PokerFaceView.tsx` (mounted `current_game === "pokerface"` in `app/party/[code].tsx`) | ✅ | ✅ | **Batch 3 — LAST party game ported.** N-player presenter-rotation bluff; legally-gated bounded variant (points only, NO Fangs/ELO/wager). Self-owned `pokerface` realtime topic + 1.5s poll + effective-host advance; reads rounds via GET only (verdict server-stripped pre-reveal). Lobby picker (`GameKey`) still can't START a Poker Face game on iOS — but a web host's game now renders natively. |
+| Compete pyramid + hex | `app/compete/*` (ladder visuals) | `app/(tabs)/compete.tsx` | ✅ | ✅ | **Batch 3** — compete ladder pyramid + hex tier visuals ported (component owned by `ios-dev-components`; composed into the Compete tab). |
+| Class note editor | web class notebook | `components/academia/*` note editor (in Academia/class flow) | ✅ | ✅ | **Batch 3** — class note editor ported (component owned by `ios-dev-components`). |
+| Quiz category | `/quiz` category select | `app/quiz.tsx` category step | ✅ | ✅ | **Batch 3** — quiz category selection ported. |
+| Vocab SRS | web vocab spaced-repetition | iOS vocab SRS view | ✅ | ✅ | **Batch 3** — vocabulary spaced-repetition scheduling ported. |
+| Ninny misses (practice) | `app/learn/ninny` practice-your-misses | `app/learn/ninny.tsx` practice-misses re-drill | ✅ | ✅ | **Batch 3** — free re-drill of just-missed items in the same mode, sourced from the live result; abandon-penalty-exempt. |
+| Mastery action area | `components/Mastery/MasteryActionArea` (QuestionOptionsBody reveal) | `app/mastery/[examId].tsx` option-reveal coloring | ✅ | ✅ | **Batch 3** — per-chip answer-reveal (green/red flash + correct-index hint + pop/shake) matching web's QuestionOptionsBody. |
+| Study sheet (Session Report) | `components/Mastery/StudySheetButton.tsx` (SessionReportFab) | `components/mastery/StudySheetButton.tsx` (mounted in Mastery session header) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED).** Three states: locked (<33%), free→Pro paywall sheet, paid→Session Report. **AI + NATIVE-GATED:** no jsPDF/expo-print/view-shot dep + content needs a server round-trip, so the paid path renders present-but-disabled ("Generate study sheet · coming soon"). Wire `onGenerate` when the PDF/share + server-generation path lands. |
+| Shop cosmetic tabs | `/shop` cosmetics + boosters | `app/shop.tsx` cosmetic/booster tabs | ✅ | 🟡 | **Batch 3** — shop cosmetic/booster tab scaffolding ported (component owned by `ios-dev-components`); catalog still partly stubbed pending `shop-catalog.ts` re-sync. |
+| Ninny chat | `components/Ninny/ChatPanel.tsx` | `components/ninny/ChatView.tsx` (see AI/Ninny row above) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED — AI-cost).** Send disabled; read-only history loads. See the "Chat panel" row for the full gating note. |
+| Focus music | `components/FocusMusicToggle.tsx` | `components/FocusMusicToggle.tsx` (Dashboard) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED — native/expo-av).** Playback is a no-op until expo-av lands. See the "Focus music toggle" row above for the full gating note. |
+| Share card | `components/ShareCard.tsx` | `components/ShareCard.tsx` (mounted in `app/profile.tsx` via "Share your stats" row, `useRef<ShareCardHandle>`) | ✅ | 🟡 | **Batch 3 mounted 2026-06-15 (GATED — native capture).** Renders the visual stat card (level/tier big number + Fangs/Streak/Badges stat row) in the house bottom sheet, presented imperatively (mirrors ConfirmSheet). **NATIVE-GATED:** `react-native-view-shot` + `expo-sharing` not installed, so it ships a built-in `Share.share()` TEXT share ("image export coming soon"); the rendered card IS the future capture target (no redesign needed). |
 | **System / Legal** | | | | | |
 | About | `/about` | (none) | ✅ | 🚫 | iOS uses Settings → About modal |
 | Contact | `/contact` | (none) | ✅ | 🚫 | iOS uses native mail |
@@ -1968,37 +2108,41 @@ Deliberate no-row decision. Added 8-second `AbortSignal.timeout()` on the three 
 
 ## Real Feature Gaps (Things iOS Genuinely Doesn't Have)
 
-After the audit, the actual list of iOS-missing features is:
+**Updated 2026-06-15 after the 4-batch porting marathon (108-rank backlog).** The original Week-2/3/4 list below is now HISTORICAL — items 1-12 all shipped (Duel, Learn hub, Learn→Paths, Arena, Mastery orchestrator, Classes index, Syllabus upload, Grade tracker, Flashcard study, Study DNA, Friend DM, Games hub all ✅; Shop cosmetics tabs scaffolded; Focus music mounted-gated). The genuinely-open gaps are now the deliberately-gated long tail:
 
-**High value (Batch A — Week 2):**
-1. Duel (`/duel`) — entire feature missing
-2. Learn hub (`/learn`) + Learn → Ninny + Learn → Paths
-3. Classes index page
-4. Arena PvP matchmaking ("Find Match" → real matches)
-5. Mastery orchestrator full integration
+**Native-module-gated (iOS surface built, blocked on a dep):**
+1. **OCR — photo-to-syllabus / photo-to-study-set (ranks 19-21)** 🟡 — capture surface + `rawText` POST scaffolded; needs **Apple Vision** (`VNRecognizeTextRequest`) wired in. $0 on-device. Reuses the shared `/api/mastery/parse` + `/api/classes/[id]/syllabus` rawText route.
+2. **Map Pin Drop competitive mode (rank 13)** 🟡 — mode entry + scoring shell scaffolded; needs the **`react-native-maps`** dependency (absent from tree) for map render + pin interaction. Reuses the competitive-mode backend contract.
+3. **Focus music playback (`expo-av`)** 🟡 — full pill + station picker + persistence mounted on Dashboard; playback is a no-op until `expo-av` lands (+ `UIBackgroundModes:["audio"]`).
+4. **Share-card image export (`react-native-view-shot` + `expo-sharing`)** 🟡 — card renders + ships a text `Share.share()` fallback; image capture awaits the deps.
 
-**Medium value (Batch B — Week 3):**
-6. Syllabus upload
-7. Grade tracker
-8. Flashcard study (standalone)
-9. Study DNA
-10. Shop cosmetics + boosters (UI exists, stubbed)
-11. Friend DM
+**AI-cost-gated (await Sam's OpenAI go):**
+5. **Ninny chat-with-material send** 🟡 — `ChatView` mounted, read-only history loads; live send disabled (server-side OpenAI, billed per message).
+6. **Mastery study-sheet generation** 🟡 — `StudySheetButton` mounted (lock <33%, Pro paywall); paid generate path disabled (server round-trip + PDF/share dep).
+7. **Coach Socratic / analysis (ranks 16-18)** — non-AI prompt scaffolding at parity; the OpenAI Socratic/analysis paths inherit the same Pro gating as web.
 
-**Low value (Batch D — Week 4 or defer):**
-12. Games hub
-13. Focus music toggle
+**Realtime-gated (documented gap):**
+8. **2v2 Squad format (rank 14)** — iOS reuses the platform-neutral `party_code` 2v2 queue contract; the native duo-toggle UI + **4-player realtime lockstep** are NOT built. 1v1 unchanged.
+
+**Infra Phase B (roadmapped, not built):**
+9. **S3 presigned upload (Phase B)** — swap iOS note-image upload from `supabase.storage.upload` to `/api/note-images/presign` + mirror the read resolver; gated on Sam's `terraform apply` + Vercel env (Phase A is inert until then).
+
+---
+**HISTORICAL (pre-marathon list, all items now shipped — kept for the audit trail):**
+~~Duel · Learn hub · Learn→Ninny · Learn→Paths · Classes index · Arena PvP · Mastery orchestrator · Syllabus upload · Grade tracker · Flashcard study · Study DNA · Friend DM · Games hub · Shop cosmetics (tabs scaffolded) · Focus music (mounted-gated)~~
 
 ---
 
 ## Reverse Parity — Things iOS has that Web Should Match
 
 These are flagged for the WEB team — iOS shipped them first or better:
-- **Notifications inbox** — iOS has full `/notifications` route; web has component only
-- **Daily Bet** — verify web has it
-- **Bounties card** — verify web has it
-- **Streak Revive UI** — iOS has dedicated banner + hook
-- **Native auth flow polish** — Apple auth, haptics, animated intro on iOS
+- **Notifications inbox (rank 107)** — iOS has full `/notifications` route; web has component only. STILL the canonical reverse-parity item — web should match iOS.
+- **Wallet — top earners breakdown** — **iOS-AHEAD (Batch-2)** `TopEarners` aggregates earn-side transactions into top sources with proportional bars; no web counterpart.
+- **Leaderboard — Everyone/Friends scope toggle** — **iOS-AHEAD (Batch-2)** client-side friends filter over the top-50, re-ranked within the circle; web has no friends tab yet.
+- **Mastery — exam-modal subtopic weight editor** — **iOS-AHEAD (Batch-2)** editable ±0.05 weights before create; web seeds weights from the Ninny parse, not user-editable.
+- **Streak Revive UI** — iOS has dedicated banner + hook (now also shared via `streakReviveAPI`).
+- **Native auth flow polish** — Apple auth, haptics, animated intro on iOS.
+- ~~Daily Bet / Bounties card "verify web has it"~~ — RESOLVED 2026-06-15: both are on the web Dashboard too (not reverse-parity); see the Cross-cutting Daily Bet / Bounties rows.
 
 ---
 
