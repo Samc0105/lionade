@@ -45,11 +45,33 @@ export type MatchOutcome =
 // Back-compat alias — older imports referenced SettleResult as the score shape.
 export type SettleResult = SettleScore;
 
+// The discriminated outcome settle() resolves to so the SHELL can branch on a
+// server "opponent_active" refusal without ever mutating render state. Normal
+// end-of-rounds callers (the mode screens) ignore the return value.
+export type SettleOutcome = "settled" | "voided" | "opponent_active" | "error" | "noop";
+
+// CROSS-FILE CONTRACT — the prop shape the shell injects into every mode screen.
+// The shell owns the SINGLE useSettle hook and passes these down so the four
+// mode screens render NO ResultCard and own NO hook of their own. Derived from
+// the hook's return below; mode screens use only { settle, result }.
+export interface MatchSettleProps {
+  settle: (opts?: { abandoned?: boolean }) => Promise<SettleOutcome>;
+  forfeit: () => Promise<void>;
+  result: MatchOutcome | null;
+  settling: boolean;
+  error: string | null;
+}
+
 // Server response shapes for the two endpoints we POST to here.
 interface CompleteResponse extends Partial<SettleScore> {
   alreadyCompleted?: boolean;
   voided?: boolean;
   reason?: string;
+  // Disconnect-fairness: an abandoned END-MATCH attempt the server refused
+  // because the opponent showed recent answer activity. HTTP 200, ok:true so
+  // the !ok error path does NOT fire; the shell branches on this status to
+  // re-arm its grace timer instead of voiding/settling unfairly.
+  status?: "opponent_active";
 }
 interface ForfeitResponse {
   ok?: boolean;
@@ -72,27 +94,43 @@ export function useSettle(matchId: string) {
   // player uses to END a match an opponent abandoned. POST /complete may now
   // answer { voided } when a side never played — we surface that as a neutral
   // outcome instead of silently no-oping.
+  //
+  // settle(opts?.abandoned) sends the { abandoned: true } flag ONLY for the
+  // shell's manual END-MATCH (the disconnect-fairness contract). Normal
+  // rounds-exhausted callers (the mode screens) call settle() with no args, so
+  // the flag is omitted and today's behavior is unchanged. The return value is
+  // a discriminated outcome so the SHELL can branch on an "opponent_active"
+  // refusal (re-arm grace timer) without any render-state mutation here.
   const settle = useCallback(
-    async () => {
-      if (settling || result) return;
+    async (opts?: { abandoned?: boolean }): Promise<SettleOutcome> => {
+      if (settling || result) return "noop";
       setSettling(true);
       setError(null);
       const { ok, data } = await apiPost<CompleteResponse>(
         `/api/competitive/match/${matchId}/complete`,
-        {},
+        opts?.abandoned ? { abandoned: true } : {},
       );
       setSettling(false);
       if (!ok || !data) {
         setError("Couldn't end the match, try again");
-        return;
+        return "error";
+      }
+      // Server refused an abandoned end because the opponent is still active.
+      // DO NOT set a result — the shell keeps the grace panel up and re-arms.
+      if (data.status === "opponent_active") {
+        return "opponent_active";
       }
       if (data.voided) {
         setResult({ kind: "voided", reason: data.reason });
-      } else if (data.winnerTeam) {
+        return "voided";
+      }
+      if (data.winnerTeam) {
         setResult({ kind: "settled", ...(data as SettleScore) });
+        return "settled";
       }
       // alreadyCompleted with no payload: the opponent settled first. Leave any
       // prior result in place; nothing to show that we don't already have.
+      return "noop";
     },
     [matchId, settling, result],
   );

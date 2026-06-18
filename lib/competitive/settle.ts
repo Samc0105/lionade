@@ -31,6 +31,20 @@ import { buildEloDeltas } from "./elo";
 import { resolvePayout } from "./fang-payout";
 import { eloColumnForFormat, type CompetitiveMatchRow, type CompetitiveFormat } from "./types";
 
+/** PostgREST surfaces a missing RPC as PGRST202; raw Postgres as 42883. Used so
+ * settle is safe to run before migration 20260618130000 is applied. */
+function isMissingFn(e: { code?: string; message?: string } | null | undefined): boolean {
+  if (!e) return false;
+  return (
+    e.code === "PGRST202" ||
+    e.code === "42883" ||
+    (typeof e.message === "string" &&
+      (e.message.includes("settle_competitive_credit") ||
+        e.message.toLowerCase().includes("could not find the function") ||
+        e.message.toLowerCase().includes("does not exist")))
+  );
+}
+
 export interface SettleOptions {
   /**
    * Override the winner determination. When set, the score-derived winner is
@@ -186,70 +200,111 @@ export async function settleClaimedMatch(
     fangDelta[u] = intended;
   }
 
-  // ── Loss-cap enforcement (per user) + balance clamp ──
-  // Coins go through the atomic update_user_coins RPC (keeps fangs_cashable in
-  // sync with coins — a raw write would drift the dual ledger and corrupt the
-  // V2 cash-out accounting). We use source 'cashable' for BOTH signs: a win
-  // credits cashable, and a loss DEBITS cashable WITHOUT touching
-  // lifetime_fangs_spent — a wager loss is not a cash-out "spend", so it must
-  // not count toward the 60%-spend gate. (Service role may pass a negative
-  // 'cashable' delta; the RPC clamps cashable at 0.) ELO is a separate,
-  // non-ledger column written plainly. A rare concurrent balance drop can make
-  // a debit exceed live coins -> P0001; we log and skip that one coin write
-  // (the loss simply isn't applied — never a crash or a negative balance).
+  // ── Per-user ATOMIC settle (credit + ELO), idempotent + concurrency-safe ──
+  // settle MUST be safe to run twice: the active|completing claim in /complete +
+  // /forfeit is now RESUMABLE (a partial first run that threw after crediting
+  // some users can be re-grabbed), and two settlers can race. The dedup key is a
+  // competitive_match ledger row per (user_id, reference_id=match.id), enforced
+  // by a partial UNIQUE index. settle_competitive_credit inserts that marker
+  // ON CONFLICT DO NOTHING and, ONLY if it inserted, applies the cashable
+  // balance delta (clamped >=0) — all in ONE transaction, so the marker and the
+  // credit can never diverge and a duplicate/concurrent settle is a no-op. It
+  // returns whether THIS call credited; if not (already settled), we ALSO skip
+  // the ELO write — ELO is an absolute SET to eloAfter[u] recomputed from the
+  // now-moved live rating, so re-SETting it would corrupt the rating. A marker
+  // is written for EVERY participant (incl. draw / loss-capped / floored-to-0),
+  // so a delta-0 user is still deduped and their ELO is not re-SET on a resume.
+  // Prior marker amounts feed the terminal row's fang_delta for skipped users.
+  //
+  // Fang accounting: source 'cashable' for both signs — a win credits cashable,
+  // a loss debits cashable WITHOUT touching lifetime_fangs_spent (a wager loss
+  // is not a cash-out "spend"); the RPC clamps cashable at 0. ELO is a separate,
+  // non-ledger column written plainly only by the call that won the marker.
+  const { data: priorTxns } = await supabase
+    .from("coin_transactions")
+    .select("user_id, amount")
+    .eq("type", "competitive_match")
+    .eq("reference_id", match.id);
+  const priorAmountByUser: Record<string, number> = {};
+  for (const t of (priorTxns ?? []) as Array<{ user_id: string; amount: number | null }>) {
+    priorAmountByUser[t.user_id] = (priorAmountByUser[t.user_id] ?? 0) + (t.amount ?? 0);
+  }
+
   const profileWrites: Array<Promise<void>> = [];
   const cappedFangDelta: Record<string, number> = {};
 
   for (const u of participants) {
-    let delta = fangDelta[u];
-    if (delta < 0) {
-      const tier = resolveLossCapTier({ elo: eloBefore[u], isPro: planMap[u] === "pro" });
-      const lossWindow = await computeLossWindow(supabase, u);
-      const capReached = isLossCapReached({
-        netFangsLast24h: lossWindow.netFangsLast24h,
-        tier,
-      });
-      if (capReached) delta = 0;
-    }
-    const newCoins = Math.max(0, coinsBefore[u] + delta);
-    const effectiveDelta = newCoins - coinsBefore[u];
-    cappedFangDelta[u] = effectiveDelta;
-
     profileWrites.push(
       (async () => {
-        if (effectiveDelta !== 0) {
-          const { error: coinErr } = await supabase.rpc("update_user_coins", {
-            p_user_id: u,
-            p_delta: effectiveDelta,
-            p_min_balance: 0,
-            p_source: "cashable",
-          });
-          if (coinErr) console.error("[settle] coin write", u, coinErr.message);
-
-          // Audit row — competitive Fang movements were never recorded in
-          // coin_transactions (only on the match row), so they were missing
-          // from the user's Fang history + any ledger sum. settle runs once per
-          // match (active->completing claim), so this logs once per user.
-          // Best-effort: a failed log never claws back the settled balance.
-          const onTeamA = match.team_a.includes(u);
-          const isWin =
-            winnerTeam !== "draw" &&
-            winnerTeam !== null &&
-            ((winnerTeam === "a" && onTeamA) || (winnerTeam === "b" && !onTeamA));
-          const label = winnerTeam === "draw" ? "draw" : isWin ? "win" : "loss";
-          const { error: txnErr } = await supabase.from("coin_transactions").insert({
-            user_id: u,
-            amount: effectiveDelta,
-            type: "competitive_match",
-            reference_id: match.id,
-            description: `Competitive ${label} (${match.mode})`,
-          });
-          if (txnErr) console.error("[settle] ledger log", u, txnErr.message);
+        // Loss-cap a negative wager delta (per user, 24h window).
+        let delta = fangDelta[u];
+        if (delta < 0) {
+          const tier = resolveLossCapTier({ elo: eloBefore[u], isPro: planMap[u] === "pro" });
+          const lossWindow = await computeLossWindow(supabase, u);
+          if (isLossCapReached({ netFangsLast24h: lossWindow.netFangsLast24h, tier })) delta = 0;
         }
+        const label =
+          winnerTeam === "draw"
+            ? "draw"
+            : (winnerTeam === "a") === match.team_a.includes(u)
+            ? "win"
+            : "loss";
+        const description = `Competitive ${label} (${match.mode})`;
+
+        // Atomic claim + credit: marker insert ON CONFLICT DO NOTHING, balance
+        // applied only if inserted, all one txn. Returns { credited, effective }.
+        const { data: res, error: rpcErr } = await supabase.rpc("settle_competitive_credit", {
+          p_user_id: u,
+          p_match_id: match.id,
+          p_delta: delta,
+          p_description: description,
+        });
+
+        if (rpcErr && isMissingFn(rpcErr)) {
+          // Migration 20260618130000 not applied yet — fall back to the prior
+          // best-effort path so this is safe to merge before the RPC exists.
+          // (Apply that migration BEFORE relying on resumable-CAS idempotency.)
+          if (u in priorAmountByUser) {
+            cappedFangDelta[u] = priorAmountByUser[u];
+            return;
+          }
+          const newCoins = Math.max(0, coinsBefore[u] + delta);
+          const eff = newCoins - coinsBefore[u];
+          cappedFangDelta[u] = eff;
+          if (eff !== 0) {
+            const { error: coinErr } = await supabase.rpc("update_user_coins", {
+              p_user_id: u, p_delta: eff, p_min_balance: 0, p_source: "cashable",
+            });
+            if (coinErr) console.error("[settle] coin write", u, coinErr.message);
+            const { error: txnErr } = await supabase.from("coin_transactions").insert({
+              user_id: u, amount: eff, type: "competitive_match",
+              reference_id: match.id, description,
+            });
+            if (txnErr) console.error("[settle] ledger log", u, txnErr.message);
+          }
+          const { error: eloErr } = await supabase
+            .from("profiles").update({ [eloCol]: eloAfter[u] }).eq("id", u);
+          if (eloErr) console.error("[settle] elo write", u, eloErr.message);
+          return;
+        }
+
+        if (rpcErr) {
+          // RPC exists but errored — it is transactional, so it rolled back and
+          // credited nothing. Fail CLOSED: do NOT write ELO (no credit happened).
+          console.error("[settle] credit rpc", u, rpcErr.message);
+          cappedFangDelta[u] = priorAmountByUser[u] ?? 0;
+          return;
+        }
+
+        if (!res?.credited) {
+          // Already settled (prior partial run / concurrent settler) — skip ELO.
+          cappedFangDelta[u] = priorAmountByUser[u] ?? match.fang_delta?.[u] ?? 0;
+          return;
+        }
+        cappedFangDelta[u] = Number(res.effective ?? 0);
+        // We won the marker → write ELO exactly once for this user.
         const { error: eloErr } = await supabase
-          .from("profiles")
-          .update({ [eloCol]: eloAfter[u] })
-          .eq("id", u);
+          .from("profiles").update({ [eloCol]: eloAfter[u] }).eq("id", u);
         if (eloErr) console.error("[settle] elo write", u, eloErr.message);
       })(),
     );
@@ -259,6 +314,12 @@ export async function settleClaimedMatch(
 
   const finalStatus: "completed" | "forfeited" = opts.forfeitedBy ? "forfeited" : "completed";
 
+  // Terminal-row write — an absolute SET keyed by id, naturally idempotent. NOTE:
+  // on the rare RESUME path (a credited user was skipped above) the elo_before/
+  // elo_after jsonb for those users is recomputed from the already-moved live
+  // rating, so the AUDIT jsonb can drift slightly for them. This is record-only
+  // drift: the live ratings + Fang balances are correct (those writes were
+  // skipped). fang_delta uses the previously-applied amount for skipped users.
   await supabase
     .from("competitive_matches")
     .update({

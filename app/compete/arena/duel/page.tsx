@@ -10,6 +10,7 @@ import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import { subscribeResilient, type ResilientHandle } from "@/lib/realtime-resilient";
 import { avatarFor } from "@/lib/avatar";
 import Confetti from "@/components/Confetti";
 import {
@@ -191,6 +192,10 @@ function ArenaPage() {
   const questionStartTime = useRef(0);
   const answerLocked = useRef(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  // Resilient-subscribe handle for the battle channel, so cleanup can cancel
+  // pending reconnect timers BEFORE removeChannel (mirrors useMatchChannel's
+  // cancel-then-remove order). Held in a ref so the unmount cleanup can reach it.
+  const channelHandleRef = useRef<ResilientHandle | null>(null);
   // The post-result "brief pause then advance" timer in recordAndAdvance. Held
   // in a ref so unmount + resetArena can clear it; otherwise it could fire
   // setState (advance / completeMatch) on an unmounted or reset component.
@@ -381,26 +386,81 @@ function ArenaPage() {
     return () => clearTimeout(t);
   }, [phase, countdown, questions]);
 
+  // Re-fetch the CURRENT question's opponent answer from the persisted
+  // arena_answers (via /api/arena/match). Used as the poll-timeout fallback and
+  // on realtime reconnect so a dropped broadcast never strands the on-screen
+  // score at a phantom 0 — /api/arena/complete recomputes from these same rows,
+  // so this realigns the optimistic score with the official verdict. Returns
+  // the opponent's answer only when BOTH sides have answered (otherwise null,
+  // which means a genuine no-answer and we credit 0 as before).
+  const fetchOpponentAnswer = useCallback(async (): Promise<{
+    is_correct: boolean;
+    points_earned: number;
+    selected_answer: number;
+    response_time_ms: number;
+  } | null> => {
+    if (!matchId) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = await apiGet<any>(`/api/arena/match?id=${matchId}`);
+    if (!r.ok || !r.data) return null;
+    const data = r.data;
+    const qId = questions[currentQ]?.id;
+    const answers = data.answers?.[qId];
+    if (!answers?.player1 || !answers?.player2) return null;
+    const isP1 = me?.id === data.player1?.id;
+    return isP1 ? answers.player2 : answers.player1;
+  }, [matchId, questions, currentQ, me?.id]);
+
   // ── Realtime channel for opponent answers ──────────────────
   useEffect(() => {
     if (phase !== "battle" || !matchId || !opponent?.id) return;
 
     const channel = supabase.channel(`arena-match-${matchId}`);
 
+    // Listener MUST be attached to the stable channel handle BEFORE
+    // subscribeResilient runs (the wrapper re-runs .subscribe() on the same
+    // handle and must not double-attach).
     channel.on("broadcast", { event: "player_answered" }, (payload: any) => {
       if (payload.payload?.userId === opponent.id) {
         setOpponentAnswered(true);
       }
     });
 
-    channel.subscribe();
+    // silentOnGiveUp: the poll fallback already surfaces opponent state, so we
+    // don't want the generic "Connection lost" toast mid-battle. On every
+    // (re)connect, reconcile the opponent's answer for the current question so a
+    // drop during the wait never leaves us stranded on a missed broadcast.
+    const handle = subscribeResilient(channel, {
+      label: `arena-match:${matchId}`,
+      silentOnGiveUp: true,
+      onSubscribed: () => {
+        // Reconcile only if we're still waiting on the opponent for this
+        // question; gate the score mutation on !opponentAnswered to stay
+        // idempotent against a late broadcast / a successful poll tick.
+        (async () => {
+          const opAns = await fetchOpponentAnswer();
+          if (!opAns) return;
+          setOpponentAnswered((already) => {
+            if (already) return already; // already credited this question — no double-add
+            setOpTotalPoints((p) => p + (opAns.points_earned ?? 0));
+            if (opAns.is_correct) setOpCorrectCount((c) => c + 1);
+            return true;
+          });
+        })();
+      },
+    });
     channelRef.current = channel;
+    channelHandleRef.current = handle;
 
     return () => {
-      channel.unsubscribe();
+      // Cancel pending reconnect timers FIRST so a stale retry can't
+      // re-subscribe a torn-down channel, then remove (project standard).
+      handle.cancel();
+      supabase.removeChannel(channel);
       channelRef.current = null;
+      channelHandleRef.current = null;
     };
-  }, [phase, matchId, opponent?.id]);
+  }, [phase, matchId, opponent?.id, fetchOpponentAnswer]);
 
   // ── Question timer ─────────────────────────────────────────
   useEffect(() => {
@@ -478,8 +538,21 @@ function ArenaPage() {
       polls++;
       if (polls > maxPolls) {
         clearInterval(iv);
-        // Opponent timed out — record and advance
-        recordAndAdvance(myResult, myTimeMs);
+        // Poll window elapsed. Before crediting 0, re-fetch the persisted
+        // answer: a dropped broadcast plus a final tick racing clearInterval
+        // can leave the opponent's REAL answer sitting in arena_answers while
+        // the on-screen score shows a phantom 0 that diverges from the official
+        // /complete verdict. If the answer is there, credit it; only credit 0
+        // when the opponent genuinely never answered (fetch returns null).
+        const opAns = await fetchOpponentAnswer();
+        if (opAns) {
+          setOpponentAnswered(true);
+          setOpTotalPoints((p) => p + (opAns.points_earned ?? 0));
+          if (opAns.is_correct) setOpCorrectCount((c) => c + 1);
+          recordAndAdvance(myResult, myTimeMs, opAns);
+        } else {
+          recordAndAdvance(myResult, myTimeMs, null);
+        }
         return;
       }
 
@@ -501,7 +574,7 @@ function ArenaPage() {
       }
     }, 1000);
     opponentPollRef.current = iv;
-  }, [matchId, user?.id, questions, currentQ, me?.id]);
+  }, [matchId, user?.id, questions, currentQ, me?.id, fetchOpponentAnswer]);
 
   // Record question result and move to next
   const recordAndAdvance = useCallback((myResult: AnswerResult, myTimeMs: number, opAns?: { is_correct: boolean; points_earned: number; selected_answer: number; response_time_ms: number } | null) => {
@@ -656,7 +729,13 @@ function ArenaPage() {
       if (challengePollRef.current) clearInterval(challengePollRef.current);
       if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
       if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
-      channelRef.current?.unsubscribe();
+      // Cancel any pending resilient-reconnect timer FIRST, then remove the
+      // channel (project standard) so a stale retry can't resubscribe a
+      // torn-down channel.
+      channelHandleRef.current?.cancel();
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+      channelHandleRef.current = null;
+      channelRef.current = null;
     };
   }, []);
 

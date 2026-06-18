@@ -36,7 +36,7 @@ import { apiGet } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { useHeartbeat } from "@/lib/use-heartbeat";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
-import { useSettle } from "@/components/competitive/useSettle";
+import { useSettle, type MatchSettleProps } from "@/components/competitive/useSettle";
 import ResultCard from "@/components/competitive/ResultCard";
 import { isCompetitiveMode, type CompetitiveMatchRow, type CompetitiveMode } from "@/lib/competitive/types";
 
@@ -44,7 +44,12 @@ import { isCompetitiveMode, type CompetitiveMatchRow, type CompetitiveMode } fro
 // gameplay loop (and PinScreen's internal Leaflet lazy-load) only ships when
 // that mode is actually played. ssr:false because these are fully client-side
 // realtime surfaces — there's nothing meaningful to render server-side.
-type ModeScreenProps = { loaded: LoadedMatch; selfId: string };
+//
+// SINGLE SETTLE SOURCE-OF-TRUTH: the SHELL owns the one useSettle hook and
+// injects { settle, result } so each mode screen owns NO hook and renders NO
+// ResultCard. The screen's finished-effect calls the passed-in settle; the
+// shell renders the lone ResultCard from the same hook's result.
+type ModeScreenProps = { loaded: LoadedMatch; selfId: string } & Pick<MatchSettleProps, "settle" | "result">;
 const MODE_SCREENS: Record<CompetitiveMode, React.ComponentType<ModeScreenProps>> = {
   sabotage: dynamic(() => import("@/components/competitive/sabotage/SabotageScreen"), { ssr: false }),
   zoom: dynamic(() => import("@/components/competitive/zoom/ZoomScreen"), { ssr: false }),
@@ -125,10 +130,22 @@ export default function CompetitiveMatchPage() {
   // The dot-path chain auto-resolves the "compete.arena" + "compete" ancestors,
   // so maintenance on any of them replaces the surface for non-staff. `mode` is
   // narrowed to a CompetitiveMode by the isCompetitiveMode guard above.
+  // The active-match render is delegated to the Shell via a callback so the
+  // Shell can inject settle/result from its SINGLE useSettle hook. The
+  // loading/error/unknown-mode states stay as plain `children` the Shell
+  // renders verbatim (no hook needed for those).
+  const renderMatch =
+    !error && loaded && user
+      ? (p: Pick<MatchSettleProps, "settle" | "result">) => {
+          const ModeScreen = MODE_SCREENS[mode];
+          return <ModeScreen loaded={loaded} selfId={user.id} settle={p.settle} result={p.result} />;
+        }
+      : undefined;
+
   return (
     <ProtectedRoute>
       <FeatureGate feature={`compete.arena.${mode}`}>
-      <Shell mode={mode} loaded={loaded} selfId={user?.id ?? null}>
+      <Shell mode={mode} loaded={loaded} selfId={user?.id ?? null} renderMatch={renderMatch}>
         {error && (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
             <p className="text-cream/70 mb-2">{error}</p>
@@ -141,10 +158,6 @@ export default function CompetitiveMatchPage() {
             <p className="text-cream/50 mt-3 font-bebas tracking-wider">LOADING MATCH...</p>
           </div>
         )}
-        {!error && loaded && user && (() => {
-          const ModeScreen = MODE_SCREENS[mode];
-          return <ModeScreen loaded={loaded} selfId={user.id} />;
-        })()}
       </Shell>
       </FeatureGate>
     </ProtectedRoute>
@@ -165,11 +178,16 @@ function Shell({
   mode,
   loaded,
   selfId,
+  renderMatch,
   children,
 }: {
   mode: CompetitiveMode;
   loaded?: LoadedMatch | null;
   selfId?: string | null;
+  // Active-match render injected by the parent; the Shell hands it settle +
+  // result from its single useSettle hook so the mode screen owns neither.
+  // Absent for loading / error / unknown-mode, which render `children`.
+  renderMatch?: (p: Pick<MatchSettleProps, "settle" | "result">) => React.ReactNode;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -224,6 +242,12 @@ function Shell({
   // presence blip never trips the panel. ──
   const [now, setNow] = useState(() => Date.now());
   const [exitPrompt, setExitPrompt] = useState(false);
+  // Disconnect-fairness: the server refused an abandoned END-MATCH because the
+  // opponent shows recent answer activity (in-flight final /answer POSTs). We
+  // keep the grace panel up, swap its subtext to "Opponent still active, hold
+  // on" for a short hold, then fall back to the snooze machinery. Starts null
+  // (no flash) and only becomes a timestamp the moment a refusal lands.
+  const [opponentActiveHold, setOpponentActiveHold] = useState<number | null>(null);
   // "Keep waiting" snoozes the panel until this timestamp. While snoozed the
   // grace window is measured from here instead of opponentLastSeen, so the panel
   // re-surfaces after one more full grace window if they're still gone — and the
@@ -271,13 +295,33 @@ function Shell({
   // KEEP PLAYING — the safe action for the exit prompt (also fired by Escape).
   const cancelExit = () => setExitPrompt(false);
 
-  const endAbandonedMatch = async () => {
-    await settle(); // POST /complete → settle (both played enough) or voided
-  };
-
   // KEEP WAITING — the safe action for the opponent panel (also fired by
   // Escape). Snoozes the panel for one more grace window.
   const keepWaiting = () => setSnoozeUntil(Date.now() + OPPONENT_GRACE_MS);
+
+  const endAbandonedMatch = async () => {
+    // Flag this as an ABANDONED/early end so the server runs its recent-activity
+    // guard. If the opponent's final /answer POSTs are still flushing (WS gone
+    // but answers in flight), the server refuses with status "opponent_active"
+    // and leaves the match 'active' — we DO NOT void/settle. Instead we keep
+    // the player waiting: show "Opponent still active, hold on" briefly and
+    // re-arm the grace timer so the panel re-surfaces after one more window.
+    const outcome = await settle({ abandoned: true });
+    if (outcome === "opponent_active") {
+      setOpponentActiveHold(Date.now());
+      keepWaiting(); // re-arm the grace window; hides the panel until it re-surfaces
+    }
+    // settled / voided / error / noop all fall through to the existing render
+    // (result card on settle/void, inline settleError on error).
+  };
+
+  // Clear the "hold on" message after a short window so the panel returns to
+  // its normal copy if it re-surfaces.
+  useEffect(() => {
+    if (opponentActiveHold === null) return;
+    const t = setTimeout(() => setOpponentActiveHold(null), 2000);
+    return () => clearTimeout(t);
+  }, [opponentActiveHold]);
 
   // ── Dialog focus management (mirrors components/ConfirmModal.tsx) ──
   // Trap Tab within the open dialog + route Escape to the safe action. Only one
@@ -415,6 +459,8 @@ function Shell({
       >
         {result && selfId ? (
           <ResultCard result={result} selfId={selfId} teamA={teamA} />
+        ) : renderMatch ? (
+          renderMatch({ settle, result })
         ) : (
           children
         )}
@@ -448,12 +494,20 @@ function Shell({
               <p className="font-bebas text-3xl tracking-wider mb-2" style={{ color: accent }}>
                 OPPONENT DISCONNECTED
               </p>
-              <p className="text-cream/65 font-syne text-sm leading-relaxed mb-1">
-                Your opponent dropped out of the match.
-              </p>
-              <p className="text-cream/40 font-dm-mono text-xs mb-6">
-                Gone for {Math.floor(oppGoneFor / 1000)}s
-              </p>
+              {opponentActiveHold !== null ? (
+                <p className="text-cream/65 font-syne text-sm leading-relaxed mb-6">
+                  Opponent still active, hold on.
+                </p>
+              ) : (
+                <>
+                  <p className="text-cream/65 font-syne text-sm leading-relaxed mb-1">
+                    Your opponent dropped out of the match.
+                  </p>
+                  <p className="text-cream/40 font-dm-mono text-xs mb-6">
+                    Gone for {Math.floor(oppGoneFor / 1000)}s
+                  </p>
+                </>
+              )}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={endAbandonedMatch}

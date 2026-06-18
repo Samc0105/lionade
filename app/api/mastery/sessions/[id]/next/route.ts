@@ -44,8 +44,24 @@ interface SessionRow {
     last_subtopic_id: string | null;
     panels_shown_for: Record<string, number>;
     reached_mastery_celebrated: boolean;
+    // Short-lived sentinel set by claim_mastery_next while a concurrent caller
+    // is mid-generation; cleared on every final runtime_state write.
+    next_claim?: string | null;
   };
   reached_mastery_at: string | null;
+}
+
+/**
+ * True when an RPC call failed because the function doesn't exist yet (the
+ * migration hasn't been applied). PostgREST surfaces this as PGRST202; Postgres
+ * uses SQLSTATE 42883 (undefined_function). Lets the route fall back to the
+ * pre-migration behavior so it's safe to merge before the migration is applied.
+ */
+function isMissingFunction(err: { code?: string; message?: string } | null): boolean {
+  if (!err) return false;
+  if (err.code === "PGRST202" || err.code === "42883") return true;
+  const m = (err.message ?? "").toLowerCase();
+  return m.includes("could not find the function") || m.includes("does not exist");
 }
 
 export async function POST(req: NextRequest, { params }: RouteCtx) {
@@ -84,16 +100,53 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       pending: null, last_subtopic_id: null, panels_shown_for: {}, reached_mastery_celebrated: false,
     };
 
+    // ── Serialize concurrent /next callers (two-tab idempotency) ────────────
+    //    A per-session advisory-lock RPC arbitrates who gets to generate the
+    //    next card. Without it, two tabs both read pending===null, both INSERT
+    //    a question card with its own challengeToken, and the last write wins —
+    //    orphaning one card (permanently unanswerable, /answer 409). The RPC
+    //    sets a short-lived sentinel (runtime_state.next_claim) the winner
+    //    clears on its final write; the loser either adopts the live pending or
+    //    is told to retry.
+    //
+    //    Defensive fallback: if the RPC isn't deployed yet (migration not
+    //    applied), fall back to the prior resume-then-proceed behavior so this
+    //    route is safe to merge before the migration runs.
+    const claimRes = await supabaseAdmin.rpc("claim_mastery_next", { p_session_id: sessionId });
+    const claimMissing = isMissingFunction(claimRes.error);
+    if (claimRes.error && !claimMissing) {
+      console.error("[mastery/next] claim_mastery_next:", claimRes.error.message);
+      return NextResponse.json({ error: "Orchestrator error" }, { status: 500 });
+    }
+    const claim = (claimRes.data ?? null) as
+      | { outcome: "resume" | "proceed" | "generating"; pending?: SessionRow["runtime_state"]["pending"] }
+      | null;
+
+    // Another tab is mid-generation — tell the client to retry shortly. (Only
+    // reachable when the RPC is deployed; the fallback path never returns this.)
+    if (!claimMissing && claim?.outcome === "generating") {
+      return NextResponse.json({ kind: "generating" });
+    }
+
     // ── Resume: if there's a pending card, re-serve it ──────────────────────
-    if (runtime.pending) {
+    //    When the RPC is deployed it tells us authoritatively whether to resume;
+    //    in fallback mode we resume off the locally-read runtime.pending.
+    const shouldResume = claimMissing
+      ? !!runtime.pending
+      : claim?.outcome === "resume";
+    const resumePending = claimMissing
+      ? runtime.pending
+      : (claim?.pending ?? runtime.pending);
+
+    if (shouldResume && resumePending) {
       const { data: msg } = await supabaseAdmin
         .from("mastery_messages")
         .select("id, role, kind, content, payload, p_pass_after, display_pct_after, created_at")
-        .eq("id", runtime.pending.messageId)
+        .eq("id", resumePending.messageId)
         .single();
       if (msg) {
         return NextResponse.json({
-          kind: runtime.pending.type === "socratic" ? "socratic_probe" : runtime.pending.type,
+          kind: resumePending.type === "socratic" ? "socratic_probe" : resumePending.type,
           message: shapeMessage(msg),
           resumed: true,
         });
@@ -156,8 +209,36 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       exam.mastery_bkt_target,
     );
 
-    // One-shot celebration when they first hit mastery inside this session
+    // One-shot celebration when they first hit mastery inside this session.
+    //   Gated so two concurrent /next callers can't both fire it. The RPC
+    //   claim_mastery_celebrate flips reached_mastery_celebrated under the same
+    //   per-session advisory lock and returns true to exactly ONE winner; the
+    //   loser skips both inserts and falls through to a normal practice card.
+    //   Fallback (RPC not deployed): use the local JS guard as before.
+    let celebrateWinner = false;
     if (mastered && !runtime.reached_mastery_celebrated) {
+      if (claimMissing) {
+        celebrateWinner = true;
+      } else {
+        const celebRes = await supabaseAdmin.rpc("claim_mastery_celebrate", { p_session_id: sessionId });
+        if (celebRes.error && isMissingFunction(celebRes.error)) {
+          celebrateWinner = true; // RPC vanished mid-flight; degrade to local guard
+        } else if (celebRes.error) {
+          console.error("[mastery/next] claim_mastery_celebrate:", celebRes.error.message);
+          // Don't double-fire on an unknown error: treat as loser and fall through.
+          celebrateWinner = false;
+        } else {
+          celebrateWinner = celebRes.data === true;
+          // Either way the DB flag is now true (someone won under the lock).
+          // Mirror it locally so the loser's downstream runtime_state write
+          // (question / teach path) doesn't clobber the winner's flip back to
+          // false and re-open the double-celebrate window.
+          runtime.reached_mastery_celebrated = true;
+        }
+      }
+    }
+
+    if (celebrateWinner) {
       const aggregate = pPass(subtopicsForScore.map(s => ({ weight: s.weight, pMastery: s.pMastery })));
 
       const { data: msg } = await supabaseAdmin.from("mastery_messages").insert({
@@ -165,7 +246,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         role: "ninny",
         kind: "celebrate",
         content:
-          `That's mastery. Every subtopic above the threshold — you know this material cold. ` +
+          `That's mastery. Every subtopic above the threshold. You know this material cold. ` +
           `You can keep practicing; future answers won't earn Fangs but I'll keep tracking your stats.`,
         payload: { reason: "mastered" },
         p_pass_after: aggregate,
@@ -173,6 +254,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       }).select("id, role, kind, content, payload, p_pass_after, display_pct_after, created_at").single();
 
       runtime.reached_mastery_celebrated = true;
+      delete runtime.next_claim; // clear the /next sentinel on the final write
       const nowIso = new Date().toISOString();
       await supabaseAdmin
         .from("mastery_sessions")
@@ -254,6 +336,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
             challengeToken,
           };
           runtime.last_subtopic_id = matchedSub.id;
+          delete runtime.next_claim; // clear the /next sentinel on the final write
 
           const nowIso = new Date().toISOString();
           await Promise.all([
@@ -353,7 +436,8 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         // Update session + progress + event log
         runtime.panels_shown_for = { ...(runtime.panels_shown_for ?? {}), [picked]: panelsShown + 1 };
         runtime.last_subtopic_id = picked;
-        runtime.pending = null; // teach messages don't need a pending — user clicks Continue → /next again
+        runtime.pending = null; // teach messages don't need a pending; user clicks Continue then /next again
+        delete runtime.next_claim; // clear the /next sentinel on the final write
 
         const nowIso = new Date().toISOString();
         await Promise.all([
@@ -438,6 +522,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       challengeToken,
     };
     runtime.last_subtopic_id = picked;
+    delete runtime.next_claim; // clear the /next sentinel on the final write
 
     const nowIso = new Date().toISOString();
     await Promise.all([
