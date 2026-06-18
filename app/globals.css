@@ -5558,3 +5558,54 @@ html.light .space-bg-container { display: none; }
     animation: none !important;
   }
 }
+
+/* ── Landing hero (app/page.tsx) reduced-motion freeze ──
+   The marketing home is the most-trafficked public surface and its hero
+   stacks autoplay + entrance motion: six fadeUp entrance reveals (badge,
+   headline, subhead, stats, CTA, scroll cue) rendered via Tailwind
+   arbitrary-value `animate-[fadeUp_...]`, two drifting gradient orbs
+   (`animate-[drift_...]`), the rotating wireframe sphere, the dashed orbit
+   ring (`dash-spin`), the headline text-reveal slide, the gold CTA's
+   shift/breathe/shine loops, the floating geometry, the twinkling star
+   field, and the watermark lightning flash. Under prefers-reduced-motion
+   we pin every one of them to their resting (visible) state so motion-
+   sensitive visitors get a fully static hero. The arbitrary-value classes
+   compile to the `animation` shorthand, so we match them by attribute and
+   force the keyframe components to a no-op while leaving layout intact.
+   This block is gated behind the media query — non-reduced-motion users
+   are unaffected. */
+@media (prefers-reduced-motion: reduce) {
+  /* fadeUp + drift entrance/autoplay applied via Tailwind arbitrary values */
+  [class*="animate-[fadeUp"],
+  [class*="animate-[drift"] {
+    animation: none !important;
+    /* fadeUp ends at opacity 1 / translateY(0); pin there so nothing stays
+       hidden when the entrance animation is suppressed. */
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Autoplay loops local to the hero */
+  .wireframe-sphere,
+  .gold-btn,
+  .gold-btn::after,
+  .text-reveal-inner,
+  .reveal.visible .text-reveal-inner,
+  .watermark-flash {
+    animation: none !important;
+  }
+
+  /* text-reveal-inner ends at translateY(0)/opacity 1 — keep it readable */
+  .text-reveal-inner,
+  .reveal.visible .text-reveal-inner {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  /* Floating geometry + star field twinkle (decorative, aria-hidden) */
+  .geo-float,
+  .geo-spin,
+  .star {
+    animation: none !important;
+  }
+}

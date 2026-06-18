@@ -293,18 +293,17 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             Mastery Mode quizzes you adaptively on every domain you need. Real
             retention, real rewards.
           </p>
-          <Link href="/learn/mastery">
-            <button
-              className="px-8 py-3.5 rounded-xl font-bold text-base transition-all duration-200 active:scale-[0.98]"
-              style={{
-                background:
-                  "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
-                color: "#04080F",
-                boxShadow: "0 4px 20px rgba(240,180,41,0.3)",
-              }}
-            >
-              Try Mastery Mode
-            </button>
+          <Link
+            href="/learn/mastery"
+            className="inline-block px-8 py-3.5 rounded-xl font-bold text-base transition-all duration-200 active:scale-[0.98]"
+            style={{
+              background:
+                "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
+              color: "#04080F",
+              boxShadow: "0 4px 20px rgba(240,180,41,0.3)",
+            }}
+          >
+            Try Mastery Mode
           </Link>
           <p className="mt-5 text-[11px] font-mono tracking-[0.2em] uppercase text-cream/55">
             FREE TO START ·{" "}

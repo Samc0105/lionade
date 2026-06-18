@@ -194,19 +194,19 @@ export default function AboutPage() {
           <h2 className="font-bebas text-4xl sm:text-5xl tracking-wider mb-8 text-cream">
             START STUDYING FOR FANGS
           </h2>
-          <Link href="/dashboard" prefetch={false}>
-            <button
-              className="px-9 py-4 rounded-full font-bold text-base transition-transform duration-150 active:scale-[0.98] hover:scale-[1.02] will-change-transform"
-              style={{
-                background:
-                  "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
-                color: "#04080F",
-                boxShadow:
-                  "0 8px 28px rgba(240,180,41,0.35), inset 0 1px 0 rgba(255,255,255,0.3)",
-              }}
-            >
-              OPEN DASHBOARD
-            </button>
+          <Link
+            href="/dashboard"
+            prefetch={false}
+            className="inline-block px-9 py-4 rounded-full font-bold text-base transition-transform duration-150 active:scale-[0.98] hover:scale-[1.02] will-change-transform"
+            style={{
+              background:
+                "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
+              color: "#04080F",
+              boxShadow:
+                "0 8px 28px rgba(240,180,41,0.35), inset 0 1px 0 rgba(255,255,255,0.3)",
+            }}
+          >
+            OPEN DASHBOARD
           </Link>
           <p className="mt-6 text-cream/55 text-xs">
             No credit card. Free Fangs from your first session.

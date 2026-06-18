@@ -5,14 +5,14 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import BackButton from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
-import { CheckCircle, Warning, EnvelopeSimple, Lifebuoy } from "@phosphor-icons/react";
+import { CheckCircle, Warning, EnvelopeSimple, Lifebuoy, Bug, Lightbulb, Question } from "@phosphor-icons/react";
 
 const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Partnership", "Other"];
 
 const QUICK_HELP = [
-  { icon: "🐛", label: "Report a Bug", category: "Bug Report", hint: "Something broken" },
-  { icon: "💡", label: "Feature Idea", category: "Feature Request", hint: "Wishlist item" },
-  { icon: "❓", label: "General Question", category: "General Question", hint: "Anything else" },
+  { Icon: Bug, color: "#4C96E1", label: "Report a Bug", category: "Bug Report", hint: "Something broken" },
+  { Icon: Lightbulb, color: "#F0B429", label: "Feature Idea", category: "Feature Request", hint: "Wishlist item" },
+  { Icon: Question, color: "#4C96E1", label: "General Question", category: "General Question", hint: "Anything else" },
 ];
 
 export default function ContactPage() {
@@ -125,7 +125,7 @@ export default function ContactPage() {
                       : "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)",
                   }}
                 >
-                  <span className="text-2xl block mb-2">{item.icon}</span>
+                  <item.Icon size={24} weight="duotone" color={item.color} className="block mb-2" aria-hidden="true" />
                   <p className="text-cream text-sm font-bold">{item.label}</p>
                   <p className="text-cream/55 text-xs mt-0.5">{item.hint}</p>
                 </button>

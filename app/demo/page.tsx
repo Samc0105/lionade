@@ -404,8 +404,9 @@ function DashboardMockup() {
         </div>
       </div>
 
-      <button
-        className="w-full py-3 rounded-xl font-bold text-sm transition-all"
+      <div
+        aria-hidden="true"
+        className="w-full py-3 rounded-xl font-bold text-sm text-center"
         style={{
           background:
             "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
@@ -414,7 +415,7 @@ function DashboardMockup() {
         }}
       >
         CLAIM TODAY&apos;S BONUS
-      </button>
+      </div>
     </GlassCard>
   );
 }
@@ -530,18 +531,18 @@ function WordBankMockup() {
 
       <p className="text-cream/55 text-[10px] font-mono tracking-[0.28em] uppercase text-center mb-3">HOW WELL DID YOU KNOW IT?</p>
       <div className="grid grid-cols-3 gap-2.5">
-        <button className="py-3 rounded-xl border border-red-400/25 bg-red-400/8 text-red-300 text-xs font-bold tracking-wider">
+        <div aria-hidden="true" className="py-3 rounded-xl border border-red-400/25 bg-red-400/8 text-red-300 text-xs font-bold tracking-wider text-center">
           AGAIN
           <span className="block text-[9px] font-mono text-red-300/60 mt-0.5 tracking-widest">&lt; 1 MIN</span>
-        </button>
-        <button className="py-3 rounded-xl border border-yellow-400/25 bg-yellow-400/8 text-yellow-300 text-xs font-bold tracking-wider">
+        </div>
+        <div aria-hidden="true" className="py-3 rounded-xl border border-yellow-400/25 bg-yellow-400/8 text-yellow-300 text-xs font-bold tracking-wider text-center">
           HARD
           <span className="block text-[9px] font-mono text-yellow-300/60 mt-0.5 tracking-widest">~ 6 HRS</span>
-        </button>
-        <button className="py-3 rounded-xl border border-green-400/25 bg-green-400/8 text-green-300 text-xs font-bold tracking-wider">
+        </div>
+        <div aria-hidden="true" className="py-3 rounded-xl border border-green-400/25 bg-green-400/8 text-green-300 text-xs font-bold tracking-wider text-center">
           EASY
           <span className="block text-[9px] font-mono text-green-300/60 mt-0.5 tracking-widest">~ 4 DAYS</span>
-        </button>
+        </div>
       </div>
 
       <div className="mt-5 pt-4 border-t border-white/8 flex items-center justify-between text-xs">

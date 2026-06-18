@@ -331,7 +331,7 @@ export default function LandingPage() {
         {/* Subheadline */}
         <p className="mt-6 max-w-[560px] text-[clamp(16px,2.5vw,22px)] font-normal text-white leading-relaxed animate-[fadeUp_0.8s_ease_0.2s_both] relative z-10">
           You already put in the hours. <strong className="text-white font-bold">Now get paid for them.</strong><br />
-          Lionade is the platform that rewards your grind &mdash; daily quizzes, real competition, and actual cash for your knowledge.
+          Lionade is the platform that rewards your grind: daily quizzes, real competition, and actual cash for your knowledge.
         </p>
 
         {/* Stats */}
@@ -352,10 +352,8 @@ export default function LandingPage() {
 
         {/* Primary CTA */}
         <div className="mt-14 w-full max-w-[520px] animate-[fadeUp_0.8s_ease_0.4s_both] relative z-10">
-          <Link href="/login" className="block">
-            <button className="gold-btn w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full">
-              START STUDYING FREE
-            </button>
+          <Link href="/login" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
+            START STUDYING FREE
           </Link>
           <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">
             No credit card &middot; No app download &middot; 100% free
@@ -680,10 +678,8 @@ export default function LandingPage() {
           </h2>
         </div>
         <div className="max-w-[520px] mx-auto mt-12 reveal relative z-10">
-          <Link href="/login" className="block">
-            <button className="gold-btn w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full">
-              START STUDYING FREE
-            </button>
+          <Link href="/login" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
+            START STUDYING FREE
           </Link>
           <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">
             Free to join &middot; No credit card &middot; No cap

@@ -78,19 +78,19 @@ export default function HelpPage() {
           <p className="text-cream/65 text-base max-w-xl mx-auto leading-relaxed mb-8">
             We answer every message. Bugs, billing, partnerships, feature ideas, or feedback on the site, send it our way.
           </p>
-          <Link href="/contact" prefetch={false}>
-            <button
-              className="px-9 py-4 rounded-full font-bold text-base transition-transform duration-150 active:scale-[0.98] hover:scale-[1.02] will-change-transform"
-              style={{
-                background:
-                  "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
-                color: "#04080F",
-                boxShadow:
-                  "0 8px 28px rgba(240,180,41,0.35), inset 0 1px 0 rgba(255,255,255,0.3)",
-              }}
-            >
-              CONTACT SUPPORT
-            </button>
+          <Link
+            href="/contact"
+            prefetch={false}
+            className="inline-block px-9 py-4 rounded-full font-bold text-base transition-transform duration-150 active:scale-[0.98] hover:scale-[1.02] will-change-transform"
+            style={{
+              background:
+                "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
+              color: "#04080F",
+              boxShadow:
+                "0 8px 28px rgba(240,180,41,0.35), inset 0 1px 0 rgba(255,255,255,0.3)",
+            }}
+          >
+            CONTACT SUPPORT
           </Link>
           <p className="mt-6 text-cream/55 text-xs font-mono uppercase tracking-[0.22em]">
             support@getlionade.com
