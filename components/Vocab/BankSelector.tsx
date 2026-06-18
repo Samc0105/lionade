@@ -192,11 +192,12 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
           const isActive = bank.slug === activeSlug;
           return (
             <div key={bank.id} className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => onSelect(bank.slug)}
-                onContextMenu={e => { e.preventDefault(); openMenu(bank); }}
-                className="press-feedback inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border font-bebas tracking-wider text-sm whitespace-nowrap transition-colors"
+              {/* Pill = two sibling buttons in one chip shell. The select
+                  button can't wrap the edit control (nested interactive = invalid
+                  HTML + a11y trap), so the chip styling lives on this flex
+                  container and each action is its own real <button>. */}
+              <div
+                className="press-feedback inline-flex items-center gap-2 rounded-full pl-3.5 pr-2 py-1.5 border font-bebas tracking-wider text-sm whitespace-nowrap transition-colors"
                 style={{
                   background: isActive
                     ? `linear-gradient(135deg, ${bank.color}28 0%, ${bank.color}10 100%)`
@@ -205,52 +206,51 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
                   color: isActive ? "#EEF4FF" : "rgba(238,244,255,0.75)",
                   boxShadow: isActive ? `0 0 12px ${bank.color}30` : "none",
                 }}
-                aria-pressed={isActive}
               >
-                <span aria-hidden="true" className="text-base leading-none">{bank.icon}</span>
-                {/* V3A — public + cloned indicators. Render BEFORE the name so
-                    the bank's status reads left-to-right with its identity. */}
-                {bank.is_public && (
-                  <span
-                    aria-label="Public bank — others can clone it"
-                    title="Public bank — others can clone it"
-                    className="inline-flex items-center text-cream/80"
-                  >
-                    <Globe size={11} weight="bold" aria-hidden="true" />
-                  </span>
-                )}
-                {bank.parent_bank_id && (
-                  <span
-                    aria-label={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
-                    title={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
-                    className="inline-flex items-center text-cream/80"
-                  >
-                    <ArrowUUpLeft size={11} weight="bold" aria-hidden="true" />
-                  </span>
-                )}
-                <span>{bank.name}</span>
-                {bank.kind === "language" && bank.source_lang && bank.target_lang && (
-                  <span className="font-mono text-[9px] uppercase tracking-wider opacity-65">
-                    {bank.source_lang}/{bank.target_lang}
-                  </span>
-                )}
-                <span
-                  role="button"
-                  tabIndex={0}
+                <button
+                  type="button"
+                  onClick={() => onSelect(bank.slug)}
+                  onContextMenu={e => { e.preventDefault(); openMenu(bank); }}
+                  className="inline-flex items-center gap-2 bg-transparent text-inherit"
+                  aria-pressed={isActive}
+                >
+                  <span aria-hidden="true" className="text-base leading-none">{bank.icon}</span>
+                  {/* V3A: public + cloned indicators. Render BEFORE the name so
+                      the bank's status reads left-to-right with its identity. */}
+                  {bank.is_public && (
+                    <span
+                      aria-label="Public bank: others can clone it"
+                      title="Public bank: others can clone it"
+                      className="inline-flex items-center text-cream/80"
+                    >
+                      <Globe size={11} weight="bold" aria-hidden="true" />
+                    </span>
+                  )}
+                  {bank.parent_bank_id && (
+                    <span
+                      aria-label={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
+                      title={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
+                      className="inline-flex items-center text-cream/80"
+                    >
+                      <ArrowUUpLeft size={11} weight="bold" aria-hidden="true" />
+                    </span>
+                  )}
+                  <span>{bank.name}</span>
+                  {bank.kind === "language" && bank.source_lang && bank.target_lang && (
+                    <span className="font-mono text-[9px] uppercase tracking-wider opacity-65">
+                      {bank.source_lang}/{bank.target_lang}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
                   onClick={e => { e.stopPropagation(); openMenu(bank); }}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openMenu(bank);
-                    }
-                  }}
                   aria-label={`Edit ${bank.name}`}
-                  className="ml-0.5 p-0.5 rounded text-cream/55 hover:text-cream transition-colors cursor-pointer"
+                  className="ml-0.5 p-0.5 rounded text-cream/55 hover:text-cream transition-colors"
                 >
                   <DotsThreeVertical size={12} weight="bold" aria-hidden="true" />
-                </span>
-              </button>
+                </button>
+              </div>
 
               {/* Context menu */}
               {menuBankId === bank.id && (

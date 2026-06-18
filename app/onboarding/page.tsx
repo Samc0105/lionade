@@ -122,6 +122,10 @@ export default function OnboardingPage() {
   const [diagCorrect, setDiagCorrect] = useState<boolean | null>(null);
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagDone, setDiagDone] = useState(false);
+  // Distinguishes a load FAILURE (network/server error) from a genuinely
+  // empty question bank. On failure we offer a retry instead of silently
+  // downgrading the user to "beginner".
+  const [diagError, setDiagError] = useState(false);
 
   // Step 5: Classes
   const [classDrafts, setClassDrafts] = useState<ClassDraft[]>([{ ...EMPTY_CLASS_DRAFT }]);
@@ -134,7 +138,7 @@ export default function OnboardingPage() {
     4: levelChoice === "diagnostic"
       ? (diagDone ? "All done! Let's see your results..." : "Answer these 5 questions so I can find your level!")
       : "You're all set! Let's start learning!",
-    5: "Last thing — got specific classes you're studying for? Add them and Lionade builds your study around them.",
+    5: "Last thing. Got specific classes you're studying for? Add them and Lionade builds your study around them.",
   };
 
   // Force dark mode
@@ -177,6 +181,7 @@ export default function OnboardingPage() {
   const loadDiagnostic = useCallback(async () => {
     if (!selectedSubjects[0]) return;
     setDiagLoading(true);
+    setDiagError(false);
     try {
       // Get a mix of difficulties
       const subj = SUBJECTS.find(s => s.label === selectedSubjects[0]);
@@ -189,7 +194,10 @@ export default function OnboardingPage() {
       setDiagCorrect(null);
       setDiagDone(false);
     } catch {
+      // Real load failure (vs. an empty bank). Flag it so the UI offers a
+      // retry rather than the bare "no questions" downgrade-to-beginner card.
       setDiagQuestions([]);
+      setDiagError(true);
     } finally {
       setDiagLoading(false);
     }
@@ -588,8 +596,40 @@ export default function OnboardingPage() {
                   Continue →
                 </button>
               </div>
+            ) : diagError ? (
+              /* Load FAILED (network/server). Offer a retry instead of
+                 silently downgrading the user to "beginner". */
+              <div className="text-center py-8">
+                <h2 ref={stepHeadingRef} tabIndex={-1}
+                  className="font-bebas text-2xl text-cream tracking-wider mb-2 outline-none">
+                  COULDN&apos;T LOAD THE QUIZ
+                </h2>
+                <p className="text-cream/60 text-sm mb-5">
+                  Something went wrong loading your diagnostic. Check your connection and try again.
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { void loadDiagnostic(); }}
+                    className="flex-1 min-h-[44px] py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                      hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                  >
+                    Try again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(5)}
+                    className="flex-1 min-h-[44px] py-3.5 rounded-xl font-bold text-sm border border-white/[0.15]
+                      text-cream/70 hover:text-cream hover:border-white/[0.3] transition-colors
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                  >
+                    Continue →
+                  </button>
+                </div>
+              </div>
             ) : diagQuestions.length === 0 ? (
-              /* No questions available — skip diagnostic */
+              /* Genuinely empty bank for this subject. Skip diagnostic. */
               <div className="text-center py-8">
                 <h2 ref={stepHeadingRef} tabIndex={-1}
                   className="text-cream/70 text-sm mb-4 outline-none">
@@ -744,7 +784,10 @@ export default function OnboardingPage() {
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* Code input + color swatches. The swatch row wraps onto
+                      its own line below the code input on narrow screens so the
+                      40px-min touch targets don't squeeze the code field. */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <input
                       value={c.shortCode}
                       onChange={(e) => {
@@ -753,11 +796,11 @@ export default function OnboardingPage() {
                       }}
                       placeholder="Code (optional)"
                       aria-label={`Code for class ${idx + 1} (optional)`}
-                      className="flex-1 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/[0.08]
+                      className="w-full sm:flex-1 sm:w-auto min-h-[44px] rounded-lg bg-white/[0.04] border border-white/[0.08]
                         focus:border-electric/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70
                         px-3 py-1.5 text-[12px] text-cream placeholder:text-cream/45"
                     />
-                    <div className="flex gap-1" role="group" aria-label={`Color for class ${idx + 1}`}>
+                    <div className="flex flex-wrap gap-0.5" role="group" aria-label={`Color for class ${idx + 1}`}>
                       {CLASS_COLORS.map((col) => (
                         <button
                           key={col}
@@ -765,7 +808,7 @@ export default function OnboardingPage() {
                           onClick={() => setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, color: col } : row))}
                           aria-label={`Color ${col}`}
                           aria-pressed={c.color === col}
-                          className={`w-7 h-7 grid place-items-center rounded-full transition-transform
+                          className={`w-10 h-10 grid place-items-center rounded-full transition-transform
                             focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
                             ${c.color === col ? "motion-safe:scale-110" : "motion-safe:hover:scale-105"}`}
                         >

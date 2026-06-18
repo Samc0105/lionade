@@ -1893,7 +1893,7 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
           ) : quizHistory.length === 0 ? (
             <Card className="text-center py-10">
               <p className="text-cream/60">No quizzes yet. Take your first quiz!</p>
-              <Link href="/quiz"><button className="mt-4 px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">Start a Quiz</button></Link>
+              <Link href="/quiz" className="inline-block mt-4 px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">Start a Quiz</Link>
             </Card>
           ) : quizHistory.map((h: any) => {
             const acc = h.total_questions > 0 ? Math.round((h.correct_answers / h.total_questions) * 100) : 0;

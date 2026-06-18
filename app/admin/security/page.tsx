@@ -350,7 +350,7 @@ function TrafficChart({ points }: { points: TrafficPoint[] | undefined }) {
         <div className="h-[240px] flex flex-col items-center justify-center text-center">
           <Pulse size={28} weight="fill" className="text-cream/25 mb-2" aria-hidden="true" />
           <p className="text-cream/50 text-sm">No request telemetry in the last hour.</p>
-          <p className="text-cream/35 text-xs mt-1">
+          <p className="text-cream/50 text-xs mt-1">
             Bars will fill once the middleware starts flushing rollups.
           </p>
         </div>
@@ -704,7 +704,7 @@ export default function AdminSecurityPage() {
               aria-hidden="true"
             />
             <p className="text-cream/60 text-sm">No flagged actors in the last 6 hours.</p>
-            <p className="text-cream/35 text-xs mt-1">
+            <p className="text-cream/50 text-xs mt-1">
               Scanners, brute force, and probes will appear here when detected.
             </p>
           </div>

@@ -67,25 +67,43 @@ export function AdminModalShell({
 }: AdminModalShellProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
 
+  // Esc to close (when not busy) + Tab focus-trap so keyboard/SR users can't
+  // tab into the page behind an aria-modal dialog (WCAG 2.1.2 / 2.4.3). Ported
+  // from ConfirmModal so action modals get the same behavior.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
+      if (e.key === "Escape" && !busy) { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const items = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, busy, onClose]);
 
   // Move focus into the panel on open (mirrors ConfirmModal's rAF guard
-  // against the entrance-animation layout race).
+  // against the entrance-animation layout race), and restore focus to the
+  // trigger element on close.
   useEffect(() => {
     if (!open) return;
+    const restoreTo = document.activeElement as HTMLElement | null;
     const id = requestAnimationFrame(() => {
       const target =
         panelRef.current?.querySelector<HTMLElement>("input, textarea, select, button");
       (target ?? panelRef.current)?.focus();
     });
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+      restoreTo?.focus?.();
+    };
   }, [open]);
 
   if (!open) return null;
