@@ -95,23 +95,21 @@ export async function grantKnowledgeSharerBadge(
 }
 
 /**
- * Fire-and-forget grant of a Streak Warrior emblem tier. `tier` must be one
- * of 10 / 30 / 100 / 365 — the RPC validates and rejects unknown tiers.
- *
- * NOT YET wired into a route. The streak-increment site (likely
- * `app/api/clock-in/route.ts` or wherever `advance_streak` is called) must
- * call this AFTER the streak number is locked in. Out of scope for this
- * wave — flagged in the vault entry under "wiring pending".
+ * Fire-and-forget grant of a Streak Warrior emblem. Pass the user's CURRENT
+ * streak length; the RPC picks the highest tier crossed (10/30/100/365) and is
+ * idempotent. (Wired directly via supabaseAdmin.rpc in app/api/login-bonus;
+ * this wrapper exists for any other caller — note the RPC param is
+ * `p_streak_days`, the raw streak, NOT a tier.)
  */
 export async function grantStreakEmblem(
   client: SupabaseClient,
   userId: string,
-  tier: 10 | 30 | 100 | 365,
+  streakDays: number,
 ): Promise<void> {
   try {
     const { error } = await client.rpc("grant_streak_emblem", {
       p_user_id: userId,
-      p_tier: tier,
+      p_streak_days: streakDays,
     });
     if (error) {
       console.error("[cosmetic-grants] grant_streak_emblem", error.message);
@@ -119,6 +117,38 @@ export async function grantStreakEmblem(
   } catch (err) {
     console.error(
       "[cosmetic-grants] grant_streak_emblem threw",
+      err instanceof Error ? err.message : "unknown",
+    );
+  }
+}
+
+/**
+ * Fire-and-forget grant of a FREE earned cosmetic at a milestone (the
+ * earn-a-cosmetic faucet). The CALLER must have already verified the milestone
+ * was crossed — this helper does no gating (the underlying RPC is service-role
+ * only and takes an arbitrary cosmetic id). `cosmeticId` should be an EXISTING
+ * slot-backed catalog id (e.g. a common aura/frame) so it equips for free
+ * through the normal locker plumbing. Idempotent: re-hitting a milestone never
+ * re-grants (earned_cosmetics UNIQUE on user_id + cosmetic_id).
+ */
+export async function grantEarnedCosmetic(
+  client: SupabaseClient,
+  userId: string,
+  cosmeticId: string,
+  earnedVia: string,
+): Promise<void> {
+  try {
+    const { error } = await client.rpc("grant_earned_cosmetic", {
+      p_user_id: userId,
+      p_cosmetic_id: cosmeticId,
+      p_earned_via: earnedVia,
+    });
+    if (error) {
+      console.error("[cosmetic-grants] grant_earned_cosmetic", error.message);
+    }
+  } catch (err) {
+    console.error(
+      "[cosmetic-grants] grant_earned_cosmetic threw",
       err instanceof Error ? err.message : "unknown",
     );
   }

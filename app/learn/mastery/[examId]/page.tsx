@@ -13,7 +13,7 @@ const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false }
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import SubtopicRail, { type SubtopicRailItem } from "@/components/Mastery/SubtopicRail";
 import MasteryMessage, { type MessageShape } from "@/components/Mastery/MasteryMessage";
-import MasteryActionArea, { type LiveQuestion, type AnswerOutcome } from "@/components/Mastery/MasteryActionArea";
+import MasteryActionArea, { type LiveQuestion, type AnswerOutcome, type HintResult } from "@/components/Mastery/MasteryActionArea";
 import { useActiveTime } from "@/components/Mastery/useActiveTime";
 import SessionReportFab from "@/components/Mastery/StudySheetButton";
 import NinnyThinking, { MasteryNotesFooter } from "@/components/Mastery/NinnyThinking";
@@ -92,6 +92,8 @@ interface SessionResponse {
     displayPct: number;
   }[];
   messages: MessageShape[];
+  /** Mastery Hint Pack — hints the user has left to spend in the action area. */
+  hintsRemaining?: number;
   pPass: number;
   overallDisplayPct: number;
   ready: boolean;
@@ -636,6 +638,39 @@ export default function MasterySessionPage() {
     } finally { setBusy(false); }
   }, [sessionId, liveQuestion, busy, data?.session.pending?.subtopicId, queue, mutate, doNext, refillQueue]);
 
+  // Mastery Hint Pack — spend one hint to eliminate a wrong option on the live
+  // question. The server returns a WRONG index (never the answer); we reflect
+  // the new remaining count in the cache so it stays right across questions.
+  const doHint = useCallback(
+    async (): Promise<HintResult | null> => {
+      // Server owns the eliminated set (keyed to the pending question), so we
+      // send only the challenge token. busy-guarded for symmetry with
+      // doAnswer/doNext so a hint can't fire during a question transition.
+      if (!sessionId || !liveQuestion || busy) return null;
+      setActionError(null);
+      try {
+        const r = await apiPost<HintResult>(
+          `/api/mastery/sessions/${sessionId}/hint`,
+          { challengeToken: liveQuestion.challengeToken },
+        );
+        if (!r.ok || !r.data) {
+          setActionError(r.error || "Couldn't use a hint. Try again.");
+          return null;
+        }
+        const res = r.data;
+        mutate(
+          (current) => (current ? { ...current, hintsRemaining: res.hintsRemaining } : current),
+          { revalidate: false },
+        );
+        return res;
+      } catch {
+        setActionError("Couldn't use a hint. Try again.");
+        return null;
+      }
+    },
+    [sessionId, liveQuestion, busy, mutate],
+  );
+
   const doSocratic = async (reply: string) => {
     if (!sessionId || busy) return;
     setBusy(true);
@@ -993,6 +1028,8 @@ export default function MasterySessionPage() {
                     disabled={busy}
                     onContinue={doNext}
                     onAnswer={doAnswer}
+                    hintsRemaining={data.hintsRemaining ?? 0}
+                    onHint={doHint}
                     onSocraticSubmit={doSocratic}
                     socraticInitial={socraticInitial}
                     onSocraticChange={persistMasteryState}

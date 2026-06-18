@@ -293,7 +293,7 @@ export default function SketchView({
   // who receives it enters celebrating in lockstep. See report at end of
   // file for the "client-derived vs DB-persisted" design call.
   const [celebrating, setCelebrating] = useState<{
-    winner: { user_id: string; username: string | null; avatar_url: string | null } | null;
+    winner: { user_id: string; username: string | null; avatar_url: string | null; equipped_frame?: string | null; equipped_avatar_aura?: string | null } | null;
     word: string;
     started_at: string;
   } | null>(null);
@@ -906,7 +906,7 @@ export default function SketchView({
       const payload = (msg.payload ?? {}) as {
         reveal?: typeof reveal;
         celebrating?: {
-          winner: { user_id: string; username: string | null; avatar_url: string | null } | null;
+          winner: { user_id: string; username: string | null; avatar_url: string | null; equipped_frame?: string | null; equipped_avatar_aura?: string | null } | null;
           word: string;
           started_at: string;
         };
@@ -1295,17 +1295,18 @@ export default function SketchView({
     if (res.data.source_kind === "bank") setRevealIsBank(true);
     const startedAt = new Date().toISOString();
     // Resolve winner from the first-correct-guesser ref (captured live during
-    // the GUESS broadcast). Pulls avatar_url defensively from the players list
-    // if it happens to be there (it isn't on PartyPlayer today, so we send null
-    // and the overlay falls back to dicebear seeded on username).
+    // the GUESS broadcast). Pull avatar_url + equipped cosmetics from the
+    // players snapshot so the celebration shows the winner's frame + aura
+    // (PartyPlayer now carries these); null falls back to a dicebear avatar.
     const fc = firstCorrectRef.current;
+    const fcPlayer = fc ? players.find((p) => p.user_id === fc.user_id) : undefined;
     const winner = fc
       ? {
           user_id: fc.user_id,
           username: fc.username,
-          avatar_url:
-            (players.find((p) => p.user_id === fc.user_id) as { avatar_url?: string | null } | undefined)
-              ?.avatar_url ?? null,
+          avatar_url: fcPlayer?.avatar_url ?? null,
+          equipped_frame: fcPlayer?.equipped_frame ?? null,
+          equipped_avatar_aura: fcPlayer?.equipped_avatar_aura ?? null,
         }
       : null;
     const celebratingPayload = {
@@ -1542,7 +1543,31 @@ export default function SketchView({
     user_id: p.user_id,
     username: p.username,
     score: p.score,
+    avatar_url: p.avatar_url,
+    equipped_username_effect: p.equipped_username_effect,
+    equipped_name_color: p.equipped_name_color,
+    equipped_frame: p.equipped_frame,
+    equipped_avatar_aura: p.equipped_avatar_aura,
   })), [players]);
+
+  // The post-round reveal scoreboard (from /complete) only carries
+  // user_id/username/score, so enrich each row from the in-scope players
+  // snapshot to paint equipped frame/aura + name cosmetics on the reveal +
+  // game-over rosters without any backend change (every active player is in the
+  // snapshot; absent = plain fallback).
+  const enrichBoardRow = (s: { user_id: string; username: string | null; score: number }) => {
+    const p = players.find((pp) => pp.user_id === s.user_id);
+    return {
+      user_id: s.user_id,
+      username: s.username,
+      score: s.score,
+      avatar_url: p?.avatar_url,
+      equipped_username_effect: p?.equipped_username_effect,
+      equipped_name_color: p?.equipped_name_color,
+      equipped_frame: p?.equipped_frame,
+      equipped_avatar_aura: p?.equipped_avatar_aura,
+    };
+  };
 
   // Spectator set across the room — for the scoreboard badge. Same derivation
   // as `isSpectator` but for everyone: a player who joined after the current
@@ -2648,11 +2673,7 @@ export default function SketchView({
                 vote card / auto-advance / CTAs; the last word card stays above
                 for context. ── */
             <GameOverScreen
-              players={reveal.scoreboard.map((s) => ({
-                user_id: s.user_id,
-                username: s.username,
-                score: s.score,
-              }))}
+              players={reveal.scoreboard.map(enrichBoardRow)}
               meUserId={meUserId}
               accent="#A855F7"
               isHost={isEffectiveHost}
@@ -2671,11 +2692,7 @@ export default function SketchView({
                   transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <PartyScoreboard
-                    players={reveal.scoreboard.map((s) => ({
-                      user_id: s.user_id,
-                      username: s.username,
-                      score: s.score,
-                    }))}
+                    players={reveal.scoreboard.map(enrichBoardRow)}
                     highlightUserId={meUserId}
                     drawerUserId={reveal.drawer_user_id}
                     spectatorUserIds={spectatorUserIds}

@@ -52,7 +52,7 @@ export async function fetchRoomSnapshot(
 
   const { data: players } = await supabase
     .from("party_room_players")
-    .select("user_id, score, joined_at, left_at, is_ready, is_pending_round, is_spectator, selected_subjects, profiles!inner(username, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura)")
+    .select("user_id, score, joined_at, left_at, is_ready, is_pending_round, is_spectator, selected_subjects, profiles!inner(username, avatar_url, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura)")
     .eq("room_id", room.id)
     .is("left_at", null)
     .order("joined_at", { ascending: true });
@@ -69,6 +69,7 @@ export async function fetchRoomSnapshot(
   const shaped: PartyPlayer[] = (players ?? []).map((p) => ({
     user_id: p.user_id,
     username: profileField(p, "username"),
+    avatar_url: profileField(p, "avatar_url"),
     score: p.score ?? 0,
     joined_at: p.joined_at,
     left_at: p.left_at,

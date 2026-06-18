@@ -18,6 +18,8 @@ import { subscribeResilient } from "@/lib/realtime-resilient";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 import AnimatedUsername from "@/components/AnimatedUsername";
+import Avatar from "@/components/Avatar";
+import { avatarFor } from "@/lib/avatar";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 
 const MAX_PLAYERS = 6;
@@ -1125,19 +1127,30 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
             return (
               <div
                 key={p.user_id}
-                className={`rounded-lg px-3 py-2 flex items-center gap-2 truncate${
+                className={`rounded-lg px-3 py-2 flex items-center gap-2 min-w-0${
                   justJoined ? " pa-join-in" : ""
                 }${isReady ? " pa-ready-lit" : ""}`}
                 style={{ background: bg, border: `1px solid ${accent}` }}
               >
-                <span
-                  aria-hidden="true"
-                  className="inline-block w-2 h-2 rounded-full shrink-0"
-                  style={{
-                    background: isReady ? "#22C55E" : "rgba(255,255,255,0.18)",
-                    boxShadow: isReady ? "0 0 8px rgba(34,197,94,0.6)" : undefined,
-                  }}
-                />
+                {/* Decorated avatar — shows the player's equipped frame + aura,
+                    with the ready/waiting dot overlaid bottom-right. */}
+                <span className="relative shrink-0 inline-flex">
+                  <Avatar
+                    url={avatarFor(p.username, p.avatar_url)}
+                    alt={p.username ?? "Player"}
+                    size="sm"
+                    frame={p.equipped_frame}
+                    aura={p.equipped_avatar_aura}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-0 right-0 z-10 w-2.5 h-2.5 rounded-full border border-[#04080F]"
+                    style={{
+                      background: isReady ? "#22C55E" : "rgba(150,160,180,0.6)",
+                      boxShadow: isReady ? "0 0 8px rgba(34,197,94,0.6)" : undefined,
+                    }}
+                  />
+                </span>
                 <p className="font-syne text-sm text-cream/90 truncate flex-1">
                   <AnimatedUsername
                     username={p.username ?? "Player"}

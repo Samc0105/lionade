@@ -7,6 +7,40 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-18 (cont.): SHOP COSMETICS FOLLOW-UPS — loadout presets, earn-a-cosmetic faucet, party gameplay rosters, founder flair
+
+**Status:** Shipped to web working tree (uncommitted; localhost-verified; reviewed SHIP by security ×2 + code-review + frontend). Two migrations HELD for Sam (`082_cosmetic_loadouts.sql`, `20260618150000_grant_earned_cosmetic.sql`). All zero-API. Owner: `vp-ios` to mirror the shared-backend pieces.
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Loadout presets** | ✅ save your whole look (5 slots) as a named preset + swap the set in one tap. New `cosmetic_loadouts` table (RLS owner-scoped, cap 8), `/api/me/loadout` GET/POST/PATCH(apply, ownership-validated batch equip, stale ids skipped)/DELETE, a Loadouts strip in `CosmeticLocker` (each card is its own live preview; Apply optimistically swaps the whole look). Migration `082` HELD | 🟡 **parity** — shared backend (iOS could call `/api/me/loadout`); needs an iOS Loadouts UI |
+| **Earn-a-cosmetic faucet** | ✅ FREE common cosmetics at milestones: 7-day streak → `aura_lunar`, Level 5 → `aura_solar`, first Mastery → `frame_basic_blue`. New service-role-only `grant_earned_cosmetic` RPC (idempotent) + wrapper; wired fire-and-forget at the 3 milestone sites. **Also fixed 2 prod bugs** that made the EXISTING earned-cosmetic system silently dead: the owned-route selected nonexistent columns (dropped ALL earned items) and the streak-emblem catalog ids didn't match the deployed RPC. Migration `20260618150000` HELD | ✅ SHARED-BACKEND — iOS reads the same `/api/cosmetics/owned` + `/api/me/equip`, so earned cosmetics work once migration applied; iOS needs the catalog id sync + a "cosmetic unlocked" toast |
+| **Party in-gameplay cosmetics** | ✅ equipped frame+aura now render on the who's-done roster (`AvatarCheckRow`), the final podium (`GameOverScreen`), the Sketch round-win celebration (`RoundEndOverlay`), the Sketch reveal/game-over boards (client-side enrich), and PokerFace presenter + reveal rows. (Lobby + scoreboard were done in the prior pass.) | 🟡 **parity** — iOS party views need the same decorated avatars |
+| **Founder flair pill** | ✅ NARROW SLICE: the highest-rarity owned founder badge auto-shows as a rarity-tinted pill on the SELF profile hero (`badge-styles.ts` + `EquippedFlair` + `useEquippedCosmetics.flair`). Protects the $14.99 Founding Scholar SKU that previously rendered nowhere. DEFERRED: user-choosable flair, earned-medal showcase, cross-surface (leaderboard/social) rendering | 🟡 **parity** — iOS founder badge has no render either; mirror the pill later |
+
+**Apply-before-ship migrations (HELD per policy):** `lib/migrations/082_cosmetic_loadouts.sql` (presets table) + `lib/migrations/20260618150000_grant_earned_cosmetic.sql` (faucet RPC). Until applied: presets 500 on save/list, the faucet is inert (fire-and-forget logs + grants nothing). Both purely additive, zero data-loss risk.
+
+---
+
+## 2026-06-18: SHOP COSMETICS — fluid legendary glare + render equipped cosmetics app-wide
+
+**Status:** Shipped to web working tree (uncommitted, on `main`; localhost-verified pending Sam). **Verified against prod Supabase:** migrations 063 (`equipped_*` slot columns) + 064 (equip forge-guard trigger) ARE applied, and there is NO restrictive `user_inventory.item_type` CHECK — so buy/own + equip/swap of every cosmetic type (frame, aura, name color, banner, username effect) already works server-side. The earlier-feared "063 unapplied / CHECK too narrow" blockers do NOT exist in prod. This pass fixed the legendary card animation reset and closed the "equipped cosmetics never render on the user" gaps. Owner: `vp-ios` to mirror.
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Legendary shop card gold sweep — fluid seamless loop** | ✅ rewrote `shop-tier-sweep-legendary` keyframe to advance exactly one tile (200%) on a repeating two-glint gradient so 0%==100% (no positional snap) and a glint is always on screen (no dead gap that read as a "reset"); reduced-motion coverage unchanged | 🟡 **parity** — globals.css comment ties this to the iOS Go-Pro pill marquee; `ios-design-motion` should mirror the two-glint / one-tile-period loop in Reanimated/Skia if iOS has a legendary card |
+| **Equipped cosmetics render on the real user** | ✅ dashboard hero now renders the self avatar with equipped frame+aura+name effect (previously NO avatar on home); `/api/social/friends` now selects + returns all 4 `equipped_*` pointers for friends/incoming/outgoing (the /social frontend already read them) | 🟡 **parity** — `packages/lionade-core` social.ts passes `equipped_*` through but iOS does NOT render frame/aura/name-color yet; needs an iOS DecoratedAvatar equivalent + the dashboard/social render wiring |
+| **Shop equip cache consistency** | ✅ shop `handleEquip` now revalidates BOTH inventory + cosmetics-owned SWR caches so an equip from the shop paints immediately on navbar/dashboard/profile | 🚫 N/A (web SWR-specific; iOS has its own cache layer) |
+| **Party cosmetics — frame + aura on player tiles** | ✅ lobby roster (ready dot overlaid on a decorated avatar) + scoreboard rows across all 4 game views (Trivia/PokerFace/Bluff/Sketch) now render the player's avatar with equipped frame+aura; `room-state.ts` selects `avatar_url`; the `playersForBoard` memos forward `avatar_url` + all `equipped_*` (which also lit up name color/effect there for the first time) | 🟡 **parity** — iOS party tiles need the same decorated avatar |
+| **Mastery Hint Pack — buyable + functional** | ✅ BUILT (migration `20260618140000` UNAPPLIED, held for Sam): `profiles.mastery_hints_remaining` counter (guarded by `guard_profile_equipped`); granted on purchase (fail-closed refund if ungranted); spent via `POST /api/mastery/sessions/[id]/hint` to eliminate a wrong MCQ option (server-authoritative, 50/50 floor, answer never leaked); "Use a hint (N left)" button + dimmed eliminated options in `MasteryActionArea`. Shop gate removed. Reviewed (security ×2 + correctness) SHIP | 🚫 N/A until web ships; iOS Mastery would inherit the routes/counter once it adopts the action |
+| **Make all items purchasable** | 🟡 **ALL DONE except voice skin** — every Fang cosmetic + the mastery hint pack are now buyable + functional + equippable. ONLY `voice_ninny_classic` stays gated (needs a paid TTS provider — Sam chose "keep Coming Soon, $0"). Cash-only `priceUSD` premium SKUs still need a separate Stripe cosmetic-IAP flow (out of scope) | 🚫 N/A until the web work lands |
+
+**Apply-before-ship:** migration `lib/migrations/20260618140000_mastery_hints.sql` is UNAPPLIED (held per Sam's migration policy). Until applied, buying the hint pack safely REFUNDS (fail-closed) and the hint button stays hidden (count reads 0). Apply it, then the hint pack is fully live.
+
+**Deliberate gating (not a bug):** `voice_ninny_classic` (6000 Fangs) stays "Coming Soon" — no Ninny TTS yet and a voice provider is a flagged API cost (Sam: keep gated, $0). **Deferred (backend follow-up):** the Sketchy *reveal* + *game-over* scoreboards read the `/complete` payload (`{user_id, username, score}`) not `playersForBoard`, so they render plain — lighting them up needs the `/complete` route to return `equipped_*` (dev-backend).
+
+---
+
 ## 2026-06-17 → 06-18: WEB POLISH + ECONOMY HARDENING + SERVER BACKLOG + PAYMENTS
 
 **Status:** Shipped to web `main` (the polish/a11y/economy-display pass + the X-handle + .env.example + Stripe runbook) plus a HELD branch `feat/server-backlog` (the Mastery/Arena server backlog, migrations UNAPPLIED). Several items are SHARED-BACKEND (iOS hits the same API/DB and inherits the fix once the migrations are applied) — those need no iOS client work but ARE gated on the same migrations. The client-side items have iOS counterparts to mirror in a future batch. Owner: `vp-ios` to schedule the client mirrors; the shared-backend rows are inherited.

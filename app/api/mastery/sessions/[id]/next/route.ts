@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { grantEarnedCosmetic } from "@/lib/cosmetic-grants";
 import {
   displayPct, pPass, isMasteryReached, pickNextSubtopic, pickDifficulty,
 } from "@/lib/mastery";
@@ -277,6 +278,12 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         session_id: sessionId, user_id: userId, event_type: "mastery_reached",
         p_pass_after: aggregate,
       });
+
+      // Earn-a-cosmetic faucet: a FREE common frame for reaching mastery. The
+      // grant is idempotent (one per user ever), so this naturally rewards the
+      // user's FIRST mastered subject and no-ops on later ones. frame_basic_blue
+      // is a slot-backed catalog id, so it equips through the normal plumbing.
+      void grantEarnedCosmetic(supabaseAdmin, userId, "frame_basic_blue", "first_mastery");
 
       return NextResponse.json({
         kind: "celebrate",

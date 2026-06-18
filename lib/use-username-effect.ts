@@ -32,6 +32,7 @@ import {
   resolveNameColor,
   type UsernameEffect,
 } from "@/components/AnimatedUsername";
+import { pickTopFounderBadge } from "@/lib/cosmetics/badge-styles";
 
 interface OwnedCosmetic {
   // Backend uses `itemId` / `itemType`; tolerate legacy `id` / `type` too.
@@ -62,6 +63,9 @@ export interface EquippedCosmetics {
   frame: string | null;
   aura: string | null;
   banner: string | null;
+  // Auto-selected highest-rarity owned FOUNDER badge id (Shop V2 flair pill).
+  // null = none owned. Not slot-equipped; surfaced for display only.
+  flair: string | null;
 }
 
 const EMPTY: EquippedCosmetics = {
@@ -70,6 +74,7 @@ const EMPTY: EquippedCosmetics = {
   frame: null,
   aura: null,
   banner: null,
+  flair: null,
 };
 
 function itemId(c: OwnedCosmetic): string {
@@ -104,6 +109,15 @@ export function useEquippedCosmetics(): EquippedCosmetics {
   if (!data?.ok || !data.data) return EMPTY;
   const payload = data.data;
 
+  // Flair: auto-pick the highest-rarity owned founder badge from the items
+  // list (present in both response paths). Display-only; no equip slot.
+  const flair = pickTopFounderBadge(
+    (payload.items ?? [])
+      .filter((c) => itemType(c) === "founder_badge")
+      .map((c) => itemId(c))
+      .filter(Boolean),
+  );
+
   // ── Preferred path: the resolved `equipped` object ──
   const eq = payload.equipped;
   if (eq) {
@@ -115,6 +129,7 @@ export function useEquippedCosmetics(): EquippedCosmetics {
       frame: normId(eq.frame),
       aura: normId(eq.avatar_aura),
       banner: normId(eq.banner),
+      flair,
     };
   }
 
@@ -144,6 +159,7 @@ export function useEquippedCosmetics(): EquippedCosmetics {
     frame: frameItem ? normId(itemId(frameItem)) : null,
     aura: auraItem ? normId(itemId(auraItem)) : null,
     banner: bannerItem ? normId(itemId(bannerItem)) : null,
+    flair,
   };
 }
 

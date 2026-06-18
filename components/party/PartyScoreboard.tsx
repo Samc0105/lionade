@@ -13,15 +13,22 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Crown, Eye } from "@phosphor-icons/react";
 import CountUp from "@/components/CountUp";
 import AnimatedUsername from "@/components/AnimatedUsername";
+import Avatar from "@/components/Avatar";
+import { avatarFor } from "@/lib/avatar";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 
 interface Player {
   user_id: string;
   username: string | null;
   score: number;
-  // Shop V2 — server-supplied equipped cosmetics (optional).
+  // Shop V2 — server-supplied equipped cosmetics (optional). avatar_url +
+  // frame + aura let the row render a decorated avatar; null/missing degrades
+  // gracefully (DiceBear fallback avatar, plain ring).
+  avatar_url?: string | null;
   equipped_username_effect?: string | null;
   equipped_name_color?: string | null;
+  equipped_frame?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 interface Props {
@@ -98,6 +105,13 @@ export default function PartyScoreboard({
                 >
                   {isLeader ? <Crown size={13} weight="fill" aria-hidden="true" /> : i + 1}
                 </span>
+                <Avatar
+                  url={avatarFor(p.username, p.avatar_url)}
+                  alt={p.username ?? "Player"}
+                  size="sm"
+                  frame={p.equipped_frame}
+                  aura={p.equipped_avatar_aura}
+                />
                 <span className="font-syne text-sm text-cream/85 truncate">
                   <AnimatedUsername
                     username={p.username ?? "Player"}

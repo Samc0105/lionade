@@ -39,6 +39,8 @@ import JoiningNextRoundBanner from "./JoiningNextRoundBanner";
 import RoundCountdown from "./RoundCountdown";
 import GameOverScreen from "./GameOverScreen";
 import CountUp from "@/components/CountUp";
+import Avatar from "@/components/Avatar";
+import { avatarFor } from "@/lib/avatar";
 import dynamic from "next/dynamic";
 // Confetti is dynamic-imported — see RoundEndOverlay for the why. Saves
 // shipping the canvas particle code on every PokerFaceView mount.
@@ -703,17 +705,28 @@ export default function PokerFaceView({
   }, [isEffectiveHost, rematchPending, room.code]);
 
   const playersForBoard = useMemo(
-    () => players.map((p) => ({ user_id: p.user_id, username: p.username, score: p.score })),
+    () => players.map((p) => ({
+      user_id: p.user_id, username: p.username, score: p.score,
+      avatar_url: p.avatar_url,
+      equipped_username_effect: p.equipped_username_effect,
+      equipped_name_color: p.equipped_name_color,
+      equipped_frame: p.equipped_frame,
+      equipped_avatar_aura: p.equipped_avatar_aura,
+    })),
     [players],
   );
 
-  // Presenter avatar for the caller listening screen. Dicebear seeded on
-  // username so it's stable per-user across surfaces (engineering
-  // non-negotiable: avatar stability via useMemo).
-  const presenterAvatarSrc = useMemo(() => {
-    const seed = detail?.presenter_username ?? detail?.presenter_user_id ?? "presenter";
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=4A90D9`;
-  }, [detail?.presenter_username, detail?.presenter_user_id]);
+  // Presenter avatar + equipped cosmetics for the caller listening screen.
+  // Resolved from the players snapshot so the presenter's frame + aura show;
+  // avatar stability via useMemo (engineering non-negotiable).
+  const presenterCosmetics = useMemo(() => {
+    const p = players.find((pp) => pp.user_id === detail?.presenter_user_id);
+    return {
+      url: avatarFor(detail?.presenter_username, p?.avatar_url),
+      frame: p?.equipped_frame ?? null,
+      aura: p?.equipped_avatar_aura ?? null,
+    };
+  }, [players, detail?.presenter_user_id, detail?.presenter_username]);
 
   // Phase 2 vote auto-decide callbacks (75% threshold). Only fire on the
   // post-round reveal screen when the game isn't already game-over. Effective
@@ -814,13 +827,18 @@ export default function PokerFaceView({
             />
           ))
         )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={presenterAvatarSrc}
-          alt={`${presenterName} avatar`}
-          className="w-20 h-20 rounded-full object-cover bg-navy relative z-10"
-          style={{ border: `2px solid ${ACCENT}59`, boxShadow: `0 0 20px ${ACCENT}33` }}
-        />
+        <span
+          className="relative z-10 inline-flex rounded-full"
+          style={{ boxShadow: `0 0 0 2px ${ACCENT}59, 0 0 20px ${ACCENT}33` }}
+        >
+          <Avatar
+            url={presenterCosmetics.url}
+            alt={`${presenterName} avatar`}
+            size="lg"
+            frame={presenterCosmetics.frame}
+            aura={presenterCosmetics.aura}
+          />
+        </span>
       </div>
       <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider text-center px-4">
         WAITING FOR {presenterName.toUpperCase()} TO READ THEIR FACT
@@ -1412,6 +1430,9 @@ export default function PokerFaceView({
                 <div className="space-y-2">
                   {round.reveal.calls.map((c, i) => {
                     const pts = round.reveal!.round_points[c.user_id] ?? 0;
+                    // Resolve the caller's avatar + equipped cosmetics from the
+                    // players snapshot so frame/aura show on the reveal rows.
+                    const cp = players.find((pp) => pp.user_id === c.user_id);
                     return (
                       <div
                         key={c.user_id}
@@ -1424,10 +1445,19 @@ export default function PokerFaceView({
                           ...(reduced ? {} : { animationDelay: `${i * 80}ms` }),
                         }}
                       >
-                        <p className="font-syne text-sm text-cream/90 min-w-0 truncate">
-                          {c.username ?? "Player"}
-                          {c.user_id === meUserId && <span className="text-cream/40 text-xs"> (you)</span>}
-                        </p>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Avatar
+                            url={avatarFor(c.username, cp?.avatar_url)}
+                            alt={c.username ?? "Player"}
+                            size="sm"
+                            frame={cp?.equipped_frame}
+                            aura={cp?.equipped_avatar_aura}
+                          />
+                          <p className="font-syne text-sm text-cream/90 min-w-0 truncate">
+                            {c.username ?? "Player"}
+                            {c.user_id === meUserId && <span className="text-cream/40 text-xs"> (you)</span>}
+                          </p>
+                        </div>
                         <span className="flex items-center gap-2 shrink-0">
                           <span
                             className="font-bebas text-sm tracking-wider"

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { getShopItem, getEarnedCosmetic, getFounderBadge } from "@/lib/shop-catalog";
 
 /**
  * GET /api/cosmetics/owned
@@ -72,7 +73,7 @@ export async function GET(req: NextRequest) {
       .eq("user_id", userId),
     supabaseAdmin
       .from("earned_cosmetics")
-      .select("cosmetic_id, cosmetic_type, granted_at")
+      .select("cosmetic_id, earned_via, earned_at")
       .eq("user_id", userId),
     supabaseAdmin
       .from("profiles")
@@ -150,16 +151,25 @@ export async function GET(req: NextRequest) {
 
   for (const row of (earnedRes.data ?? []) as Array<{
     cosmetic_id: string;
-    cosmetic_type: string | null;
-    granted_at: string | null;
+    earned_via: string | null;
+    earned_at: string | null;
   }>) {
     if (typeof row.cosmetic_id !== "string") continue;
     if (byId.has(row.cosmetic_id)) continue;
+    // earned_cosmetics has no type column — resolve the item type from the
+    // catalog so an earned SLOT-BACKED item (e.g. a free aura_lunar) reports
+    // its real itemType ('avatar_aura') and lands in the right locker slot,
+    // while earned medals/emblems resolve via the earned/founder catalogs.
+    const resolvedType =
+      getShopItem(row.cosmetic_id)?.type ??
+      getEarnedCosmetic(row.cosmetic_id)?.type ??
+      getFounderBadge(row.cosmetic_id)?.type ??
+      null;
     byId.set(row.cosmetic_id, {
       id: row.cosmetic_id,
-      type: row.cosmetic_type ?? null,
+      type: resolvedType,
       source: "earned",
-      acquiredAt: row.granted_at ?? null,
+      acquiredAt: row.earned_at ?? null,
     });
   }
 

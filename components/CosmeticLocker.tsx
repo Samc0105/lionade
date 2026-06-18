@@ -29,7 +29,7 @@
  */
 
 import { useMemo, useState } from "react";
-import useSWR from "swr";
+import useSWR, { type KeyedMutator } from "swr";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import {
@@ -39,12 +39,12 @@ import {
   ANIMATED_BANNERS,
   type ShopItem as CoreShopItem,
 } from "@lionade/core/constants/shop-catalog";
-import { apiGet, apiPost } from "@/lib/api-client";
-import { getBannerStyle } from "@/lib/cosmetics/cosmetic-styles";
+import { apiGet, apiPost, apiPatch, apiDelete, type ApiResult } from "@/lib/api-client";
+import { getBannerStyle, BANNER_STYLES } from "@/lib/cosmetics/cosmetic-styles";
 import Avatar from "@/components/Avatar";
 import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
 import { toastError, toastSuccess } from "@/lib/toast";
-import { Sparkle, Storefront, Check } from "@phosphor-icons/react";
+import { Sparkle, Storefront, Check, Stack, FloppyDisk, X as XIcon } from "@phosphor-icons/react";
 
 // ── Owned-item contract (mirror of useEquippedCosmetics' tolerance) ──
 interface OwnedItem {
@@ -64,6 +64,25 @@ interface EquippedResolved {
 interface OwnedResponse {
   items?: OwnedItem[];
   equipped?: EquippedResolved;
+}
+
+// A saved loadout preset (mirror of the cosmetic_loadouts row the API returns).
+interface LoadoutRow {
+  id: string;
+  name: string;
+  loadout_frame: string | null;
+  loadout_avatar_aura: string | null;
+  loadout_name_color: string | null;
+  loadout_banner: string | null;
+  loadout_username_effect: string | null;
+}
+// The five equipped ids that make up the current look (null = slot empty).
+interface CurrentLook {
+  frame: string | null;
+  avatar_aura: string | null;
+  name_color: string | null;
+  banner: string | null;
+  username_effect: string | null;
 }
 
 function oId(c: OwnedItem): string {
@@ -228,8 +247,28 @@ export default function CosmeticLocker({ username }: { username: string }) {
     setBusySlot(null);
   };
 
+  // The current look (includes optimistic overrides) — fed to "Save current
+  // look" and to apply-loadout cache patching.
+  const currentLook: CurrentLook = {
+    frame: equippedFor("frame"),
+    avatar_aura: equippedFor("avatar_aura"),
+    name_color: equippedFor("name_color"),
+    banner: equippedFor("banner"),
+    username_effect: equippedFor("username_effect"),
+  };
+
+  // After a loadout applies, clear per-slot optimistic overrides so the locker
+  // cards reflect the freshly-applied whole-look state from the shared cache.
+  const clearOptimistic = () => setOptimistic({});
+
   return (
     <div className="space-y-6">
+      <LoadoutStrip
+        username={username}
+        currentLook={currentLook}
+        mutateShared={mutate}
+        clearOptimistic={clearOptimistic}
+      />
       {SLOTS.map((slot) => {
         const owned = grouped[slot.key];
         const equippedId = equippedFor(slot.key);
@@ -377,5 +416,239 @@ function LockerPreview({
       style={{ background: banner.background, backgroundSize: banner.backgroundSize }}
       aria-hidden="true"
     />
+  );
+}
+
+// ── Loadouts: save your whole look + swap the set in one tap ──
+// Each preset card IS its own preview (composed from the same renderers the
+// per-slot cards use), so what you see is what Apply gives you. Applying batch-
+// equips all 5 slots via PATCH /api/me/loadout and patches the shared
+// cosmetics-owned cache so the locker + profile hero swap at once.
+function LoadoutStrip({
+  username,
+  currentLook,
+  mutateShared,
+  clearOptimistic,
+}: {
+  username: string;
+  currentLook: CurrentLook;
+  mutateShared: KeyedMutator<ApiResult<OwnedResponse>>;
+  clearOptimistic: () => void;
+}) {
+  const { user } = useAuth();
+  const key = user?.id ? `loadouts/${user.id}` : null;
+  const { data, mutate: mutateLoadouts } = useSWR(
+    key,
+    () => apiGet<{ loadouts: LoadoutRow[] }>("/api/me/loadout"),
+    { dedupingInterval: 60_000, revalidateOnFocus: true, shouldRetryOnError: false },
+  );
+  const loadouts: LoadoutRow[] = data?.ok ? (data.data?.loadouts ?? []) : [];
+
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [showSave, setShowSave] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [savingNow, setSavingNow] = useState(false);
+
+  const hasLook = Object.values(currentLook).some(Boolean);
+
+  const previewAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`;
+
+  const handleApply = async (l: LoadoutRow) => {
+    if (busyId) return;
+    setBusyId(l.id);
+    const res = await apiPatch<{ ok: boolean; equipped: Record<string, string | null>; skipped: string[] }>(
+      "/api/me/loadout",
+      { id: l.id },
+    );
+    if (!res.ok || !res.data) {
+      toastError(res.error || "Couldn't apply that look.");
+      setBusyId(null);
+      return;
+    }
+    const eqMap = res.data.equipped;
+    // Patch the shared cosmetics-owned cache so the locker cards AND the profile
+    // hero swap to the whole look at once (no five sequential flickers).
+    await mutateShared(
+      (cur) => {
+        if (!cur?.ok || !cur.data) return cur;
+        const nextEquipped = {
+          ...(cur.data.equipped ?? {}),
+          frame: eqMap.equipped_frame ?? null,
+          avatar_aura: eqMap.equipped_avatar_aura ?? null,
+          name_color: eqMap.equipped_name_color ?? null,
+          banner: eqMap.equipped_banner ?? null,
+          effect: eqMap.equipped_username_effect ?? null,
+        };
+        return { ...cur, data: { ...cur.data, equipped: nextEquipped } };
+      },
+      { revalidate: false },
+    );
+    clearOptimistic();
+    const skipped = res.data.skipped ?? [];
+    toastSuccess(
+      skipped.length > 0
+        ? `Applied "${l.name}". ${skipped.length} item${skipped.length > 1 ? "s" : ""} you no longer own were skipped.`
+        : `Applied "${l.name}"`,
+    );
+    setBusyId(null);
+  };
+
+  const handleSave = async () => {
+    const name = nameInput.trim();
+    if (!name || savingNow) return;
+    setSavingNow(true);
+    const res = await apiPost("/api/me/loadout", {
+      name,
+      frame: currentLook.frame,
+      avatar_aura: currentLook.avatar_aura,
+      name_color: currentLook.name_color,
+      banner: currentLook.banner,
+      username_effect: currentLook.username_effect,
+    });
+    if (!res.ok) {
+      toastError(res.error || "Couldn't save that look.");
+      setSavingNow(false);
+      return;
+    }
+    toastSuccess("Look saved");
+    setNameInput("");
+    setShowSave(false);
+    setSavingNow(false);
+    await mutateLoadouts();
+  };
+
+  const handleDelete = async (l: LoadoutRow) => {
+    if (busyId) return;
+    setBusyId(l.id);
+    const res = await apiDelete(`/api/me/loadout?id=${encodeURIComponent(l.id)}`);
+    if (!res.ok) {
+      toastError("Couldn't delete that look.");
+      setBusyId(null);
+      return;
+    }
+    setBusyId(null);
+    await mutateLoadouts();
+  };
+
+  return (
+    <section
+      aria-labelledby="locker-loadouts"
+      className="rounded-2xl border border-gold/20 p-5"
+      style={{ background: "var(--sidebar-bg)" }}
+    >
+      <div className="flex items-center justify-between mb-4 gap-3">
+        <h3 id="locker-loadouts" className="font-bebas text-xl text-cream tracking-wider inline-flex items-center gap-2">
+          <Stack size={18} weight="fill" color="#F0B429" aria-hidden="true" /> Loadouts
+        </h3>
+        <button
+          type="button"
+          onClick={() => setShowSave((s) => !s)}
+          disabled={!hasLook}
+          className="inline-flex items-center gap-1.5 min-h-[36px] font-syne font-semibold text-xs px-3 py-2 rounded-full border border-gold/30 text-gold hover:bg-gold/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          title={hasLook ? "Save your current look as a preset" : "Equip something first"}
+        >
+          <FloppyDisk size={13} weight="fill" aria-hidden="true" /> Save current look
+        </button>
+      </div>
+
+      {showSave && (
+        <div className="flex items-center gap-2 mb-4">
+          <label htmlFor="loadout-name" className="sr-only">Loadout name</label>
+          <input
+            id="loadout-name"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value.slice(0, 40))}
+            onKeyDown={(e) => { if (e.key === "Enter") void handleSave(); }}
+            placeholder="Name this look"
+            autoComplete="off"
+            className="flex-1 bg-white/[0.04] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-cream placeholder-cream/40 focus:outline-none focus:border-gold/50"
+          />
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={!nameInput.trim() || savingNow}
+            className="min-h-[40px] px-4 rounded-lg text-xs font-bold bg-gold text-navy disabled:opacity-50 transition-all"
+          >
+            {savingNow ? "Saving..." : "Save"}
+          </button>
+        </div>
+      )}
+
+      {loadouts.length === 0 ? (
+        <p className="text-cream/45 text-sm py-2">
+          No saved looks yet. Equip a frame, aura, name color and more, then tap{" "}
+          <span className="text-gold/80">Save current look</span> to swap your whole style in one tap later.
+        </p>
+      ) : (
+        <div role="list" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {loadouts.map((l) => {
+            const busy = busyId === l.id;
+            // Only preview a banner that has a real style (so a catalog-removed
+            // id shows NO strip rather than the ambient default — keeping the
+            // card a true preview of what Apply gives).
+            const banner = l.loadout_banner && BANNER_STYLES[l.loadout_banner] ? getBannerStyle(l.loadout_banner) : null;
+            return (
+              <div
+                key={l.id}
+                role="listitem"
+                className="rounded-xl p-3 flex flex-col gap-3 border border-white/[0.08]"
+                style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))" }}
+              >
+                {/* Composite preview = exactly what Apply gives you */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar
+                    url={previewAvatar}
+                    alt=""
+                    size="md"
+                    frame={l.loadout_frame}
+                    aura={l.loadout_avatar_aura}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <AnimatedUsername
+                      username={username}
+                      effect={EFFECT_TOKEN[l.loadout_username_effect ?? ""] ?? "none"}
+                      nameColor={l.loadout_name_color}
+                      size="md"
+                      className="font-bebas text-lg tracking-wide truncate block"
+                    />
+                    {banner && (
+                      <div
+                        className={`mt-1 w-full h-3 rounded ${banner.animClass ?? ""}`}
+                        style={{ background: banner.background, backgroundSize: banner.backgroundSize }}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bebas text-base text-cream/90 tracking-wide truncate">{l.name}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => void handleApply(l)}
+                      disabled={busy}
+                      aria-label={`Apply the ${l.name} look`}
+                      className="min-h-[40px] px-4 rounded-lg text-xs font-bold border border-gold/40 text-gold hover:bg-gold/10 transition-all disabled:opacity-50"
+                    >
+                      {busy ? "..." : "Apply"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete(l)}
+                      disabled={busy}
+                      aria-label={`Delete the ${l.name} look`}
+                      className="min-h-[40px] w-10 grid place-items-center rounded-lg border border-white/[0.1] text-cream/50 hover:text-cream hover:border-white/[0.25] transition-all disabled:opacity-50"
+                    >
+                      <XIcon size={13} weight="bold" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }

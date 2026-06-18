@@ -359,7 +359,7 @@ const ROUTE_LIMITS: RouteLimit[] = [
   },
   {
     test: (p) =>
-      /^\/api\/mastery\/sessions\/[^/]+\/(next|answer|socratic)$/.test(p),
+      /^\/api\/mastery\/sessions\/[^/]+\/(next|answer|socratic|hint)$/.test(p),
     max: 60,
     windowMs: 60 * 1000,
     keyPrefix: "mastery-loop",

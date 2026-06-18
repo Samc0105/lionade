@@ -19,6 +19,8 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import CountUp from "@/components/CountUp";
+import Avatar from "@/components/Avatar";
+import { avatarFor } from "@/lib/avatar";
 
 // Confetti is dynamic-imported so the canvas particle code only ships when a
 // game actually ends (same rationale as RoundEndOverlay).
@@ -28,6 +30,11 @@ interface GameOverPlayer {
   user_id: string;
   username: string | null;
   score: number;
+  // Shop V2 — optional equipped cosmetics so the podium shows decorated avatars.
+  // Callers that pass PartyPlayer-derived rows include these; missing = plain.
+  avatar_url?: string | null;
+  equipped_frame?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 interface Props {
@@ -128,6 +135,13 @@ export default function GameOverScreen({
                 >
                   {i === 0 ? "\u{1F451} " : ""}{pl.label}
                 </span>
+                <Avatar
+                  url={avatarFor(p.username, p.avatar_url)}
+                  alt={p.username ?? "Player"}
+                  size={i === 0 ? "md" : "sm"}
+                  frame={p.equipped_frame}
+                  aura={p.equipped_avatar_aura}
+                />
                 <span className={`font-syne text-cream/90 truncate ${i === 0 ? "text-base sm:text-lg" : "text-sm"}`}>
                   {p.username ?? "Player"}
                   {isMe && <span className="text-cream/40 text-xs"> (you)</span>}
@@ -163,6 +177,13 @@ export default function GameOverScreen({
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="font-bebas text-xs text-cream/40 w-7">{i + 4}TH</span>
+                  <Avatar
+                    url={avatarFor(p.username, p.avatar_url)}
+                    alt={p.username ?? "Player"}
+                    size="sm"
+                    frame={p.equipped_frame}
+                    aura={p.equipped_avatar_aura}
+                  />
                   <span className="font-syne text-sm text-cream/80 truncate">
                     {p.username ?? "Player"}
                     {isMe && <span className="text-cream/40 text-xs"> (you)</span>}

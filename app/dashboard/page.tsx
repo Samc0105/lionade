@@ -26,7 +26,8 @@ import DailyReadyNudge from "@/components/DailyReadyNudge";
 import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
+import Avatar from "@/components/Avatar";
+import { useEquippedCosmetics } from "@/lib/use-username-effect";
 import dynamic from "next/dynamic";
 const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import {
@@ -98,7 +99,11 @@ function DashboardContent() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
   // Shop V2 — drives the "Welcome back, {name}" hero header username effect.
-  const usernameEffect = useEquippedUsernameEffect();
+  // Full equipped-cosmetic set for the hero: username effect + the avatar's
+  // frame and aura, so the user's own equipped cosmetics finally render on the
+  // home screen (the dashboard hero previously showed no avatar at all).
+  const cosmetics = useEquippedCosmetics();
+  const usernameEffect = cosmetics.effect;
   // Hydration gate. useAuth + SWR seed from localStorage on the client,
   // so SSR (and the first client render commit) sees an empty cache while
   // the very next render sees populated data. Any conditional inside this
@@ -503,16 +508,28 @@ function DashboardContent() {
               }}
             />
             <div className="flex items-start justify-between gap-4 relative">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric mb-1.5">
-                  Command Bridge
-                </p>
-                <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-[0.95]">
-                  Welcome back, {usernameEffect === "none"
-                    ? <span className="shimmer-text">{user.username}</span>
-                    : <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider" />}
-                </h1>
-                <p className="text-cream/65 text-sm mt-2 font-syne">{getGreeting()}</p>
+              <div className="flex items-center gap-4 min-w-0">
+                {/* Self avatar — paints the equipped frame + aura on the home
+                    screen (the "I own a legendary aura" money-moment). */}
+                <Avatar
+                  url={user.avatar}
+                  alt={user.username}
+                  size="lg"
+                  frame={cosmetics.frame}
+                  aura={cosmetics.aura}
+                  className="flex-shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric mb-1.5">
+                    Command Bridge
+                  </p>
+                  <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-[0.95]">
+                    Welcome back, {usernameEffect === "none"
+                      ? <span className="shimmer-text">{user.username}</span>
+                      : <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider" />}
+                  </h1>
+                  <p className="text-cream/65 text-sm mt-2 font-syne">{getGreeting()}</p>
+                </div>
               </div>
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
                 <p className="text-cream/30 text-[11px] font-mono tracking-wider uppercase">{today}</p>

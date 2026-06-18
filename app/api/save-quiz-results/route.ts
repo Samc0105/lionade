@@ -8,6 +8,8 @@ import { absoluteUrl } from "@/lib/site-config";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 import { clearActiveSession } from "@/lib/presence";
 import { BOOSTER_ITEMS } from "@/lib/shop-catalog";
+import { getLevelFromXp } from "@/lib/levels";
+import { grantEarnedCosmetic } from "@/lib/cosmetic-grants";
 
 // ── Server-authoritative reward derivation ─────────────────────────────────
 // The base per-correct-answer reward (BEFORE the plan multiplier) used to be
@@ -413,6 +415,13 @@ export async function POST(req: NextRequest) {
     if (profileUpdateErr) {
       console.error("[save-quiz-results] Step 3 FAILED — profile update:", profileUpdateErr.message);
       return NextResponse.json({ error: "Couldn't update profile." }, { status: 500 });
+    }
+
+    // Earn-a-cosmetic faucet: a FREE common aura when the user crosses into
+    // Level 5, rewarding core quiz engagement. Fire-and-forget + idempotent
+    // (one grant per user ever). aura_solar is a slot-backed catalog id.
+    if (getLevelFromXp(profile.xp ?? 0) < 5 && getLevelFromXp(newXp) >= 5) {
+      void grantEarnedCosmetic(supabaseAdmin, userId, "aura_solar", "level_5");
     }
 
     // 3b. Consecutive quiz bonus — award 50 fangs for every 3rd quiz completed within 60 minutes

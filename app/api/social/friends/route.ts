@@ -67,12 +67,19 @@ export async function GET(req: NextRequest) {
       arena_elo: number | null;
       is_online: boolean | null;
       last_seen: string | null;
+      // Equipped cosmetics — the /social frontend renders frame + aura on the
+      // avatar and name color/effect on the username for every row, so the list
+      // endpoint must pull all four equipped_* pointers (not just the effect).
+      equipped_username_effect: string | null;
+      equipped_frame: string | null;
+      equipped_name_color: string | null;
+      equipped_avatar_aura: string | null;
     };
     const profileMap = new Map<string, Profile>();
     if (profileIds.size > 0) {
       const { data: profileRows } = await supabaseAdmin
         .from("profiles")
-        .select("id, username, avatar_url, arena_elo, is_online, last_seen, equipped_username_effect")
+        .select("id, username, avatar_url, arena_elo, is_online, last_seen, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura")
         .in("id", Array.from(profileIds));
       for (const p of (profileRows ?? []) as Profile[]) {
         profileMap.set(p.id, p);
@@ -84,6 +91,16 @@ export async function GET(req: NextRequest) {
     for (const m of unreadRows) {
       unreadMap[m.sender_id] = (unreadMap[m.sender_id] ?? 0) + 1;
     }
+
+    // Equipped-cosmetic passthrough — the /social rows render frame + aura on the
+    // avatar and color/effect on the name, so every response shape carries all
+    // four equipped_* pointers verbatim (null = nothing equipped = plain render).
+    const cosmeticsOf = (p: Profile) => ({
+      equipped_username_effect: p.equipped_username_effect,
+      equipped_frame: p.equipped_frame,
+      equipped_name_color: p.equipped_name_color,
+      equipped_avatar_aura: p.equipped_avatar_aura,
+    });
 
     // Shape the response
     const friends = acceptedRows
@@ -99,6 +116,7 @@ export async function GET(req: NextRequest) {
           is_online: p.is_online ?? false,
           last_seen: p.last_seen,
           unreadCount: unreadMap[p.id] ?? 0,
+          ...cosmeticsOf(p),
         };
       })
       .filter(Boolean);
@@ -113,6 +131,7 @@ export async function GET(req: NextRequest) {
           avatar_url: p.avatar_url,
           arena_elo: p.arena_elo ?? 1000,
           friendshipId: r.id,
+          ...cosmeticsOf(p),
         };
       })
       .filter(Boolean);
@@ -128,6 +147,7 @@ export async function GET(req: NextRequest) {
           arena_elo: p.arena_elo ?? 1000,
           friendshipId: r.id,
           sentAt: r.created_at,
+          ...cosmeticsOf(p),
         };
       })
       .filter(Boolean);

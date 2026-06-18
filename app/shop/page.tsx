@@ -233,7 +233,7 @@ const ITEM_CHROME: Record<string, ItemChrome> = {
   boost_brain_freeze: { Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
   boost_score_boost: { Icon: TrendUp, iconWeight: "regular", iconColor: "#94A3B8" },
   // Server blocks this one ("coming soon") — surface as locked, never buyable.
-  boost_mastery_hint_pack: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", comingSoon: true, previewImg: "/shop/mastery-hint-pack.png" },
+  boost_mastery_hint_pack: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", previewImg: "/shop/mastery-hint-pack.png" },
   boost_streak_shield_3pack: { Icon: Shield, iconWeight: "fill", iconColor: "#A855F7" },
   // Avatar auras (canonical ids)
   aura_solar: { Icon: Sphere, iconWeight: "fill", iconColor: "#FACC15" },
@@ -1508,7 +1508,12 @@ export default function ShopPage() {
         toastError("Couldn't update that item. Try again.");
         return;
       }
-      await mutateInventory();
+      // Revalidate BOTH caches: mutateInventory updates the shop's own
+      // owned/equipped pills, and mutateCosmeticsOwned refreshes the
+      // self-cosmetic hook (useEquippedCosmetics) so the newly equipped
+      // frame/aura/name-color paints immediately on the navbar, dashboard
+      // hero and profile without waiting for a focus revalidation.
+      await Promise.all([mutateInventory(), mutateCosmeticsOwned()]);
     } catch (e) {
       console.error("[shop:equip] threw", e);
       toastError("Couldn't update that item. Try again.");

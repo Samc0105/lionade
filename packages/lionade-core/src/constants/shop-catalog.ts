@@ -227,7 +227,7 @@ export const FOUNDER_BADGES: FounderBadgeItem[] = [
 // generated dynamically per exam, so the catalog entry is a PREFIX template.
 export const EARNED_COSMETICS: EarnedCosmeticItem[] = [
   {
-    id: "emblem_streak_warrior_10",
+    id: "emblem_streak_10day",
     name: "Streak Warrior 10",
     description: "Earned at a 10-day streak.",
     type: "earned_medal",
@@ -236,7 +236,7 @@ export const EARNED_COSMETICS: EarnedCosmeticItem[] = [
     howToEarn: "Hit a 10-day login streak.",
   },
   {
-    id: "emblem_streak_warrior_30",
+    id: "emblem_streak_30day",
     name: "Streak Warrior 30",
     description: "Earned at a 30-day streak.",
     type: "earned_medal",
@@ -245,7 +245,7 @@ export const EARNED_COSMETICS: EarnedCosmeticItem[] = [
     howToEarn: "Hit a 30-day login streak.",
   },
   {
-    id: "emblem_streak_warrior_100",
+    id: "emblem_streak_100day",
     name: "Streak Warrior 100",
     description: "Earned at a 100-day streak.",
     type: "earned_medal",
@@ -254,7 +254,7 @@ export const EARNED_COSMETICS: EarnedCosmeticItem[] = [
     howToEarn: "Hit a 100-day login streak.",
   },
   {
-    id: "emblem_streak_warrior_365",
+    id: "emblem_streak_365day",
     name: "Streak Warrior 365",
     description: "Earned at a 365-day streak. A full year.",
     type: "earned_medal",

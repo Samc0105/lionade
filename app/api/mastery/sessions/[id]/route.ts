@@ -60,6 +60,18 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
     const exam = examRes.data;
     if (!exam) return NextResponse.json({ error: "Exam missing" }, { status: 500 });
 
+    // Mastery Hint Pack: the user's remaining hint count drives the "Reveal a
+    // hint" action in the action area. Read defensively — pre-migration the
+    // column is absent and PostgREST returns an error (data:null), so we fall
+    // back to 0 rather than failing the whole session load.
+    const { data: hintRow } = await supabaseAdmin
+      .from("profiles")
+      .select("mastery_hints_remaining")
+      .eq("id", userId)
+      .single();
+    const hintsRemaining =
+      (hintRow as { mastery_hints_remaining?: number } | null)?.mastery_hints_remaining ?? 0;
+
     const subtopicIds = (subRes.data ?? []).map(s => s.id);
     // Bound to current exam's subtopics — was full-user scan
     const progRes = subtopicIds.length === 0
@@ -147,6 +159,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       },
       subtopics,
       messages,
+      hintsRemaining,
       pPass: Math.round(aggregate * 10000) / 10000,
       overallDisplayPct: Math.round(overallDisplayPct * 10) / 10,
       ready,

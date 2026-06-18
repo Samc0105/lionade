@@ -3287,8 +3287,15 @@ html.light .space-bg-container { display: none; }
    shop base) set inline via RARITY_COLORS[r].cardBg. This class adds a
    THIRD gradient on top (the moving gold band) and animates its position. */
 @keyframes shop-tier-sweep-legendary-anim {
-  0% { background-position: -100% 0, 0 0, 0 0; }
-  100% { background-position: 200% 0, 0 0, 0 0; }
+  /* Advance EXACTLY one tile. background-size is 200%, so 0% -> 200% travels one
+     full repeat period; because a repeating background shifted by one whole tile
+     renders identically, the start state equals the end state and the loop has
+     zero visible snap. (The OLD keyframe travelled -100% -> 200% = 1.5 tiles, so
+     it never lined up and the band vanished for a long dead stretch each cycle,
+     then reappeared — that "appear, long gap, snap back" cadence is what read as
+     "resets after a while".) */
+  from { background-position: 0% 0; }
+  to   { background-position: 200% 0; }
 }
 .shop-tier-sweep-legendary {
   /* Stack the moving gold band on TOP of whatever inline background the card has.
@@ -3300,19 +3307,27 @@ html.light .space-bg-container { display: none; }
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* TWO soft gold glints per 200% tile (cores at ~25% and ~75%). At a 200%
+     background-size that lands the cores exactly one card-width apart, so a glint
+     is always gliding across the card — a continuous fluid shimmer with no dead
+     gap, instead of one lonely band that disappears between passes. */
   background: linear-gradient(
     115deg,
-    transparent 0%,
-    transparent 40%,
-    rgba(255, 215, 0, 0.10) 50%,
-    rgba(255, 235, 120, 0.18) 55%,
-    rgba(255, 215, 0, 0.10) 60%,
-    transparent 70%,
-    transparent 100%
+    transparent 12%,
+    rgba(255, 215, 0, 0.10) 22%,
+    rgba(255, 235, 120, 0.20) 25%,
+    rgba(255, 215, 0, 0.10) 28%,
+    transparent 38%,
+    transparent 62%,
+    rgba(255, 215, 0, 0.10) 72%,
+    rgba(255, 235, 120, 0.20) 75%,
+    rgba(255, 215, 0, 0.10) 78%,
+    transparent 88%
   );
   background-size: 200% 100%;
-  background-position: -100% 0;
-  animation: shop-tier-sweep-legendary-anim 7s linear infinite;
+  background-repeat: repeat;
+  background-position: 0% 0;
+  animation: shop-tier-sweep-legendary-anim 6s linear infinite;
   border-radius: inherit;
   z-index: 0;
   mix-blend-mode: screen;

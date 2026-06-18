@@ -517,7 +517,14 @@ export default function TriviaView({
   }, [isLoadingScreen]);
 
   const playersForBoard = useMemo(
-    () => players.map((p) => ({ user_id: p.user_id, username: p.username, score: p.score })),
+    () => players.map((p) => ({
+      user_id: p.user_id, username: p.username, score: p.score,
+      avatar_url: p.avatar_url,
+      equipped_username_effect: p.equipped_username_effect,
+      equipped_name_color: p.equipped_name_color,
+      equipped_frame: p.equipped_frame,
+      equipped_avatar_aura: p.equipped_avatar_aura,
+    })),
     [players],
   );
 

@@ -37,6 +37,10 @@ export interface PartySettings {
 export interface PartyPlayer {
   user_id: string;
   username: string | null;
+  // Shop V2 — avatar url so party tiles can render the player's avatar with
+  // their equipped frame + aura (the equipped_* ids below). Null = use the
+  // deterministic DiceBear fallback via avatarFor().
+  avatar_url?: string | null;
   score: number;
   joined_at: string;
   left_at: string | null;

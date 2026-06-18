@@ -8,15 +8,15 @@
 // leak content. Done players get a gold ring + checkmark badge; pending
 // players stay dim. Extracted from BluffView.tsx (2026-06-11) so siblings can
 // share it without re-declaring it.
+//
+// Shop V2: each avatar now renders the player's equipped frame + aura via the
+// shared Avatar component. The functional done/me state ring + checkmark stay
+// on a SEPARATE outer layer so an equipped cosmetic frame never masks game
+// state.
 
+import Avatar from "@/components/Avatar";
+import { avatarFor } from "@/lib/avatar";
 import type { PartyPlayer } from "@/lib/party/types";
-
-// Same dicebear style the party views use for presenter/roster avatars; seed =
-// username so the avatar is stable across rounds without any profile fetch.
-function avatarSrcFor(username: string | null | undefined): string {
-  const seed = username && username.length > 0 ? username : "player";
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-}
 
 export default function AvatarCheckRow({
   players,
@@ -45,27 +45,29 @@ export default function AvatarCheckRow({
           <span
             key={p.user_id}
             title={`${name} · ${done ? doneTitle : pendingTitle}`}
-            className="relative inline-flex"
+            className="relative inline-flex rounded-full transition-all"
+            style={{
+              // Functional state ring on the OUTER wrapper, kept separate from
+              // any equipped cosmetic frame so game state is never masked.
+              boxShadow: done
+                ? "0 0 0 2px rgba(255,215,0,0.75), 0 0 8px rgba(255,215,0,0.4)"
+                : isMe
+                  ? "0 0 0 2px rgba(168,85,247,0.55)"
+                  : "0 0 0 1px rgba(255,255,255,0.14)",
+              opacity: done ? 1 : 0.5,
+            }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={avatarSrcFor(p.username)}
+            <Avatar
+              url={avatarFor(p.username, p.avatar_url)}
               alt={`${name}, ${done ? doneTitle : pendingTitle}`}
-              className="w-8 h-8 rounded-full bg-navy object-cover transition-all"
-              style={{
-                border: done
-                  ? "2px solid rgba(255,215,0,0.75)"
-                  : isMe
-                    ? "2px solid rgba(168,85,247,0.55)"
-                    : "1px solid rgba(255,255,255,0.14)",
-                boxShadow: done ? "0 0 8px rgba(255,215,0,0.4)" : "none",
-                opacity: done ? 1 : 0.5,
-              }}
+              size="sm"
+              frame={p.equipped_frame}
+              aura={p.equipped_avatar_aura}
             />
             {done && (
               <span
                 aria-hidden="true"
-                className={`absolute -bottom-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ${reduced ? "" : "pa-chip-in"}`}
+                className={`absolute -bottom-0.5 -right-0.5 z-10 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ${reduced ? "" : "pa-chip-in"}`}
                 style={{
                   background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                   border: "1px solid rgba(4,8,15,0.6)",

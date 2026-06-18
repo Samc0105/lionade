@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
+import { grantEarnedCosmetic } from "@/lib/cosmetic-grants";
 
 export const dynamic = "force-dynamic";
 
@@ -204,6 +205,14 @@ export async function POST(req: NextRequest) {
     .then(({ error }) => {
       if (error) console.warn("[login-bonus] grant_streak_emblem:", error.message);
     });
+
+  // Earn-a-cosmetic faucet: a FREE common aura at a 7-day login streak, giving
+  // non-payers a real equippable cosmetic. Fire-and-forget + idempotent (one
+  // grant per user ever). aura_lunar is a slot-backed catalog id, so it equips
+  // through the normal locker plumbing.
+  if (newStreak >= 7) {
+    void grantEarnedCosmetic(supabaseAdmin, userId, "aura_lunar", "streak_7");
+  }
 
   return NextResponse.json({
     awarded: true,

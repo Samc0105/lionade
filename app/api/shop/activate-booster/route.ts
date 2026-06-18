@@ -53,6 +53,16 @@ export async function POST(req: NextRequest) {
     if (!item || item.type !== "booster" || !item.boosterEffect) {
       return NextResponse.json({ error: "Not a booster" }, { status: 400 });
     }
+    // Mastery Hint Pack is NOT an activatable booster — it credits the
+    // profiles.mastery_hints_remaining counter on purchase and is spent directly
+    // in Mastery Mode (/api/mastery/sessions/[id]/hint). Reject it here so a user
+    // can't burn the inventory item into a dead active_boosters row.
+    if (item.boosterEffect === "mastery_hint") {
+      return NextResponse.json(
+        { error: "Hints are used directly in Mastery Mode" },
+        { status: 400 },
+      );
+    }
     const boosterEffect = item.boosterEffect;
     const boosterValue = item.boosterValue ?? 1;
     // uses_remaining comes from the catalog's boosterDuration so multi-use

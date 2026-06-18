@@ -65,6 +65,7 @@ import {
 import dynamic from "next/dynamic";
 const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 import AnimatedUsername from "@/components/AnimatedUsername";
+import EquippedFlair from "@/components/EquippedFlair";
 import Avatar from "@/components/Avatar";
 import CosmeticLocker from "@/components/CosmeticLocker";
 import { useEquippedUsernameEffect, useEquippedCosmetics } from "@/lib/use-username-effect";
@@ -583,8 +584,9 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
               <p className="text-cream/60 text-sm mb-3">{user.displayName}</p>
             )}
 
-            {/* Chips row: streak + accuracy + badges */}
+            {/* Chips row: flair + streak + accuracy + badges */}
             <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-4">
+              <EquippedFlair flair={cosmetics.flair} />
               {statsReady && streak > 0 && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-orange-400/30 bg-orange-400/10">
                   <Fire size={12} weight="fill" color="#FB923C" aria-hidden="true" />

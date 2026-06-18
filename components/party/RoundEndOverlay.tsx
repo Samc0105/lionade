@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import RevealText from "@/components/RevealText";
+import Avatar from "@/components/Avatar";
 
 // Confetti is dynamic-imported so the canvas particle code only lands in
 // the bundle when a round actually ends with a winner. Shrinks every
@@ -36,6 +37,10 @@ interface RoundEndOverlayProps {
     user_id: string;
     username: string | null;
     avatar_url?: string | null;
+    // Shop V2 — equipped cosmetics so the winner's frame + aura show in the
+    // celebration. Optional; missing = plain avatar.
+    equipped_frame?: string | null;
+    equipped_avatar_aura?: string | null;
   } | null;
   /** The secret word that was being drawn — revealed at round end. */
   word: string;
@@ -153,16 +158,20 @@ export default function RoundEndOverlay({
               delay: reduced ? 0 : 0.12,
               ease: [0.25, 1, 0.5, 1],
             }}
-            className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-[#FFD700]/60"
+            className="relative rounded-full"
             style={{
-              boxShadow: "0 0 24px rgba(255,215,0,0.35)",
+              // Gold celebration ring kept as the outer wrapper so a win still
+              // reads as a win even when the player has no equipped frame; the
+              // Avatar renders any equipped frame (inner) + aura (halo).
+              boxShadow: "0 0 0 3px rgba(255,215,0,0.6), 0 0 24px rgba(255,215,0,0.35)",
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={avatarSrc}
+            <Avatar
+              url={avatarSrc}
               alt={`${winnerName} avatar`}
-              className="w-full h-full object-cover bg-navy"
+              size="xl"
+              frame={winner.equipped_frame}
+              aura={winner.equipped_avatar_aura}
             />
           </motion.div>
         ) : (

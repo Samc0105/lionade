@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, PaperPlaneTilt } from "@phosphor-icons/react";
+import { ArrowRight, PaperPlaneTilt, Lightbulb } from "@phosphor-icons/react";
 import Confetti from "@/components/Confetti";
 import { pickThinkingPhrase } from "@/lib/mastery/thinking-phrases";
 
@@ -38,12 +38,26 @@ export interface LiveQuestion {
 export type AnswerOutcome = { wasCorrect: boolean; correctIndex: number };
 export type AnswerResult = AnswerOutcome | { ok: false } | void;
 
+/**
+ * Result of spending a Mastery Hint: the wrong option the server eliminated,
+ * the full eliminated set so far, and the hint count left. Null on failure.
+ */
+export type HintResult = { eliminatedIndex: number; eliminated: number[]; hintsRemaining: number };
+
 interface Props {
   pending: { type: "teach" | "question" | "socratic"; [k: string]: unknown } | null;
   liveQuestion: LiveQuestion | null;    // only populated when pending.type === 'question'
   disabled?: boolean;
   onContinue: () => Promise<void> | void;
   onAnswer: (selectedIndex: number) => Promise<AnswerResult> | AnswerResult;
+  /** Mastery Hint Pack: hints the user has left to spend (0 = no hint button). */
+  hintsRemaining?: number;
+  /**
+   * Spend a hint to eliminate a wrong option. Receives the indices already
+   * eliminated this question; resolves with the new eliminated set + remaining
+   * count, or null on failure (the action area just re-enables the button).
+   */
+  onHint?: (eliminated: number[]) => Promise<HintResult | null> | HintResult | null;
   onSocraticSubmit: (reply: string) => Promise<void> | void;
   /**
    * Optional initial value for the socratic textarea. Used by the parent page
@@ -61,10 +75,19 @@ interface Props {
 
 export default function MasteryActionArea({
   pending, liveQuestion, disabled, onContinue, onAnswer, onSocraticSubmit,
+  hintsRemaining = 0, onHint,
   socraticInitial, onSocraticChange,
 }: Props) {
   if (pending?.type === "question" && liveQuestion) {
-    return <QuestionOptions q={liveQuestion} disabled={disabled} onAnswer={onAnswer} />;
+    return (
+      <QuestionOptions
+        q={liveQuestion}
+        disabled={disabled}
+        onAnswer={onAnswer}
+        hintsRemaining={hintsRemaining}
+        onHint={onHint}
+      />
+    );
   }
   if (pending?.type === "socratic") {
     return (
@@ -86,24 +109,62 @@ function QuestionOptions(props: {
   q: LiveQuestion;
   disabled?: boolean;
   onAnswer: (i: number) => Promise<AnswerResult> | AnswerResult;
+  hintsRemaining?: number;
+  onHint?: (eliminated: number[]) => Promise<HintResult | null> | HintResult | null;
 }) {
   return <QuestionOptionsBody key={props.q.questionId} {...props} />;
 }
 
 function QuestionOptionsBody({
-  q, disabled, onAnswer,
+  q, disabled, onAnswer, hintsRemaining = 0, onHint,
 }: {
   q: LiveQuestion;
   disabled?: boolean;
   onAnswer: (i: number) => Promise<AnswerResult> | AnswerResult;
+  hintsRemaining?: number;
+  onHint?: (eliminated: number[]) => Promise<HintResult | null> | HintResult | null;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [outcome, setOutcome] = useState<AnswerOutcome | null>(null);
+  // Mastery Hint Pack — option indices the server has eliminated this question.
+  const [eliminated, setEliminated] = useState<number[]>([]);
+  const [hinting, setHinting] = useState(false);
+  // sr-only announcement when a hint removes an option (the state change is
+  // otherwise only visual — dim + line-through).
+  const [hintAnnounce, setHintAnnounce] = useState("");
   const reducedMotion = useReducedMotion();
 
+  // Leave the correct option + at least one wrong option (mirrors the server cap).
+  const maxEliminations = Math.max(0, q.options.length - 2);
+  const canHint =
+    !!onHint &&
+    hintsRemaining > 0 &&
+    picked === null &&
+    !disabled &&
+    eliminated.length < maxEliminations;
+
+  const useHint = async () => {
+    if (!onHint || hinting || picked !== null || disabled) return;
+    setHinting(true);
+    try {
+      const res = await onHint(eliminated);
+      if (res) {
+        setEliminated(res.eliminated ?? [...eliminated, res.eliminatedIndex]);
+        const letter = String.fromCharCode(65 + res.eliminatedIndex);
+        setHintAnnounce(
+          `Option ${letter} removed. ${res.hintsRemaining} ${res.hintsRemaining === 1 ? "hint" : "hints"} left.`,
+        );
+      }
+    } catch {
+      // Parent surfaced the error; just re-enable the button.
+    } finally {
+      setHinting(false);
+    }
+  };
+
   const onPick = async (i: number) => {
-    if (disabled || submitting || picked !== null) return;
+    if (disabled || submitting || picked !== null || eliminated.includes(i)) return;
     setPicked(i);
     setSubmitting(true);
     try {
@@ -126,8 +187,29 @@ function QuestionOptionsBody({
 
   return (
     <div className="relative flex flex-col gap-2">
+      {/* Mastery Hint — spend one hint to remove a wrong option (50/50 floor). */}
+      {(canHint || hinting) && (
+        <button
+          type="button"
+          onClick={useHint}
+          disabled={hinting || !canHint}
+          aria-label={`Use a hint to remove a wrong answer, ${hintsRemaining} ${hintsRemaining === 1 ? "hint" : "hints"} left`}
+          className="
+            self-start inline-flex items-center gap-1.5 rounded-full
+            border border-[#FACC15]/40 bg-[#FACC15]/[0.08] px-3 py-1.5
+            font-mono text-[10px] uppercase tracking-[0.18em] text-[#FACC15]
+            hover:bg-[#FACC15]/[0.14] disabled:opacity-50 disabled:cursor-not-allowed
+            transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]/60 focus-visible:ring-offset-1 focus-visible:ring-offset-navy
+          "
+        >
+          <Lightbulb size={13} weight="fill" aria-hidden="true" />
+          {hinting ? "Revealing…" : `Use a hint (${hintsRemaining} left)`}
+        </button>
+      )}
       {q.options.map((opt, i) => {
         const isPicked = i === picked;
+        const isEliminated = eliminated.includes(i);
         const revealed = outcome !== null && picked !== null;
         const isCorrectReveal = revealed && isPicked && outcome.wasCorrect;
         const isWrongReveal = revealed && isPicked && !outcome.wasCorrect;
@@ -147,22 +229,24 @@ function QuestionOptionsBody({
             ? { duration: 0.28, ease: "easeOut" as const }
             : undefined;
 
-        const interactiveAnims = picked === null && !disabled && !reducedMotion
+        const interactiveAnims = picked === null && !disabled && !reducedMotion && !isEliminated
           ? { whileHover: { y: -2 }, whileTap: { scale: 0.98 } }
           : {};
 
         // Color state: pre-reveal uses the original gold-on-pick styling. Post-
         // reveal, the picked card flashes green or red, and the actually-correct
         // card subtly highlights green even if not picked.
-        const stateClasses = isCorrectReveal
-          ? "bg-[#22C55E]/[0.10] border-[#22C55E]/60 text-cream"
-          : isWrongReveal
-            ? "bg-[#EF4444]/[0.10] border-[#EF4444]/60 text-cream"
-            : isCorrectIndexReveal
-              ? "bg-[#22C55E]/[0.06] border-[#22C55E]/40 text-cream"
-              : isPicked
-                ? "bg-gold/[0.08] border-gold/40 text-cream"
-                : "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.2] hover:bg-white/[0.04] text-cream/90";
+        const stateClasses = isEliminated
+          ? "bg-white/[0.01] border-white/[0.04] text-cream/30 line-through"
+          : isCorrectReveal
+            ? "bg-[#22C55E]/[0.10] border-[#22C55E]/60 text-cream"
+            : isWrongReveal
+              ? "bg-[#EF4444]/[0.10] border-[#EF4444]/60 text-cream"
+              : isCorrectIndexReveal
+                ? "bg-[#22C55E]/[0.06] border-[#22C55E]/40 text-cream"
+                : isPicked
+                  ? "bg-gold/[0.08] border-gold/40 text-cream"
+                  : "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.2] hover:bg-white/[0.04] text-cream/90";
 
         const labelClass = isCorrectReveal || isCorrectIndexReveal
           ? "text-[#22C55E]"
@@ -184,8 +268,8 @@ function QuestionOptionsBody({
             key={i}
             type="button"
             onClick={() => onPick(i)}
-            disabled={disabled || picked !== null}
-            aria-label={`Option ${letter}: ${opt}${revealSuffix}`}
+            disabled={disabled || picked !== null || isEliminated}
+            aria-label={`Option ${letter}: ${opt}${revealSuffix}${isEliminated ? " (removed by hint)" : ""}`}
             className={`
               group relative flex items-start gap-3 text-left w-full min-h-[44px]
               rounded-[8px] border px-4 py-3 text-[14px] leading-relaxed
@@ -217,6 +301,9 @@ function QuestionOptionsBody({
             : `Incorrect. The correct answer was option ${String.fromCharCode(65 + outcome.correctIndex)}.`
           : ""}
       </span>
+
+      {/* Screen-reader announcement when a hint removes a wrong option. */}
+      <span aria-live="polite" className="sr-only">{hintAnnounce}</span>
 
       {outcome?.wasCorrect && !reducedMotion && (
         <Confetti

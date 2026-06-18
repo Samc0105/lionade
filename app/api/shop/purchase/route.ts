@@ -98,13 +98,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unknown item" }, { status: 404 });
     }
 
-    // Coming-soon items: these have no consumer feature yet, so block the
-    // purchase server-side (a crafted request must not be able to buy them).
-    // The frontend renders them as locked. Two cases today:
-    //   • voice_skin (voice_ninny_classic) — no Ninny voice playback yet
-    //   • boost_mastery_hint_pack — no hint consumer in Mastery Mode yet
-    const COMING_SOON_IDS = new Set(["boost_mastery_hint_pack"]);
-    if (item.type === "voice_skin" || COMING_SOON_IDS.has(item.id)) {
+    // Coming-soon items: no consumer feature yet, so block the purchase
+    // server-side (a crafted request must not be able to buy them). Only
+    // voice_ninny_classic (voice_skin) remains gated — there is still no Ninny
+    // voice/TTS playback. boost_mastery_hint_pack is now live: it grants the
+    // mastery_hints_remaining counter consumed by the Mastery "Reveal a hint"
+    // action (see the grant below + /api/mastery/sessions/[id]/hint).
+    if (item.type === "voice_skin") {
       return NextResponse.json(
         { error: "This item is coming soon" },
         { status: 400 },
@@ -185,6 +185,20 @@ export async function POST(req: NextRequest) {
           rarity: item.rarity,
         });
         if (insErr) inventoryErr = { message: insErr.message };
+      }
+
+      // Mastery Hint Pack: also credit the consumable hint counter that the
+      // Mastery "Reveal a hint" action spends. Done inside the same try so a
+      // failure (e.g. the mastery-hints migration not yet applied) flips
+      // inventoryErr and triggers the refund below — we never charge Fangs for
+      // hints we did not actually credit (fail-closed).
+      if (!inventoryErr && item.boosterEffect === "mastery_hint") {
+        const grant = (item.boosterValue ?? 5) * quantity;
+        const { error: hintErr } = await supabaseAdmin.rpc("grant_mastery_hints", {
+          p_user_id: userId,
+          p_delta: grant,
+        });
+        if (hintErr) inventoryErr = { message: `mastery hint grant failed: ${hintErr.message}` };
       }
     } catch (e) {
       inventoryErr = { message: e instanceof Error ? e.message : "inventory exception" };
