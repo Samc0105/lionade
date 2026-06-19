@@ -184,10 +184,10 @@ export default function CosmeticLocker({ username }: { username: string }) {
     return out;
   }, [items]);
 
-  const handleToggle = async (slot: SlotKey, itemId: string) => {
+  // Set a slot to an EXACT value ("" = unequip). One active per slot: writing a
+  // new id replaces whatever was there; writing "" clears the slot.
+  const applyEquip = async (slot: SlotKey, next: string) => {
     if (busySlot) return;
-    const currently = equippedFor(slot);
-    const next = currently === itemId ? "" : itemId; // toggle: same item => unequip
     // Optimistic: reflect immediately on locker + hero (shared SWR cache).
     setOptimistic((m) => ({ ...m, [slot]: next }));
     setBusySlot(slot);
@@ -247,6 +247,11 @@ export default function CosmeticLocker({ username }: { username: string }) {
     setBusySlot(null);
   };
 
+  // Tapping an owned item toggles it: equip it, or unequip if it is the one
+  // currently active in that slot.
+  const handleToggle = (slot: SlotKey, itemId: string) =>
+    applyEquip(slot, equippedFor(slot) === itemId ? "" : itemId);
+
   // The current look (includes optimistic overrides) — fed to "Save current
   // look" and to apply-loadout cache patching.
   const currentLook: CurrentLook = {
@@ -303,6 +308,36 @@ export default function CosmeticLocker({ username }: { username: string }) {
               </div>
             ) : (
               <div role="list" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Explicit "None" — one active per slot, so this clears the
+                    slot. Always visible so unequip is a first-class choice, not
+                    just a hidden toggle on the equipped item. */}
+                <button
+                  type="button"
+                  role="listitem"
+                  onClick={() => applyEquip(slot.key, "")}
+                  disabled={busySlot === slot.key}
+                  aria-pressed={!equippedId}
+                  aria-label={equippedId ? `Unequip ${slot.label.toLowerCase()} (none)` : `No ${slot.label.toLowerCase()} equipped`}
+                  className={`rounded-xl p-3 flex flex-col items-center justify-center gap-2 min-h-[140px] transition-colors disabled:opacity-50 ${
+                    !equippedId ? "text-green-300" : "text-cream/55 hover:text-cream"
+                  }`}
+                  style={{
+                    background: !equippedId
+                      ? "linear-gradient(135deg, rgba(34,197,94,0.10), rgba(34,197,94,0.03))"
+                      : "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",
+                    border: !equippedId ? "1px solid rgba(34,197,94,0.45)" : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <span aria-hidden="true" className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-white/15">
+                    <XIcon size={16} weight="bold" />
+                  </span>
+                  <span className="font-bebas text-base tracking-wide">None</span>
+                  {!equippedId && (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold">
+                      <Check size={10} weight="bold" aria-hidden="true" /> On
+                    </span>
+                  )}
+                </button>
                 {owned.map((it) => {
                   const id = oId(it);
                   const meta = CATALOG_BY_ID[id];
