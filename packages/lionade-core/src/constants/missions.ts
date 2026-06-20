@@ -49,7 +49,7 @@ export const MISSION_POOL: MissionTemplate[] = [
   // Subject-specific (3)
   { id: "study_2_subjects", title: "Well-Rounded", description: "Complete quizzes in 2 different subjects", icon: "\u{1F310}", type: "subject", target: 2, coinReward: 25, xpReward: 50, color: "#9B59B6", progressQuery: "distinct_subjects" },
   { id: "study_3_subjects", title: "Renaissance Scholar", description: "Study 3 different subjects today", icon: "\u{1F393}", type: "subject", target: 3, coinReward: 40, xpReward: 80, color: "#9B59B6", progressQuery: "distinct_subjects" },
-  { id: "earn_50_coins", title: "Coin Hunter", description: "Earn 50 coins today from quizzes", icon: "\u{1FA99}", type: "subject", target: 50, coinReward: 20, xpReward: 40, color: "#9B59B6", progressQuery: "coins_today" },
+  { id: "earn_50_coins", title: "Fang Hunter", description: "Earn 50 Fangs today from quizzes", icon: "\u{1FA99}", type: "subject", target: 50, coinReward: 20, xpReward: 40, color: "#9B59B6", progressQuery: "coins_today" },
 
   // Competitive/Social (3)
   { id: "play_arena", title: "Enter the Arena", description: "Complete 1 arena match", icon: "\u{2694}\u{FE0F}", type: "social", target: 1, coinReward: 30, xpReward: 60, color: "#E74C3C", progressQuery: "arena_completed" },

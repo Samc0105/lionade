@@ -1840,7 +1840,7 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
         <button role="tab" aria-selected={view === "transactions"} onClick={() => setView("transactions")}
           className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors
             ${view === "transactions" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/60 hover:text-cream"}`}>
-          <span className="inline-flex items-center gap-2"><Coins size={16} weight="fill" color="#FFD700" aria-hidden="true" /> Coin Transactions</span>
+          <span className="inline-flex items-center gap-2"><Coins size={16} weight="fill" color="#FFD700" aria-hidden="true" /> Fang Transactions</span>
         </button>
         <button role="tab" aria-selected={view === "quizzes"} onClick={() => setView("quizzes")}
           className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors

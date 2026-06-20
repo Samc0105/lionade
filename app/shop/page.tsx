@@ -1736,7 +1736,7 @@ export default function ShopPage() {
               onClick={() => setStoreMode("coins")}
               onKeyDown={(e) => handleTabKeys(e, (i) => setStoreMode(i === 0 ? "coins" : "premium"))}
               className={`relative z-10 flex items-center gap-2 min-h-[44px] px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${!isPremium ? "text-gold" : "text-cream/60 hover:text-cream"}`}>
-              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Fang Store
             </button>
             <button type="button" role="tab" id="store-tab-premium" aria-selected={isPremium} aria-controls="store-panel-premium" tabIndex={isPremium ? 0 : -1}
               onClick={() => setStoreMode("premium")}
@@ -2033,7 +2033,7 @@ export default function ShopPage() {
         {!isPremium && (
           <div id="store-panel-coins" role="tabpanel" aria-labelledby="store-tab-coins">
             {/* ── Tabs ── */}
-            <div role="tablist" aria-label="Coin store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+            <div role="tablist" aria-label="Fang store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
               {TABS.map((t, idx) => {
                 const TabIcon = t.Icon;
                 const selected = tab === t.key;

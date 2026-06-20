@@ -370,10 +370,10 @@ export default function CompetePage() {
                   </p>
                   <p className="text-cream/60 text-sm sm:text-base leading-relaxed max-w-xl mb-2">
                     Challenge anyone to a head-to-head battle. Same 10 questions. 15 seconds each.
-                    Speed bonus for fast answers. Winner takes the wagered coins.
+                    Speed bonus for fast answers. Winner takes the wagered Fangs.
                   </p>
                   <p className="text-cream/55 text-xs mb-6 flex items-center justify-center gap-1">
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 Fangs
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/compete/arena/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">
@@ -597,7 +597,7 @@ export default function CompetePage() {
                     <Trophy size={32} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> WEEKLY TOURNAMENT
                   </p>
                   <p className="text-cream/60 text-sm sm:text-base leading-relaxed mb-6 max-w-xl">
-                    Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and coin prizes.
+                    Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and Fang prizes.
                   </p>
 
                   {/* Bracket SVG */}

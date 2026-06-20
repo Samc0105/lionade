@@ -1577,7 +1577,7 @@ function DashboardContent() {
                     { key: "perfect_score", illustration: "ach-perfectionist",   name: "Perfectionist" },
                     { key: "streak_3",      illustration: "ach-on-fire",         name: "On Fire" },
                     { key: "streak_7",      illustration: "ach-dedicated",       name: "Dedicated" },
-                    { key: "coins_100",     illustration: "ach-coin-collector",  name: "Coin Collector" },
+                    { key: "coins_100",     illustration: "ach-coin-collector",  name: "Fang Collector" },
                     { key: "coins_500",     illustration: "ach-big-saver",       name: "Big Saver" },
                     { key: "quizzes_10",    illustration: "ach-quiz-master",     name: "Quiz Master" },
                     { key: "quizzes_50",    illustration: "ach-scholar",         name: "Scholar" },
