@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-26: MASTERY — accuracy-gated progress bar + AI-tailored wrong-answer feedback (+ Profile/Wallet smoothness)
+
+**Status:** Branch `feat/mastery-tuning` (PR open). `tsc`-clean, adversarial pre-merge review done (1 profile-error + 1 timeout warn fixed). The two Mastery changes are SERVER-SIDE (shared backend) so iOS Mastery inherits them with NO client work; the smoothness piece is web-specific. Owner: `vp-ios` to verify the inherited behaviour in the iOS Mastery flow.
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Mastery progress bar gates on CORRECT answers** | ✅ `displayPct()` (`@lionade/core` mastery-bkt) caps the bar by `correct/40`, not `attempts/40`, so a wrong answer no longer advances it (10 wrong = 0%) and a run of misses pulls it down. Threaded `correct` through all 8 displayPct call sites + the selects that lacked it | ✅ **SHARED-BACKEND** — the bar value is computed server-side and returned in the session/answer/next payloads; iOS renders whatever the server sends, so it inherits the fix with zero client change. (mastery-bkt also propagates on `sync-core.sh` if iOS ever computes locally) |
+| **AI-tailored wrong-answer feedback** | ✅ on a miss (within the per-session budget) gpt-4o-mini explains the trap in the option the user picked vs the right answer; replaces the static "Not quite." + the skipped reflect-first probe. Falls back to the bank explanation on failure (5s timeout) | ✅ **SHARED-BACKEND** — the feedback message is generated in `/api/mastery/sessions/[id]/answer` and returned in the payload; iOS shows it as-is, no client change. (Shifts gpt-4o-mini usage to fire on misses within the existing ≤8/session cap) |
+| **Profile + Wallet paint instantly (no reload-on-load)** | ✅ migrated off hand-rolled useState/useEffect onto the persisted SWR cache (`useTransactions`, `useRecentActivity` + the existing badge/subject/quiz hooks); per-source loading with graceful error fallback | 🚫 N/A — web SWR-specific; iOS already uses its own AsyncStorage-persisted SWR provider |
+
+**Note:** the legacy `/api/mastery/sessions/[id]/socratic` route is retained but no longer fed (the answer path generates feedback inline now). No migration; all changes are code-only.
+
+---
+
 ## 2026-06-18 (cont.): SHOP COSMETICS FOLLOW-UPS — loadout presets, earn-a-cosmetic faucet, party gameplay rosters, founder flair
 
 **Status:** Shipped to web working tree (uncommitted; localhost-verified; reviewed SHIP by security ×2 + code-review + frontend). Two migrations HELD for Sam (`082_cosmetic_loadouts.sql`, `20260618150000_grant_earned_cosmetic.sql`). All zero-API. Owner: `vp-ios` to mirror the shared-backend pieces.
