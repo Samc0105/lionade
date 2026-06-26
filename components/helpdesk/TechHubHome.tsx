@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CalendarBlank } from "@phosphor-icons/react";
 import { TRACKS, getTrack } from "@/lib/helpdesk/tracks";
@@ -22,7 +22,10 @@ export default function TechHubHome() {
     return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  const resolvedTotal = mounted ? totalCleared() : 0;
+  // Keyed on `version` so the window-focus refresh (which bumps version) is a
+  // real dependency, not just an incidental re-render. Keeps a lint cleanup from
+  // silently deleting `version` and breaking the on-focus progress refresh.
+  const resolvedTotal = useMemo(() => (mounted ? totalCleared() : 0), [mounted, version]);
   const daily = dailyShift();
   const dailyTrack = getTrack(daily.track);
   const dailyColor = dailyTrack?.color ?? "#FFD700";

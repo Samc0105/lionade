@@ -75,3 +75,9 @@ export function playBreach(): void {
 export function playWin(): void {
   [523, 659, 784, 1047].forEach((f, i) => beep(f, 150, "sine", 0.05, i * 0.12));
 }
+
+/** A botched, catastrophic call (a "mishandled" ticket). A descending buzz. */
+export function playFail(): void {
+  beep(160, 180, "sawtooth", 0.05);
+  beep(120, 240, "sawtooth", 0.05, 0.1);
+}

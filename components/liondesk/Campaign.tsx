@@ -28,7 +28,11 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
     setRecords(getAllRecords());
   }, []);
 
-  const cleared = mounted ? shifts.filter((s) => (records[s.id]?.bestScore ?? 0) >= PASS_SCORE).length : 0;
+  const clearedSet = useMemo(
+    () => new Set(mounted ? shifts.filter((s) => (records[s.id]?.bestScore ?? 0) >= PASS_SCORE).map((s) => s.id) : []),
+    [mounted, shifts, records],
+  );
+  const cleared = clearedSet.size;
   const rankIdx = def ? Math.min(cleared, def.ranks.length - 1) : 0;
   const rankTitle = def?.ranks[rankIdx]?.title ?? "";
   const accent = shifts[0]?.accent ?? "#4A90D9";
@@ -81,9 +85,12 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
         {shifts.map((s) => {
           const rec = records[s.id];
           const done = mounted && (rec?.bestScore ?? 0) >= PASS_SCORE;
-          const unlocked = mounted ? s.order <= cleared : s.order === 0;
+          // Prerequisite-based unlock: a shift opens only when every lower-order
+          // shift is individually cleared, so an out-of-order daily (Shift of the
+          // Day) bonus never inflates the ladder.
+          const unlocked = mounted ? shifts.every((o) => o.order >= s.order || clearedSet.has(o.id)) : s.order === 0;
           const grade = rec ? gradeFor(rec.bestScore) : null;
-          const need = s.order - cleared;
+          const need = shifts.filter((o) => o.order < s.order && !clearedSet.has(o.id)).length;
           return (
             <li key={s.id}>
               <button

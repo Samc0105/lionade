@@ -8,7 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
-import { playArrival, playResolve, playBreach, playWin, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
+import { playArrival, playResolve, playBreach, playFail, playWin, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
 
 export interface ShiftResult {
   shiftId: string;
@@ -338,20 +338,24 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
       window.removeEventListener("keydown", resume);
     };
   }, []);
-  const soundPrev = useRef<{ landed: number; resolved: number; breached: number; ended: boolean } | null>(null);
+  const soundPrev = useRef<{ landed: number; resolved: number; breached: number; mishandled: number; ended: boolean } | null>(null);
   useEffect(() => {
     const el = shift.durationSeconds - state.secondsLeft;
     const landedN = shift.items.filter((i) => el >= i.arriveAfter).length;
     const resolvedN = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
     const breachedN = shift.items.filter((i) => state.items[i.id].breached).length;
+    const mishandledN = shift.items.filter((i) => state.items[i.id].status === "mishandled").length;
     const p = soundPrev.current;
     if (p) {
+      // Independent checks: a single tick can both land a ticket and breach
+      // another, and each cue must fire (an else-if would drop one for good).
       if (breachedN > p.breached) playBreach();
-      else if (resolvedN > p.resolved) playResolve();
-      else if (landedN > p.landed) playArrival();
+      if (mishandledN > p.mishandled) playFail();
+      if (resolvedN > p.resolved) playResolve();
+      if (landedN > p.landed) playArrival();
       if (state.ended && !p.ended) playWin();
     }
-    soundPrev.current = { landed: landedN, resolved: resolvedN, breached: breachedN, ended: state.ended };
+    soundPrev.current = { landed: landedN, resolved: resolvedN, breached: breachedN, mishandled: mishandledN, ended: state.ended };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
   function toggleMute() {
