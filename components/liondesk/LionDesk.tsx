@@ -380,7 +380,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
 
   return (
     <div className="rounded-2xl border border-white/[0.08] overflow-hidden bg-[#070b14]">
-      <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={shift.items.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
 
       <div className="grid grid-cols-[64px_1fr] min-h-[560px]">
@@ -830,14 +830,32 @@ function MiniTerminal({ item, onStep }: { item: ShiftItem; onStep: (step: string
 
 /* ───────────────────────── toasts ───────────────────────── */
 
+// Self-managing toasts: each one auto-dismisses ~4.2s after it appears, and at
+// most 3 are on screen at once (a 4th pushes the oldest out immediately). This
+// stops the teaching notifications from stacking up and sitting on the screen.
 function Toasts({ feed }: { feed: FeedEntry[] }) {
-  const recent = feed.slice(-3);
-  if (recent.length === 0) return null;
+  const [visible, setVisible] = useState<FeedEntry[]>([]);
+  const seen = useRef<Set<number>>(new Set());
+  const timers = useRef<number[]>([]);
+
+  useEffect(() => {
+    for (const f of feed) {
+      if (seen.current.has(f.seq)) continue;
+      seen.current.add(f.seq);
+      setVisible((cur) => [...cur, f].slice(-3));
+      const id = window.setTimeout(() => setVisible((cur) => cur.filter((x) => x.seq !== f.seq)), 4200);
+      timers.current.push(id);
+    }
+  }, [feed]);
+
+  useEffect(() => () => { timers.current.forEach((id) => clearTimeout(id)); }, []);
+
+  if (visible.length === 0) return null;
   const color = (t: FeedTone) => (t === "good" ? "#2BBE6B" : t === "bad" ? "#EF4444" : "#4A90D9");
   return (
-    <div className="absolute bottom-3 right-3 left-3 sm:left-auto sm:w-80 space-y-2 pointer-events-none">
-      {recent.map((f) => (
-        <div key={f.seq} className="rounded-lg border bg-[#0a0f1c]/95 backdrop-blur px-3 py-2 text-xs leading-snug shadow-lg" style={{ borderColor: `${color(f.tone)}55`, color: "#E7EEFA", animation: "ld-toast-in 220ms ease-out" }}>
+    <div className="absolute bottom-3 right-3 left-3 sm:left-auto sm:w-80 space-y-2 pointer-events-none z-30">
+      {visible.map((f) => (
+        <div key={f.seq} className="rounded-lg border bg-[#0a0f1c]/95 backdrop-blur px-3 py-2 text-xs leading-snug shadow-lg" style={{ borderColor: `${color(f.tone)}55`, color: "#E7EEFA", animation: "ld-toast-life 4200ms ease-out forwards" }}>
           <span style={{ color: color(f.tone) }}>{f.tone === "good" ? "✓ " : f.tone === "bad" ? "✕ " : "› "}</span>{f.text}
         </div>
       ))}

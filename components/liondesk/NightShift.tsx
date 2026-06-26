@@ -3,10 +3,11 @@
 import { useEffect, useReducer, useRef, useState, type Dispatch } from "react";
 import {
   Monitor, VideoCamera, ShieldWarning, Pulse, Warning, Moon, Lightning,
-  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning, Sliders,
+  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning, Sliders, Infinity,
 } from "@phosphor-icons/react";
 import {
   FEEDS, NIGHT, NIGHTS, hourLabel, getMaxNightSurvived, recordNightSurvived, makeCustomNight,
+  ENDLESS_NIGHT, getEndlessBest, recordEndlessBest,
   type Feed, type FeedKind, type NightDef,
 } from "@/lib/liondesk/nightshift";
 import {
@@ -49,7 +50,11 @@ function pickFeed(exclude: string[]): string {
   return pool[Math.floor(Math.random() * pool.length)].id;
 }
 function advanceSecondsFor(def: NightDef, hour: number): number {
+  if (def.endless) return Math.max(1.8, def.advanceSeconds[0] - hour * 0.35);
   return def.advanceSeconds[Math.min(hour, def.advanceSeconds.length - 1)];
+}
+function fmtSec(s: number): string {
+  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 }
 
 function menuState(): NState {
@@ -101,10 +106,12 @@ function reducer(s: NState, a: NAction): NState {
       const def = s.def;
       let hour = s.hour;
       let secInHour = s.secInHour + 1;
+      let hourCrossed = false;
       if (secInHour >= def.secondsPerHour) {
         secInHour = 0;
         hour += 1;
-        if (hour >= NIGHT.hours) return { ...s, hour: NIGHT.hours, secInHour: 0, status: "won" };
+        hourCrossed = true;
+        if (!def.endless && hour >= NIGHT.hours) return { ...s, hour: NIGHT.hours, secInHour: 0, status: "won" };
       }
       const power = def.power ? Math.max(0, s.power - def.powerDrainPerSec) : s.power;
 
@@ -136,6 +143,9 @@ function reducer(s: NState, a: NAction): NState {
           threats[i].timer = advanceSecondsFor(def, hour);
         }
       }
+      if (def.endless && hourCrossed && threats.length < 4) {
+        threats.push({ feed: pickFeed(threats.map((x) => x.feed).concat(s.activeFeed)), timer: advanceSecondsFor(def, hour) });
+      }
       return { ...s, hour, secInHour, power, offlineFeed, offlineTimer, outageCountdown, depth, advanceCount, threats, flicker: s.flicker + 1 };
     }
     default:
@@ -155,10 +165,13 @@ export default function NightShift() {
   const [maxSurvived, setMaxSurvived] = useState(0);
   const [introNight, setIntroNight] = useState<number | null>(null);
   const [customOpen, setCustomOpen] = useState(false);
+  const [endlessBest, setEndlessBest] = useState(0);
+  const [showScare, setShowScare] = useState(false);
 
   useEffect(() => {
     setMutedState(isMuted());
     setMaxSurvived(getMaxNightSurvived());
+    setEndlessBest(getEndlessBest());
   }, []);
 
   const def = state.def;
@@ -178,9 +191,22 @@ export default function NightShift() {
       stopAmbient(); playWin();
       if (state.nightIdx >= 0 && state.nightIdx < NIGHTS.length) { recordNightSurvived(NIGHTS[state.nightIdx].n); setMaxSurvived(getMaxNightSurvived()); }
     }
-    if (state.status === "lost") { stopAmbient(); playStinger(); }
+    if (state.status === "lost") {
+      stopAmbient(); playStinger();
+      if (state.def.endless) { recordEndlessBest(state.hour * state.def.secondsPerHour + state.secInHour); setEndlessBest(getEndlessBest()); }
+    }
     return () => { if (state.status === "playing") stopAmbient(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.status]);
+
+  // Jump-scare flash window before the BREACHED card.
+  useEffect(() => {
+    if (state.status === "lost") {
+      setShowScare(true);
+      const id = setTimeout(() => setShowScare(false), 750);
+      return () => clearTimeout(id);
+    }
+    setShowScare(false);
   }, [state.status]);
 
   useEffect(() => { setAmbientTension(tension); }, [tension]);
@@ -211,6 +237,10 @@ export default function NightShift() {
     dispatch({ t: "START", def: makeCustomNight(threats, speed), nightIdx: -1 });
     setCustomOpen(false);
   }
+  function startEndless() {
+    resumeAudio();
+    dispatch({ t: "START", def: ENDLESS_NIGHT, nightIdx: -1 });
+  }
 
   const activeFeed = FEEDS.find((f) => f.id === state.activeFeed)!;
   const threatHere = state.status === "playing" && !blind && !offline && state.threats.some((t) => t.feed === state.activeFeed);
@@ -218,6 +248,7 @@ export default function NightShift() {
   const integrityColor = integrity >= 70 ? "#2BBE6B" : integrity >= 40 ? "#F59E0B" : "#EF4444";
   const powerColor = state.power >= 50 ? "#2BBE6B" : state.power >= 20 ? "#F59E0B" : "#EF4444";
   const nextNightIdx = state.nightIdx >= 0 && state.nightIdx + 1 < NIGHTS.length ? state.nightIdx + 1 : null;
+  const survived = state.hour * def.secondsPerHour + state.secInHour;
 
   return (
     <div className="relative rounded-2xl border border-white/[0.08] overflow-hidden bg-[#04060c] select-none" style={{ boxShadow: `inset 0 0 120px rgba(239,68,68,${tension * 0.28})` }}>
@@ -245,7 +276,7 @@ export default function NightShift() {
             <div className="flex-1 min-w-[60px] max-w-[140px] h-1 rounded-full overflow-hidden bg-white/10">
               <div className="h-full bg-[#6E8BC0]" style={{ width: `${Math.min(100, ((state.hour + state.secInHour / def.secondsPerHour) / NIGHT.hours) * 100)}%` }} />
             </div>
-            {def.threats > 1 && <span className="font-mono text-[10px] text-red-300/80">{def.threats} intruders</span>}
+            {state.threats.length > 1 && <span className="font-mono text-[10px] text-red-300/80">{state.threats.length} intruders</span>}
           </>
         )}
         <span className="ml-auto flex items-center gap-3 font-mono text-[11px]">
@@ -335,14 +366,23 @@ export default function NightShift() {
 
       {/* overlays */}
       {state.status === "menu" && introNight === null && !customOpen && (
-        <NightMenu maxSurvived={maxSurvived} onChoose={chooseNight} onCustom={() => setCustomOpen(true)} />
+        <NightMenu maxSurvived={maxSurvived} endlessBest={endlessBest} onChoose={chooseNight} onCustom={() => setCustomOpen(true)} onEndless={startEndless} />
       )}
       {customOpen && <CustomCard onStart={startCustom} onBack={() => setCustomOpen(false)} />}
       {introNight !== null && (
         <IntroCard night={NIGHTS[introNight]} onBegin={() => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[introNight], nightIdx: introNight }); setIntroNight(null); }} onBack={() => setIntroNight(null)} />
       )}
       {(state.status === "won" || state.status === "lost") && (
-        <ResultCard won={state.status === "won"} state={state} nextNightIdx={state.status === "won" ? nextNightIdx : null} dispatch={dispatch} onNext={(i) => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[i], nightIdx: i }); }} onRetry={() => { resumeAudio(); dispatch({ t: "START", def: state.def, nightIdx: state.nightIdx }); }} />
+        <ResultCard won={state.status === "won"} state={state} survived={survived} endlessBest={endlessBest} nextNightIdx={state.status === "won" ? nextNightIdx : null} dispatch={dispatch} onNext={(i) => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[i], nightIdx: i }); }} onRetry={() => { resumeAudio(); dispatch({ t: "START", def: state.def, nightIdx: state.nightIdx }); }} />
+      )}
+
+      {/* jump-scare flash on breach */}
+      {showScare && (
+        <div className="absolute inset-0 z-40 overflow-hidden flex items-center justify-center" style={{ background: "#000", animation: "ns-shake 90ms infinite" }}>
+          <div className="ns-noise absolute inset-0" style={{ opacity: 0.55 }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(239,68,68,0.55), #000 70%)", animation: "ns-blink 0.12s infinite" }} />
+          <ShieldWarning size={130} weight="fill" color="#EF4444" aria-hidden="true" style={{ animation: "ns-blink 0.1s infinite" }} />
+        </div>
       )}
     </div>
   );
@@ -395,7 +435,7 @@ function FeedBody({ feed, threat, flicker }: { feed: Feed; threat: boolean; flic
 
 /* ───────────────────────── overlays ───────────────────────── */
 
-function NightMenu({ maxSurvived, onChoose, onCustom }: { maxSurvived: number; onChoose: (i: number) => void; onCustom: () => void }) {
+function NightMenu({ maxSurvived, endlessBest, onChoose, onCustom, onEndless }: { maxSurvived: number; endlessBest: number; onChoose: (i: number) => void; onCustom: () => void; onEndless: () => void }) {
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#04060c]/95 p-4">
       <div className="text-center max-w-md w-full">
@@ -416,10 +456,16 @@ function NightMenu({ maxSurvived, onChoose, onCustom }: { maxSurvived: number; o
             );
           })}
         </div>
-        <button onClick={onCustom} disabled={maxSurvived < 1} className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40" title={maxSurvived < 1 ? "Survive Night 1 to unlock" : "Set your own difficulty"}>
-          <Sliders size={15} weight="fill" /> Custom Night
-        </button>
-        <p className="font-mono text-[10px] text-cream/35 mt-3">Survive a night to unlock the next. It gets worse.</p>
+        <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+          <button onClick={onCustom} disabled={maxSurvived < 1} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40" title={maxSurvived < 1 ? "Survive Night 1 to unlock" : "Set your own difficulty"}>
+            <Sliders size={15} weight="fill" /> Custom Night
+          </button>
+          <button onClick={onEndless} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/30 text-red-200/85 text-sm hover:bg-red-500/10">
+            <Infinity size={15} weight="bold" /> Endless
+          </button>
+        </div>
+        {endlessBest > 0 && <p className="font-mono text-[10px] text-cream/45 mt-2">Endless best: {fmtSec(endlessBest)}</p>}
+        <p className="font-mono text-[10px] text-cream/35 mt-2">Survive a night to unlock the next. It gets worse.</p>
       </div>
     </div>
   );
@@ -467,7 +513,7 @@ function IntroCard({ night, onBegin, onBack }: { night: NightDef; onBegin: () =>
   );
 }
 
-function ResultCard({ won, state, nextNightIdx, dispatch, onNext, onRetry }: { won: boolean; state: NState; nextNightIdx: number | null; dispatch: Dispatch<NAction>; onNext: (i: number) => void; onRetry: () => void }) {
+function ResultCard({ won, state, survived, endlessBest, nextNightIdx, dispatch, onNext, onRetry }: { won: boolean; state: NState; survived: number; endlessBest: number; nextNightIdx: number | null; dispatch: Dispatch<NAction>; onNext: (i: number) => void; onRetry: () => void }) {
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ background: won ? "rgba(4,6,12,0.95)" : "rgba(40,0,0,0.92)" }}>
       <div className="text-center max-w-md" style={{ animation: won ? undefined : "ns-shake 360ms ease-in-out" }}>
@@ -483,7 +529,11 @@ function ResultCard({ won, state, nextNightIdx, dispatch, onNext, onRetry }: { w
             <p className="text-cream/70 text-sm mt-2">It reached the core. You looked away one feed too long.</p>
           </>
         )}
-        <p className="font-mono text-[11px] text-cream/50 mt-3">Reached {hourLabel(state.hour)} · {state.containments} containment{state.containments === 1 ? "" : "s"}</p>
+        {state.def.endless ? (
+          <p className="font-mono text-[11px] text-cream/50 mt-3">Survived {fmtSec(survived)} · best {fmtSec(endlessBest)} · {state.containments} contained</p>
+        ) : (
+          <p className="font-mono text-[11px] text-cream/50 mt-3">Reached {hourLabel(state.hour)} · {state.containments} containment{state.containments === 1 ? "" : "s"}</p>
+        )}
         <div className="flex gap-2 justify-center mt-5 flex-wrap">
           {won && nextNightIdx !== null ? (
             <button onClick={() => onNext(nextNightIdx)} className="px-5 py-2.5 min-h-[44px] rounded-xl font-bold text-sm text-[#04080F] inline-flex items-center gap-2" style={{ background: "linear-gradient(135deg,#2BBE6B,#4A90D9)" }}>

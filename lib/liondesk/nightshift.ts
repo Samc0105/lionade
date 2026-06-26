@@ -105,6 +105,8 @@ export interface NightDef {
   outages?: boolean;
   outageEverySec?: number;
   outageDurSec?: number;
+  /** Endless mode: never wins; ramps forever; scored by survival time. */
+  endless?: boolean;
   /** "Phone guy" briefing, shown before the night. */
   intro?: string;
 }
@@ -165,6 +167,33 @@ export function makeCustomNight(threats: number, speed: "slow" | "normal" | "fas
     outageEverySec: 18,
     outageDurSec: 5,
   };
+}
+
+/** Endless mode: survive as long as you can. Ramps faster and spawns more
+ *  intruders the longer you last; ends only when it reaches the core. */
+export const ENDLESS_NIGHT: NightDef = {
+  n: 0, name: "Endless", secondsPerHour: 20,
+  advanceSeconds: [6, 5.5, 5, 4.5, 4, 3.5],
+  threats: 1, power: true, powerDrainPerSec: 0.35, flipCost: 1,
+  outages: true, outageEverySec: 20, outageDurSec: 4, endless: true,
+};
+
+const ENDLESS_KEY = "lionade.techhub.nightshift.endless.v1";
+export function getEndlessBest(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    return parseInt(window.localStorage.getItem(ENDLESS_KEY) || "0", 10) || 0;
+  } catch {
+    return 0;
+  }
+}
+export function recordEndlessBest(sec: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (sec > getEndlessBest()) window.localStorage.setItem(ENDLESS_KEY, String(Math.floor(sec)));
+  } catch {
+    /* ignore */
+  }
 }
 
 // ── Progression (local) ──
