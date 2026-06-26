@@ -79,6 +79,11 @@ type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
 type PremiumTab = "themes" | "frames" | "name_colors" | "banners";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
 type StoreMode = "coins" | "premium";
+
+// Premium Store is gated OFF until real premium SKUs ship (every item inside is
+// still a placeholder). Flip to true — or wire to a feature flag — to surface
+// the Fang Store / Premium Store toggle and the premium panel again.
+const PREMIUM_STORE_ENABLED: boolean = false;
 type PhosphorIcon = ComponentType<IconProps>;
 
 interface ShopItem {
@@ -1299,12 +1304,12 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
 
               <div className="mt-1 mb-4">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-bebas text-4xl text-gold tracking-wider leading-none">{formatCoins(pack.fangs)}</span>
+                  <span className="font-bebas text-4xl text-gold tracking-wider leading-none">{pack.fangs.toLocaleString()}</span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">Fangs</span>
                 </div>
                 {pack.bonus > 0 && (
                   <p className="text-[11px] text-cream/55 mt-1">
-                    Base 5,000 + <span className="text-gold/80 font-bold">{formatCoins(pack.bonus)}</span> bonus
+                    Base 5,000 + <span className="text-gold/80 font-bold">{pack.bonus.toLocaleString()}</span> bonus
                   </p>
                 )}
               </div>
@@ -1313,7 +1318,7 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
                 type="button"
                 onClick={() => handleBuyPack(pack)}
                 disabled={disabled || isPending}
-                aria-label={`Buy ${pack.name}: ${formatCoins(pack.fangs)} Fangs for $${pack.priceUSD.toFixed(2)}`}
+                aria-label={`Buy ${pack.name}: ${pack.fangs.toLocaleString()} Fangs for $${pack.priceUSD.toFixed(2)}`}
                 aria-busy={isPending}
                 className={`mt-auto inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl py-2.5 px-4 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                   disabled
@@ -1718,7 +1723,8 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* ── Store Mode Toggle ── */}
+        {/* ── Store Mode Toggle — hidden while the Premium Store is gated off ── */}
+        {PREMIUM_STORE_ENABLED && (
         <div className={`flex items-center justify-center mb-8 ${reduce ? "" : "transition-all duration-700 delay-75"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
           <div role="tablist" aria-label="Store mode" className="shop-toggle relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {/* Sliding indicator */}
@@ -1736,7 +1742,7 @@ export default function ShopPage() {
               onClick={() => setStoreMode("coins")}
               onKeyDown={(e) => handleTabKeys(e, (i) => setStoreMode(i === 0 ? "coins" : "premium"))}
               className={`relative z-10 flex items-center gap-2 min-h-[44px] px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${!isPremium ? "text-gold" : "text-cream/60 hover:text-cream"}`}>
-              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Fang Store
             </button>
             <button type="button" role="tab" id="store-tab-premium" aria-selected={isPremium} aria-controls="store-panel-premium" tabIndex={isPremium ? 0 : -1}
               onClick={() => setStoreMode("premium")}
@@ -1746,6 +1752,7 @@ export default function ShopPage() {
             </button>
           </div>
         </div>
+        )}
 
         {/* ══════════ BUY FANGS (Stripe IAP, coin store only) ══════════ */}
         {!isPremium && (
@@ -2031,9 +2038,9 @@ export default function ShopPage() {
 
         {/* ══════════ COIN STORE ══════════ */}
         {!isPremium && (
-          <div id="store-panel-coins" role="tabpanel" aria-labelledby="store-tab-coins">
+          <div id="store-panel-coins" role={PREMIUM_STORE_ENABLED ? "tabpanel" : undefined} aria-labelledby={PREMIUM_STORE_ENABLED ? "store-tab-coins" : undefined}>
             {/* ── Tabs ── */}
-            <div role="tablist" aria-label="Coin store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+            <div role="tablist" aria-label="Fang store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
               {TABS.map((t, idx) => {
                 const TabIcon = t.Icon;
                 const selected = tab === t.key;

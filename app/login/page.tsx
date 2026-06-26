@@ -23,35 +23,12 @@ import {
   Megaphone,
 } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
+import { EDUCATION_LEVELS, STUDY_GOALS } from "@/lib/profile-options";
 
 type Tab = "login" | "signup";
 
-const EDUCATION_LEVELS = [
-  "Middle School",
-  "High School Freshman",
-  "High School Sophomore",
-  "High School Junior",
-  "High School Senior",
-  "College Freshman",
-  "College Sophomore",
-  "College Junior",
-  "College Senior",
-  "Graduate Student",
-  "Working Professional",
-  "Self Taught / Independent Learner",
-  "Other",
-];
-
-const STUDY_GOALS = [
-  "Improve my grades",
-  "Prepare for SAT / ACT / GRE",
-  "Study for certifications (AWS, CompTIA, etc.)",
-  "Learn coding and tech skills",
-  "Study for professional exams (CPA, Bar, MCAT)",
-  "General knowledge and self improvement",
-  "Compete and win rewards",
-  "Other",
-];
+// EDUCATION_LEVELS + STUDY_GOALS now live in @/lib/profile-options (shared with
+// the profile editor so the two screens can't drift).
 
 const REFERRAL_SOURCES = [
   "TikTok",
@@ -267,7 +244,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in…</p>
+          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in...</p>
         </div>
       </div>
     );
@@ -534,7 +511,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <p className="text-cream/60 text-sm mt-3">
-            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join 50K students already grinding."}
+            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join thousands of students already grinding."}
           </p>
         </div>
 

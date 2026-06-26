@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     if (debitErr) {
       if (debitErr.code === "P0001") {
-        return NextResponse.json({ error: "Not enough coins" }, { status: 400 });
+        return NextResponse.json({ error: "Not enough Fangs" }, { status: 400 });
       }
       console.error("[shop/purchase] debit:", debitErr.message);
       return NextResponse.json({ error: "Purchase failed" }, { status: 500 });

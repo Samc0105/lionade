@@ -827,7 +827,7 @@ function DashboardContent() {
                     >
                       <span className="block font-mono text-[9px] uppercase tracking-[0.22em] text-gold/70 mb-1">Staked</span>
                       <div className="flex items-end gap-1.5">
-                        <span className="font-bebas text-gold leading-none text-[34px] tracking-wider">
+                        <span className="font-bebas text-gold leading-none text-[34px] tracking-wider tabular-nums">
                           {activeBet.coins_staked > 0 ? activeBet.coins_staked : "—"}
                         </span>
                         <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mb-1" />
@@ -850,7 +850,7 @@ function DashboardContent() {
                     >
                       <span className="block font-mono text-[9px] uppercase tracking-[0.22em] text-electric/70 mb-1">To win</span>
                       <div className="flex items-end gap-1.5">
-                        <span className="font-bebas text-electric leading-none text-[34px] tracking-wider">
+                        <span className="font-bebas text-electric leading-none text-[34px] tracking-wider tabular-nums">
                           {activeBet.coins_staked > 0 ? Math.floor(activeBet.coins_staked * (BET_MULTIPLIERS[activeBet.target_score] ?? 1)) : "—"}
                         </span>
                         <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mb-1" />
@@ -875,7 +875,7 @@ function DashboardContent() {
                         </span>
                       </div>
                       <div className="flex items-end gap-2">
-                        <span className="font-bebas text-gold leading-[0.9] text-[64px] tracking-wider bet-win-numeral">
+                        <span className="font-bebas text-gold leading-[0.9] text-[64px] tracking-wider tabular-nums bet-win-numeral">
                           +{lastBet.coins_won > 0 ? lastBet.coins_won : 0}
                         </span>
                         <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain mb-2" />
@@ -1577,7 +1577,7 @@ function DashboardContent() {
                     { key: "perfect_score", illustration: "ach-perfectionist",   name: "Perfectionist" },
                     { key: "streak_3",      illustration: "ach-on-fire",         name: "On Fire" },
                     { key: "streak_7",      illustration: "ach-dedicated",       name: "Dedicated" },
-                    { key: "coins_100",     illustration: "ach-coin-collector",  name: "Coin Collector" },
+                    { key: "coins_100",     illustration: "ach-coin-collector",  name: "Fang Collector" },
                     { key: "coins_500",     illustration: "ach-big-saver",       name: "Big Saver" },
                     { key: "quizzes_10",    illustration: "ach-quiz-master",     name: "Quiz Master" },
                     { key: "quizzes_50",    illustration: "ach-scholar",         name: "Scholar" },

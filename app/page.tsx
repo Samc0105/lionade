@@ -9,7 +9,7 @@ import RedirectIfSignedIn from "@/components/RedirectIfSignedIn";
 const STEPS = [
   { num: "01", icon: "\uD83C\uDFAF", title: "Clock In Daily", desc: 'Open Lionade and start your <strong class="text-electric">Daily Grind</strong> \u2014 AI-generated quizzes in your subject. Every correct answer adds to your streak and your bag.' },
   { num: "02", icon: "\u2694\uFE0F", title: "Duel & Compete", desc: 'Challenge anyone to a <strong class="text-electric">1v1 match</strong> or enter weekly team tournaments. The more you win, the higher you climb \u2014 and the more you earn.' },
-  { num: "03", icon: "\uD83D\uDCB0", title: "Stack Rewards", desc: 'Top performers earn <strong class="text-electric">real rewards</strong>. Coins, badges, and eventually real cash payouts \u2014 because your study time is worth something.' },
+  { num: "03", icon: "\uD83D\uDCB0", title: "Stack Rewards", desc: 'Top performers earn <strong class="text-electric">real rewards</strong>. Fangs, badges, and eventually real cash payouts \u2014 because your study time is worth something.' },
   { num: "04", icon: "\uD83C\uDFC6", title: "Get Promoted", desc: 'Rank up high enough and <strong class="text-electric">unlock tutoring</strong> \u2014 set your rate, help others, and earn a second income stream from your knowledge.' },
 ];
 
@@ -23,9 +23,9 @@ const FEATURES = [
 ];
 
 const SNEAK_PEEKS = [
-  { tag: "// Dashboard", title: "YOUR COMMAND CENTER", desc: "See your coins, streak, XP, level, and daily progress all in one place. The dashboard tracks everything so you know exactly where you stand.", items: [{ icon: "\uD83E\uDE99", label: "Coin balance + transaction history" }, { icon: "\uD83D\uDD25", label: "Current streak & best streak" }, { icon: "\uD83D\uDCC8", label: "XP progress bar to next level" }, { icon: "\uD83C\uDFAF", label: "Daily missions & bonus challenges" }] },
-  { tag: "// Quiz Engine", title: "SMART QUIZZES THAT ADAPT", desc: "No two sessions are the same. Questions adjust to your skill level in real time \u2014 answer correctly and the difficulty ramps up, increasing your coin rewards.", items: [{ icon: "\u23F1\uFE0F", label: "Timed questions with countdown" }, { icon: "\uD83E\uDDE0", label: "Difficulty scales with your level" }, { icon: "\uD83D\uDCA1", label: "Instant explanations after each answer" }, { icon: "\uD83D\uDCB0", label: "Harder questions = bigger coin drops" }] },
-  { tag: "// 1v1 Duels", title: "HEAD-TO-HEAD BATTLES", desc: "Challenge anyone to a real-time knowledge duel. Pick the subject, wager your coins, and go head-to-head. Winner takes the pot.", items: [{ icon: "\u2694\uFE0F", label: "Real-time 1v1 matchmaking" }, { icon: "\uD83E\uDE99", label: "Coin wager system" }, { icon: "\uD83C\uDFC6", label: "Win streaks & duel rankings" }, { icon: "\uD83D\uDCAC", label: "Challenge friends by username" }] },
+  { tag: "// Dashboard", title: "YOUR COMMAND CENTER", desc: "See your Fangs, streak, XP, level, and daily progress all in one place. The dashboard tracks everything so you know exactly where you stand.", items: [{ icon: "\uD83E\uDE99", label: "Fang balance + transaction history" }, { icon: "\uD83D\uDD25", label: "Current streak & best streak" }, { icon: "\uD83D\uDCC8", label: "XP progress bar to next level" }, { icon: "\uD83C\uDFAF", label: "Daily missions & bonus challenges" }] },
+  { tag: "// Quiz Engine", title: "SMART QUIZZES THAT ADAPT", desc: "No two sessions are the same. Questions adjust to your skill level in real time \u2014 answer correctly and the difficulty ramps up, increasing your Fang rewards.", items: [{ icon: "\u23F1\uFE0F", label: "Timed questions with countdown" }, { icon: "\uD83E\uDDE0", label: "Difficulty scales with your level" }, { icon: "\uD83D\uDCA1", label: "Instant explanations after each answer" }, { icon: "\uD83D\uDCB0", label: "Harder questions = bigger Fang drops" }] },
+  { tag: "// 1v1 Duels", title: "HEAD-TO-HEAD BATTLES", desc: "Challenge anyone to a real-time knowledge duel. Pick the subject, wager your Fangs, and go head-to-head. Winner takes the pot.", items: [{ icon: "\u2694\uFE0F", label: "Real-time 1v1 matchmaking" }, { icon: "\uD83E\uDE99", label: "Fang wager system" }, { icon: "\uD83C\uDFC6", label: "Win streaks & duel rankings" }, { icon: "\uD83D\uDCAC", label: "Challenge friends by username" }] },
 ];
 
 const SUBJECTS = [
@@ -40,20 +40,20 @@ const SUBJECTS = [
 ];
 
 const ROADMAP = [
-  { phase: "Live Now", title: "V1 \u2014 Public Launch", desc: "Lionade is live. Daily quizzes, 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind. Sign up and start stacking coins.", status: "active" },
-  { phase: "December 2026", title: "V2 \u2014 Lionade Pro", desc: "Paid subscriptions arrive. Pro tiers with advanced analytics, bonus coin multipliers, exclusive tournaments, and priority matchmaking. Plus \u2014 real cash payouts go live. Start converting your earned coins into real money.", status: "upcoming" },
+  { phase: "Live Now", title: "V1 \u2014 Public Launch", desc: "Lionade is live. Daily quizzes, 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind. Sign up and start stacking Fangs.", status: "active" },
+  { phase: "December 2026", title: "V2 \u2014 Lionade Pro", desc: "Paid subscriptions arrive. Pro tiers with advanced analytics, bonus Fang multipliers, exclusive tournaments, and priority matchmaking. Plus \u2014 real cash payouts go live. Start converting your earned Fangs into real money.", status: "upcoming" },
   { phase: "March 2027", title: "V3 \u2014 The Full Vision", desc: "Meet Ninny \u2014 your AI-powered study companion. Team leagues, tutoring marketplace, and the complete Lionade ecosystem. Cash payouts get a 10% boost across the board \u2014 the longer you\u2019ve been grinding, the more you earn.", status: "upcoming" },
 ];
 
 const FAQ = [
   { q: "Is Lionade actually free?", a: "100%. Free to join, free to play, free forever. We\u2019ll never charge you to study. Revenue comes from optional premium features \u2014 not your wallet." },
-  { q: "How do I earn coins?", a: "Every correct answer earns coins. Harder questions pay more. Daily streaks give bonus multipliers, and winning 1v1 Duels pays out the wagered coins." },
+  { q: "How do I earn Fangs?", a: "Every correct answer earns Fangs. Harder questions pay more. Daily streaks give bonus multipliers, and winning 1v1 Duels pays out the wagered Fangs." },
   { q: "What subjects are available?", a: "Math, Science, Languages, SAT/ACT prep, Coding, Finance, and IT Certifications like CompTIA and AWS. More subjects are added based on community requests." },
-  { q: "Can I actually cash out?", a: "That\u2019s the plan. Our roadmap targets V2 for real cash conversions. Early users who stack coins now will be first in line when payouts go live." },
+  { q: "Can I actually cash out?", a: "That\u2019s the plan. Our roadmap targets V2 for real cash conversions. Early users who stack Fangs now will be first in line when payouts go live." },
   { q: "How are questions generated?", a: "We use a mix of expert-curated question banks and AI-generated content that adapts to your skill level. Every session is unique to you." },
-  { q: "What are 1v1 Duels?", a: "Challenge any other user to a head-to-head quiz match. Both players wager coins, answer the same questions, and the winner takes the pot." },
+  { q: "What are 1v1 Duels?", a: "Challenge any other user to a head-to-head quiz match. Both players wager Fangs, answer the same questions, and the winner takes the pot." },
   { q: "Do I need to download an app?", a: "Nope. Lionade is web-first \u2014 just open your browser, log in, and start grinding. Works on any device, anywhere, anytime. No app store needed." },
-  { q: "What\u2019s a streak and why does it matter?", a: "Your streak tracks how many consecutive days you\u2019ve studied. The longer your streak, the higher your coin multiplier. Break it and you start over." },
+  { q: "What\u2019s a streak and why does it matter?", a: "Your streak tracks how many consecutive days you\u2019ve studied. The longer your streak, the higher your Fang multiplier. Break it and you start over." },
   { q: "Is Lionade live yet?", a: "Yes \u2014 V1 is live. Sign up free and start grinding right now. No waitlist, no invite codes. V2 with real cash payouts ships December 2026; V3 with team leagues and tutoring marketplace ships March 2027." },
 ];
 
@@ -167,7 +167,7 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
 
   return (
     <div className="tilt-card group relative p-8 sm:p-10 overflow-hidden transition-all duration-300 rounded-[28px] min-h-[320px] flex flex-col"
-      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(255,215,0,0.22)" }}
       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
       {/* Top glow line */}
@@ -286,7 +286,7 @@ export default function LandingPage() {
       {/* ─── Nav ─── */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
         style={{ background: "linear-gradient(to bottom, rgba(4,8,15,0.95), transparent)" }}>
-        <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-9 rounded-md" />
+        <img src={cdnUrl("/logo-full.png")} alt="Lionade" width={36} height={36} className="h-9 rounded-md" />
         <Link href="/login" className="font-mono text-[11px] tracking-[2px] uppercase text-gray-300 hover:text-electric transition-colors">
           Sign In
         </Link>
@@ -404,7 +404,7 @@ export default function LandingPage() {
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 680 680">
                 <circle cx="340" cy="340" r="250" fill="none" stroke="rgba(74,144,217,0.12)"
                   strokeWidth="1" strokeDasharray="8 6"
-                  style={{ animation: "dash-spin 12s linear infinite" }} />
+                  className="feature-orbit-ring" />
               </svg>
 
               {/* 6 orbital nodes */}
@@ -534,7 +534,7 @@ export default function LandingPage() {
           {SNEAK_PEEKS.map((peek, idx) => (
             <div key={peek.tag} className={`tilt-card group p-8 sm:p-12 relative overflow-hidden transition-all duration-300 ${
               idx === 0 ? "rounded-[32px] rounded-tl-[8px]" : idx === 1 ? "rounded-[32px] rounded-tr-[8px]" : "rounded-[32px] rounded-br-[8px]"
-            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(255,215,0,0.22)" }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
               {/* Accent glow */}
@@ -575,7 +575,7 @@ export default function LandingPage() {
               className="group relative rounded-[24px] p-6 sm:p-7 text-center transition-all duration-300 ease-out hover:-translate-y-1 cursor-default"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "2px solid #FFD700",
+                border: "1px solid rgba(255,215,0,0.22)",
                 minHeight: 170,
                 display: "flex",
                 flexDirection: "column",
@@ -650,7 +650,7 @@ export default function LandingPage() {
             <div key={item.q} className="group rounded-[24px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "2px solid #FFD700",
+                border: "1px solid rgba(255,215,0,0.22)",
                 minHeight: 200,
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
@@ -733,7 +733,7 @@ export default function LandingPage() {
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
-        <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-8 rounded-md" />
+        <img src={cdnUrl("/logo-full.png")} alt="Lionade" width={32} height={32} className="h-8 rounded-md" />
         <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made</span>
         <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 {SITE_HOST} &middot; All rights reserved</span>
       </footer>

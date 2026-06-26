@@ -22,7 +22,6 @@ import {
   Brain,
   Sword,
   Target,
-  Users,
   Trophy,
   CheckCircle,
   CurrencyDollar,
@@ -195,14 +194,8 @@ export default function CompetePage() {
                 border: "1px solid rgba(255,215,0,0.18)",
                 boxShadow: "0 0 32px rgba(255,215,0,0.04)",
               }}>
-              {/* Inline coin glyph — smaller than the full hero coin */}
-              <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full shrink-0"
-                style={{
-                  background: "linear-gradient(145deg, #FFD700 0%, #B8960C 50%, #FFD700 100%)",
-                  boxShadow: "0 2px 10px rgba(255,215,0,0.25), inset 0 1px 2px rgba(255,255,255,0.3)",
-                }}>
-                <span className="font-bebas text-base sm:text-lg text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
-              </div>
+              {/* Fang mark — currency is always Fangs, never a $ coin */}
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 sm:w-12 sm:h-12 object-contain shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="font-bebas text-base sm:text-lg text-cream/85 tracking-[0.16em] leading-none">
                   WEEKLY COMPETITIVE
@@ -370,17 +363,14 @@ export default function CompetePage() {
                   </p>
                   <p className="text-cream/60 text-sm sm:text-base leading-relaxed max-w-xl mb-2">
                     Challenge anyone to a head-to-head battle. Same 10 questions. 15 seconds each.
-                    Speed bonus for fast answers. Winner takes the wagered coins.
+                    Speed bonus for fast answers. Winner takes the wagered Fangs.
                   </p>
                   <p className="text-cream/55 text-xs mb-6 flex items-center justify-center gap-1">
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10 to 100 Fangs
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/compete/arena/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">
-                      <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find Opponent
-                    </Link>
-                    <Link href="/compete/arena/duel" className="btn-outline text-sm px-6 py-3 rounded-xl">
-                      <Users size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Challenge Friend
+                      <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find a Duel
                     </Link>
                   </div>
                   <p className="text-cream/55 text-xs">
@@ -597,7 +587,7 @@ export default function CompetePage() {
                     <Trophy size={32} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> WEEKLY TOURNAMENT
                   </p>
                   <p className="text-cream/60 text-sm sm:text-base leading-relaxed mb-6 max-w-xl">
-                    Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and coin prizes.
+                    Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and Fang prizes.
                   </p>
 
                   {/* Bracket SVG */}

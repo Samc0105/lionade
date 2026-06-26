@@ -553,6 +553,22 @@ body {
   animation: highlight-sweep 2s ease 0.3s forwards;
 }
 
+/* Feature-orbit ring (landing). Carries its spin via this class instead of an
+   inline style so prefers-reduced-motion can actually freeze it. */
+.feature-orbit-ring {
+  animation: dash-spin 12s linear infinite;
+}
+
+/* Reduced-motion: freeze the one-shot heading sweep + step-ring draw and the
+   looping orbit ring for motion-sensitive users. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal.visible .highlight-sweep,
+  .reveal.visible .step-ring,
+  .feature-orbit-ring {
+    animation: none !important;
+  }
+}
+
 /* ── Wavy section divider ── */
 .wave-divider {
   width: 100%;

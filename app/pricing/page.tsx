@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: "Why are there ads on Free?",
-    a: "AI costs real money. The adaptive exam prep runs on OpenAI, and ads on Free cover those costs so Lionade stays genuinely free for anyone who can't or doesn't want to pay. Pro removes popups; Platinum removes ads entirely.",
+    a: "AI costs real money. The adaptive exam prep runs on advanced AI, and ads on Free cover those costs so Lionade stays genuinely free for anyone who can't or doesn't want to pay. Pro removes popups; Platinum removes ads entirely.",
   },
   {
     q: "How does the annual discount work?",

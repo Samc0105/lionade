@@ -671,7 +671,7 @@ export default function RoadMapPage() {
                     THIS STAGE IS COMING SOON
                   </h2>
                   <p className="text-cream/45 text-sm font-syne max-w-sm mx-auto mb-6 leading-relaxed">
-                    We&apos;re still loading questions for this stage. Try another stage in the meantime.
+                    Questions for this stage aren&apos;t ready yet. Try another stage in the meantime.
                   </p>
                   <button onClick={backToMap} className="btn-primary px-6 py-2.5 font-syne font-semibold">
                     Back to Map

@@ -404,8 +404,10 @@ export default function SubscriptionSettingsPage() {
             loading={!usage}
           />
 
-          {/* AI vocab lookups — NO source/limit exists → honest placeholder */}
-          <UsagePlaceholder label="AI vocab lookups" />
+          {/* AI vocab lookups usage row is hidden until a real metric source
+             exists — it was shipping a "Tracking coming soon" placeholder to
+             users in their billing settings. Re-add <UsagePlaceholder> once the
+             metric is wired. */}
         </div>
       </SettingsCard>
 

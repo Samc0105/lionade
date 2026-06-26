@@ -1303,7 +1303,7 @@ export default function SocialPage() {
                             {rival.username}
                           </p>
                           <p className="font-bebas text-3xl text-electric tabular-nums leading-none">
-                            {rival.coinsThisWeek}
+                            <CountUp id="social-rivalweekly" value={rival.coinsThisWeek} duration={500} />
                             <span className="text-cream/55 text-sm ml-1.5">Fangs</span>
                           </p>
                         </div>
@@ -1594,7 +1594,7 @@ export default function SocialPage() {
                       <span aria-hidden="true">←</span>
                     </button>
                     <div className="relative">
-                      <img src={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      <Avatar url={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt="" size="xs" frame={selectedFriend.equipped_frame} aura={selectedFriend.equipped_avatar_aura} />
                       {selectedFriend.is_online && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
@@ -1912,7 +1912,7 @@ export default function SocialPage() {
         {showAddFriendModal && (
           <div
             ref={addFriendDialogRef}
-            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-slide-up"
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
             role="dialog"
             aria-modal="true"
             aria-label="Add friend"
@@ -1927,7 +1927,7 @@ export default function SocialPage() {
             }}
           >
             <div
-              className="w-full max-w-md rounded-2xl border border-electric/25 overflow-hidden"
+              className="w-full max-w-md rounded-2xl border border-electric/25 overflow-hidden animate-slide-up"
               style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
               ref={dropdownRef}
             >
@@ -2013,7 +2013,7 @@ export default function SocialPage() {
                           <span className="text-cream/55 text-xs">Searching...</span>
                         </div>
                       ) : searchResults.length === 0 ? (
-                        <div className="py-4 text-center">
+                        <div className="py-4 text-center" role="presentation">
                           <p className="text-cream/55 text-xs">No users found</p>
                         </div>
                       ) : (
@@ -2022,6 +2022,9 @@ export default function SocialPage() {
                           return (
                             <div
                               key={u.id}
+                              role="option"
+                              id={`add-friend-opt-${u.id}`}
+                              aria-selected={false}
                               className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
                             >
                               <img

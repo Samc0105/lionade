@@ -7,6 +7,26 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-26: WEB POLISH PR — brand/copy, a11y, P0 data bugs, visual consistency
+
+**Status:** PR [#4](https://github.com/Samc0105/lionade/pull/4) open on branch `chore/web-polish` (11 commits, 33 files; every batch `tsc`-clean, copy-guard passing, 4-way adversarial pre-merge review done — NOT merged). Driven by a cross-surface polish audit. Most of it is web-specific DOM/CSS (🚫 N/A on native), but the copy + a few UX/data items have real iOS counterparts. Owner: `vp-ios` to schedule the iOS mirrors.
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Cash-out story → future/V2 (not live)** | ✅ `/about`, `/demo`, `/help` no longer claim real-money payouts are live; aligned to "coming with V2" + a `CASH_OUT_LIVE=false` flag in `lib/site-config` | 🟡 **parity — verify iOS** copy (about / onboarding / paywall) for the same "live cash-out / cash out at $5" claims and align identically. Real-money claims are legally sensitive |
+| **Fangs terminology (never "coins")** | ✅ fixed quiz / study-dna / shop / dashboard + `@lionade/core` `missions.ts` + `shop-catalog.ts` | 🟡 the core constants propagate on `sync-core.sh`; iOS-NATIVE screens still need a "coins" → "Fangs" sweep |
+| **Profile data-loss — education/study-goal option mismatch (P0)** | ✅ signup + profile-edit now share one canonical list (`lib/profile-options.ts`) + a defensive option, so a saved value can't render blank or be wiped on save | 🟡 **parity — verify iOS** profile editor uses the same option set signup/onboarding writes; same wipe risk if they drift |
+| **AP-exams per-card best score** | ✅ stopped showing the SAME best score on all 10 cards (lookup ignored topic) → neutral state until per-topic data is stored | 🟡 **parity — if iOS has an AP-exams screen**, same bug; needs the topic persisted per quiz session |
+| **Hidden placeholder surfaces** (Premium Store, subscription "tracking coming soon", paths empty-state) | ✅ gated/removed so nothing reads as unfinished | 🟡 **parity — if the iOS shop has the same dead Premium tab**, gate it the same way |
+| **Social chat-header avatar cosmetics** | ✅ DM chat header now renders equipped frame/aura via `<Avatar>` | 🟡 folds into the existing iOS DecoratedAvatar parity item (iOS still renders raw avatars in social) |
+| **a11y — reduced-motion freeze, valid add-friend listbox, modal panel anim** | ✅ | 🚫 DOM-specific; the PRINCIPLES (reduce-motion, VoiceOver list semantics) belong to an `ios-design-accessibility` pass, not a 1:1 port |
+| **Visual/CSS polish** (landing→glass, logo CLS, FAQ accordion anim, locked-badge, bet `tabular-nums`, contact grid, Buy-Fangs number formatting) | ✅ | 🚫 N/A — web DOM/CSS specific |
+| **Copy regression guard** (`scripts/check-copy.sh`) | ✅ fails the build on `/image-name.png` or any live-cash-out claim | 🚫 N/A (web CI); iOS could add an analogous lint if useful |
+
+**Separate from the PR:** the word-bank save fix (`vocab_words` drop `NOT NULL` on `source_lang`/`target_lang`) is a one-time prod migration to run in the Supabase SQL editor — file at `supabase/migrations/20260620150000_vocab_words_nullable_lang.sql`. iOS vocab inherits it once applied (shared backend).
+
+---
+
 ## 2026-06-18 (cont.): SHOP COSMETICS FOLLOW-UPS — loadout presets, earn-a-cosmetic faucet, party gameplay rosters, founder flair
 
 **Status:** Shipped to web working tree (uncommitted; localhost-verified; reviewed SHIP by security ×2 + code-review + frontend). Two migrations HELD for Sam (`082_cosmetic_loadouts.sql`, `20260618150000_grant_earned_cosmetic.sql`). All zero-API. Owner: `vp-ios` to mirror the shared-backend pieces.

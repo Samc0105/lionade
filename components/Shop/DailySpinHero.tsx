@@ -259,10 +259,10 @@ export default function DailySpinHero() {
 
 // ─── Info modal — explainer for each outcome ────────────────────────────────
 const INFO_ROWS: { color: string; chance: string; label: string; desc: string; tone: "win" | "neutral" | "bad" | "jackpot" }[] = [
-  { color: "#4A90D9", chance: "30%",  label: "Small Fangs",   desc: "50–150 Fangs, the most common pull.",                tone: "win" },
-  { color: "#22C55E", chance: "20%",  label: "Medium Fangs",  desc: "200–400 Fangs. A solid pull.",                       tone: "win" },
+  { color: "#4A90D9", chance: "30%",  label: "Small Fangs",   desc: "50 to 150 Fangs, the most common pull.",                tone: "win" },
+  { color: "#22C55E", chance: "20%",  label: "Medium Fangs",  desc: "200 to 400 Fangs. A solid pull.",                       tone: "win" },
   { color: "#A855F7", chance: "15%",  label: "Free Booster",  desc: "A random booster lands in your inventory.",          tone: "win" },
-  { color: "#0EA5E9", chance: "12%",  label: "Big Fangs",     desc: "500–1,000 Fangs. Heavy bag.",                        tone: "win" },
+  { color: "#0EA5E9", chance: "12%",  label: "Big Fangs",     desc: "500 to 1,000 Fangs. Heavy bag.",                        tone: "win" },
   { color: "#F59E0B", chance: "5%",   label: "Mega Fangs",    desc: "Flat 2,000 Fangs.",                                  tone: "win" },
   { color: "#EF4444", chance: "3%",   label: "Streak Shield", desc: "One free streak save, protects you for 1 day.",     tone: "win" },
   { color: "#EC4899", chance: "3%",   label: "Rare Cosmetic", desc: "A surprise rare item. Already own them all? Falls back to 1,000 Fangs.", tone: "win" },

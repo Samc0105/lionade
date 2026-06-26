@@ -452,11 +452,11 @@ export default function WalletPage() {
                           <TxnIcon size={17} weight="regular" color="currentColor" aria-hidden="true" />
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-syne text-cream text-sm truncate capitalize leading-tight">
+                          <p className={`font-syne text-cream text-sm truncate leading-tight ${txn.description ? "" : "capitalize"}`}>
                             {label}
                           </p>
                           <p className="text-cream/40 text-[10px] font-mono tracking-wider mt-0.5 truncate">
-                            {source.toLowerCase()} · {timeAgo(txn.created_at)}
+                            {txn.description ? `${source.toLowerCase()} · ` : ""}{timeAgo(txn.created_at)}
                           </p>
                         </div>
                         <span className="font-bebas text-2xl tracking-wider shrink-0 tabular-nums" style={{ color: accent }}>

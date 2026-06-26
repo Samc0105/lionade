@@ -8,12 +8,12 @@ const PILLARS = [
   {
     eyebrow: "WHAT WE DO",
     title: "PAY YOU TO STUDY",
-    body: "Every focused minute on Lionade earns Fangs. Cash out at $5, redeem for gift cards, or burn them on power-ups inside the platform. Studying is the only side hustle that compounds for the rest of your life. We made sure it pays now too.",
+    body: "Every focused minute on Lionade earns Fangs. Burn them on power-ups inside the platform today, with gift-card redemptions and cash-out arriving as Lionade grows. Studying is the only side hustle that compounds for the rest of your life. We are building it to pay.",
   },
   {
     eyebrow: "HOW IT WORKS",
     title: "EARN, COMPETE, CASH OUT",
-    body: "Hit your daily focus target. Climb the leaderboard. Win head-to-head trivia in Compete. Run Mastery Mode on any subject you can name. The more you put in, the more Fangs you stack. No gimmicks, no fake currency. Real payouts, real progress.",
+    body: "Hit your daily focus target. Climb the leaderboard. Win head-to-head trivia in Compete. Run Mastery Mode on any subject you can name. The more you put in, the more Fangs you stack. No gimmicks, no fake currency. Real rewards, real progress.",
   },
   {
     eyebrow: "WHO IT IS FOR",
@@ -36,7 +36,7 @@ const TIMELINE = [
   {
     date: "MAY 2026",
     title: "Public Launch",
-    body: "Lionade went live at getlionade.com. Cash payouts opened. iOS TestFlight builds rolling out to the early waitlist.",
+    body: "Lionade went live at getlionade.com. Daily quizzes, 1v1 Compete, and Mastery Mode all shipped. Cash-out lands with V2.",
   },
   {
     date: "NOW",
