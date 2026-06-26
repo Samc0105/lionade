@@ -1594,7 +1594,7 @@ export default function SocialPage() {
                       <span aria-hidden="true">←</span>
                     </button>
                     <div className="relative">
-                      <img src={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      <Avatar url={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt="" size="xs" frame={selectedFriend.equipped_frame} aura={selectedFriend.equipped_avatar_aura} />
                       {selectedFriend.is_online && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}

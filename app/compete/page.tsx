@@ -22,7 +22,6 @@ import {
   Brain,
   Sword,
   Target,
-  Users,
   Trophy,
   CheckCircle,
   CurrencyDollar,
@@ -371,10 +370,7 @@ export default function CompetePage() {
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/compete/arena/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">
-                      <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find Opponent
-                    </Link>
-                    <Link href="/compete/arena/duel" className="btn-outline text-sm px-6 py-3 rounded-xl">
-                      <Users size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Challenge Friend
+                      <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find a Duel
                     </Link>
                   </div>
                   <p className="text-cream/55 text-xs">
