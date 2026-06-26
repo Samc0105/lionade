@@ -60,15 +60,14 @@ export default function ApExamsPage() {
       .finally(() => setHistoryLoaded(true));
   }, [user]);
 
-  const getBestScore = (topicName: string): { correct: number; total: number } | null => {
-    const matching = quizHistory.filter(
-      (h) => h.subject === "Test Prep"
-    );
-    if (matching.length === 0) return null;
-    const best = matching.reduce((a, b) =>
-      b.correct_answers / b.total_questions > a.correct_answers / a.total_questions ? b : a
-    );
-    return { correct: best.correct_answers, total: best.total_questions };
+  const getBestScore = (_topicName: string): { correct: number; total: number } | null => {
+    // Per-topic AP scores aren't tracked yet: quiz_sessions records the subject
+    // ("Test Prep") but not which AP topic, so the old lookup returned the SAME
+    // best score on all 10 cards. Show the neutral state until the topic is
+    // persisted on the session, then filter quizHistory by it here.
+    // TODO: add a topic column to the quiz session, then attribute per card.
+    void quizHistory;
+    return null;
   };
 
   const startApQuiz = (topicName: string) => {
@@ -153,7 +152,7 @@ export default function ApExamsPage() {
                         </div>
                       </>
                     ) : (
-                      <p className="text-cream/55 text-[11px]">Not attempted yet</p>
+                      <p className="text-cream/55 text-[11px]">Start a quiz</p>
                     )}
                   </div>
                 </button>

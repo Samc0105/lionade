@@ -79,6 +79,11 @@ type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
 type PremiumTab = "themes" | "frames" | "name_colors" | "banners";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
 type StoreMode = "coins" | "premium";
+
+// Premium Store is gated OFF until real premium SKUs ship (every item inside is
+// still a placeholder). Flip to true — or wire to a feature flag — to surface
+// the Fang Store / Premium Store toggle and the premium panel again.
+const PREMIUM_STORE_ENABLED: boolean = false;
 type PhosphorIcon = ComponentType<IconProps>;
 
 interface ShopItem {
@@ -1718,7 +1723,8 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* ── Store Mode Toggle ── */}
+        {/* ── Store Mode Toggle — hidden while the Premium Store is gated off ── */}
+        {PREMIUM_STORE_ENABLED && (
         <div className={`flex items-center justify-center mb-8 ${reduce ? "" : "transition-all duration-700 delay-75"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
           <div role="tablist" aria-label="Store mode" className="shop-toggle relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {/* Sliding indicator */}
@@ -1746,6 +1752,7 @@ export default function ShopPage() {
             </button>
           </div>
         </div>
+        )}
 
         {/* ══════════ BUY FANGS (Stripe IAP, coin store only) ══════════ */}
         {!isPremium && (
