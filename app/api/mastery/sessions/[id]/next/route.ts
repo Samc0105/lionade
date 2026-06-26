@@ -177,10 +177,10 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const [progRes, seenEventsRes] = await Promise.all([
       // Bound to current exam's subtopics — was full-user scan
       subtopicIds.length === 0
-        ? Promise.resolve({ data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; last_taught_at: string | null; last_seen_at: string | null }> })
+        ? Promise.resolve({ data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; correct: number; last_taught_at: string | null; last_seen_at: string | null }> })
         : supabaseAdmin
             .from("mastery_progress")
-            .select("subtopic_id, p_mastery, attempts, last_taught_at, last_seen_at")
+            .select("subtopic_id, p_mastery, attempts, correct, last_taught_at, last_seen_at")
             .eq("user_id", userId)
             .in("subtopic_id", subtopicIds),
       supabaseAdmin
@@ -202,6 +202,8 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         weight: s.weight,
         pMastery: p?.p_mastery ?? 0.10,
         lastSeenAt: p?.last_seen_at ? new Date(p.last_seen_at).getTime() : null,
+        attempts: p?.attempts ?? 0,
+        correct: p?.correct ?? 0,
       };
     });
 
@@ -372,7 +374,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
     // Pick next subtopic: prefer weighted-gap leader; if mastered, fall back
     // to any subtopic so the practice-forever mode still has something to drill.
-    let picked = pickNextSubtopic(subtopicsForScore);
+    let picked = pickNextSubtopic(subtopicsForScore, Date.now(), runtime.last_subtopic_id);
     if (!picked) {
       // All gaps closed — pick lowest-mastery subtopic as a "keep sharp" pick.
       const sorted = [...subtopicsForScore].sort((a, b) => a.pMastery - b.pMastery);
@@ -575,14 +577,14 @@ function shapeMessage(m: {
 
 function weightedDisplay(
   scored: { subtopicId: string; weight: number }[],
-  progMap: Map<string, { p_mastery?: number | null; attempts?: number | null } | undefined>,
+  progMap: Map<string, { p_mastery?: number | null; attempts?: number | null; correct?: number | null } | undefined>,
   bktTarget: number,
 ): number {
   let total = 0, num = 0;
   for (const s of scored) {
     total += s.weight;
     const p = progMap.get(s.subtopicId);
-    const pct = p ? displayPct(p.p_mastery ?? 0.10, p.attempts ?? 0, bktTarget) : 0;
+    const pct = p ? displayPct(p.p_mastery ?? 0.10, p.attempts ?? 0, bktTarget, p.correct ?? 0) : 0;
     num += s.weight * pct;
   }
   return total > 0 ? Math.round((num / total) * 10) / 10 : 0;

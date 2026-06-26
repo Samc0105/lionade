@@ -94,11 +94,10 @@ export function pPass(
 /**
  * Map BKT pMastery (0..1, practically capped at 0.95 by bktTarget) to a
  * displayed percentage (0..100). Two dampeners:
- *   1. Volume floor — early questions can't spike the bar. Until the user
- *      has answered 20 questions on this subtopic, the display is floored
- *      by `attempts / 20` of the raw value. Fresh users spend the first
- *      chunk of the session exploring, which matches Sam's "little by little"
- *      feel.
+ *   1. Volume cap — early questions can't spike the bar. The display is capped
+ *      by `correct / 40` (CORRECT answers, not raw attempts), so wrong answers
+ *      never advance it and ~40 correct per subtopic unlocks the full range.
+ *      Users climb little by little as they actually get things right.
  *   2. Target normalization — bktTarget (default 0.95) maps to 100%, so the
  *      bar is reachable through real grinding rather than asymptoting
  *      forever at 0.95.
@@ -107,25 +106,35 @@ export function displayPct(
   pMastery: number,
   attempts: number,
   bktTarget: number = 0.95,
+  correct?: number,
 ): number {
   // Hard zero for fresh subtopics — BKT carries a 0.10 prior that we don't
   // want leaking into the UI as "mastered" before the user has answered
   // anything.
   if (attempts === 0) return 0;
-  // Cap the displayed bar by attempts/40, so one session can't vault a bar
-  // to 80%. Real cert prep takes ~40+ attempts per subtopic to hit mastery.
-  // Also cap by raw normalized (pMastery/target) so users never see more
+  // Volume cap gates on CORRECT answers when the caller provides them, so a
+  // WRONG answer never advances the bar — and because updateBKT lowers
+  // pMastery on a miss, the raw `normalized` posterior becomes the binding
+  // term once accuracy slips, so a run of wrong answers can pull the bar DOWN.
+  // ~40 correct per subtopic to fully unlock the volume (real cert-prep grind).
+  // Legacy callers that omit `correct` keep the old attempts-based pacing.
+  // Also capped by raw normalized (pMastery/target) so users never see more
   // than their actual Bayesian posterior.
+  const volumeUnits = correct ?? attempts;
   const normalized = Math.min(1, pMastery / bktTarget);
-  const volumeCap  = Math.min(1, attempts / 40);
+  const volumeCap  = Math.min(1, volumeUnits / 40);
   return Math.max(0, Math.min(100, Math.min(normalized, volumeCap) * 100));
 }
 
 /**
- * Pick the next subtopic to drill. Score = weight × gap so we spend time on
- * the biggest weighted weakness. Small recency bonus so we don't hammer the
- * same subtopic forever when it's borderline — breaks ties in favor of
- * variety without letting variety win over genuine weakness.
+ * Pick the next subtopic to drill. Score = weight × gap × accFactor, so we
+ * spend the most time on the biggest weighted weakness AND lean harder toward
+ * topics the user is actually getting WRONG (low accuracy counts up to ~2x).
+ * A small recency bonus plus a bounded just-served penalty rotate a borderline
+ * leader to the next-weakest so one topic isn't hammered forever, while a
+ * genuinely much-weaker topic still recurs. Fully deterministic + abuse-safe:
+ * every input is a server-computed BKT/accuracy value, and answering wrong only
+ * earns MORE practice on that topic, never a reward.
  */
 export function pickNextSubtopic(
   subtopics: {
@@ -133,16 +142,29 @@ export function pickNextSubtopic(
     weight: number;
     pMastery: number;
     lastSeenAt?: number | null;
+    attempts?: number | null;
+    correct?: number | null;
   }[],
   now: number = Date.now(),
+  lastSubtopicId?: string | null,
 ): string | null {
   if (subtopics.length === 0) return null;
 
+  const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+
   const scored = subtopics.map(t => {
     const gap = Math.max(0, 0.85 - t.pMastery);
+    // Accuracy lean: a low-accuracy topic counts up to ~2x toward selection
+    // (factor 1.0 → 2.0), so the user gets more questions where they miss.
+    const attempts = t.attempts ?? 0;
+    const accuracy = attempts > 0 ? clamp01((t.correct ?? 0) / attempts) : null;
+    const accFactor = accuracy === null ? 1 : 1 + (1 - accuracy);
     const recencySec = t.lastSeenAt ? (now - t.lastSeenAt) / 1000 : 1e9;
     const recencyBonus = Math.min(0.05, recencySec / 60_000); // 1 min → ~0.001
-    return { id: t.subtopicId, score: t.weight * gap + recencyBonus };
+    // Bounded penalty on the topic served last turn — small enough that a
+    // genuinely much-weaker topic still wins, big enough to rotate near-ties.
+    const justServed = lastSubtopicId && t.subtopicId === lastSubtopicId ? 0.15 * t.weight : 0;
+    return { id: t.subtopicId, score: t.weight * gap * accFactor + recencyBonus - justServed };
   });
 
   scored.sort((a, b) => b.score - a.score);

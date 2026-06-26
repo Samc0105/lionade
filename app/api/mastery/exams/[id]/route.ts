@@ -63,7 +63,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
         correct: p?.correct ?? 0,
         currentStreak: p?.current_streak ?? 0,
         displayPct: p
-          ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target)
+          ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target, p.correct ?? 0)
           : 0,
       };
     });

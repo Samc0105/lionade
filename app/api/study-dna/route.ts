@@ -155,7 +155,7 @@ export async function GET(req: NextRequest) {
       const exam = examById.get(sub.user_exam_id);
       const cls = exam?.class_id ? classById.get(exam.class_id) : null;
       const target = exam?.mastery_bkt_target ?? 0.95;
-      const pct = displayPct(p.p_mastery, p.attempts, target);
+      const pct = displayPct(p.p_mastery, p.attempts, target, p.correct ?? 0);
       // Display name: prefer "Class · Subtopic" for context
       const name = cls ? `${cls.name} · ${sub.name}` : sub.name;
       return {

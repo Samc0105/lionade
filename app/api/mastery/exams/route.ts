@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
       let totalWeight = 0;
       for (const s of subs) {
         const p = progressBySubtopic.get(s.id);
-        const pct = p ? displayPct(p.p_mastery, p.attempts, e.mastery_bkt_target) : 0;
+        const pct = p ? displayPct(p.p_mastery, p.attempts, e.mastery_bkt_target, p.correct ?? 0) : 0;
         weightedPct += s.weight * pct;
         totalWeight += s.weight;
       }

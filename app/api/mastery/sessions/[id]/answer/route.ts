@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { updateBKT, pPass, displayPct, isMasteryReached } from "@/lib/mastery";
 import type { Difficulty } from "@/lib/mastery";
+import { callAI, LLM_CHEAP } from "@/lib/ai";
 
 /**
  * POST /api/mastery/sessions/[id]/answer
@@ -11,18 +12,23 @@ import type { Difficulty } from "@/lib/mastery";
  *
  * Validates the challenge token against runtime_state.pending (server owns
  * "what question is in flight"), runs the BKT update, writes the user's
- * answer message + Ninny's feedback message, and — if the answer was wrong
- * and we haven't blown the socratic budget — kicks off a socratic probe
- * ("why'd you pick that?") that gates on a follow-up /socratic call.
+ * answer message + Ninny's feedback message. On a WRONG answer, within the
+ * per-session AI budget, it generates an explanation tailored to the option
+ * the user picked (gpt-4o-mini) and surfaces it immediately as the feedback
+ * explanation. Falls back to the bank explanation (spending no budget turn)
+ * on model failure or exhausted budget. The old reflect-first socratic probe
+ * was removed; the standalone /socratic route is retained but no longer fed.
  *
  * Response:
  *   { wasCorrect, correctIndex, explanation,
- *     socraticProbe: true | false,
- *     message: <feedback message>,
- *     pPass, displayPct, pMasteryForSubtopic }
+ *     socraticProbe: false (legacy field, always false now),
+ *     answerMessage, feedbackMessage, socraticProbeMessage: null,
+ *     pPass, displayPct, pMasteryForSubtopic, streakAtSubtopic }
  */
 
-const SOCRATIC_TURNS_PER_SESSION = 8; // hard cap on Haiku socratic spends
+// Per-session cap on the gpt-4o-mini wrong-answer feedback spends. Shares the
+// `socratic_turns_spent` column with the (now-unfed) legacy /socratic route.
+const SOCRATIC_TURNS_PER_SESSION = 8;
 const STREAK_CONTRIBUTION_CAP = 10;   // matches /api/ninny/complete pattern
 
 type RouteCtx = { params: { id: string } };
@@ -130,7 +136,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const newAttempts = (currentProg?.attempts ?? 0) + 1;
     const newCorrect = (currentProg?.correct ?? 0) + (wasCorrect ? 1 : 0);
     const newStreak = wasCorrect ? (currentProg?.current_streak ?? 0) + 1 : 0;
-    const newDisplayPct = displayPct(newPMastery, newAttempts, exam.mastery_bkt_target);
+    const newDisplayPct = displayPct(newPMastery, newAttempts, exam.mastery_bkt_target, newCorrect);
 
     const nowIso = new Date().toISOString();
     await supabaseAdmin
@@ -160,7 +166,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       const num = (subRes.data ?? []).reduce((acc, s) => {
         if (s.id === pendingQ.subtopicId) return acc + s.weight * newDisplayPct;
         const p = progMap.get(s.id);
-        return acc + s.weight * (p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target) : 0);
+        return acc + s.weight * (p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target, p.correct ?? 0) : 0);
       }, 0);
       return Math.round((num / totalW) * 10) / 10;
     })();
@@ -183,25 +189,31 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       display_pct_after: weightedDisplay,
     }).select("id, role, kind, content, payload, p_pass_after, display_pct_after, created_at").single();
 
-    // Decide whether to run a Socratic probe. Only if wrong, and only if we
-    // still have budget; otherwise surface the bank explanation directly.
+    // On a WRONG answer, spend a budgeted gpt-4o-mini turn to generate feedback
+    // tailored to the option the user actually picked, instead of the old flat
+    // "Not quite." + a static bank explanation (or a reflect-first probe most
+    // users just clicked past). Falls back to the bank explanation, and spends
+    // NO turn, if the model call fails or the per-session budget is exhausted.
     const socraticBudgetLeft = session.socratic_turns_spent < SOCRATIC_TURNS_PER_SESSION;
-    const doSocratic = !wasCorrect && socraticBudgetLeft;
+    const aiExplanation = (!wasCorrect && socraticBudgetLeft)
+      ? await generateWrongFeedback(q, selectedIndex, userId)
+      : null;
+    const spentAiTurn = aiExplanation !== null;
 
     let feedbackMsg: Awaited<ReturnType<typeof insertFeedback>> | null = null;
     const feedbackContent = wasCorrect
       ? pickCorrectOpener(newStreak)
-      : "Not quite.";
+      : pickWrongOpener(q.options[selectedIndex]);
     const feedbackPayload: Record<string, unknown> = {
       wasCorrect,
       correctIndex: q.correct_index,
-      explanation: q.explanation,
+      // AI-tailored reasoning about the user's specific pick when we have it;
+      // the pre-written bank line otherwise.
+      explanation: aiExplanation ?? q.explanation,
+      explanationSource: spentAiTurn ? "ai" : "bank",
       questionId: q.id,
       userSelectedIndex: selectedIndex,
     };
-    if (doSocratic) {
-      feedbackPayload.pendingSocratic = true;
-    }
 
     feedbackMsg = await insertFeedback({
       sessionId,
@@ -211,34 +223,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       displayPctAfter: weightedDisplay,
     });
 
-    // If starting socratic: insert a probe message and set pending
-    let socraticProbeMsg: Awaited<ReturnType<typeof insertFeedback>> | null = null;
-    if (doSocratic) {
-      socraticProbeMsg = await supabaseAdmin.from("mastery_messages").insert({
-        session_id: sessionId,
-        role: "ninny",
-        kind: "socratic_probe",
-        content:
-          `Before I tell you what's right — what made you pick "${q.options[selectedIndex]}"? ` +
-          `One sentence is fine.`,
-        payload: { questionId: q.id, userSelectedIndex: selectedIndex },
-        p_pass_after: aggregate,
-        display_pct_after: weightedDisplay,
-      }).select("id, role, kind, content, payload, p_pass_after, display_pct_after, created_at").single().then(r => r.data);
-    }
-
-    // Update runtime_state: either clear pending (no socratic), or point at the socratic probe
-    if (doSocratic && socraticProbeMsg) {
-      runtime.pending = {
-        type: "socratic",
-        messageId: socraticProbeMsg.id,
-        subtopicId: pendingQ.subtopicId,
-        questionId: q.id,
-        userSelectedIndex: selectedIndex,
-      };
-    } else {
-      runtime.pending = null;
-    }
+    runtime.pending = null;
 
     // Session + question bank counters (non-blocking where possible)
     await Promise.all([
@@ -246,7 +231,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         runtime_state: runtime,
         questions_answered: session.questions_answered + 1,
         correct_count: session.correct_count + (wasCorrect ? 1 : 0),
-        socratic_turns_spent: session.socratic_turns_spent + (doSocratic ? 1 : 0),
+        socratic_turns_spent: session.socratic_turns_spent + (spentAiTurn ? 1 : 0),
         current_p_pass: aggregate,
         last_active_at: nowIso,
       }).eq("id", sessionId),
@@ -283,10 +268,10 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       displayPct: weightedDisplay,
       pMasteryForSubtopic: newPMastery,
       streakAtSubtopic: newStreak,
-      socraticProbe: doSocratic,
+      socraticProbe: false,
       answerMessage: answerMsg ? shapeMessage(answerMsg) : null,
       feedbackMessage: feedbackMsg ? shapeMessage(feedbackMsg) : null,
-      socraticProbeMessage: socraticProbeMsg ? shapeMessage(socraticProbeMsg) : null,
+      socraticProbeMessage: null,
     });
   } catch (e) {
     console.error("[mastery/sessions/:id/answer]", e);
@@ -321,6 +306,64 @@ function pickCorrectOpener(streak: number): string {
   if (streak >= 5) return `Five in a row — you're on a run.`;
   if (streak >= 3) return `Three straight. Nice lock-in.`;
   return `Got it.`;
+}
+
+// Varied wrong-answer opener that names the option the user actually picked, so
+// every miss doesn't read as the same flat "Not quite." Deterministic spread by
+// the chosen text (no Math.random — keeps the route reproducible).
+function pickWrongOpener(choice: string | undefined): string {
+  if (!choice) return `Let's look at this one.`;
+  const label = choice.length > 44 ? `${choice.slice(0, 42)}...` : choice;
+  const lines = [
+    `"${label}" isn't it.`,
+    `Not "${label}". Let's break down why.`,
+    `"${label}" is a tempting pick, but no.`,
+    `Close, but "${label}" misses it.`,
+  ];
+  let h = 0;
+  for (let i = 0; i < choice.length; i++) h = (h * 31 + choice.charCodeAt(i)) | 0;
+  return lines[Math.abs(h) % lines.length];
+}
+
+// Tailored wrong-answer reasoning. Reuses the same budgeted gpt-4o-mini turn the
+// socratic path used, but fires immediately on the miss (no "type your reasoning"
+// step) so the explanation actually reasons about the option the user picked.
+// Returns null on failure/empty so the caller falls back to the bank explanation
+// and spends NO budget turn.
+async function generateWrongFeedback(
+  q: { question: string; options: unknown; correct_index: number; explanation: string | null },
+  selectedIndex: number,
+  userId: string,
+): Promise<string | null> {
+  // options is a jsonb column (untyped at runtime); coerce defensively.
+  const options = Array.isArray(q.options) ? q.options.map((o) => String(o)) : [];
+  const wrongOpt = options[selectedIndex];
+  const correctOpt = options[q.correct_index];
+  if (!wrongOpt || !correctOpt) return null;
+  try {
+    const res = await callAI({
+      model: LLM_CHEAP,
+      maxTokens: 220,
+      temperature: 0.5,
+      timeoutMs: 5_000,
+      system:
+        "You are Ninny, a study companion. Warm, direct, and specific. No emojis, no 'as an AI', no markdown headings, no dashes. Keep it under 70 words.",
+      userContent:
+`A student answered a multiple-choice question wrong. They picked "${wrongOpt}"; the correct answer is "${correctOpt}".
+
+In 2 to 3 sentences, specific to THIS question (never generic): name the trap that makes "${wrongOpt}" tempting, contrast it with why "${correctOpt}" is right, and end with one sharp takeaway they should remember.
+
+Question: ${q.question}
+Options: ${options.map((o, i) => `${i}. ${o}`).join(" | ")}
+Reference (background, do not quote verbatim): ${q.explanation ?? "n/a"}`,
+      telemetry: { route: "mastery/answer-feedback", promptVersion: "v1-2026-06-26", userId },
+    });
+    const text = res.text.trim();
+    return text || null;
+  } catch (e) {
+    console.error("[mastery/answer] tailored feedback failed:", (e as Error).message);
+    return null;
+  }
 }
 
 function shapeMessage(m: {

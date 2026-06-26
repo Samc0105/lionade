@@ -3,13 +3,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { useUserStats, mutateUserStats } from "@/lib/hooks";
+import { useUserStats, mutateUserStats, useAllBadges, useUserBadges, useSubjectStats, useQuizHistory, useRecentActivity } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
-import {
-  getAllBadges, getUserBadges, getSubjectStats,
-  getQuizHistory, getRecentActivity,
-  getPreferences, updatePreferences,
-} from "@/lib/db";
+import { getPreferences, updatePreferences } from "@/lib/db";
 import type { UserPreferences } from "@/lib/db";
 import { getLevelProgress, formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -177,32 +173,33 @@ export default function ProfilePage() {
   const [section, setSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Data
-  const [allBadges, setAllBadges] = useState<any[]>([]);
-  const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
-  const [subjectStats, setSubjectStats] = useState<any[]>([]);
-  const [quizHistory, setQuizHistory] = useState<any[]>([]);
-  const [activity, setActivity] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Data — persisted SWR hooks so a re-visit paints the last-seen profile
+  // instantly from cache and revalidates silently, instead of cold-fetching all
+  // five sources with a page-wide skeleton on every navigation.
+  const { data: allBadgesData, error: allBadgesErr } = useAllBadges();
+  const { data: earnedBadgesData, error: earnedBadgesErr } = useUserBadges(user?.id);
+  const { data: subjectStatsData, error: subjectStatsErr } = useSubjectStats(user?.id, { lifetime: true });
+  const { data: quizHistoryData, error: quizHistoryErr } = useQuizHistory(user?.id, 30);
+  const { data: activityData, error: activityErr } = useRecentActivity(user?.id, 30);
 
-  useEffect(() => {
-    if (!user) return;
-    refreshUser();
-    Promise.all([
-      getAllBadges().catch(() => []),
-      getUserBadges(user.id).catch(() => []),
-      getSubjectStats(user.id, { lifetime: true }).catch(() => []),
-      getQuizHistory(user.id, 30).catch(() => []),
-      getRecentActivity(user.id, 30).catch(() => []),
-    ]).then(([all, earned, stats, history, act]) => {
-      setAllBadges(all);
-      setEarnedBadges(earned);
-      setSubjectStats(stats);
-      setQuizHistory(history);
-      setActivity(act);
-      setLoading(false);
-    });
-  }, [user?.id]);
+  const allBadges = (allBadgesData ?? []) as any[];
+  const earnedBadges = (earnedBadgesData ?? []) as any[];
+  const subjectStats = (subjectStatsData ?? []) as any[];
+  const quizHistory = (quizHistoryData ?? []) as any[];
+  const activity = (activityData ?? []) as any[];
+  // No flash-of-zero, and no infinite skeleton on a transient failure: a source
+  // is "loading" only while it's still in flight (undefined AND no error). A
+  // failed fetch degrades gracefully to empty data (matching the old
+  // .catch(() => []) behaviour) instead of a perpetual skeleton.
+  const loading =
+    (allBadgesData === undefined && !allBadgesErr) ||
+    (earnedBadgesData === undefined && !earnedBadgesErr) ||
+    (subjectStatsData === undefined && !subjectStatsErr) ||
+    (quizHistoryData === undefined && !quizHistoryErr) ||
+    (activityData === undefined && !activityErr);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (user) refreshUser(); }, [user?.id]);
 
   if (!user) return null;
 

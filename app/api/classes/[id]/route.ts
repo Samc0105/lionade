@@ -91,7 +91,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
           .in("user_exam_id", examIds),
         supabaseAdmin
           .from("mastery_progress")
-          .select("subtopic_id, p_mastery, attempts")
+          .select("subtopic_id, p_mastery, attempts, correct")
           .eq("user_id", userId),
       ]);
 
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
           return {
             weight: s.weight,
             pMastery: p?.p_mastery ?? 0.10,
-            displayPct: p ? displayPct(p.p_mastery, p.attempts, e.mastery_bkt_target) : 0,
+            displayPct: p ? displayPct(p.p_mastery, p.attempts, e.mastery_bkt_target, p.correct ?? 0) : 0,
           };
         });
         const totalW = scored.reduce((a, s) => a + s.weight, 0) || 1;

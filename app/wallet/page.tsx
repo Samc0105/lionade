@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/lib/auth";
-import { useUserStats } from "@/lib/hooks";
+import { useUserStats, useTransactions } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
@@ -10,7 +10,6 @@ import AmbientOrbs from "@/components/AmbientOrbs";
 import CountUp from "@/components/CountUp";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
-import { supabase } from "@/lib/supabase";
 import {
   BookOpen,
   Sword,
@@ -190,9 +189,14 @@ function useTodayEarned(txns: Transaction[]) {
 export default function WalletPage() {
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [txnLoading, setTxnLoading] = useState(true);
-  const [txnError, setTxnError] = useState(false);
+  // Persisted SWR so the transaction list paints instantly from cache on
+  // re-entry instead of cold-fetching with a skeleton on every visit. A failed
+  // query surfaces as `error` (Retry = mutate), never as "no transactions."
+  const { data: txnData, isLoading: txnIsLoading, error: txnFetchError, mutate: refetchTransactions } =
+    useTransactions(user?.id, 20);
+  const transactions = (txnData ?? []) as Transaction[];
+  const txnLoading = txnIsLoading;
+  const txnError = !!txnFetchError;
 
   const coins = stats?.coins ?? user?.coins ?? null;
   const xp = stats?.xp ?? user?.xp ?? null;
@@ -200,31 +204,7 @@ export default function WalletPage() {
   const streak = stats?.streak ?? user?.streak ?? null;
   const ready = coins !== null;
 
-  // Manual fetch (not SWR) so the Retry button can re-invoke the exact same
-  // call. A failed query must surface as an error, never as "no transactions."
-  const fetchTransactions = useCallback(async () => {
-    if (!user?.id) return;
-    setTxnLoading(true);
-    setTxnError(false);
-    const { data, error } = await supabase
-      .from("coin_transactions")
-      .select("id, amount, type, description, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    if (error) {
-      console.error("[wallet:transactions] fetch failed", error);
-      setTxnError(true);
-      setTxnLoading(false);
-      return;
-    }
-    setTransactions((data ?? []) as Transaction[]);
-    setTxnLoading(false);
-  }, [user?.id]);
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+  // (transactions now come from the persisted useTransactions hook above)
 
   const weekly = useWeeklyDelta(transactions);
   const todayEarned = useTodayEarned(transactions);
@@ -402,7 +382,7 @@ export default function WalletPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={fetchTransactions}
+                    onClick={() => refetchTransactions()}
                     className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
                   >
                     <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
