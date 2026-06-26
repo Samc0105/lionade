@@ -1912,7 +1912,7 @@ export default function SocialPage() {
         {showAddFriendModal && (
           <div
             ref={addFriendDialogRef}
-            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-slide-up"
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
             role="dialog"
             aria-modal="true"
             aria-label="Add friend"
@@ -1927,7 +1927,7 @@ export default function SocialPage() {
             }}
           >
             <div
-              className="w-full max-w-md rounded-2xl border border-electric/25 overflow-hidden"
+              className="w-full max-w-md rounded-2xl border border-electric/25 overflow-hidden animate-slide-up"
               style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
               ref={dropdownRef}
             >
@@ -2013,7 +2013,7 @@ export default function SocialPage() {
                           <span className="text-cream/55 text-xs">Searching...</span>
                         </div>
                       ) : searchResults.length === 0 ? (
-                        <div className="py-4 text-center">
+                        <div className="py-4 text-center" role="presentation">
                           <p className="text-cream/55 text-xs">No users found</p>
                         </div>
                       ) : (
@@ -2022,6 +2022,9 @@ export default function SocialPage() {
                           return (
                             <div
                               key={u.id}
+                              role="option"
+                              id={`add-friend-opt-${u.id}`}
+                              aria-selected={false}
                               className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
                             >
                               <img
