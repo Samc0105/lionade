@@ -29,6 +29,14 @@ export const SITE_HOST: string = SITE_URL_OBJ.host;
 /** Default sender/support email — derived from the host. */
 export const SUPPORT_EMAIL = `support@${SITE_HOST}`;
 
+/**
+ * Cash-out status. Real-money payouts are NOT live — Lionade cannot pay out
+ * before it generates revenue. Cash-out ships with V2 (targeted December 2026).
+ * Keep ALL public copy consistent with this: never claim live payouts. Earning
+ * Fangs and spending them on in-app power-ups is the only value loop live today.
+ */
+export const CASH_OUT_LIVE = false;
+
 /** Join a relative path to the site URL. `absoluteUrl("/about") → "https://…/about"`. */
 export function absoluteUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;

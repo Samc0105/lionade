@@ -33,7 +33,7 @@ export const FAQS: Faq[] = [
     category: "Getting Started",
     question: "What is Lionade?",
     answer:
-      "Lionade is a study-rewards app that pays you to learn. Every focused minute earns Fangs, our in-app currency. Stack enough Fangs and you can cash out, unlock power-ups, or burn them on streak rescues. Around the studying we run games, head-to-head competitions, and a Mastery Mode that teaches and quizzes you on any topic you name.",
+      "Lionade is a study-rewards app that pays you to learn. Every focused minute earns Fangs, our in-app currency. Stack enough Fangs to unlock power-ups or burn them on streak rescues, with cash-out coming in V2. Around the studying we run games, head-to-head competitions, and a Mastery Mode that teaches and quizzes you on any topic you name.",
   },
   {
     id: "how-to-sign-up",
@@ -47,7 +47,7 @@ export const FAQS: Faq[] = [
     category: "Getting Started",
     question: "Is Lionade free?",
     answer:
-      "Yes. The core loop is free forever. You can earn Fangs, play most games, run limited Mastery sessions, and join the leaderboard without paying. Pro is optional and unlocks unlimited Mastery, faster Fang multipliers, and a few cosmetic flexes. Free users still cash out real money.",
+      "Yes. The core loop is free forever. You can earn Fangs, play most games, run limited Mastery sessions, and join the leaderboard without paying. Pro is optional and unlocks unlimited Mastery, faster Fang multipliers, and a few cosmetic flexes. Cash-out arrives for every tier in V2.",
   },
   {
     id: "why-lionade-not-lemonade",
@@ -84,14 +84,14 @@ export const FAQS: Faq[] = [
     category: "Fangs",
     question: "Can Fangs be redeemed for real money?",
     answer:
-      "Cash payouts are live for early cohorts now and the full V2 cashout system rolls out broadly in December 2026. The minimum payout will be $5 worth of Fangs and we pay through standard payment rails. Gift card redemptions and in-app power-ups are available today.",
+      "Not yet. The full V2 cashout system rolls out in December 2026. The minimum payout will be $5 worth of Fangs, paid through standard payment rails. For now you can spend Fangs on in-app power-ups and streak rescues.",
   },
   {
     id: "fangs-expire",
     category: "Fangs",
     question: "Do Fangs expire?",
     answer:
-      "No. Fangs do not expire. You can stack them for as long as you want. The only caveat is that if your account is deleted, the balance is forfeited, so cash out before you go if you have a balance worth keeping.",
+      "No. Fangs do not expire. You can stack them for as long as you want. The only caveat is that if your account is deleted, the balance is forfeited, so spend your Fangs before you go if you have a balance worth keeping.",
   },
   {
     id: "why-fangs",
@@ -181,7 +181,7 @@ export const FAQS: Faq[] = [
     category: "Account",
     question: "How do I delete my account?",
     answer:
-      "Settings, Account, Delete Account. We delete your profile, stats, and personal data within thirty days. Cash out any Fangs you care about first because the balance is forfeited on deletion. If you change your mind in the first seven days, contact support and we can usually restore it.",
+      "Settings, Account, Delete Account. We delete your profile, stats, and personal data within thirty days. Spend any Fangs you care about first because the balance is forfeited on deletion. If you change your mind in the first seven days, contact support and we can usually restore it.",
   },
   {
     id: "change-email",
@@ -211,7 +211,7 @@ export const FAQS: Faq[] = [
     category: "Pricing",
     question: "What is the difference between Free and Pro?",
     answer:
-      "Free includes the full study tracker, Fang earning loop, leaderboards, daily games, and limited Mastery sessions. Pro adds unlimited Mastery, a Fang earning multiplier, cosmetic flexes (avatars, banners, badges), and priority email support. Cash payouts work on both tiers.",
+      "Free includes the full study tracker, Fang earning loop, leaderboards, daily games, and limited Mastery sessions. Pro adds unlimited Mastery, a Fang earning multiplier, cosmetic flexes (avatars, banners, badges), and priority email support. Cash-out, when it ships in V2, works on both tiers.",
   },
   {
     id: "cancel-anytime",

@@ -26,7 +26,7 @@ const SECTIONS = [
     eyebrow: "ONE",
     label: "DASHBOARD",
     title: "EARN FANGS FROM STUDYING",
-    body: "Every focused minute pays. Hit your daily target, stack streaks, and watch Fangs compound. Cash out at $5 or burn them on power-ups inside the platform.",
+    body: "Every focused minute pays. Hit your daily target, stack streaks, and watch Fangs compound. Spend them on power-ups inside the platform now, with cash-out coming as Lionade grows.",
     mockup: "dashboard",
   },
   {
@@ -379,7 +379,7 @@ function DashboardMockup() {
           </span>
           <FangIcon size={22} />
         </div>
-        <p className="text-cream/55 text-xs mt-1.5">Worth $12.84 in cash payout</p>
+        <p className="text-cream/55 text-xs mt-1.5">Cash-out unlocks with V2</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
@@ -776,7 +776,7 @@ function CtaStripe() {
             </span>
           </h2>
           <p className="mt-5 max-w-xl mx-auto text-cream/65 text-base sm:text-lg leading-relaxed">
-            Start free. Upgrade if you love it. Cash out the first $5 you stack.
+            Start free. Upgrade if you love it. Cash-out arrives with V2.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -802,7 +802,7 @@ function CtaStripe() {
           </div>
 
           <p className="mt-7 text-[11px] font-mono tracking-[0.24em] uppercase text-cream/55">
-            NO CARD <span className="text-cream/20 mx-2">·</span> CASH OUT AT $5 <span className="text-cream/20 mx-2">·</span> CANCEL ANY TIME
+            NO CARD <span className="text-cream/20 mx-2">·</span> CASH OUT COMING IN V2 <span className="text-cream/20 mx-2">·</span> CANCEL ANY TIME
           </p>
         </div>
       </div>
