@@ -400,8 +400,8 @@ function Heatmap({ heatmap }: { heatmap: Array<{ date: string; value: number }> 
   };
 
   // Group into weeks (cols) × days (rows). UTC weekday: 0 = Sun.
-  // We'll go simple: just show 30 cells in a 5-row × 6-col grid sorted
-  // chronologically, to keep it readable on mobile.
+  // We'll go simple: just show 30 cells in a 10-col × 3-row grid sorted
+  // chronologically, to keep it readable on desktop.
   const cells = heatmap;
 
   // Brand-new / dormant accounts have every cell at 0, which renders as 30 dead
@@ -421,7 +421,7 @@ function Heatmap({ heatmap }: { heatmap: Array<{ date: string; value: number }> 
       <div className="relative">
         <div
           className="grid gap-[5px]"
-          style={{ gridTemplateColumns: "repeat(15, 1fr)" }}
+          style={{ gridTemplateColumns: "repeat(10, 1fr)" }}
           aria-hidden={allZero || undefined}
         >
           {cells.map((c) => (

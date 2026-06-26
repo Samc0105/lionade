@@ -305,7 +305,7 @@ export default function DemoPage() {
               {/* Timer bar */}
               <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-1000 linear"
+                  className="h-full rounded-full transition-all duration-1000 ease-linear"
                   style={{
                     width: `${timerBarPercent}%`,
                     background:

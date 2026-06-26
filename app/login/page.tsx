@@ -511,7 +511,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <p className="text-cream/60 text-sm mt-3">
-            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join 50K students already grinding."}
+            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join thousands of students already grinding."}
           </p>
         </div>
 

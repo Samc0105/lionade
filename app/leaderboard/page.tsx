@@ -394,7 +394,7 @@ export default function LeaderboardPage() {
                       <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1" aria-hidden="true">
                         {isElo ? `${(topThree[0]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}
                       </p>
-                      <span className="mt-1 text-[10px] bg-gold/15 border border-gold/40 text-gold px-2 py-0.5 rounded-full font-bold tracking-wide" aria-hidden="true">GOLD · #1 GOAT</span>
+                      <span className="mt-1 text-[10px] bg-gold/15 border border-gold/40 text-gold px-2 py-0.5 rounded-full font-bold tracking-wide" aria-hidden="true">GOLD · #1</span>
                     </div>
                   </div>
 

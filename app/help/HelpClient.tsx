@@ -60,14 +60,16 @@ function FaqItem({ faq, defaultOpen }: { faq: Faq; defaultOpen: boolean }) {
         id={`faq-panel-${faq.id}`}
         role="region"
         aria-labelledby={`faq-trigger-${faq.id}`}
-        hidden={!open}
-        className="px-6 pb-6 sm:px-8 sm:pb-8 origin-top help-panel"
+        aria-hidden={!open}
+        className="grid help-panel transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
         style={{
+          gridTemplateRows: open ? "1fr" : "0fr",
           opacity: open ? 1 : 0,
-          transform: open ? "scaleY(1)" : "scaleY(0.95)",
         }}
       >
-        <p className="text-cream/75 text-base leading-relaxed max-w-3xl">{faq.answer}</p>
+        <div className="overflow-hidden">
+          <p className="px-6 pb-6 sm:px-8 sm:pb-8 text-cream/75 text-base leading-relaxed max-w-3xl">{faq.answer}</p>
+        </div>
       </div>
     </div>
   );
