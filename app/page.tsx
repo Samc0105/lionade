@@ -167,7 +167,7 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
 
   return (
     <div className="tilt-card group relative p-8 sm:p-10 overflow-hidden transition-all duration-300 rounded-[28px] min-h-[320px] flex flex-col"
-      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(255,215,0,0.22)" }}
       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
       {/* Top glow line */}
@@ -286,7 +286,7 @@ export default function LandingPage() {
       {/* ─── Nav ─── */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
         style={{ background: "linear-gradient(to bottom, rgba(4,8,15,0.95), transparent)" }}>
-        <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-9 rounded-md" />
+        <img src={cdnUrl("/logo-full.png")} alt="Lionade" width={36} height={36} className="h-9 rounded-md" />
         <Link href="/login" className="font-mono text-[11px] tracking-[2px] uppercase text-gray-300 hover:text-electric transition-colors">
           Sign In
         </Link>
@@ -534,7 +534,7 @@ export default function LandingPage() {
           {SNEAK_PEEKS.map((peek, idx) => (
             <div key={peek.tag} className={`tilt-card group p-8 sm:p-12 relative overflow-hidden transition-all duration-300 ${
               idx === 0 ? "rounded-[32px] rounded-tl-[8px]" : idx === 1 ? "rounded-[32px] rounded-tr-[8px]" : "rounded-[32px] rounded-br-[8px]"
-            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(255,215,0,0.22)" }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
               {/* Accent glow */}
@@ -575,7 +575,7 @@ export default function LandingPage() {
               className="group relative rounded-[24px] p-6 sm:p-7 text-center transition-all duration-300 ease-out hover:-translate-y-1 cursor-default"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "2px solid #FFD700",
+                border: "1px solid rgba(255,215,0,0.22)",
                 minHeight: 170,
                 display: "flex",
                 flexDirection: "column",
@@ -650,7 +650,7 @@ export default function LandingPage() {
             <div key={item.q} className="group rounded-[24px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "2px solid #FFD700",
+                border: "1px solid rgba(255,215,0,0.22)",
                 minHeight: 200,
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
@@ -733,7 +733,7 @@ export default function LandingPage() {
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
-        <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-8 rounded-md" />
+        <img src={cdnUrl("/logo-full.png")} alt="Lionade" width={32} height={32} className="h-8 rounded-md" />
         <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made</span>
         <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 {SITE_HOST} &middot; All rights reserved</span>
       </footer>
