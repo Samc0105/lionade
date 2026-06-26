@@ -2038,7 +2038,7 @@ export default function ShopPage() {
 
         {/* ══════════ COIN STORE ══════════ */}
         {!isPremium && (
-          <div id="store-panel-coins" role="tabpanel" aria-labelledby="store-tab-coins">
+          <div id="store-panel-coins" role={PREMIUM_STORE_ENABLED ? "tabpanel" : undefined} aria-labelledby={PREMIUM_STORE_ENABLED ? "store-tab-coins" : undefined}>
             {/* ── Tabs ── */}
             <div role="tablist" aria-label="Fang store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
               {TABS.map((t, idx) => {
