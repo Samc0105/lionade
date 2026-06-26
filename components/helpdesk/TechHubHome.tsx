@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon } from "@phosphor-icons/react";
 import { TRACKS, getTrack } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -56,6 +56,27 @@ export default function TechHubHome() {
           </div>
         </Link>
       )}
+
+      {/* Night Shift — the FNAF-style monitoring mode. */}
+      <Link
+        href="/learn/techhub/nightshift"
+        className="group block rounded-2xl p-4 transition-colors"
+        style={{ background: "linear-gradient(110deg, rgba(110,139,192,0.14) 0%, rgba(239,68,68,0.07) 65%, rgba(4,6,12,0.96) 100%)", border: "1px solid rgba(110,139,192,0.32)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(110,139,192,0.16)", border: "1px solid rgba(110,139,192,0.45)" }}>
+            <Moon size={20} weight="fill" color="#9DB4E0" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">NIGHT SHIFT</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/30">New</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">Alone in the SOC. Flip the feeds, catch the intruder before it reaches the core, survive til 6 AM.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#9DB4E0" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
 
       {/* Intro */}
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">

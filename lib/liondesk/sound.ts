@@ -81,3 +81,70 @@ export function playFail(): void {
   beep(160, 180, "sawtooth", 0.05);
   beep(120, 240, "sawtooth", 0.05, 0.1);
 }
+
+// ── Night Shift atmosphere ──────────────────────────────────────────────────
+
+let drone: { osc: OscillatorNode; sub: OscillatorNode; gain: GainNode } | null = null;
+
+/** Start the low ambient server-room hum (idempotent). */
+export function startAmbient(): void {
+  const c = getCtx();
+  if (!c || isMuted() || drone) return;
+  const osc = c.createOscillator();
+  const sub = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.value = 55;
+  sub.type = "sine";
+  sub.frequency.value = 27.5;
+  gain.gain.setValueAtTime(0.0001, c.currentTime);
+  gain.gain.linearRampToValueAtTime(0.02, c.currentTime + 1.2);
+  osc.connect(gain);
+  sub.connect(gain);
+  gain.connect(c.destination);
+  osc.start();
+  sub.start();
+  drone = { osc, sub, gain };
+}
+
+/** Raise the dread as the threat nears the core (level 0..1). */
+export function setAmbientTension(level: number): void {
+  const c = getCtx();
+  if (!drone || !c) return;
+  const l = Math.max(0, Math.min(1, level));
+  drone.osc.frequency.setTargetAtTime(55 + l * 45, c.currentTime, 0.4);
+  drone.gain.gain.setTargetAtTime(0.02 + l * 0.035, c.currentTime, 0.4);
+}
+
+export function stopAmbient(): void {
+  const c = getCtx();
+  if (!drone || !c) return;
+  try {
+    drone.gain.gain.cancelScheduledValues(c.currentTime);
+    drone.gain.gain.setTargetAtTime(0.0001, c.currentTime, 0.25);
+    drone.osc.stop(c.currentTime + 0.6);
+    drone.sub.stop(c.currentTime + 0.6);
+  } catch {
+    /* ignore */
+  }
+  drone = null;
+}
+
+/** Alarm when the threat advances a step. */
+export function playAlarm(): void {
+  beep(880, 130, "square", 0.05);
+  beep(660, 170, "square", 0.05, 0.14);
+}
+
+/** Confirmation when you contain the threat on the right feed. */
+export function playContain(): void {
+  beep(520, 70, "sine", 0.05);
+  beep(820, 100, "sine", 0.05, 0.07);
+}
+
+/** The breach jump-scare stinger. */
+export function playStinger(): void {
+  beep(150, 450, "sawtooth", 0.09);
+  beep(95, 650, "sawtooth", 0.09, 0.04);
+  beep(70, 800, "square", 0.07, 0.08);
+}
