@@ -119,7 +119,7 @@ function makeReducer(shift: Shift) {
         shift.items.forEach((i) => {
           const it = items[i.id];
           if (it.breached || isTerminal(it.status) || elapsed < i.arriveAfter) return;
-          if (elapsed >= i.arriveAfter + SLA_BUDGET[i.priority]) {
+          if (elapsed >= i.arriveAfter + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
             const base = BREACH_PENALTY[i.priority];
             const pen = i.from.vip ? Math.round(base * 1.5) : base;
             items = { ...items, [i.id]: { ...it, breached: true } };
@@ -484,7 +484,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
-            const remaining = i.arriveAfter + SLA_BUDGET[i.priority] - elapsed;
+            const remaining = i.arriveAfter + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1) - elapsed;
             return (
               <li key={i.id}>
                 <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
@@ -632,7 +632,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
   const it = state.items[item.id];
   const [showHint, setShowHint] = useState(false);
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const slaRemaining = item.arriveAfter + SLA_BUDGET[item.priority] - elapsed;
+  const slaRemaining = item.arriveAfter + SLA_BUDGET[item.priority] * (shift.slaScale ?? 1) - elapsed;
   const kbArticle = item.kbArticleId ? shift.kb.find((a) => a.id === item.kbArticleId) ?? null : null;
   const part = item.part ? shift.inventory.find((p) => p.sku === item.part!.sku) ?? null : null;
   const stepDone = (k: string) => (k === "kb" ? state.kbRead.includes(item.kbArticleId ?? "") : it.steps.includes(k));
@@ -704,14 +704,16 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
         )}
       </div>
 
-      {/* hint */}
-      <div className="mt-3">
-        {showHint ? (
-          <p className="text-cream/65 text-xs rounded-lg border border-gold/20 bg-gold/[0.05] p-2.5">💡 {item.hint}</p>
-        ) : (
-          <button onClick={() => setShowHint(true)} className="font-mono text-[11px] text-cream/45 hover:text-gold">need a hint?</button>
-        )}
-      </div>
+      {/* hint (hidden under the Skeleton Crew modifier) */}
+      {!shift.noHints && (
+        <div className="mt-3">
+          {showHint ? (
+            <p className="text-cream/65 text-xs rounded-lg border border-gold/20 bg-gold/[0.05] p-2.5">💡 {item.hint}</p>
+          ) : (
+            <button onClick={() => setShowHint(true)} className="font-mono text-[11px] text-cream/45 hover:text-gold">need a hint?</button>
+          )}
+        </div>
+      )}
 
       {/* actions */}
       {!isTerminal(it.status) ? (

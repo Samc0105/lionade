@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon } from "@phosphor-icons/react";
-import { TRACKS, getTrack } from "@/lib/helpdesk/tracks";
+import { ArrowRight, CalendarBlank, Moon, Shuffle } from "@phosphor-icons/react";
+import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
-import { dailyShift } from "@/lib/liondesk/daily";
 import { trackIconFor } from "@/components/helpdesk/icons";
 
 export default function TechHubHome() {
@@ -26,36 +25,42 @@ export default function TechHubHome() {
   // real dependency, not just an incidental re-render. Keeps a lint cleanup from
   // silently deleting `version` and breaking the on-focus progress refresh.
   const resolvedTotal = useMemo(() => (mounted ? totalCleared() : 0), [mounted, version]);
-  const daily = dailyShift();
-  const dailyTrack = getTrack(daily.track);
-  const dailyColor = dailyTrack?.color ?? "#FFD700";
 
   return (
     <div className="space-y-6">
-      {/* Shift of the Day — a fresh reason to clock in daily. Rendered after
-          mount so server/client date can't cause a hydration mismatch. */}
-      {mounted && (
-        <Link
-          href={`/learn/techhub/${daily.track}/shift?shift=${daily.id}`}
-          className="group block rounded-2xl p-4 transition-colors"
-          style={{ background: `linear-gradient(110deg, ${dailyColor}1f 0%, rgba(255,215,0,0.06) 60%, rgba(12,16,32,0.95) 100%)`, border: `1px solid ${dailyColor}3a` }}
-        >
+      {/* Combination modes — a different mix of tickets + mutators every session. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Link href="/learn/techhub/surprise?daily=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.14) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.3)" }}>
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${dailyColor}1a`, border: `1px solid ${dailyColor}40` }}>
-              <CalendarBlank size={20} weight="fill" color={dailyColor} aria-hidden="true" />
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.14)", border: "1px solid rgba(255,215,0,0.4)" }}>
+              <CalendarBlank size={20} weight="fill" color="#FFD700" aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gold/90">Shift of the day</span>
-                <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">bonus</span>
+                <p className="font-bebas text-lg text-cream tracking-wider leading-none">DAILY COMBO</p>
+                <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">today</span>
               </div>
-              <p className="font-syne font-semibold text-sm text-cream mt-0.5 truncate">{daily.name}</p>
-              <p className="text-cream/55 text-[11px]">{dailyTrack?.name} · {daily.rank}</p>
+              <p className="text-cream/60 text-xs mt-1">Today's mix of tickets and mutators. Same for everyone.</p>
             </div>
-            <ArrowRight size={16} weight="bold" color={dailyColor} aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={16} weight="bold" color="#FFD700" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
-      )}
+        <Link href="/learn/techhub/surprise" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(168,85,247,0.16) 0%, rgba(74,144,217,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(168,85,247,0.32)" }}>
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.16)", border: "1px solid rgba(168,85,247,0.45)" }}>
+              <Shuffle size={20} weight="fill" color="#C9A2F2" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-bebas text-lg text-cream tracking-wider leading-none">SURPRISE SHIFT</p>
+                <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-[#A855F7]/15 text-[#C9A2F2] border border-[#A855F7]/30">random</span>
+              </div>
+              <p className="text-cream/60 text-xs mt-1">A fresh draw of tickets and random modifiers. No two runs alike.</p>
+            </div>
+            <ArrowRight size={16} weight="bold" color="#C9A2F2" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+      </div>
 
       {/* Night Shift — the FNAF-style monitoring mode. */}
       <Link

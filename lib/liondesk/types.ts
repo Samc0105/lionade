@@ -113,6 +113,13 @@ export interface ShiftItem {
   hint: string;
 }
 
+/** A mutator applied to a generated shift, surfaced as a chip. */
+export interface ShiftModifier {
+  id: string;
+  label: string;
+  desc: string;
+}
+
 export interface Shift {
   id: string;
   track: Track;
@@ -128,4 +135,10 @@ export interface Shift {
   kb: KbArticle[];
   adUsers: AdUser[];
   items: ShiftItem[];
+  /** Multiplies the live SLA budget (Rush Hour modifier). Default 1. */
+  slaScale?: number;
+  /** Hide the per-ticket hint (Skeleton Crew modifier). */
+  noHints?: boolean;
+  /** Active modifiers, for display. */
+  modifiers?: ShiftModifier[];
 }
