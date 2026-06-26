@@ -404,7 +404,7 @@ export default function LandingPage() {
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 680 680">
                 <circle cx="340" cy="340" r="250" fill="none" stroke="rgba(74,144,217,0.12)"
                   strokeWidth="1" strokeDasharray="8 6"
-                  style={{ animation: "dash-spin 12s linear infinite" }} />
+                  className="feature-orbit-ring" />
               </svg>
 
               {/* 6 orbital nodes */}
