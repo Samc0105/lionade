@@ -169,6 +169,25 @@ export function makeCustomNight(threats: number, speed: "slow" | "normal" | "fas
   };
 }
 
+/** A rolled-up random night: different threat count, speed, power, and outages
+ *  every time, for replay variety. */
+export function randomNight(rnd: () => number = Math.random): NightDef {
+  const speeds = [
+    [7, 6.5, 6, 5.5, 5, 4.5],
+    [6, 5.5, 5, 4.5, 4, 3.5],
+    [5, 4.5, 4, 3.5, 3, 2.5],
+  ];
+  const speedIdx = Math.floor(rnd() * speeds.length);
+  const threats = 1 + Math.floor(rnd() * 3); // 1-3
+  const power = rnd() < 0.7;
+  const outages = rnd() < 0.5;
+  return {
+    n: 0, name: "Random Night", secondsPerHour: 24, advanceSeconds: speeds[speedIdx],
+    threats, power, powerDrainPerSec: 0.32 + speedIdx * 0.07, flipCost: power ? 1.2 : 0,
+    outages, outageEverySec: 18, outageDurSec: 5,
+  };
+}
+
 /** Endless mode: survive as long as you can. Ramps faster and spawns more
  *  intruders the longer you last; ends only when it reaches the core. */
 export const ENDLESS_NIGHT: NightDef = {

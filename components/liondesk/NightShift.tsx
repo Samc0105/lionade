@@ -3,11 +3,11 @@
 import { useEffect, useReducer, useRef, useState, type Dispatch } from "react";
 import {
   Monitor, VideoCamera, ShieldWarning, Pulse, Warning, Moon, Lightning,
-  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning, Sliders, Infinity,
+  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning, Sliders, Infinity, Shuffle,
 } from "@phosphor-icons/react";
 import {
   FEEDS, NIGHT, NIGHTS, hourLabel, getMaxNightSurvived, recordNightSurvived, makeCustomNight,
-  ENDLESS_NIGHT, getEndlessBest, recordEndlessBest,
+  ENDLESS_NIGHT, getEndlessBest, recordEndlessBest, randomNight,
   type Feed, type FeedKind, type NightDef,
 } from "@/lib/liondesk/nightshift";
 import {
@@ -241,6 +241,10 @@ export default function NightShift() {
     resumeAudio();
     dispatch({ t: "START", def: ENDLESS_NIGHT, nightIdx: -1 });
   }
+  function startRandom() {
+    resumeAudio();
+    dispatch({ t: "START", def: randomNight(), nightIdx: -1 });
+  }
 
   const activeFeed = FEEDS.find((f) => f.id === state.activeFeed)!;
   const threatHere = state.status === "playing" && !blind && !offline && state.threats.some((t) => t.feed === state.activeFeed);
@@ -366,7 +370,7 @@ export default function NightShift() {
 
       {/* overlays */}
       {state.status === "menu" && introNight === null && !customOpen && (
-        <NightMenu maxSurvived={maxSurvived} endlessBest={endlessBest} onChoose={chooseNight} onCustom={() => setCustomOpen(true)} onEndless={startEndless} />
+        <NightMenu maxSurvived={maxSurvived} endlessBest={endlessBest} onChoose={chooseNight} onCustom={() => setCustomOpen(true)} onEndless={startEndless} onRandom={startRandom} />
       )}
       {customOpen && <CustomCard onStart={startCustom} onBack={() => setCustomOpen(false)} />}
       {introNight !== null && (
@@ -435,7 +439,7 @@ function FeedBody({ feed, threat, flicker }: { feed: Feed; threat: boolean; flic
 
 /* ───────────────────────── overlays ───────────────────────── */
 
-function NightMenu({ maxSurvived, endlessBest, onChoose, onCustom, onEndless }: { maxSurvived: number; endlessBest: number; onChoose: (i: number) => void; onCustom: () => void; onEndless: () => void }) {
+function NightMenu({ maxSurvived, endlessBest, onChoose, onCustom, onEndless, onRandom }: { maxSurvived: number; endlessBest: number; onChoose: (i: number) => void; onCustom: () => void; onEndless: () => void; onRandom: () => void }) {
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#04060c]/95 p-4">
       <div className="text-center max-w-md w-full">
@@ -457,6 +461,9 @@ function NightMenu({ maxSurvived, endlessBest, onChoose, onCustom, onEndless }: 
           })}
         </div>
         <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+          <button onClick={onRandom} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#6E8BC0]/40 text-[#9DB4E0] text-sm hover:bg-[#6E8BC0]/10">
+            <Shuffle size={15} weight="fill" /> Random Night
+          </button>
           <button onClick={onCustom} disabled={maxSurvived < 1} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40" title={maxSurvived < 1 ? "Survive Night 1 to unlock" : "Set your own difficulty"}>
             <Sliders size={15} weight="fill" /> Custom Night
           </button>
