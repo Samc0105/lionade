@@ -13,7 +13,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown } from "@phosphor-icons/react";
+import { Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown, Terminal } from "@phosphor-icons/react";
 import { usePlan } from "@/lib/use-plan";
 import CountUp from "@/components/CountUp";
 
@@ -346,6 +346,31 @@ export default function LearnPage() {
                   )}
                 </div>
               </FeatureGate>
+            </Link>
+
+            {/* TechHub — flagship "learn by doing" surface. Work real tech
+                tickets in a terminal and climb from intern to CTO. */}
+            <Link
+              href="/learn/techhub"
+              className="fluid-card-hover press-feedback group mt-3 block rounded-[10px] p-5"
+              style={{
+                background: "linear-gradient(110deg, rgba(74,144,217,0.12) 0%, rgba(43,190,107,0.06) 55%, rgba(12,16,32,0.95) 100%)",
+                border: "1px solid rgba(74,144,217,0.28)",
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(74,144,217,0.14)", border: "1px solid rgba(74,144,217,0.4)" }}>
+                  <Terminal size={22} weight="fill" color="#4A90D9" aria-hidden="true" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bebas text-xl text-cream tracking-wider leading-none">TECHHUB</p>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-electric/15 text-electric border border-electric/30">New</span>
+                  </div>
+                  <p className="text-cream/65 text-xs mt-1.5">Work real IT, security, and engineering tickets in a terminal. Climb from intern to CTO.</p>
+                </div>
+                <ArrowRight size={18} weight="bold" color="#4A90D9" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+              </div>
             </Link>
 
             {/* Secondary actions — 5 clean rows, not cards */}

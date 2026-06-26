@@ -1,0 +1,1481 @@
+[
+  {
+    "id": "vpn-mfa-loop",
+    "track": "helpdesk",
+    "rank": "Tier 2 Support",
+    "rankLevel": 2,
+    "difficulty": "Intermediate",
+    "reward": 60,
+    "xp": 45,
+    "ticket": {
+      "from": "Priya, Field Sales (remote)",
+      "subject": "VPN won't connect after my password got reset",
+      "priority": "High",
+      "body": "IT made me reset my password this morning and now I can log in fine but the VPN client just spins on the verification step and never connects. I've reset the password TWICE more thinking I fumbled it. Still stuck. I have a customer demo at noon and everything I need is behind the VPN. Please just push another reset or whatever gets me in."
+    },
+    "evidence": [
+      {
+        "label": "VPN auth log / user pkhan (Priya Khan)",
+        "lines": [
+          "08:14:02  AUTH  user=pkhan  password=ACCEPTED  src=73.219.x.x",
+          "08:14:02  SESSION  MFA challenge issued (push + TOTP)",
+          "08:14:32  SESSION  MFA challenge TIMED OUT / token rejected",
+          "08:14:33  SESSION  tunnel NOT established  (state: AUTH_OK / SESSION_FAIL)",
+          "08:21:10  AUTH  user=pkhan  password=ACCEPTED  (retry)  -> MFA timed out again",
+          "08:36:48  AUTH  user=pkhan  password=ACCEPTED  (retry x3)  -> MFA timed out again"
+        ]
+      },
+      {
+        "label": "Identity / account state / pkhan",
+        "lines": [
+          "account: ENABLED   lockout: NONE   bad-password-count: 0",
+          "last password change: today 07:55 (admin-forced reset)",
+          "flag: PASSWORD_RESET_REQUIRED = TRUE   <-- blocks VPN session post-auth",
+          "MFA: enrolled (TOTP authenticator + push)   device last sync: 41 days ago",
+          "note: RESET_REQUIRED accounts authenticate but are denied tunnel until cleared"
+        ]
+      },
+      {
+        "label": "MFA device registration / pkhan",
+        "lines": [
+          "enrolled device: Authenticator (TOTP, 30s window)",
+          "server time: 08:14:30 UTC",
+          "device-reported code valid-window: skew +88s (out of tolerance, max +/-30s)",
+          "result: TOTP codes REJECTED (clock drift)   push: delivered, not approved in window",
+          "registration: intact (no re-enroll needed, only re-sync)"
+        ]
+      }
+    ],
+    "goal": "Get Priya's VPN tunnel to establish. Figure out why auth succeeds but the session never completes, and fix the actual blocker without resetting her password again.",
+    "hint": "Read the auth log closely: the password is ACCEPTED, so this isn't a wrong-password problem and another reset won't help. The failure is on the leg AFTER the password. Confirm the account's post-reset state and check her MFA device before you change anything.",
+    "successMessage": "That's the read. The password was never wrong; the auth log showed it ACCEPTED, then the session died on MFA because the forced reset left a 'reset required' flag that blocks VPN, and her authenticator's clock had drifted so its codes were rejected. Clearing the flag and re-syncing MFA fixes both legs at once. The instinct to build: when auth succeeds but the session fails, separate 'wrong credential' from 'blocked or broken session leg', and confirm account state plus MFA before you reset anything again. A fourth password reset would have changed nothing and burned her demo window.",
+    "commands": [
+      {
+        "aliases": ["view auth log", "auth log", "logs", "log", "tail vpn"],
+        "output": "pkhan: password=ACCEPTED every attempt (today 08:14, 08:21, 08:36). Each time the SESSION leg fails: 'MFA challenge timed out / token rejected', tunnel NOT established. State reads AUTH_OK / SESSION_FAIL. Translation: the password is right; the MFA step is where it dies.",
+        "step": "triage"
+      },
+      {
+        "aliases": ["check account", "account status", "account state", "inspect account", "whoami pkhan"],
+        "output": "pkhan: ENABLED, not locked, bad-password-count 0. Password changed today at 07:55 by an admin-forced reset. FLAG: PASSWORD_RESET_REQUIRED = TRUE. Per policy, reset-required accounts can authenticate but are DENIED the VPN tunnel until that flag is cleared. This is a post-auth block, not a credential problem.",
+        "step": "confirm-account"
+      },
+      {
+        "aliases": ["check mfa", "mfa status", "inspect mfa", "mfa device", "verify mfa"],
+        "output": "pkhan MFA: enrolled (TOTP + push), registration intact. Device last synced 41 days ago. Server time 08:14:30 UTC vs device skew +88s, well past the +/-30s window, so TOTP codes are REJECTED. Push was delivered but not approved inside the window. Needs a re-sync, not a re-enroll.",
+        "step": "check-mfa"
+      },
+      {
+        "aliases": ["ping vpn gateway", "ping gateway", "ping", "test connectivity"],
+        "output": "Reply from vpn-gw-01: time 38ms (4/4 packets). The gateway is reachable and Priya's network path is fine. The failure is identity/session side, not connectivity.",
+        "step": "triage"
+      },
+      {
+        "aliases": ["clear reset flag and resync mfa", "clear reset required and resync mfa", "clear reset-required resync mfa", "fix account and mfa", "clear flag resync mfa"],
+        "output": "Cleared PASSWORD_RESET_REQUIRED on pkhan and re-synced her authenticator to server time (skew now 0s). Priya re-runs the client: password ACCEPTED, MFA push approved in-window, tunnel ESTABLISHED. She's on the VPN with time to spare before the demo.",
+        "resolvesTicket": true,
+        "requires": ["triage", "confirm-account", "check-mfa"],
+        "tone": "success"
+      },
+      {
+        "aliases": ["reset password again", "force password reset", "push another reset", "reset password"],
+        "output": "Reset her password a 4th time. She authenticates fine on the new password... and the session dies on MFA exactly like before. The auth log already showed password=ACCEPTED, so the password was never the problem, and resetting it again changes nothing.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["re-enroll mfa", "reset mfa", "wipe mfa enrollment", "remove mfa"],
+        "output": "Wiping and re-enrolling MFA would technically fix the clock drift, but it's overkill and locks her out of every other app until she re-scans the QR. Registration is intact; a re-sync handles the drift without nuking her enrollment. Also, it still wouldn't clear the reset-required flag blocking the tunnel.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["disable mfa", "turn off mfa", "bypass mfa", "exempt from mfa"],
+        "output": "Disabling MFA on a remote sales account to 'unblock' a VPN is a security incident waiting to happen, and it doesn't address the PASSWORD_RESET_REQUIRED flag that's actually denying the tunnel. Hard no.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["reinstall vpn client", "reinstall client", "update vpn client"],
+        "output": "Reinstalled the client, same loop. The client behaved correctly the whole time: it relayed an ACCEPTED password and a failed MFA challenge. The block is server-side account state, not a broken install.",
+        "tone": "warn"
+      }
+    ]
+  },
+  {
+    "id": "server-disk-full",
+    "track": "helpdesk",
+    "rank": "Sysadmin",
+    "rankLevel": 3,
+    "difficulty": "Advanced",
+    "reward": 80,
+    "xp": 65,
+    "ticket": {
+      "from": "monitoring@techhub.io",
+      "subject": "app-prod-3 throwing 500s, customers locked out",
+      "priority": "High",
+      "body": "Heads up, app-prod-3 started serving HTTP 500 on every request about 20 minutes ago. Health check is red, the load balancer pulled it from rotation, and we are running on two nodes instead of three. The on-call already tried bouncing the app service once and it came back up for maybe 30 seconds then died again. Before you do anything drastic, figure out WHY it is unhealthy. Confirm the cause and check what is going on with the box, then make the call. Do not just reboot it and hope. Ping me when it is back in rotation."
+    },
+    "evidence": [
+      {
+        "label": "app-prod-3: GET /healthz (last response)",
+        "lines": [
+          "$ curl -s http://app-prod-3.internal/healthz",
+          "HTTP/1.1 500 Internal Server Error",
+          "{\"status\":\"error\",\"detail\":\"could not write to /var/log/app/app.log: [Errno 28] No space left on device\"}",
+          "",
+          "# app service log tail (journalctl -u app -n 5):",
+          "app[4471]: ERROR failed to flush request log, OSError 28 No space left on device",
+          "app[4471]: CRITICAL worker 4471 exiting, cannot persist state",
+          "systemd: app.service: main process exited, status=1/FAILURE",
+          "systemd: app.service: scheduled restart (attempt 6), still failing"
+        ]
+      },
+      {
+        "label": "Filesystem usage (df -h)",
+        "lines": [
+          "$ df -h",
+          "Filesystem      Size  Used Avail Use% Mounted on",
+          "/dev/nvme0n1p1   50G   50G   0   100% /",
+          "tmpfs           7.8G  1.2M  7.8G   1% /run",
+          "/dev/nvme0n1p2  200G   38G  162G  20% /data",
+          "",
+          "# / (root) is full. /data has room. The app logs to /var/log/app on root."
+        ]
+      },
+      {
+        "label": "Largest paths on root (du, sorted) + log dir",
+        "lines": [
+          "$ sudo du -ahx / | sort -rh | head -n 6",
+          "48G   /var/log/app/debug.log",
+          "1.1G  /usr/lib",
+          "640M  /var/lib/docker/overlay2",
+          "120M  /var/log/app/app.log",
+          "44M   /opt/app/releases/current",
+          "",
+          "$ sudo ls -la /var/log/app/",
+          "-rw-r--r-- 1 app app 51539607552 Jun 15 02:14 debug.log   <- 48G, growing since 06-09 deploy",
+          "-rw-r--r-- 1 app app   125829120 Jun 15 09:02 app.log",
+          "# no /etc/logrotate.d/app config present; LOG_LEVEL=DEBUG left on since 06-09"
+        ]
+      }
+    ],
+    "goal": "Find why app-prod-3 is unhealthy, confirm the root partition is full from a runaway debug log, free the space the right way, and stop it from recurring.",
+    "hint": "A 500 that says No space left on device is a disk problem, not an app problem. Restarting a process cannot create free space. Find which partition is full, then find the one file eating it, before you touch anything.",
+    "successMessage": "The app was not broken, the disk was. Root was 100% full from an unrotated debug.log that hit 48GB after DEBUG was left on since the last deploy, so every write failed with Errno 28 and the app could not even start. Reclaiming the space by truncating that one file let the app write again, and turning DEBUG off plus adding logrotate stops it from refilling. The pro instinct: when you see No space left on device, reach for df then du to confirm WHICH partition and WHICH file before acting, and never reboot blind, a reboot frees nothing and just hides the evidence.",
+    "commands": [
+      {
+        "aliases": ["healthz", "curl healthz", "check health", "health check", "curl health"],
+        "step": "triage",
+        "output": "$ curl -s http://app-prod-3.internal/healthz\nHTTP/1.1 500 Internal Server Error\n{\"status\":\"error\",\"detail\":\"could not write to /var/log/app/app.log: [Errno 28] No space left on device\"}\n\nErrno 28 is ENOSPC, No space left on device. This is not an app bug, the disk it writes to is full. Next, find which filesystem.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["df", "df -h", "check disk", "disk usage", "check space", "filesystem"],
+        "step": "triage",
+        "output": "$ df -h\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p1   50G   50G   0   100% /\ntmpfs           7.8G  1.2M  7.8G   1% /run\n/dev/nvme0n1p2  200G   38G  162G  20% /data\n\nRoot / is at 100%, zero bytes free. /data is fine at 20%. The app logs to /var/log/app, which sits on root. Now find what filled it.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["du", "du -ahx", "find big files", "du sort", "largest files", "what is using space"],
+        "step": "confirm-culprit",
+        "output": "$ sudo du -ahx / | sort -rh | head -n 6\n48G   /var/log/app/debug.log\n1.1G  /usr/lib\n640M  /var/lib/docker/overlay2\n120M  /var/log/app/app.log\n44M   /opt/app/releases/current\n\nConfirmed. One file, /var/log/app/debug.log, is 48GB. That single file is why root is full.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["ls -la /var/log/app", "ls /var/log/app", "inspect log dir", "check logrotate", "logrotate config"],
+        "step": "confirm-culprit",
+        "output": "$ sudo ls -la /var/log/app/\n-rw-r--r-- 1 app app 51539607552 Jun 15 02:14 debug.log\n-rw-r--r-- 1 app app   125829120 Jun 15 09:02 app.log\n\n$ ls /etc/logrotate.d/ | grep app\n(no output)\n\n$ grep -i 'LOG_LEVEL' /opt/app/releases/current/.env\nLOG_LEVEL=DEBUG   # set 06-09, never reverted\n\ndebug.log has no rotation config and DEBUG has been on since the 06-09 deploy, so it grew unbounded for 6 days. That is the root cause, not just the symptom.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["truncate debug.log", "truncate", "clear debug log", "free space", "rotate log", "truncate -s 0", "empty debug log", "fix disk", "resolve"],
+        "requires": ["triage", "confirm-culprit"],
+        "resolvesTicket": true,
+        "output": "$ sudo truncate -s 0 /var/log/app/debug.log\n$ sudo sed -i 's/LOG_LEVEL=DEBUG/LOG_LEVEL=INFO/' /opt/app/releases/current/.env\n$ sudo tee /etc/logrotate.d/app >/dev/null <<'EOF'\n/var/log/app/*.log {\n  daily\n  rotate 7\n  size 200M\n  compress\n  missingok\n  copytruncate\n}\nEOF\n$ sudo systemctl restart app\n\n$ df -h /\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p1   50G  2.1G   48G   5% /\n\n$ curl -s http://app-prod-3.internal/healthz\nHTTP/1.1 200 OK\n{\"status\":\"ok\"}\n\nRoot dropped from 100% to 5%, the app can write again, and the load balancer put app-prod-3 back in rotation. DEBUG is now INFO and logrotate caps the log going forward. Resolved.",
+        "tone": "success"
+      },
+      {
+        "aliases": ["reboot", "restart server", "reboot box", "reboot app-prod-3"],
+        "output": "$ sudo reboot\nConnection closed. ...reconnecting.\n\n$ df -h /\n/dev/nvme0n1p1   50G   50G   0   100% /\n$ curl -s http://app-prod-3.internal/healthz\nHTTP/1.1 500 Internal Server Error {\"detail\":\"[Errno 28] No space left on device\"}\n\nThe reboot changed nothing. The 48GB file is still on disk, root is still 100% full, and the app still cannot write. Rebooting frees no space, it just burns minutes and clears the in-memory evidence. Free the disk, do not bounce the box.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["restart app", "systemctl restart app", "bounce app", "restart service", "restart the app"],
+        "output": "$ sudo systemctl restart app\napp.service: started\napp[5012]: ERROR failed to write log, OSError 28 No space left on device\napp[5012]: CRITICAL worker exiting, cannot persist state\napp.service: main process exited, status=1/FAILURE\n\nSame loop the on-call already hit. The process starts, tries to write to a full disk, dies. Restarting an app cannot create free space. Fix the disk first, then the restart actually sticks.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["resize disk", "extend partition", "grow root", "add storage", "expand volume"],
+        "output": "$ sudo growpart /dev/nvme0n1 1\nNOCHANGE: partition 1 could not be grown, no free space on the underlying device\n\nThere is no spare capacity to grow into, and a bigger volume needs a maintenance window and infra approval. You would also be treating a 48GB junk file as if it were real data. Resizing to absorb a runaway debug log is throwing hardware at a logging bug. Reclaim the space first.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["rm -rf /var/log/app", "delete log directory", "rm log dir", "remove logs"],
+        "output": "$ sudo rm -rf /var/log/app/\n\nStop. You just nuked the whole log directory, including app.log that holds the request history you may need for the incident writeup. The app also still holds an open handle on debug.log, so the 48GB will not free until the process restarts anyway. Deleting a logging directory wholesale is reckless. Truncate the one offending file instead, keep app.log, and add rotation.",
+        "tone": "warn"
+      }
+    ]
+  },
+  {
+    "id": "phish-triage",
+    "track": "soc",
+    "rank": "SOC Intern",
+    "rankLevel": 0,
+    "difficulty": "Entry",
+    "reward": 40,
+    "xp": 30,
+    "ticket": {
+      "from": "Priya Nakamura, Tier-2 Shift Lead",
+      "subject": "[ESCALATION] User-reported email: 'IT Helpdesk: your password expires today'",
+      "priority": "Medium",
+      "body": "Morning. An employee in Sales (m.okafor) hit the 'Report Phishing' button on a message claiming her password expires today and asking her to 'verify here'. She did NOT click anything, good instinct on her part. It's sitting in the review queue as item q-4471. I've already pulled the raw headers and the URL detonation report into your panels so you don't have to dig.\n\nThis is your call to make end to end. Don't guess from the subject line; the subject is the bait. Read the auth results and the sender details, decide if it's real IT or someone wearing IT's name, and then take the ONE action that both protects the queue and protects the user. We do not click 'verify' links to 'check', and we do not quietly trash reported mail without telling the person who reported it. Show your work in the terminal, then resolve q-4471."
+    },
+    "evidence": [
+      {
+        "label": "headers --raw q-4471 (received message authentication)",
+        "lines": [
+          "Delivered-To: m.okafor@getlionade.com",
+          "Return-Path: <helpdesk@1ionade-it.com>",
+          "From: \"IT Helpdesk\" <helpdesk@1ionade-it.com>",
+          "Reply-To: it-verify@1ionade-it.com",
+          "Subject: IT Helpdesk: your password expires today, verify here",
+          "Authentication-Results: mx.getlionade.com;",
+          "  spf=fail (sender IP 193.42.x.x not permitted by 1ionade-it.com) smtp.mailfrom=1ionade-it.com",
+          "  dkim=fail (body hash did not verify) header.d=1ionade-it.com",
+          "  dmarc=fail (p=none) header.from=1ionade-it.com",
+          "Note: getlionade.com IT mail signs as dkim=pass header.d=getlionade.com. This message does NOT."
+        ]
+      },
+      {
+        "label": "url-detonate q-4471 (sandboxed link analysis, no live click)",
+        "lines": [
+          "Extracted href: hxxps://1ionade-it-verify[.]com/sso/login?u=m.okafor",
+          "Display text in email: 'verify here'  (host hidden behind anchor text)",
+          "Resolved host: 1ionade-it-verify.com  ->  193.42.x.x  (registered 2 days ago)",
+          "Page fingerprint: clone of getlionade SSO login, posts credentials to /collect.php",
+          "Verdict: CREDENTIAL HARVESTER. Lookalike of real host login.getlionade.com.",
+          "Real corporate SSO only ever lives on *.getlionade.com. This host is not."
+        ]
+      },
+      {
+        "label": "sender-rep 1ionade-it.com (reputation + lookalike check)",
+        "lines": [
+          "Domain age: 2 days   |   Prior mail volume to us: 0",
+          "Homoglyph check: '1ionade-it.com' uses digit '1' where real brand uses letter 'l' (lionade)",
+          "Legitimate IT domain on record: getlionade.com (verified, 4yr history, SPF+DKIM aligned)",
+          "Queue impact: 1 reported copy (q-4471). Recipient: m.okafor. Clicked: NO. Submitted creds: NO."
+        ]
+      }
+    ],
+    "goal": "Confirm from the headers and link that q-4471 is a lookalike-domain phishing email, then quarantine and report it and warn the user, without clicking the link or silently deleting it.",
+    "hint": "The subject line is bait; ignore it. The truth is in three places: the SPF/DKIM auth results, the Return-Path and From domain, and where the 'verify' link actually resolves. Compare every one of them against the real domain on record. If sender and link are both impostors and auth fails, the right move contains the threat and loops the user back in. It is not a click, and it is not a quiet delete.",
+    "successMessage": "Correct. SPF=fail plus DKIM=fail plus DMARC=fail told you the sender could not prove it owned the domain, and the domain itself was a homoglyph ('1ionade-it.com' with a digit one, not the real getlionade.com), with the 'verify' link resolving to a two-day-old credential harvester. Quarantine-and-report contains the threat for everyone, and warning the reporter both confirms her good instinct and tells her what to watch for next. The pro instinct: never trust the display name or subject, verify the authentication results and the actual link host against the known-good domain, and always close the loop with the human who flagged it instead of trashing evidence silently.",
+    "commands": [
+      {
+        "step": "Read the raw authentication headers for the reported message.",
+        "aliases": ["headers q-4471", "headers", "headers --raw q-4471", "view headers", "check headers"],
+        "output": "Pulling authentication results for q-4471...\n  Return-Path: <helpdesk@1ionade-it.com>\n  From: IT Helpdesk <helpdesk@1ionade-it.com>\n  spf=fail   (IP 193.42.x.x not permitted by 1ionade-it.com)\n  dkim=fail  (body hash did not verify, header.d=1ionade-it.com)\n  dmarc=fail (p=none, header.from=1ionade-it.com)\nReal getlionade.com IT mail signs dkim=pass for header.d=getlionade.com. This message fails all three checks and the sender domain is not getlionade.com.",
+        "tone": "info"
+      },
+      {
+        "step": "Detonate the embedded link in the sandbox to see where 'verify here' really goes.",
+        "aliases": ["url-detonate q-4471", "detonate q-4471", "detonate link", "scan link", "check link", "url-detonate"],
+        "output": "Sandbox detonation (no live click)...\n  Anchor text shown to user: 'verify here'\n  True href: hxxps://1ionade-it-verify[.]com/sso/login?u=m.okafor\n  Host resolves to 193.42.x.x, domain registered 2 days ago\n  Page is a clone of the getlionade SSO login, posts to /collect.php\n  VERDICT: credential harvester. Lookalike of login.getlionade.com.\nThe display text hid the real host. Corporate SSO only lives on *.getlionade.com; this is not it.",
+        "tone": "info"
+      },
+      {
+        "step": "Check the reputation and lookalike status of the sending domain.",
+        "aliases": ["sender-rep 1ionade-it.com", "sender-rep", "rep 1ionade-it.com", "check sender", "whois 1ionade-it.com"],
+        "output": "Reputation lookup: 1ionade-it.com\n  Domain age: 2 days   Prior mail to us: 0\n  Homoglyph: uses digit '1' where the real brand uses letter 'l' (lionade)\n  Known-good IT domain on record: getlionade.com (4yr, SPF+DKIM aligned)\nThis is a freshly registered impostor wearing IT's name. It is not the real sender.",
+        "tone": "info"
+      },
+      {
+        "step": "Review the current state of the review queue and blast radius before acting.",
+        "aliases": ["status q-4471", "status", "queue status", "show queue", "inspect q-4471"],
+        "output": "Queue item q-4471\n  Reported by: m.okafor (Sales)   Action so far: hit 'Report Phishing'\n  Copies in queue: 1    Recipient clicked link: NO    Creds submitted: NO\n  Awaiting analyst decision.\nGood news: caught pre-click. The only open task is the correct containment action plus closing the loop with the reporter.",
+        "tone": "info"
+      },
+      {
+        "step": "WRONG: open the verify link yourself to 'confirm' it is phishing.",
+        "aliases": ["click link", "open link", "visit link", "verify here", "open verify", "click verify"],
+        "output": "Refused. You never load a live credential-harvesting page from a corporate IP to 'check'. The sandbox detonation already gave you the verdict without exposing anyone. Clicking can fingerprint your network, burn the source, or auto-submit. The evidence is conclusive from headers and detonation; act on it, don't touch it.",
+        "tone": "warn"
+      },
+      {
+        "step": "WRONG: tell the user to just delete it and move on, no record.",
+        "aliases": ["delete email", "tell user delete", "just delete it", "delete q-4471", "trash email", "reply delete"],
+        "output": "Bad call. A silent delete destroys evidence, leaves the lookalike domain unblocked for the next target, and never confirms to m.okafor that she did the right thing or warns her what to watch for. Reported phishing gets quarantined and reported so it can be blocked org-wide, and the reporter gets a reply. Don't quietly trash it.",
+        "tone": "warn"
+      },
+      {
+        "step": "WRONG: trust it because it looks like IT and reset her password for her.",
+        "aliases": ["reset password", "reset m.okafor password", "trust sender", "approve email", "mark safe", "whitelist 1ionade-it.com"],
+        "output": "Stop. The From name says 'IT Helpdesk' but the domain is 1ionade-it.com (digit one), SPF/DKIM/DMARC all fail, and the link is a two-day-old harvester. Acting on its instructions is exactly what the attacker wants. Display names and subjects are bait; the auth results and real link host are the truth. Do not whitelist or act on this sender.",
+        "tone": "warn"
+      },
+      {
+        "step": "WRONG: reply to the sender asking them to verify their identity.",
+        "aliases": ["reply to sender", "reply email", "ask sender", "email helpdesk", "respond to sender"],
+        "output": "No. Replying confirms the mailbox is live and active, which feeds the attacker a fresh, engaged target. The Reply-To is it-verify@1ionade-it.com, also the impostor domain. You already have everything you need from the headers and detonation. Never negotiate with the phish; contain and report it.",
+        "tone": "warn"
+      },
+      {
+        "step": "CORRECT: quarantine and report the message, then warn the reporting user.",
+        "aliases": ["quarantine and report q-4471", "quarantine q-4471", "quarantine and warn", "report phishing q-4471", "quarantine report warn", "contain and report"],
+        "output": "Resolving q-4471...\n  [1/4] Message quarantined org-wide. 1 copy pulled, future copies from 1ionade-it.com blocked.\n  [2/4] Reported to threat intel: lookalike domains 1ionade-it.com + 1ionade-it-verify.com submitted for blocklist.\n  [3/4] Reply sent to m.okafor: confirmed phishing, thanked her for reporting, reminded her to check the sender domain and hover links before clicking.\n  [4/4] Case closed: phishing, contained pre-click, no credentials exposed.\nClean resolution. You read the auth failures, spotted the homoglyph sender and link, contained the threat, and closed the loop with the human.",
+        "tone": "success",
+        "requires": ["headers q-4471", "url-detonate q-4471"],
+        "resolvesTicket": true
+      }
+    ]
+  },
+  {
+    "id": "brute-force-rdp",
+    "track": "soc",
+    "rank": "SOC Analyst I",
+    "rankLevel": 1,
+    "difficulty": "Intermediate",
+    "reward": 60,
+    "xp": 45,
+    "ticket": {
+      "from": "Priya Nadkarni, SOC Shift Lead",
+      "subject": "[P2] svc-admin: failed RDP spike then a successful login from the same foreign IP",
+      "priority": "High",
+      "body": "Hey, picking this off the queue for you. Our auth correlation rule flagged svc-admin around 02:22 local. Looks like a wall of failed RDP attempts off one outside IP, and the part I don't love is there's a 4624 success mixed in near the end from that same address. svc-admin is a domain service account that shouldn't be logging in interactively over RDP at 2am, so this is either a very loud false positive or someone just walked in.\n\nDon't pull the trigger on a fix yet. Confirm whether that success actually came from the attacker IP and figure out exactly which account is owning the box, then contain it properly. I've seen people block the IP, close the ticket, and go back to bed while the attacker is already sitting on the account from a second session. Do this one right."
+    },
+    "evidence": [
+      {
+        "label": "auth-correlation rule LION-RDP-07 (alert payload)",
+        "lines": [
+          "rule_id        : LION-RDP-07 \"RDP failed-burst followed by success\"",
+          "severity       : HIGH",
+          "host           : WIN-JUMP01  (jump.corp.lionade.internal / 10.20.4.11)",
+          "target_account : svc-admin",
+          "src_ip         : 203.0.113.66   (geo: NL, not in corp allowlist)",
+          "window         : 02:14:07 -> 02:22:48  (00:08:41)",
+          "failed_4625    : 412   (LogonType 10 / RemoteInteractive)",
+          "success_4624   : 1     (LogonType 10, 02:22:48)",
+          "note           : success src_ip matches the failed-burst src_ip"
+        ]
+      },
+      {
+        "label": "WIN-JUMP01 Security log, tail (Event 4625 = fail, 4624 = success)",
+        "lines": [
+          "02:22:31  4625 FAIL  svc-admin  src=203.0.113.66  LogonType=10  Status=0xC000006A (bad password)",
+          "02:22:35  4625 FAIL  svc-admin  src=203.0.113.66  LogonType=10  Status=0xC000006A (bad password)",
+          "02:22:39  4625 FAIL  svc-admin  src=203.0.113.66  LogonType=10  Status=0xC000006A (bad password)",
+          "02:22:43  4625 FAIL  svc-admin  src=203.0.113.66  LogonType=10  Status=0xC000006A (bad password)",
+          "02:22:48  4624 OK    svc-admin  src=203.0.113.66  LogonType=10  >>> session S-1138 ESTABLISHED",
+          "02:23:10  4672 priv  svc-admin  SeBackupPrivilege, SeDebugPrivilege assigned to S-1138",
+          "-- note: 11 other accounts probed in the same window, all 0 successes --"
+        ]
+      },
+      {
+        "label": "Active sessions on WIN-JUMP01 (qwinsta-style snapshot, 02:41)",
+        "lines": [
+          "SESSIONNAME   USERNAME     ID     STATE   IDLE   LOGON-IP        LOGON-TIME",
+          "console       (none)        0     Conn    .      .               .",
+          "rdp-tcp#4     svc-admin     1138  Active  2m     203.0.113.66    02:22:48",
+          "services      (none)        65537 Disc    .      .               .",
+          "-- svc-admin is a SERVICE account; interactive RDP login is policy-prohibited --"
+        ]
+      }
+    ],
+    "goal": "Confirm the brute force succeeded and identify the compromised account, then contain BOTH the source IP and the account itself.",
+    "hint": "A blocked IP doesn't help if the attacker is already logged in. Prove the success is real and pin down which account is live before you contain, then make sure nothing you do leaves that session alive.",
+    "successMessage": "Correct. A failed-burst that ends in a 4624 success from the same IP is a confirmed brute force, not noise, and an interactive RDP login on a service account is the tell that confirms compromise. The pro instinct is to contain both ends at once: kill the attacker's network path (block 203.0.113.66) AND neutralize the account they own (disable svc-admin, drop session S-1138, force a credential reset). Block the IP alone and the attacker keeps the foothold from any other address; disable the account but leave the live session and they keep working until it drops.",
+    "commands": [
+      {
+        "aliases": ["status", "triage", "show alert", "alert"],
+        "step": "triage",
+        "tone": "info",
+        "output": "LION-RDP-07 [HIGH] on WIN-JUMP01\\ntarget : svc-admin   src : 203.0.113.66 (NL, not allowlisted)\\nwindow : 02:14:07 -> 02:22:48 (8m41s)\\n412 failed 4625, then 1 success 4624 from the SAME ip.\\nsvc-admin is a service account. it has no business doing interactive RDP.\\nnext: confirm that success is real, then confirm what session it opened."
+      },
+      {
+        "aliases": ["logs", "auth log", "security log", "show logs", "tail log"],
+        "step": "triage",
+        "tone": "info",
+        "output": "02:22:43  4625 FAIL  svc-admin  203.0.113.66  0xC000006A\\n02:22:48  4624 OK    svc-admin  203.0.113.66  LogonType=10  session S-1138\\n02:23:10  4672 priv  svc-admin  SeBackupPrivilege, SeDebugPrivilege -> S-1138\\nthe success ip matches the brute-force ip. it is not a separate trusted login.\\n11 other accounts were probed in the same burst; zero of them succeeded."
+      },
+      {
+        "aliases": ["sessions", "confirm session", "whoami", "query sessions", "active sessions", "confirm account"],
+        "step": "confirm-account",
+        "tone": "info",
+        "output": "rdp-tcp#4  svc-admin  ID=1138  Active  LOGON-IP=203.0.113.66  02:22:48\\nconfirmed: svc-admin is logged in RIGHT NOW over RDP from the attacker ip.\\nthis is the compromised account, and the session (S-1138) is still live.\\ncontainment has to cover BOTH the ip and this account+session."
+      },
+      {
+        "aliases": ["ping 203.0.113.66", "ping ip", "lookup ip", "whois 203.0.113.66", "geo"],
+        "tone": "info",
+        "output": "203.0.113.66 -> ASN 64500, hosting/VPS range, Amsterdam NL.\\nnot in any corp office or VPN block. no business reason to reach svc-admin.\\nblocking this ip stops THIS path, but it does nothing about a session already open."
+      },
+      {
+        "aliases": ["block ip", "block 203.0.113.66", "firewall block", "deny ip", "null route ip"],
+        "tone": "warn",
+        "output": "[partial] firewall rule added: DENY src 203.0.113.66.\\nthe attacker's current address is cut off... but session S-1138 is STILL active\\nand svc-admin's password still works. they can reconnect from any other ip,\\nor just keep operating in the session they already hold. you contained the\\nroad, not the intruder. don't close this."
+      },
+      {
+        "aliases": ["disable svc-admin", "lock account", "disable account only", "disable user"],
+        "tone": "warn",
+        "output": "[risky / blind] you went to disable svc-admin before confirming the live session.\\nif you act without the confirm-account step you're fixing on a hunch, and you'd\\nalso be leaving 203.0.113.66 free to hammer the next service account.\\nconfirm the session, then contain BOTH the ip and the account together."
+      },
+      {
+        "aliases": ["reset password", "rotate password", "change password", "force reset only"],
+        "tone": "warn",
+        "output": "[incomplete] you reset svc-admin's password.\\ngood instinct, wrong on its own: session S-1138 was authenticated BEFORE the reset,\\nso the attacker keeps that live session, and 203.0.113.66 is still allowed to connect.\\na reset is part of recovery, not containment by itself."
+      },
+      {
+        "aliases": ["restart server", "reboot win-jump01", "restart jump host", "reboot"],
+        "tone": "warn",
+        "output": "[do not] rebooting WIN-JUMP01 drops the session by accident but destroys volatile\\nevidence (open handles, attacker process tree, memory) and tips them off.\\nit also leaves the ip allowed and the account credentials valid, so they walk\\nright back in after boot. contain deliberately, don't bounce the box."
+      },
+      {
+        "aliases": ["contain", "block ip and disable account", "contain breach", "block ip and lock svc-admin", "block and disable", "full containment", "kill session and block ip"],
+        "requires": ["triage", "confirm-account"],
+        "resolvesTicket": true,
+        "tone": "success",
+        "output": "CONTAINMENT (confirmed first):\\n  - firewall: DENY src 203.0.113.66 (inbound + outbound)\\n  - svc-admin: account DISABLED, session S-1138 logged off (force)\\n  - credentials: rotation forced on svc-admin + any cached use\\nverify: qwinsta WIN-JUMP01 -> no svc-admin sessions. 4624 from 203.0.113.66 -> none.\\nticket resolved. evidence preserved, scope noted (11 probed accounts, 0 other hits)."
+      }
+    ]
+  },
+  {
+    "id": "malware-beacon",
+    "track": "soc",
+    "rank": "SOC Analyst II",
+    "rankLevel": 2,
+    "difficulty": "Advanced",
+    "reward": 80,
+    "xp": 65,
+    "ticket": {
+      "from": "EDR Auto-Alert (relayed by Priya, on-call IR)",
+      "subject": "WKS-1042 phoning home every 60s, process looks fake",
+      "priority": "Critical",
+      "body": "EDR popped a behavioral alert on WKS-1042 (finance, user j.okafor). It's making a clean little outbound HTTPS hit to the same domain on a timer, and the process behind it is named svch0st.exe. Yeah, with a zero. Marketing swears it's a CDN tool from an update they ran. I'm slammed on another P1, so this one's yours. Figure out if it's real, and if it is, do the RIGHT thing with the box. Don't just swat the symptom and call it closed."
+    },
+    "evidence": [
+      {
+        "label": "Netflow — WKS-1042 outbound (last 6 min)",
+        "lines": [
+          "12:00:03  10.4.7.42:51002 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
+          "12:01:03  10.4.7.42:51118 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
+          "12:02:03  10.4.7.42:51231 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
+          "12:03:03  10.4.7.42:51344 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
+          "12:04:03  10.4.7.42:51459 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
+          "note: same dst, ~same size, exactly 60s apart. Machine-regular, not human. This is a heartbeat."
+        ]
+      },
+      {
+        "label": "EDR process tree — WKS-1042",
+        "lines": [
+          "svch0st.exe   PID 6612   parent: explorer.exe (user shell)   signed: NO",
+          "  path: C:\\Users\\j.okafor\\AppData\\Local\\Temp\\svch0st.exe",
+          "  owns socket -> 185.220.101.7:443  (the 60s beacon)",
+          "-- for contrast, the real one --",
+          "svchost.exe   PID 884    parent: services.exe   signed: YES (Microsoft)",
+          "  path: C:\\Windows\\System32\\svchost.exe"
+        ]
+      },
+      {
+        "label": "Threat intel lookup — cdn-update-sync.live",
+        "lines": [
+          "WHOIS: registered 2 days ago (2026-06-24), privacy-proxy registrant, 1-year reg",
+          "Category: UNCATEGORIZED. No CDN ASN. Hosted on a bulletproof VPS range.",
+          "DNS TXT / config also resolves a SECOND name: cdn-update-sync2.live -> 185.220.101.9 (backup C2)",
+          "Reputation: malicious (beacon profile matches a known loader family)"
+        ]
+      }
+    ],
+    "goal": "Confirm WKS-1042 is C2-beaconing, then contain the host the right way: isolate it from the network and quarantine the process while preserving it for IR.",
+    "hint": "Two tells make this real before you touch anything: the connection is too regular to be a person (a heartbeat), and the process name is a costume for a legit Windows one. Prove both, grab a copy for the responders, THEN decide what to pull. Ask what a domain block alone leaves the attacker.",
+    "successMessage": "Correct call. You confirmed the beacon (60s heartbeat to a 2-day-old domain) and the masquerade (svch0st.exe with a zero, unsigned, running from a user Temp folder instead of System32), captured the binary and memory for IR, then isolated the whole host so the loader can't talk out OR reinfect. That order is the muscle memory: confirm the cause, preserve the evidence, then contain at the host. Blocking only the domain just hands control to the backup C2 that intel already surfaced, and reimaging on sight would have torched the only forensic copy of the malware.",
+    "commands": [
+      {
+        "aliases": ["netstat", "netflow", "connections", "show connections", "netstat -ano"],
+        "output": "WKS-1042 outbound, established:\n  10.4.7.42:* -> 185.220.101.7:443  cdn-update-sync.live  (owner PID 6612)\nHistory: one TLS hit to that dst every 60 seconds, same ~1.4 KB payload.\nThat is a fixed-interval heartbeat. Humans don't browse on a metronome; malware beacons do.",
+        "step": "confirm-beacon",
+        "tone": "info"
+      },
+      {
+        "aliases": ["edr proc", "process tree", "proclist", "ps", "inspect process", "tasklist"],
+        "output": "PID 6612  svch0st.exe  (note the ZERO)  parent: explorer.exe  signed: NO\n  C:\\Users\\j.okafor\\AppData\\Local\\Temp\\svch0st.exe  <- user Temp, not System32\n  holds the socket to 185.220.101.7:443\nReal Windows svchost.exe is PID 884, parent services.exe, signed by Microsoft, in System32.\nThis is a masquerade: a fake binary wearing a trusted name.",
+        "step": "confirm-masquerade",
+        "tone": "info"
+      },
+      {
+        "aliases": ["whois", "threat intel", "lookup domain", "intel cdn-update-sync.live", "reputation"],
+        "output": "cdn-update-sync.live: registered 2 days ago, privacy-proxy owner, bulletproof VPS, UNCATEGORIZED, no CDN ASN.\nReputation: MALICIOUS (matches a known loader beacon profile).\nHeads up: it also resolves a BACKUP name, cdn-update-sync2.live -> 185.220.101.9.\nSo killing one domain still leaves the attacker a second way home.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["capture", "preserve", "collect evidence", "memdump", "image process", "acquire"],
+        "output": "Acquired: copy of C:\\...\\Temp\\svch0st.exe + a memory dump of PID 6612, hashed and saved to the IR evidence share.\nIR now has the live sample. You can contain destructively without losing the malware for analysis.",
+        "step": "preserve-evidence",
+        "tone": "info"
+      },
+      {
+        "aliases": ["isolate host", "isolate", "quarantine host", "contain host", "network isolate", "isolate wks-1042"],
+        "output": "WKS-1042 network-isolated (EDR containment: management channel only). svch0st.exe PID 6612 killed and the binary quarantined.\nBeacon to 185.220.101.7 is dead, and so is the path to the backup C2. Host can't reach the internet to reinfect. Sample is preserved for IR.",
+        "resolvesTicket": true,
+        "requires": ["confirm-beacon", "confirm-masquerade", "preserve-evidence"],
+        "tone": "success"
+      },
+      {
+        "aliases": ["block domain", "blackhole domain", "block cdn-update-sync.live", "firewall block domain", "block dns"],
+        "output": "Blocked cdn-update-sync.live at the firewall. Beacon to .7 stops for about a minute, then the loader fails over to cdn-update-sync2.live -> 185.220.101.9 and keeps talking.\nYou swatted one C2 and left the host infected with a backup channel. Contain the HOST, not just the name.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["reimage", "reimage host", "wipe", "format", "reinstall windows", "rebuild box"],
+        "output": "Reimaging would clear the box, but you just destroyed the only forensic copy of the malware. IR can't tell scope, persistence, or what was stolen.\nPreserve the evidence and isolate FIRST. Reimage is a recovery step, not the containment step.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["kill process", "kill svch0st", "kill pid 6612", "end task", "terminate process"],
+        "output": "Killed PID 6612... and svch0st.exe respawns from a startup persistence entry within seconds, beaconing again.\nThe host is still on the network. Killing the process alone doesn't contain anything; isolate the host.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["ignore", "close ticket", "mark benign", "whitelist", "approve as cdn"],
+        "output": "Marketing's 'CDN tool' story doesn't survive the evidence: unsigned binary, misspelled name, Temp path, brand-new malicious domain, 60s heartbeat. This is not a CDN. Do not close it benign.",
+        "tone": "warn"
+      }
+    ]
+  },
+  {
+    "id": "null-ref-500",
+    "track": "swe",
+    "rank": "SWE Intern",
+    "rankLevel": 0,
+    "difficulty": "Entry",
+    "reward": 40,
+    "xp": 30,
+    "ticket": {
+      "from": "Priya Nadkarni, Senior Engineer (on-call lead)",
+      "subject": "GET /api/orders/:id throwing 500s, looks like guest checkout",
+      "priority": "High",
+      "body": "Hey, welcome to your first real page. Support is getting tickets that some order pages 500 out, but only sometimes. Refreshing the same broken order fails every time, refreshing a different order works fine, so it is not random and it is not the whole service falling over. I already pulled the request logs and the app error log for you; both are on your panels. The stack trace names a file and a line number. Read it literally and go look at that line. Do not page the infra team and do not restart anything until you understand WHY a specific request blows up. When you think you have the actual cause, ship the smallest fix that stops it. Tag me when it is green."
+    },
+    "evidence": [
+      {
+        "label": "access.log (last 8 requests to /api/orders)",
+        "lines": [
+          "10:02:14  GET /api/orders/8841  200  61ms   user=registered",
+          "10:02:31  GET /api/orders/8842  200  58ms   user=registered",
+          "10:03:02  GET /api/orders/9007  500  44ms   user=guest",
+          "10:03:09  GET /api/orders/9007  500  41ms   user=guest   <-- same id, fails again",
+          "10:03:55  GET /api/orders/8843  200  60ms   user=registered",
+          "10:04:20  GET /api/orders/9011  500  43ms   user=guest",
+          "10:05:01  GET /api/orders/8844  200  59ms   user=registered",
+          "10:05:38  GET /api/orders/9012  500  42ms   user=guest",
+          "",
+          "note: every 500 is user=guest. every 200 is user=registered. retries do not help."
+        ]
+      },
+      {
+        "label": "app-error.log (stack trace, most recent 500)",
+        "lines": [
+          "[ERROR] 10:05:38 unhandled exception on GET /api/orders/9012",
+          "TypeError: Cannot read properties of undefined (reading 'street')",
+          "    at getOrderById (src/services/orders.service.ts:42:39)",
+          "    at OrdersController.show (src/controllers/orders.controller.ts:27:28)",
+          "    at processTicksAndRejections (node:internal/process/task_queues:95:5)",
+          "",
+          "context: order.id=9012  order.customer.type=guest  order.customer.address=undefined"
+        ]
+      },
+      {
+        "label": "orders.service.ts (lines 38-46)",
+        "lines": [
+          "38  async function getOrderById(id) {",
+          "39    const order = await db.orders.findById(id);",
+          "40    if (!order) throw new NotFoundError(id);",
+          "41",
+          "42    const shipTo = order.customer.address.street;   // <-- crash here",
+          "43    const label = formatLabel(order.customer.name, shipTo);",
+          "44",
+          "45    return { ...order, shippingLabel: label };",
+          "46  }"
+        ]
+      }
+    ],
+    "goal": "Find why /api/orders/:id 500s only for guest orders and fix the actual cause at the line in the stack trace.",
+    "hint": "The error names a file and a line. Open it and ask: what is undefined when the request comes from a guest, and what does line 42 assume is always there? Fix the assumption, not the server.",
+    "successMessage": "Guest orders have no saved address, so order.customer.address is undefined, and line 42 reads .street off undefined every time, which is why retries on the same id always failed. You added a guard at the source (optional chaining with a sensible default) so the access is safe whether an address exists or not. The pro instinct: a stack trace points at the exact line, so you go read that line and fix the bad assumption there. You never wrap a known bug in a try/catch or restart the box, because the data that triggers it has not changed and it will just break again.",
+    "commands": [
+      {
+        "aliases": ["read stack trace", "stack trace", "open error log", "view error log", "app-error.log"],
+        "output": "TypeError: Cannot read properties of undefined (reading 'street')\n    at getOrderById (src/services/orders.service.ts:42:39)\n\norder.customer.type=guest   order.customer.address=undefined\n\nThe crash is a property read on something undefined. Column 39 of line 42 is '.street'. So the thing before .street, order.customer.address, is undefined at the moment of the read.",
+        "tone": "info",
+        "step": "Read the stack trace to the exact line and column."
+      },
+      {
+        "aliases": ["open orders.service.ts", "view line 42", "read line 42", "open service file", "show source"],
+        "output": "42  const shipTo = order.customer.address.street;\n\nLine 42 reaches three levels deep with zero guards. It assumes order.customer.address always exists. Nothing here handles the case where address is missing.",
+        "tone": "info",
+        "step": "Open the file at the crashing line."
+      },
+      {
+        "aliases": ["inspect order 9012", "inspect failing order", "show guest order", "inspect order"],
+        "output": "order 9012\n  id: 9012\n  customer:\n    name: \"A. Guest\"\n    type: \"guest\"\n    address: undefined   <-- guests check out without saving an address\n  items: [ ... 2 items ... ]\n\nSo for a guest, customer.address is undefined. Line 42 then reads .street off it and throws.",
+        "tone": "info",
+        "step": "Inspect a failing (guest) order and confirm address is missing."
+      },
+      {
+        "aliases": ["inspect order 8844", "inspect passing order", "show registered order", "compare order"],
+        "output": "order 8844\n  id: 8844\n  customer:\n    name: \"M. Rivera\"\n    type: \"registered\"\n    address:\n      street: \"441 Pine St\"\n      city: \"Austin\"\n  items: [ ... 1 item ... ]\n\nRegistered customers have a saved address, so .address.street resolves fine. That is why only guest orders 500. The difference is the data, not the server.",
+        "tone": "info",
+        "step": "Compare against a passing (registered) order to isolate the variable."
+      },
+      {
+        "aliases": ["guard the optional chain", "add null guard", "fix line 42", "use optional chaining", "guard address", "add default", "patch line 42"],
+        "output": "Patched src/services/orders.service.ts:42\n\n-  const shipTo = order.customer.address.street;\n+  const shipTo = order.customer.address?.street ?? \"NO ADDRESS ON FILE\";\n\nReplaying the failing requests:\n  GET /api/orders/9007  200\n  GET /api/orders/9011  200\n  GET /api/orders/9012  200\n  GET /api/orders/8844  200  (registered orders still fine)\n\nGuest orders now render with a clear placeholder label and registered orders are unchanged. No more 500s. Resolved.",
+        "tone": "success",
+        "resolvesTicket": true,
+        "step": "Guard the optional access at the source so a missing address cannot throw.",
+        "requires": ["read stack trace", "open orders.service.ts"]
+      },
+      {
+        "aliases": ["wrap in try catch", "add try catch", "catch the error", "swallow the error", "try catch line 42"],
+        "output": "Wrapping getOrderById in try/catch...\n\nReplay:\n  GET /api/orders/9012  200  (returns { shippingLabel: undefined })\n\nThe 500 is gone, but you did not fix anything. The address is still missing, the label is now silently broken, and you have hidden a real data gap behind a catch block. The next person debugs a blank shipping label with no error to follow. Catching an exception you already understand is just deleting your own evidence. Fix the cause on line 42 instead.",
+        "tone": "warn",
+        "step": "Rookie trap: swallow the error with try/catch."
+      },
+      {
+        "aliases": ["restart the server", "restart service", "reboot server", "bounce the service", "restart app"],
+        "output": "Restarting orders-service...\nservice back up in 6s\n\nReplay:\n  GET /api/orders/9012  500  (same TypeError on line 42)\n\nA restart clears in-memory state, but the bug is not bad state, it is bad code meeting guest data. The same guest order still has no address, so line 42 still throws. Restarting is for hangs and leaks, not for a deterministic null read. Go fix the line.",
+        "tone": "warn",
+        "step": "Rookie trap: restart the server."
+      },
+      {
+        "aliases": ["scale up instances", "add more instances", "scale out", "increase replicas", "autoscale"],
+        "output": "Scaling orders-service 2 -> 6 instances...\nall instances healthy\n\nReplay:\n  GET /api/orders/9012  500  (now failing on one of six boxes instead of one of two)\n\nThis is not a load problem. Latency on the failures is ~42ms and only guest orders fail, every time, on every instance. More boxes means more copies of the same bug. Scaling never fixes a logic error. Fix line 42.",
+        "tone": "warn",
+        "step": "Rookie trap: throw infrastructure at a code bug."
+      }
+    ]
+  },
+  {
+    "id": "failing-ci-offbyone",
+    "track": "swe",
+    "rank": "Junior Engineer",
+    "rankLevel": 1,
+    "difficulty": "Intermediate",
+    "reward": 60,
+    "xp": 45,
+    "ticket": {
+      "from": "Priya Nair, CI / Build Owner",
+      "subject": "[CI RED] main blocked, one test failing: sumRange(1,10) expected 55 received 45",
+      "priority": "High",
+      "body": "Hey, welcome to the rotation. main went red about 20 minutes ago and the merge queue is now frozen behind it, so nobody can land anything until this is green. It is a single failing assertion in the math utils suite: sumRange(1,10) is asserting 55 but getting 45. Everything else passes. Nothing in the test file changed in the last commit, so look at the implementation first. Figure out what is actually wrong before you touch anything. Whatever you do, the suite has to genuinely pass, not just look green. Ping me when main is back."
+    },
+    "evidence": [
+      {
+        "label": "CI run #4417 (failed) — math-utils.test.js",
+        "lines": [
+          "RUN  v ci-runner  branch=main  commit=a1f9c2e",
+          "",
+          "PASS  utils/clamp.test.js (4 tests)",
+          "PASS  utils/range.test.js  > rangeLength returns count (3 tests)",
+          "FAIL  utils/range.test.js  > sumRange adds inclusive bounds",
+          "",
+          "  ● sumRange adds inclusive bounds",
+          "    expect(received).toBe(expected)",
+          "      Expected: 55",
+          "      Received: 45",
+          "      at range.test.js:14:34",
+          "",
+          "Tests: 1 failed, 18 passed, 19 total",
+          "Exit code: 1   merge queue: BLOCKED"
+        ]
+      },
+      {
+        "label": "src/utils/range.js (implementation under test)",
+        "lines": [
+          "// sums every integer from start up to end (end is inclusive)",
+          "export function sumRange(start, end) {",
+          "  let total = 0;",
+          "  for (let i = start; i < end; i++) {",
+          "    total += i;",
+          "  }",
+          "  return total;",
+          "}",
+          "",
+          "export function rangeLength(start, end) {",
+          "  return end - start + 1;",
+          "}"
+        ]
+      },
+      {
+        "label": "utils/range.test.js (the assertions — UNCHANGED this commit)",
+        "lines": [
+          "// line 12",
+          "it('sumRange adds inclusive bounds', () => {",
+          "  expect(sumRange(1, 5)).toBe(15);   // 1+2+3+4+5 = 15",
+          "  expect(sumRange(1, 10)).toBe(55);  // 1+2+...+10 = 55, failing line 14: end is inclusive",
+          "});",
+          "",
+          "// git blame: this file last touched 6 days ago (commit 7b30aa1)",
+          "// last commit a1f9c2e ONLY touched src/utils/range.js"
+        ]
+      }
+    ],
+    "goal": "Diagnose the off-by-one and fix the loop bound in the implementation so sumRange includes end, without altering the test or skipping it.",
+    "hint": "The assertion is not wrong, the loop is. Trace what sumRange(1,10) actually adds versus what 'inclusive bounds' should add, then look hard at the comparison in the for loop's condition. The last integer never gets added.",
+    "successMessage": "Correct. The loop used i < end, so it stopped at end-1 and never added the final value; for sumRange(1,10) it summed 1 through 9 and returned 45, which is 10 short of the inclusive total of 55. Changing the bound to i <= end makes the loop include end, which is exactly what the contract and the test both expect (and it fixes the 1..5 case too, 10 becomes 15). The instinct a pro keeps: when a test fails, the test is usually the spec. You make the code satisfy the spec, you never bend the spec to match a bug, and you never skip your way to a green check.",
+    "commands": [
+      {
+        "aliases": ["status", "ci status", "show ci"],
+        "step": "investigate",
+        "tone": "info",
+        "output": "CI run #4417  branch=main  commit=a1f9c2e\nState: FAILED  | Merge queue: BLOCKED (3 PRs waiting)\n1 failing: utils/range.test.js > sumRange adds inclusive bounds\n  Expected: 55   Received: 45   (off by 10, the dropped final term)\nLast commit a1f9c2e touched ONLY src/utils/range.js. Test file unchanged for 6 days."
+      },
+      {
+        "aliases": ["read range.js", "cat range.js", "open range.js", "show implementation"],
+        "step": "investigate",
+        "tone": "info",
+        "output": "src/utils/range.js\n----\nexport function sumRange(start, end) {\n  let total = 0;\n  for (let i = start; i < end; i++) {   // condition stops BEFORE end\n    total += i;\n  }\n  return total;\n}\n----\nDoc comment above the function reads: 'sums every integer from start up to end (end is inclusive)' so end is meant to be included."
+      },
+      {
+        "aliases": ["read test", "cat test", "open test", "show test"],
+        "step": "investigate",
+        "tone": "info",
+        "output": "utils/range.test.js (last changed 6 days ago, commit 7b30aa1, NOT this build)\n----\nexpect(sumRange(1, 5)).toBe(15);   // inclusive 1+2+3+4+5 = 15\nexpect(sumRange(1, 10)).toBe(55);  // inclusive 1..10 = 55, line 14 the failing one\n----\nNote: under the current i<end loop, sumRange(1,5) returns 10 (not 15) and sumRange(1,10) returns 45 (not 55). Both assertions encode the inclusive contract; the (1,10) case is the one the runner reports first."
+      },
+      {
+        "aliases": ["trace", "trace sumrange", "debug", "evaluate sumrange"],
+        "step": "investigate",
+        "tone": "info",
+        "output": "trace sumRange(1, 10) with current code (i < end):\n  i runs 1..9, i=10 is SKIPPED  ->  total = 1+2+3+4+5+6+7+8+9 = 45\n  inclusive target is 1+2+...+10 = 55, so the result is short by exactly 10 (the value of end).\nKey fact: the loop never reaches i === end. The final integer is dropped every time.\nAn inclusive sum needs the loop to run while i <= end."
+      },
+      {
+        "aliases": ["fix bound", "fix loop", "fix code", "fix off by one", "change to i <= end", "make loop inclusive", "patch range.js"],
+        "step": "resolve",
+        "tone": "success",
+        "resolvesTicket": true,
+        "output": "Patching src/utils/range.js:\n-  for (let i = start; i < end; i++) {\n+  for (let i = start; i <= end; i++) {\nSaved. Re-running suite...\nPASS  utils/range.test.js > sumRange adds inclusive bounds  (now 1..5 = 15, 1..10 = 55)\nTests: 19 passed, 19 total   Exit code: 0\nmerge queue: UNBLOCKED. main is green."
+      },
+      {
+        "aliases": ["edit test", "change test", "fix test", "expect 45", "update assertion", "make test expect 45"],
+        "step": "resolve",
+        "tone": "warn",
+        "requires": [],
+        "output": "Rewriting utils/range.test.js: expect(sumRange(1,10)).toBe(45)\nSuite goes green... but you just deleted the spec. The doc comment still says end is inclusive, the (1,5) case still expects 15, and now your assertion encodes the bug instead of catching it. The test was the source of truth; you bent the truth to match broken code. Reverted. Fix the implementation, not the assertion."
+      },
+      {
+        "aliases": ["skip test", "skip", "it.skip", "disable test", "mark skipped", "xit"],
+        "step": "resolve",
+        "tone": "warn",
+        "requires": [],
+        "output": "Marking the test it.skip(...). CI flips to green, merge queue drains.\nExcept nothing is fixed. sumRange still returns 45 for (1,10) and ships to prod with a hidden off-by-one. A skipped test is a green light over a known bug; the next person inherits it cold. Re-enabled. Make the code pass for real."
+      },
+      {
+        "aliases": ["rerun", "retry", "rerun ci", "re-run", "trigger build", "restart job"],
+        "step": "resolve",
+        "tone": "warn",
+        "requires": [],
+        "output": "Re-running run #4417... commit a1f9c2e is deterministic, so the result is identical.\nFAIL  sumRange adds inclusive bounds  Expected: 55  Received: 45\nThis is not a flake. Re-running the same commit cannot fix logic. Read the loop condition."
+      }
+    ]
+  },
+  {
+    "id": "slow-endpoint-nplusone",
+    "track": "swe",
+    "rank": "Software Engineer",
+    "rankLevel": 2,
+    "difficulty": "Advanced",
+    "reward": 80,
+    "xp": 65,
+    "ticket": {
+      "from": "Priya Nandakumar, Platform On-Call",
+      "subject": "GET /api/feed p95 is 5.1s, users say the feed \"hangs\"",
+      "priority": "High",
+      "body": "Feed endpoint has been crawling since the morning deploy. p95 sits at 5.1s, p50 is fine at 90ms, so it is not every request, it is the heavy ones. No errors, no 500s, just slow. DB dashboard looks calm and CPU is low, so infra is leaning toward \"the box is too small, let us scale up.\" I am not convinced. Pull the trace, read the actual query log for one slow request, and figure out what it is really doing before anyone touches the instance size. Resolve with the real fix."
+    },
+    "evidence": [
+      {
+        "label": "APM // endpoint latency (last 1h)",
+        "lines": [
+          "route                 p50     p95     p99    rps",
+          "GET /api/feed         90ms   5100ms  6200ms  42",
+          "GET /api/profile      40ms    120ms   180ms  88",
+          "POST /api/post        70ms    210ms   300ms  12",
+          "",
+          "slow-request breakdown (trace 7f3a, p95 sample):",
+          "  app handler (cpu)............ 80ms",
+          "  db wait (51 queries)........ 4980ms",
+          "  serialize/json.............. 40ms",
+          "note: 51 db queries in ONE request. p50 requests issue 1-2."
+        ]
+      },
+      {
+        "label": "query log // request trace 7f3a",
+        "lines": [
+          "[t+002ms] SELECT id,title,author_id,body FROM posts ORDER BY created_at DESC LIMIT 50  (1 row set, 50 rows)",
+          "[t+121ms] SELECT * FROM users WHERE id = 1041   (1 row)",
+          "[t+219ms] SELECT * FROM users WHERE id = 1041   (1 row)",
+          "[t+318ms] SELECT * FROM users WHERE id = 2207   (1 row)",
+          "[t+402ms] SELECT * FROM users WHERE id = 1859   (1 row)",
+          "[t+498ms] SELECT * FROM users WHERE id = 1041   (1 row)",
+          "... (45 more SELECT * FROM users WHERE id = ? , one per post) ...",
+          "summary: 1 posts query, 50 single-row author queries. 4 distinct author_ids repeat across the 50."
+        ]
+      },
+      {
+        "label": "DB metrics // primary instance (last 1h)",
+        "lines": [
+          "cpu utilization........ 22%   (headroom: high)",
+          "memory................. 38%   (headroom: high)",
+          "active connections..... 11 / 200",
+          "slow query log (>500ms) ... 0 entries  (every query under 8ms)",
+          "buffer cache hit ratio. 99.6%",
+          "",
+          "read replica lag....... 40ms",
+          "verdict: instance is NOT saturated. each query is fast; there are just too many of them."
+        ]
+      }
+    ],
+    "goal": "Diagnose why /api/feed is slow and fix the root cause: the per-post author lookups.",
+    "hint": "Each individual query is fast; the problem is how many fire per request. Read the trace, confirm the pattern in the query log, then make the handler ask for all the authors in one round trip instead of one per post.",
+    "successMessage": "Correct. The trace showed the request was 98% db-wait across 51 queries, and the log proved it: one posts query plus fifty SELECT * FROM users WHERE id = ?, one per post. That is a textbook N+1, and batching the author fetch into a single query collapses 51 round trips into 2. The instinct to keep is to count queries per request before you blame the box: low CPU plus many fast queries almost always means N+1, not an undersized instance, and a cache or a higher timeout would only have hidden the latency, not removed it.",
+    "commands": [
+      {
+        "aliases": ["trace", "view trace", "show trace 7f3a", "apm trace", "open trace"],
+        "step": "triage",
+        "tone": "info",
+        "output": "trace 7f3a (p95 sample of GET /api/feed)\n  total................. 5100ms\n  app handler (cpu)..... 80ms\n  db wait............... 4980ms across 51 queries\n  serialize............. 40ms\nthe time is not in your code and it is not in any single query. it is in the COUNT of queries. drill into the query log next."
+      },
+      {
+        "aliases": ["query log", "show queries", "read query log", "logs", "db log", "view queries"],
+        "step": "confirm-nplusone",
+        "tone": "info",
+        "output": "trace 7f3a query log:\n  1x  SELECT id,title,author_id,body FROM posts ORDER BY created_at DESC LIMIT 50  -> 50 rows\n  50x SELECT * FROM users WHERE id = ?   (one fired per returned post)\n\npattern: list query returns N rows, then handler loops and fires one author query per row. 50 posts -> 50 author queries. that is N+1. note only 4 distinct author_ids repeat, so the work is mostly redundant too."
+      },
+      {
+        "aliases": ["db metrics", "check db", "instance metrics", "db status", "show db load"],
+        "tone": "info",
+        "output": "primary instance, last 1h:\n  cpu............ 22%   memory........ 38%\n  active conns... 11/200\n  slow queries (>500ms)... 0\n  buffer cache hit ratio.. 99.6%\nthe database is bored. every query returns in under 8ms. scaling this instance up buys you nothing; the request is slow because it makes 51 trips, not because any trip is slow."
+      },
+      {
+        "aliases": ["batch author query", "batch authors", "eager load authors", "prefetch authors", "join authors", "select users where id in", "fix n+1", "batch the author fetch"],
+        "requires": ["triage", "confirm-nplusone"],
+        "resolvesTicket": true,
+        "tone": "success",
+        "output": "deploying batched feed query...\n\nbefore: 1 posts query + 50 author queries (51 round trips)\nafter:  collect author_ids from the 50 posts, then\n        SELECT * FROM users WHERE id IN (1041,2207,1859, ...)\n        (1 batched author query)  ->  2 round trips total\n\nre-running trace 7f3a:\n  db wait...... 4980ms -> 70ms\n  total........ 5100ms -> 190ms\n  queries...... 51 -> 2\np95 on GET /api/feed now 190ms. resolved at the root: the N+1 is gone."
+      },
+      {
+        "aliases": ["bump timeout", "raise timeout", "increase request timeout", "extend timeout", "raise the timeout"],
+        "tone": "warn",
+        "output": "request timeout raised 6s -> 30s.\n\nthe endpoint no longer times out... but p95 is still 5.1s. you did not make it faster, you just gave the slowness more room to live. users still wait 5 seconds for a feed. raising a timeout treats a symptom; the 51 queries are still firing. roll this back and fix the query count."
+      },
+      {
+        "aliases": ["add cache", "cache the endpoint", "cache feed", "add redis cache", "cache authors"],
+        "tone": "warn",
+        "output": "added 60s cache layer on /api/feed.\n\nfirst request after each expiry: still 5.1s (cold cache runs all 51 queries). cache-miss traffic, new posts, and per-user feeds all blow straight through it. you have hidden the N+1 on warm hits, not removed it, and now you own a cache invalidation problem on top of a slow query. fix the query, then cache if you still need to."
+      },
+      {
+        "aliases": ["scale up db", "bigger db instance", "upgrade instance", "scale database", "resize db", "add more cpu"],
+        "tone": "warn",
+        "output": "resized primary to a larger instance class.\n\nbill went up. p95 did not move. the db was already at 22% cpu and every query ran in under 8ms, so more cpu had nothing to do. the bottleneck is 51 round trips per request, not horsepower. a bigger box cannot fix a query-count problem. revert and batch the author fetch."
+      },
+      {
+        "aliases": ["restart service", "restart api", "reboot feed", "bounce the service"],
+        "tone": "warn",
+        "output": "feed service restarted.\n\np95 back to 5.1s within the first request. nothing here was a transient state or a leak; the slow path is in the code, firing one author query per post on every single request. a restart changes nothing. read the query log and batch the lookup."
+      }
+    ]
+  },
+  {
+    "id": "bad-deploy-rollback",
+    "track": "swe",
+    "rank": "Senior Engineer",
+    "rankLevel": 3,
+    "difficulty": "Expert",
+    "reward": 110,
+    "xp": 90,
+    "ticket": {
+      "from": "PagerDuty (auto-escalated by on-call rotation)",
+      "subject": "SEV-2: error rate 18% and climbing on api-gateway since 14:05",
+      "priority": "Critical",
+      "body": "You caught the page. Customer support is already getting tickets about checkout failing. Dashboards show api-gateway error rate went from baseline 0.2% to 18% and p95 latency roughly doubled, starting around 14:05. Nothing else changed that we know of. Find what tipped it over and stop the bleeding. We can do the proper post-mortem after the graphs are green again. Do not go heroic and ship a forward fix while the site is on fire; just get us back to stable."
+    },
+    "evidence": [
+      {
+        "label": "grafana :: api-gateway (last 30m)",
+        "lines": [
+          "metric            13:55   14:00   14:05   14:10   14:14  (now)",
+          "-------------------------------------------------------------",
+          "error_rate %      0.21    0.19    11.4    17.8    18.2   ^^^",
+          "p95_latency_ms    240     238     past 14:05 climbing ...",
+          "                                          410     470    480",
+          "req_per_sec       1820    1840    1790    1760    1755",
+          "5xx (count/min)   38      33      2106    3290    3344",
+          "annotations:",
+          "  14:02  deploy: release v2.8.0 (api-gateway)  <- marker",
+          "  14:05  alert: error_rate > 5% (warning)",
+          "  14:07  alert: error_rate > 15% (critical)"
+        ]
+      },
+      {
+        "label": "deploy log :: releases (newest first)",
+        "lines": [
+          "release   status   shipped   notes",
+          "-----------------------------------------------------------",
+          "v2.8.0    LIVE     14:02     migration 0042_add_promo_col; flag checkout_v2=ON",
+          "v2.7.4    ok       prev      last known good (ran clean 9 days)",
+          "v2.7.3    ok       --        --",
+          "",
+          "flags (runtime):",
+          "  checkout_v2     = ON   (enabled by v2.8.0, 14:02)",
+          "  referral_banner = ON   (unchanged, on since v2.5.1)",
+          "  dark_mode_beta  = OFF  (unchanged)",
+          "",
+          "migration 0042_add_promo_col: applied 14:02, status APPLIED (additive column, nullable, no drop)"
+        ]
+      },
+      {
+        "label": "api-gateway logs :: grep 5xx (tail)",
+        "lines": [
+          "14:05:11  ERROR  POST /checkout  500  flag=checkout_v2 path=new  NPE: promoContext is null",
+          "14:05:11  INFO   POST /checkout  200  flag=checkout_v2 path=legacy",
+          "14:05:12  ERROR  POST /checkout  500  flag=checkout_v2 path=new  NPE: promoContext is null",
+          "14:05:13  ERROR  POST /checkout  500  flag=checkout_v2 path=new  NPE: promoContext is null",
+          "14:06:02  INFO   GET  /health     200",
+          "14:06:40  ERROR  POST /checkout  500  flag=checkout_v2 path=new  NPE: promoContext is null",
+          "note: errors only on flag=checkout_v2 path=new. legacy path returns 200. /health is green.",
+          "note: db connection pool healthy, no slow-query log entries, migration 0042 applied clean."
+        ]
+      }
+    ],
+    "goal": "Confirm the 14:02 deploy caused the 14:05 spike, then roll back to the last known-good release v2.7.4 and disable the checkout_v2 flag to stop the bleeding before debugging.",
+    "hint": "The spike has a timestamp and so does every change that shipped today. Line them up before you touch anything. When one deploy clearly owns the regression and you have a release that ran clean for nine days, the fastest way to make the graph green is not to write new code under fire; it is to go back to what worked. Stop the bleeding first, find the null pointer later.",
+    "successMessage": "Correct. You correlated the 14:02 v2.8.0 deploy with the 14:05 spike, saw the 500s were isolated to the new checkout_v2 path throwing on a null promoContext, then rolled back to v2.7.4 and killed the flag instead of hotfixing forward. That is the instinct: under an active SEV the job is to stop the bleeding using a known-good state, not to debug live traffic. The migration was additive and nullable so rolling back the code was safe; the actual null-pointer root cause gets fixed calmly in a follow-up PR once the graphs are green.",
+    "commands": [
+      {
+        "step": "correlate",
+        "aliases": ["metrics", "grafana", "status", "dashboard", "graph"],
+        "tone": "info",
+        "output": "api-gateway, last 30m:\n  error_rate: 0.2% baseline until 14:04, then 11.4% (14:05) -> 18.2% (now)\n  p95: ~240ms baseline -> 480ms now (~2x)\n  5xx jumped from ~35/min to 3300+/min at 14:05\n  traffic (req/s) is flat ~1800, so this is not a load spike.\nDeploy marker sits at 14:02. The spike starts 14:05, about 3 min after rollout finished draining. That is a textbook deploy-correlated regression."
+      },
+      {
+        "step": "correlate",
+        "aliases": ["releases", "deploy log", "changelog", "diff", "what shipped", "release list"],
+        "tone": "info",
+        "output": "Releases (newest first):\n  v2.8.0  LIVE  shipped 14:02  -> migration 0042_add_promo_col + flag checkout_v2=ON\n  v2.7.4  prev, last known good, ran clean for 9 days\nv2.8.0 is the only thing that changed today and it lines up with the spike. It bundled two risky things: a DB migration and a new checkout flag. Migration 0042 is additive/nullable (safe to leave). The flag flips the /checkout code onto a new path."
+      },
+      {
+        "aliases": ["logs", "tail logs", "grep 5xx", "errors", "stack trace", "trace"],
+        "tone": "info",
+        "output": "tail api-gateway 5xx:\n  POST /checkout 500  flag=checkout_v2 path=new  NullPointerException: promoContext is null\n  POST /checkout 200  flag=checkout_v2 path=legacy\n  GET  /health 200\nEvery 500 is the SAME error on the NEW checkout path; the legacy path and /health are fine. So the failure is fully owned by v2.8.0's new flag path, not infra, not the DB, not load."
+      },
+      {
+        "aliases": ["check db", "db health", "pool", "migration status", "check migration", "slow query"],
+        "tone": "info",
+        "output": "db: connection pool healthy, 0 slow queries, no lock contention.\nmigration 0042_add_promo_col: APPLIED 14:02, additive nullable column, no drops, no rename.\nVerdict: the database is not the problem and the migration is safe to keep in place. Rolling back the application code to v2.7.4 does not require reverting 0042 (a nullable column the old code simply ignores). This is why a code rollback is clean here."
+      },
+      {
+        "resolvesTicket": true,
+        "requires": ["correlate"],
+        "aliases": ["rollback", "roll back", "rollback to v2.7.4", "deploy v2.7.4", "revert release", "rollback release", "disable checkout_v2", "kill flag"],
+        "tone": "success",
+        "output": "Rolling back api-gateway to v2.7.4 (last known good)...\n  draining v2.8.0 instances ............ done\n  promoting v2.7.4 ..................... LIVE\n  flag checkout_v2 -> OFF\nmigration 0042 left in place (additive, nullable, harmless to old code).\n\n14:16  error_rate 18.2% -> 1.1% -> 0.2% (baseline)\n14:16  p95 480ms -> 245ms\n14:17  5xx back to ~30/min\nGraphs green. Bleeding stopped. The promoContext NPE on the new checkout path is now a calm follow-up bug, not an outage."
+      },
+      {
+        "requires": [],
+        "aliases": ["restart pods", "restart", "reboot pods", "bounce pods", "rolling restart", "kubectl rollout restart"],
+        "tone": "warn",
+        "output": "Restarting api-gateway pods...\n  pods cycled, healthy, back in rotation.\n  error_rate: still 18%. p95: still ~480ms.\nNothing changed. The bad code shipped in v2.8.0 is baked into the image, so fresh pods run the exact same broken checkout path. Restarting is the 'hope it self-heals' reflex; it only helps for leaks or stuck processes, not a logic regression you just deployed."
+      },
+      {
+        "requires": [],
+        "aliases": ["hotfix", "ship hotfix", "forward fix", "patch promocontext", "deploy fix", "push fix", "add null check"],
+        "tone": "warn",
+        "output": "Building hotfix v2.8.1 with a null guard on promoContext...\n  CI queued... tests... build... canary...\n  ETA to live: ~18 min (and that is if the fix is right the first time).\nMeanwhile the site is bleeding 18% errors. You are writing new code under fire with no review, betting the fix is correct, while a known-good release sits one button away. Forward-fixing during an active SEV is the classic hero mistake. Stop the bleeding with the rollback first, THEN ship the real null-check fix calmly."
+      },
+      {
+        "requires": [],
+        "aliases": ["revert migration", "rollback migration", "drop promo_col", "revert 0042", "undo migration"],
+        "tone": "warn",
+        "output": "Attempting to revert migration 0042_add_promo_col...\n  WARNING: 0042 is additive and nullable. The errors are an application NPE on the new checkout path, NOT a schema problem.\n  Dropping a live column mid-incident risks breaking BOTH the new and old code and is far harder to undo than a code rollback.\n  Aborted. The DB is healthy; this is a code/flag regression. Roll back the release, leave the migration alone."
+      },
+      {
+        "requires": [],
+        "aliases": ["scale up", "add replicas", "scale out", "more pods", "increase replicas"],
+        "tone": "warn",
+        "output": "Scaling api-gateway from 6 -> 12 replicas...\n  capacity doubled. error_rate: still 18%.\nTraffic was flat (~1800 req/s) the whole time, so this was never a capacity problem. More replicas just means more instances running the same broken checkout path. Scaling does not fix a logic bug; read the 5xx logs, they all point at the new flag path."
+      }
+    ]
+  },
+  {
+    "id": "recon-open-ports",
+    "track": "redteam",
+    "rank": "Pentest Intern",
+    "rankLevel": 0,
+    "difficulty": "Entry",
+    "reward": 40,
+    "xp": 30,
+    "ticket": {
+      "from": "Priya K., Engagement Lead (ACME-LAB)",
+      "subject": "Recon pass on lab.internal. Scope is ONE host",
+      "priority": "Medium",
+      "body": "Authorized engagement is live. Signed scope of work covers exactly one host: lab.internal (10.10.10.10). Nothing else. Run your service enumeration on that IP, flag anything that should not be reachable from outside, and write up the finding with a remediation a sysadmin can action. Do NOT touch any host outside the scoped IP and do NOT authenticate to anything. We document, we do not break in. Drop your finding when you have got it."
+    },
+    "evidence": [
+      {
+        "label": "Signed scope of work (ACME-LAB-2026-114)",
+        "lines": [
+          "IN SCOPE:   lab.internal  10.10.10.10  (single host)",
+          "OUT OF SCOPE: every other host, subnet, and 10.10.10.0/24 neighbor",
+          "ALLOWED:    service enumeration, port discovery, banner read",
+          "FORBIDDEN:  authentication attempts, exploitation, pivoting, persistence",
+          "Sign-off:   Priya K., client CISO desk. Window: this engagement only."
+        ]
+      },
+      {
+        "label": "Port scan results for 10.10.10.10 (lab.internal)",
+        "lines": [
+          "PORT      STATE   SERVICE    NOTE",
+          "22/tcp    open    ssh        OpenSSH 9.x, expected (admin access)",
+          "443/tcp   open    https      nginx, expected (the web app)",
+          "5432/tcp  open    postgres   PostgreSQL, reachable from your external host",
+          "Scan source: external tester box (outside the lab perimeter)",
+          "Hosts scanned: 1 (10.10.10.10 only)"
+        ]
+      },
+      {
+        "label": "Service reachability check for 5432/tcp",
+        "lines": [
+          "bind address reported by banner: 0.0.0.0:5432  (listening on ALL interfaces)",
+          "external reach from tester box: SUCCESS (TCP handshake completed)",
+          "22/tcp bind: locked to mgmt path, expected",
+          "443/tcp bind: public web, expected",
+          "A database port answering from outside the perimeter is not an expected exposure."
+        ]
+      }
+    ],
+    "goal": "Enumerate services on the one in-scope host, identify the unexpected exposed port, and report it with a concrete remediation.",
+    "hint": "SSH and HTTPS are expected on a web host. Three ports answered; two belong there. Ask which service should never be reachable from outside the perimeter, and write the finding for that one. The fix lives in the report, not in the connection.",
+    "successMessage": "That is the finding. 22 and 443 are expected on a web host; 5432/postgres listening on 0.0.0.0 and answering from outside the perimeter is a database exposed to the world, and it is the one thing that does not belong. You stayed on the single scoped IP, you did not try to log in, and you delivered an actionable remediation (firewall the port, bind it to localhost, or put it behind the VPN). That is the whole job: enumerate methodically, correlate the scan against what is expected, and report the exposure plus the fix. The instinct a real pro keeps is that recon means document the door, never walk through it.",
+    "commands": [
+      {
+        "aliases": ["read scope", "scope", "cat scope", "check scope", "show scope"],
+        "output": "Engagement ACME-LAB-2026-114. IN SCOPE: lab.internal (10.10.10.10), single host only. ALLOWED: enumeration, port discovery, banner read. FORBIDDEN: authentication, exploitation, pivoting. Every other host is out of scope.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["scan 10.10.10.10", "scan lab.internal", "port scan", "scan", "enumerate", "nmap 10.10.10.10"],
+        "output": "Scanning 10.10.10.10 (lab.internal). 1 host, in scope.\n22/tcp    open  ssh       expected (admin)\n443/tcp   open  https     expected (web app)\n5432/tcp  open  postgres  reachable from your external box\nTwo of these belong on a web host. One is a database answering from outside.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["inspect 5432", "check 5432", "banner 5432", "inspect postgres", "service 5432"],
+        "output": "5432/tcp is PostgreSQL. Bind address: 0.0.0.0:5432 (listening on all interfaces). External reach from tester box: handshake completes. A DB port should not be answering from outside the perimeter.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["compare expected", "diff expected", "what is expected", "expected services"],
+        "output": "Expected on this web host: 22/ssh (admin), 443/https (the app). NOT expected: 5432/postgres open to the outside. That delta is your finding.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["report finding", "report exposed port", "report 5432", "document finding", "flag 5432", "write up finding", "submit finding"],
+        "output": "FINDING LOGGED for 10.10.10.10 (lab.internal): 5432/tcp PostgreSQL exposed externally (bound to 0.0.0.0). REMEDIATION: firewall the port from outside, bind Postgres to localhost, or place it behind the VPN. 22 and 443 confirmed expected. Stayed in scope, no auth attempted. Priya has the writeup.",
+        "resolvesTicket": true,
+        "tone": "success"
+      },
+      {
+        "aliases": ["login postgres", "connect postgres", "psql 5432", "auth postgres", "log into db", "access database"],
+        "output": "Stop. Scope ALLOWS enumeration only and FORBIDS authentication. Connecting to the DB is exploitation beyond authorization, a scope violation even though the port is open. You found the door; the deliverable is reporting it, not opening it.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["scan subnet", "scan 10.10.10.0/24", "scan neighbors", "scan range", "scan other hosts"],
+        "output": "Out of scope. The signed SOW covers 10.10.10.10 only; the /24 and every neighbor are explicitly excluded. Scanning them is unauthorized access, full stop. Keep the scan to the single host.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["block 22", "firewall ssh", "close 443", "block https", "firewall 443"],
+        "output": "That is not the finding. 22/ssh and 443/https are EXPECTED on this web host. Closing them breaks legitimate access and reports the wrong exposure. The unexpected port is 5432. Read the scan against what is expected before you flag anything.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["ignore 5432", "looks fine", "no findings", "all expected", "close ticket clean"],
+        "output": "Not clean. 5432/postgres is answering from outside the perimeter on 0.0.0.0, a database exposed to the world. Calling the host clean misses the one real finding. Flag the exposed DB port with a remediation.",
+        "tone": "warn"
+      }
+    ]
+  },
+  {
+    "id": "default-creds-admin",
+    "track": "redteam",
+    "rank": "Junior Pentester",
+    "rankLevel": 1,
+    "difficulty": "Intermediate",
+    "reward": 60,
+    "xp": 45,
+    "ticket": {
+      "from": "Priya Anand, Lead Pentester",
+      "subject": "[ENGAGEMENT acme-lab-q2] /admin panel on acme-lab.internal, take a look",
+      "priority": "High",
+      "body": "Morning. You're cleared on the ACME lab engagement, here's your first real finding to run down solo. Scope is tight so read it before you touch anything: ONLY acme-lab.internal (10.10.10.42) and its web app on 443 are in scope. Nothing else on 10.10.10.0/24, no lateral movement, no pivoting off the box. That's written into the rules of engagement and the client will pull the whole test if we drift.\n\nDuring recon someone flagged that the app's /admin login page renders a vendor banner and the login form behaves oddly. I want you to confirm what's actually wrong, write the impact in one line a client exec would understand, and hand me the concrete remediation. Don't go deeper than confirming the finding; this is a lab and the win is the writeup, not a trophy.\n\nUse the terminal to pull the recon artifacts we already captured (proxy log, banner, login response). Everything you need is in those panels. When you know the fix, apply it against the lab's config so I can verify, then close the ticket."
+    },
+    "evidence": [
+      {
+        "label": "recon/http_banner.txt  (captured during in-scope crawl of acme-lab.internal)",
+        "lines": [
+          "$ cat recon/http_banner.txt",
+          "--- GET https://acme-lab.internal/admin  (in scope: 10.10.10.42:443) ---",
+          "HTTP/1.1 200 OK",
+          "Server: lighttpd/1.4.35",
+          "Set-Cookie: SESSIONID=deleted; Max-Age=0",
+          "X-Frame-Options: SAMEORIGIN",
+          "",
+          "<title>ACME Router Admin v1.2</title>",
+          "<div class=login-banner>ACME Router Admin v1.2  default login admin/admin</div>",
+          "<!-- TODO before ship: change factory password, ticket ACME-118 (still open) -->",
+          "",
+          "[note] Panel is reachable with no source-IP restriction and no VPN gate.",
+          "[note] Out of scope reminder: 10.10.10.43 (db host) and the rest of /24 are NOT in the RoE."
+        ]
+      },
+      {
+        "label": "recon/proxy_login.log  (intercepting proxy, our authorized test creds run)",
+        "lines": [
+          "$ cat recon/proxy_login.log",
+          "12:04:01  POST /admin/login   user=labtester  pass=Spring2026!     -> 401 Unauthorized  \"invalid credentials\"",
+          "12:04:09  POST /admin/login   user=root       pass=toor           -> 401 Unauthorized  \"invalid credentials\"",
+          "12:04:17  POST /admin/login   user=admin      pass=password       -> 401 Unauthorized  \"invalid credentials\"",
+          "12:04:25  POST /admin/login   user=admin      pass=admin          -> 302 Found        Location: /admin/dashboard",
+          "12:04:25  GET  /admin/dashboard                                 -> 200 OK   \"Welcome, admin (factory account)\"",
+          "",
+          "[finding] The vendor default pair admin/admin authenticates to the admin dashboard.",
+          "[finding] No account lockout observed after 3 prior failures; no MFA prompt on success."
+        ]
+      },
+      {
+        "label": "lab_config/admin_auth.cfg  (read-only copy of the lab app's current auth config)",
+        "lines": [
+          "$ cat lab_config/admin_auth.cfg",
+          "# ACME Router Admin v1.2 - auth module",
+          "account.admin.enabled        = true",
+          "account.admin.password_hash  = 21232f297a57a5a743894a0e4a801fc3   # md5('admin'), the published factory password, never rotated",
+          "account.admin.is_factory     = true        # never rotated since image flashed",
+          "account.admin.must_change_pw = false",
+          "panel.bind_address           = 0.0.0.0       # reachable from any source",
+          "panel.allow_cidr             = 0.0.0.0/0     # no IP restriction",
+          "panel.require_vpn            = false",
+          "panel.lockout_threshold      = 0             # lockout disabled"
+        ]
+      }
+    ],
+    "goal": "Confirm the default-credential finding on the in-scope /admin panel, then apply the real remediation (rotate to a strong unique password, disable the factory account, and IP/VPN-restrict the panel) without going out of scope.",
+    "hint": "The banner basically tells you the password, and the proxy log proves it still works. The fix is not about blocking one login attempt; it is about removing the factory account, the factory password, and the wide-open reachability that made the panel a target. Read admin_auth.cfg line by line and ask which lines a hardened box would never have.",
+    "successMessage": "Correct, and you stayed in scope. A default-credential finding is closed by killing the root cause at three layers at once: rotate the factory password to a strong unique value, disable or rename the factory account so the well-known username is gone, and restrict the panel to a management CIDR or VPN so it is not reachable by everyone. The pro instinct is that a vendor banner advertising admin/admin is not an invitation to pivot deeper; it is a documentable finding with a known, boring remediation. You resisted the urge to jump to 10.10.10.43 or plant access, and that discipline is exactly what keeps an engagement (and the client relationship) alive.",
+    "commands": [
+      {
+        "aliases": ["status", "recon status", "engagement status"],
+        "output": "Engagement: acme-lab-q2   Rank: Junior Pentester\nIn scope:  acme-lab.internal  (10.10.10.42:443, web app /admin)\nOut of scope: 10.10.10.43 (db), rest of 10.10.10.0/24, all lateral movement\nOpen finding: 1  (unconfirmed: 'default creds on /admin')\nYour job: confirm the finding, state impact, deliver remediation. Stay on .42.",
+        "tone": "info",
+        "step": "orient"
+      },
+      {
+        "aliases": ["cat banner", "read banner", "http_banner", "view banner", "banner"],
+        "output": "--- GET https://acme-lab.internal/admin ---\n<title>ACME Router Admin v1.2</title>\n<div class=login-banner>ACME Router Admin v1.2  default login admin/admin</div>\n<!-- TODO before ship: change factory password, ACME-118 (still open) -->\n[note] Panel reachable with no source-IP restriction and no VPN gate.\n\nThe app is literally printing its factory username and password on the login page. That is a finding on its own; now prove the creds still authenticate before you write it up.",
+        "tone": "info",
+        "step": "investigate"
+      },
+      {
+        "aliases": ["cat proxy log", "read proxy log", "proxy_login", "view login log", "login log"],
+        "output": "12:04:01  user=labtester pass=Spring2026!  -> 401 invalid credentials\n12:04:17  user=admin     pass=password     -> 401 invalid credentials\n12:04:25  user=admin     pass=admin        -> 302 -> /admin/dashboard  \"Welcome, admin (factory account)\"\n[finding] Vendor default pair admin/admin authenticates to the dashboard.\n[finding] No lockout after 3 failed attempts; no MFA on success.\n\nConfirmed. admin/admin is live on an unrestricted panel. This is a real default-credential finding, not a false positive.",
+        "tone": "info",
+        "step": "investigate"
+      },
+      {
+        "aliases": ["cat config", "read config", "admin_auth", "view auth config", "inspect config"],
+        "output": "account.admin.enabled        = true\naccount.admin.password_hash  = 21232f297a57a5a743894a0e4a801fc3  # md5('admin'), published factory password\naccount.admin.is_factory     = true     # never rotated since image flashed\naccount.admin.must_change_pw = false\npanel.bind_address           = 0.0.0.0   # reachable from anywhere\npanel.allow_cidr             = 0.0.0.0/0  # no IP restriction\npanel.require_vpn            = false\npanel.lockout_threshold      = 0          # lockout disabled\n\nThere it is in config: a factory account whose stored hash is md5('admin'), never forced to change, bound to everything, with no IP gate and no lockout. The fix has to touch the account, the password, AND the reachability.",
+        "tone": "info",
+        "step": "investigate"
+      },
+      {
+        "aliases": ["check scope", "scope", "am i in scope", "rules of engagement", "roe"],
+        "output": "Rules of Engagement (acme-lab-q2):\n  ALLOWED: testing acme-lab.internal / 10.10.10.42:443 and its web app.\n  FORBIDDEN: touching 10.10.10.43, scanning the rest of /24, lateral movement,\n             persistence/backdoors, exfil.\nViolating the RoE voids the engagement. The finding you have is already enough to write up; you do not need to go further to prove impact.",
+        "tone": "info",
+        "step": "investigate"
+      },
+      {
+        "aliases": ["scan 10.10.10.43", "nmap 10.10.10.43", "pivot to db", "scan subnet", "scan /24", "scan the network"],
+        "output": "REFUSED. 10.10.10.43 and the rest of 10.10.10.0/24 are explicitly OUT OF SCOPE.\nNothing in this ticket asks you to leave .42, and 'I had admin so I kept going' is how a clean finding turns into a contract breach. A default-credential finding does not need a pivot to prove impact; admin access on an internet-reachable panel IS the impact. Get back in scope.",
+        "tone": "warn",
+        "step": "wrong-fix"
+      },
+      {
+        "aliases": ["add backdoor", "plant persistence", "create hidden account", "add admin user", "install implant", "maintain access"],
+        "output": "BLOCKED. You logged in with default creds to assess the box, not to own it. Adding a hidden account or implant is unauthorized modification, it destroys evidence integrity, and it is the opposite of remediation. The deliverable is a report that gets the client to FIX this, not a foothold you keep. Remove that instinct and write the fix.",
+        "tone": "warn",
+        "step": "wrong-fix"
+      },
+      {
+        "aliases": ["block admin login", "disable login page", "block 401", "drop admin requests", "reject admin password"],
+        "output": "That does not remediate anything. Blocking the login page or dropping requests hides the symptom while the factory account, factory password, and wide-open reachability all still exist. Re-enable the page tomorrow and admin/admin works again. A real fix removes the default account and password and restricts who can reach the panel; it does not just curtain off the door.",
+        "tone": "warn",
+        "step": "wrong-fix"
+      },
+      {
+        "aliases": ["change banner", "hide banner", "remove banner text", "edit login banner"],
+        "output": "Cosmetic only. Deleting the 'default login admin/admin' text off the page does not change that admin/admin STILL authenticates (you proved it in the proxy log). Attackers try vendor defaults whether or not the banner brags about them. Fix the credentials and the reachability, not the marketing copy.",
+        "tone": "warn",
+        "step": "wrong-fix"
+      },
+      {
+        "aliases": ["harden admin panel", "rotate default creds", "disable factory account", "fix default credentials", "remediate default creds", "force strong password and restrict panel", "apply remediation"],
+        "output": "Applying remediation to acme-lab.internal (10.10.10.42) admin panel:\n  [1/3] account.admin.enabled        true  -> false   (factory account disabled)\n        account.admin.is_factory     true  -> false   (password rotated to a strong unique 20+ char value)\n        account.admin renamed              -> svc_acme_mgmt   (well-known 'admin' username retired)\n  [2/3] panel.allow_cidr   0.0.0.0/0 -> 10.20.0.0/24  (management subnet only)\n        panel.require_vpn  false -> true               panel.bind_address 0.0.0.0 -> 10.10.10.42\n  [3/3] panel.lockout_threshold 0 -> 5                (lockout after 5 failures)\n\nRe-test: POST admin/admin -> 401 invalid credentials. Panel now unreachable from outside 10.20.0.0/24.\nFINDING CONFIRMED + REMEDIATED. Impact line for the report: 'Anyone reaching the panel could gain full router-admin control using the published vendor default admin/admin; access was unrestricted by IP or VPN.' Remediation: strong unique password + factory account disabled/renamed + panel restricted to management network/VPN + lockout enabled. Ticket closed, in scope. Nice work.",
+        "tone": "success",
+        "step": "resolve",
+        "resolvesTicket": true,
+        "requires": ["cat banner", "cat proxy log", "cat config"]
+      }
+    ]
+  },
+  {
+    "id": "sqli-auth-bypass",
+    "track": "redteam",
+    "rank": "Pentester",
+    "rankLevel": 2,
+    "difficulty": "Advanced",
+    "reward": 80,
+    "xp": 65,
+    "ticket": {
+      "from": "M. Okafor, Red Team Lead",
+      "subject": "[ACME-LAB / authorized] acme-lab.internal login throwing DB errors on odd usernames",
+      "priority": "High",
+      "body": "Heads up, you are on the ACME-LAB engagement. Scope is written and tight: web app at acme-lab.internal/login ONLY. No other hosts, no data exfil, no pivoting past the login page. The blue team's intern was fuzzing the login form during a UAT pass and the app started spitting raw database errors back at the browser when the username had a quote in it. That is a smell, not a finding yet. I need you to confirm the bug class from the app's own behavior, write it up as a proper finding, and hand the dev team the remediation they actually need. We do NOT dump tables, we do NOT log in as admin to 'prove' it, and we do NOT just tell them to strip quotes and call it a day. Confirm, document, remediate. Standard rules of engagement apply: stay in scope, preserve evidence, no destructive actions."
+    },
+    "evidence": [
+      {
+        "label": "BROWSER RESPONSE: POST /login (HTTP 500), captured by proxy",
+        "lines": [
+          "Request:  POST https://acme-lab.internal/login",
+          "Body:     username=test%27&password=x",
+          "",
+          "Response: HTTP/1.1 500 Internal Server Error",
+          "Content-Type: text/html; charset=utf-8",
+          "",
+          "  <h1>Database Error</h1>",
+          "  <pre>",
+          "  Unclosed quotation mark after the character string.",
+          "  Source query:",
+          "    SELECT id, role FROM users WHERE user='test'' AND pass='x'",
+          "                                              ^ syntax error near here",
+          "  Stack: db/connector.py:118 -> raw_query()",
+          "  </pre>",
+          "",
+          "Note: a normal username (no quote) returns HTTP 200 + 'invalid credentials'.",
+          "The error ONLY fires when input contains a single quote. Verbose DB errors are",
+          "exposed to the client. The query is built by concatenating the raw username."
+        ]
+      },
+      {
+        "label": "SOURCE EXCERPT: db/connector.py (read-only, provided in scope pack)",
+        "lines": [
+          "# line 110-122, the login data-access path",
+          "def authenticate(username, password):",
+          "    # builds the SQL by string-concatenating user input directly",
+          "    q = (\"SELECT id, role FROM users \"",
+          "         \"WHERE user='\" + username + \"' AND pass='\" + password + \"'\")",
+          "    return raw_query(q)        # no parameters, raw string sent to driver",
+          "",
+          "# DB connection (same module, line 41):",
+          "#   conn = connect(user='app_root', password=..., host='db.acme-lab.internal')",
+          "#   NOTE: 'app_root' has db_owner on the whole schema (DDL plus every table)."
+        ]
+      },
+      {
+        "label": "FINDINGS REGISTER: engagement scope pack (acme-lab)",
+        "lines": [
+          "ENGAGEMENT: ACME-LAB internal web app pentest (authorized, signed SOW)",
+          "IN SCOPE:   acme-lab.internal/login  (the login endpoint and its DB path)",
+          "OUT OF SCOPE: all other tables, all other hosts, any data extraction/dump,",
+          "              any authenticated actions, persistence, lateral movement.",
+          "",
+          "OPEN FINDINGS:",
+          "  (none logged yet. intern reported a 'weird DB error', unconfirmed)",
+          "",
+          "REMEDIATION GUIDANCE ON FILE (from last engagement, for reference):",
+          "  - Input sanitation by blocklist is NOT accepted as a fix for injection.",
+          "  - DB accounts must follow least privilege; app accounts are never db_owner."
+        ]
+      }
+    ],
+    "goal": "Confirm the SQL injection auth-bypass class from the login's own error behavior, document it as a finding, then deliver the real remediation: parameterized queries plus input validation and a least-privilege DB user.",
+    "hint": "The 500 only fires on a single quote, and the leaked query shows your input landing inside the WHERE clause unescaped. Confirm the bug class and preserve the evidence first; you never push a fix blind. Then ask what actually stops user input from being read as SQL: it is the way the query is built, not the characters you try to ban.",
+    "successMessage": "Nailed it. The error proved the username flows straight into the query string (raw concatenation in connector.py), so the class is SQL injection enabling auth bypass; you confirmed it and logged the finding before touching anything, which is what keeps a finding defensible. The fix is parameterized queries or prepared statements so the input is always data and never executable SQL, backed by input validation and dropping app_root from db_owner to a least-privilege account. A pro's instinct: never 'fix' injection by blocklisting quotes, because attackers have a hundred encodings around a blocklist; you remediate the root cause (how the query is assembled) and shrink the blast radius with least privilege.",
+    "commands": [
+      {
+        "aliases": ["repro error", "reproduce", "test login", "trigger error", "fuzz login"],
+        "step": "triage",
+        "tone": "info",
+        "output": "Replaying the intern's input against acme-lab.internal/login (in scope)...\n\n  username with no quote   -> HTTP 200, body: 'invalid credentials'\n  username = test'         -> HTTP 500, body: <h1>Database Error</h1>\n                              'Unclosed quotation mark after the character string.'\n                              SELECT id, role FROM users WHERE user='test'' AND pass='x'\n\nDeterministic: the 500 fires if and only if the input contains a single quote.\nThe app reflects the raw query back to the client. Input is breaking out of the\nstring literal, a classic injectable sink. Triage step recorded."
+      },
+      {
+        "aliases": ["inspect source", "read connector", "show query builder", "inspect connector.py", "view source"],
+        "step": "confirm-cause",
+        "tone": "info",
+        "output": "db/connector.py (read-only, scope pack) line 110-122:\n\n  q = \"SELECT id, role FROM users WHERE user='\" + username + \"' AND pass='\" + password + \"'\"\n  return raw_query(q)\n\nConfirmed: the username is string-concatenated into the SQL with no parameter\nbinding and no escaping. Whatever the user types becomes part of the query.\nThis is the root cause of the 500 you reproduced. The fix has to change HOW the\nquery is built. Cause confirmed and recorded."
+      },
+      {
+        "aliases": ["check db privileges", "show db user", "inspect db account", "check least privilege", "whoami db"],
+        "tone": "info",
+        "output": "Connection config (connector.py line 41), read-only:\n\n  app account : app_root\n  grants      : db_owner on schema 'acme'  (DDL: CREATE/DROP/ALTER plus ALL tables)\n  host        : db.acme-lab.internal\n\nObservation: the login web app connects as a db_owner-level account. Even a\nminor injection here would have full-schema reach. This is a blast-radius\nproblem to fix alongside the query builder, not the root cause by itself."
+      },
+      {
+        "aliases": ["review scope", "check scope", "show rules of engagement", "read sow", "scope check"],
+        "tone": "info",
+        "output": "Engagement scope (signed SOW):\n\n  IN SCOPE   : acme-lab.internal/login and its DB path. Confirm plus document only.\n  OUT OF SCOPE: dumping any table, reading other users' data, logging in as a\n                real account, persistence, touching any other host.\n\nReminder: confirming the injection class from app behavior is in scope.\nExtracting data to 'prove' it is NOT. Document the finding, then remediate."
+      },
+      {
+        "aliases": ["document finding", "log finding", "write up finding", "open finding"],
+        "step": "document",
+        "tone": "info",
+        "output": "Drafting finding for the register...\n\n  ID    : ACME-LAB-001\n  Title : SQL injection (auth bypass) on /login via raw query concatenation\n  Sev   : High  (unauth, pre-login, reflected DB errors confirm the sink)\n  Repro : single-quote in username -> HTTP 500 plus reflected query\n  Cause : db/connector.py concatenates username/password into raw SQL\n  Scope : confirmed by app behavior only; no data extracted, in scope\n\nFinding documented. Now hand the dev team the remediation.\n(resolve when cause is confirmed and the finding is on record)"
+      },
+      {
+        "aliases": ["parameterize queries", "use parameterized queries", "use prepared statements", "remediate", "fix sqli", "deliver remediation"],
+        "tone": "success",
+        "resolvesTicket": true,
+        "requires": ["confirm-cause", "document"],
+        "output": "REMEDIATION delivered to ACME dev team for ACME-LAB-001:\n\n  1. Rewrite the data-access path to use PARAMETERIZED QUERIES or prepared\n     statements:\n         SELECT id, role FROM users WHERE user = ? AND pass = ?\n     User input is bound as DATA and never parsed as SQL. The quote that broke\n     the query now matches a literal, so the injection sink is closed.\n  2. Add input validation (allowlist the expected username shape) as a second\n     layer, and stop reflecting raw DB errors to the client.\n  3. Least privilege: drop the app from 'app_root'/db_owner to an account with\n     only the grants the login path needs (SELECT on users). Shrinks blast\n     radius for any future bug.\n\nFinding closed. Confirmed, documented, remediated at the root cause."
+      },
+      {
+        "aliases": ["blocklist quotes", "block single quotes", "strip quotes", "sanitize quotes", "escape quotes", "filter special characters"],
+        "tone": "warn",
+        "output": "REJECTED as a fix. Stripping or blocklisting quote characters does NOT remediate\ninjection:\n\n  - Attackers route around blocklists with encodings (percent-27, CHAR(39),\n    unicode homoglyphs, double-encoding) and the concatenation sink is still there.\n  - You would also break legitimate inputs (O'Brien cannot log in).\n  - The bug is HOW the query is assembled, not which characters appear.\n\nThis is the classic rookie 'fix'. Parameterize the query instead, then layer\nvalidation on top. Do not close the finding on a blocklist."
+      },
+      {
+        "aliases": ["dump users table", "dump database", "extract all tables", "select all users", "exfil data"],
+        "tone": "warn",
+        "output": "BLOCKED, and this is out of scope. Dumping tables to 'prove' the bug:\n\n  - Violates the signed SOW (extraction and other tables are out of scope).\n  - Reads real user data you have no authorization to touch.\n  - Adds nothing: you already confirmed the class from the app's own error.\n\nConfirming the injection from app behavior is enough for the finding. You\ndocument it, you do not weaponize it. Step skipped."
+      },
+      {
+        "aliases": ["login as admin", "bypass auth", "log in as admin", "auth bypass login", "exploit login"],
+        "tone": "warn",
+        "output": "BLOCKED. Actually performing the auth bypass to land an admin session is an\nauthenticated action, out of scope and unnecessary:\n\n  - The reflected query plus concatenation sink already prove the class.\n  - Logging in as a real account crosses from 'confirm' into 'exploit'.\n  - It taints the engagement and the finding's defensibility.\n\nStay at confirm-and-document. The win is the remediation, not the shell."
+      },
+      {
+        "aliases": ["add waf", "deploy waf", "block with firewall", "waf rule"],
+        "tone": "warn",
+        "output": "A WAF is a speed bump, not the fix. Adding a rule that blocks suspicious login\npayloads:\n\n  - Leaves the vulnerable concatenation in connector.py fully intact.\n  - Is bypassable (encoding, casing, novel payloads) like any signature filter.\n  - Gives false comfort while the root-cause sink still runs.\n\nUse a WAF as defense in depth AFTER you parameterize, never instead of it.\nDo not close ACME-LAB-001 on a WAF rule."
+      }
+    ]
+  },
+  {
+    "id": "privesc-pivot",
+    "track": "redteam",
+    "rank": "Senior Pentester",
+    "rankLevel": 3,
+    "difficulty": "Expert",
+    "reward": 110,
+    "xp": 90,
+    "ticket": {
+      "from": "Priya, Red Team Lead",
+      "subject": "Lab host lab-app-07: low-priv shell, find + write up any privesc",
+      "priority": "High",
+      "body": "ACME-LAB engagement, host lab-app-07.acme-lab.internal (10.10.10.10). The web team handed us a www-data shell from an app bug; that part's already documented. Your job is the next 90 minutes: enumerate for a local privesc path, confirm it for real, and write the finding so a sysadmin can fix it. Scope is THIS host only, report-and-remediate, no persistence. Don't get cute. Show me you confirmed the cause before you touch anything."
+    },
+    "evidence": [
+      {
+        "label": "engagement scope (rules-of-engagement.txt)",
+        "lines": [
+          "ENGAGEMENT: ACME-LAB / internal pentest / authorized",
+          "IN SCOPE:   lab-app-07.acme-lab.internal  (10.10.10.10)  THIS HOST ONLY",
+          "OUT OF SCOPE: db-01 (10.10.10.20), AD, prod, anything off 10.10.10.10",
+          "GOAL: identify + document local privilege escalation, deliver remediation",
+          "RULES: report-and-remediate. NO persistence, NO backdoors, NO pivoting off-host.",
+          "current shell: uid=33(www-data) gid=33(www-data)  non-root"
+        ]
+      },
+      {
+        "label": "scheduled jobs (/etc/cron.d/backup, runs as root)",
+        "lines": [
+          "# m h dom mon dow user  command",
+          "*   *  *   *   *   root  /opt/scripts/backup.sh",
+          "",
+          "syslog (last 3 min):",
+          "10:41:01 CRON[2210]: (root) CMD (/opt/scripts/backup.sh)",
+          "10:42:01 CRON[2231]: (root) CMD (/opt/scripts/backup.sh)",
+          "10:43:01 CRON[2254]: (root) CMD (/opt/scripts/backup.sh)   <-- every minute, as root"
+        ]
+      },
+      {
+        "label": "enumeration: files of interest",
+        "lines": [
+          "$ ls -l /opt/scripts/backup.sh",
+          "-rwxrwxrwx 1 root root  812 Jun 12 09:14 /opt/scripts/backup.sh   <-- world-WRITABLE, root-owned",
+          "",
+          "$ ls -l /usr/bin/passwd",
+          "-rwsr-xr-x 1 root root 59976 /usr/bin/passwd   (SUID, stock distro default, expected)",
+          "",
+          "$ ls -l /etc/shadow",
+          "-rw-r----- 1 root shadow 1420 /etc/shadow   (not world-readable, fine)",
+          "",
+          "$ cat /home/www-data/.bash_history",
+          "mysql -h db-01 -u app -p'REDACTED'   (creds for db-01, which is OUT OF SCOPE)"
+        ]
+      }
+    ],
+    "goal": "Find the local privesc path on lab-app-07, confirm it, and deliver the remediation so root can no longer be reached by a low-priv user.",
+    "hint": "Two things have to be true at once for a privesc: a process running as a high privilege, and something a low-priv user controls feeding into it. You have a root cron job. Check who can WRITE the thing it runs every minute, then fix the side you actually control: the file's owner and mode. Don't chase creds for a host that isn't in scope.",
+    "successMessage": "That's the clean finding. The root cron runs /opt/scripts/backup.sh every minute, and the script is -rwxrwxrwx, so any local user (including www-data) can rewrite a script that root will then execute. The remediation is the boring correct one: give root sole ownership and drop write for everyone (chown root:root, chmod 750), then flag the cron for a least-privilege review. A real pro confirms BOTH halves first (the root job AND who can write the file) before writing 'privesc' in a report, and never weaponizes it on a live host or wanders to the out-of-scope db-01 creds the history file dangled in front of you.",
+    "commands": [
+      {
+        "aliases": ["whoami", "id", "current user"],
+        "output": "uid=33(www-data) gid=33(www-data) groups=33(www-data)\nNo sudo entry for www-data. You are low-priv. To reach root you need a path, not a password.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["cat crontab", "cron", "ls cron", "view cron", "enumerate cron", "list cron jobs", "crontab -l"],
+        "output": "/etc/cron.d/backup:\n  *  *  *  *  *  root  /opt/scripts/backup.sh\nsyslog confirms it: CRON (root) runs /opt/scripts/backup.sh once per minute.\nSo root executes that script on a schedule. Next question: who is allowed to change what's IN it?",
+        "tone": "info",
+        "step": "enum-cron"
+      },
+      {
+        "aliases": ["ls -l backup.sh", "stat backup.sh", "ls backup", "check perms", "perms", "ls -l /opt/scripts/backup.sh"],
+        "output": "-rwxrwxrwx 1 root root 812 /opt/scripts/backup.sh\nMode 0777: owner root, but the world-write bit (the last 'w') means ANY user can edit it, www-data included.\nThat's the privesc: a low-priv user can rewrite a script root runs every minute. Confirmed.",
+        "tone": "info",
+        "step": "confirm-perms"
+      },
+      {
+        "aliases": ["check scope", "scope", "rules of engagement", "cat rules", "verify scope"],
+        "output": "IN SCOPE: lab-app-07 (10.10.10.10) only. OUT OF SCOPE: db-01 (10.10.10.20), AD, prod.\nReport-and-remediate, no persistence. Translation: fix the perms ON THIS HOST and document it. Leave db-01 alone.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["check suid", "find suid", "suid", "find / -perm -4000"],
+        "output": "/usr/bin/passwd  /usr/bin/sudo  /bin/mount ...\nAll stock distro SUID binaries at expected versions, no known local-root in this set. The SUID list is a red herring here; the real path is the writable cron script.",
+        "tone": "info"
+      },
+      {
+        "aliases": ["chmod 750 backup.sh", "chown root backup.sh", "fix perms", "harden script", "chown root:root /opt/scripts/backup.sh && chmod 750 /opt/scripts/backup.sh", "remediate", "chmod 750"],
+        "output": "chown root:root /opt/scripts/backup.sh\nchmod 750 /opt/scripts/backup.sh\n-rwxr-x--- 1 root root 812 /opt/scripts/backup.sh\nWorld-write removed; only root can edit it now, group has no write. The root cron can't be hijacked by a low-priv user anymore. Finding written up with the cron flagged for a least-privilege review.",
+        "resolvesTicket": true,
+        "tone": "success",
+        "requires": ["enum-cron", "confirm-perms"]
+      },
+      {
+        "aliases": ["edit backup.sh", "add reverse shell", "inject payload", "write payload", "append to backup.sh", "echo bash -i into backup.sh"],
+        "output": "Stop. That's planting a root backdoor on a live host. The engagement is report-and-remediate with NO persistence, so weaponizing the path is out of bounds and unnecessary. You prove a privesc by documenting it, not by detonating it. This is the move that gets a tester fired and a finding thrown out of the report.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["mysql db-01", "connect db-01", "use db creds", "login db-01", "ssh db-01"],
+        "output": "db-01 (10.10.10.20) is OUT OF SCOPE. Those creds in .bash_history are bait for a rabbit hole that isn't yours to touch. Pivoting off 10.10.10.10 breaks the rules of engagement. Note the exposed creds in the report and move on.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["chmod 777 backup.sh", "chmod +x backup.sh", "make executable"],
+        "output": "It's already executable, and 777 is what's WRONG: world-write is the whole vulnerability. Loosening perms is the opposite of the fix. You need to REMOVE write for group and other, not add more.",
+        "tone": "warn"
+      },
+      {
+        "aliases": ["delete cron", "remove cron job", "rm /etc/cron.d/backup", "disable backup", "stop cron"],
+        "output": "Deleting the backup job breaks a real root process the admins rely on, and the underlying bug, a world-writable script, is still sitting on disk for the next job or person to trip over. That's not remediation, it's hiding the symptom. Fix the file's owner and mode instead.",
+        "tone": "warn"
+      }
+    ]
+  }
+]

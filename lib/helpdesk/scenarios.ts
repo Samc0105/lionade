@@ -1,60 +1,33 @@
-// Help Desk Sim — authored scenario content (zero API cost; all deterministic).
-//
-// Each scenario is a realistic IT support ticket. The player investigates with
-// a fake terminal (each command returns scripted output drawn from the
-// evidence) and resolves the ticket by running the CORRECT fix. Wrong fixes
-// return teaching feedback instead of "solving" it. The whole thing is data —
-// add a scenario object to grow the queue, no engine changes.
+// TechHub scenarios = the two hand-built helpdesk starters + the authored set
+// in scenarios.generated.json (designed and adversarially verified offline,
+// then merged here). All deterministic, zero API cost. Re-exports the types so
+// existing imports from "@/lib/helpdesk/scenarios" keep working.
 
-export type Tone = "info" | "warn" | "success";
+import type { SimScenario, Track } from "./types";
+import generated from "./scenarios.generated.json";
 
-export interface SimCommand {
-  /** Lowercased inputs that trigger this command (matched exact OR by prefix). */
-  aliases: string[];
-  /** What the terminal prints back. */
-  output: string;
-  /** Marks the correct fix — running it resolves the ticket. */
-  resolvesTicket?: boolean;
-  /** Output colour: info (default), warn (a plausible-but-wrong fix), success. */
-  tone?: Tone;
-}
+export * from "./types";
 
-export interface SimScenario {
-  id: string;
-  difficulty: "Entry" | "Intermediate" | "Advanced";
-  reward: number; // Fangs on resolve
-  ticket: {
-    from: string;
-    subject: string;
-    priority: "Low" | "Medium" | "High";
-    body: string;
-  };
-  /** The "evidence" panel — logs, statuses, errors the player reads. */
-  evidence: { label: string; lines: string[] }[];
-  /** One-line statement of what "fixed" means. */
-  goal: string;
-  /** Revealed by the `hint` command. */
-  hint: string;
-  /** Shown when the ticket is resolved — the "why" so the player learns. */
-  successMessage: string;
-  commands: SimCommand[];
-}
-
-export const SCENARIOS: SimScenario[] = [
+// ── Hand-built starters (the original two helpdesk tickets, cleaned + tagged) ──
+const STARTERS: SimScenario[] = [
   {
     id: "printer-queue-jam",
+    track: "helpdesk",
+    rank: "Help Desk Intern",
+    rankLevel: 0,
     difficulty: "Entry",
     reward: 40,
+    xp: 30,
     ticket: {
-      from: "Dana — Accounting",
+      from: "Dana, Accounting",
       subject: "Can't print the month-end report",
       priority: "High",
       body:
-        "I've hit print like 20 times and NOTHING comes out. Now there's a pile of nothing in the queue. This is due at 5pm. Help!",
+        "I've hit print like 20 times and nothing comes out. Now there's a pile of nothing in the queue. This is due at 5pm. Help!",
     },
     evidence: [
       {
-        label: "Print Spooler — last events",
+        label: "Print Spooler, last events",
         lines: [
           "10:42  Job 7  'AcctReport.pdf'  STATUS: ERROR_PRINTER_OFFLINE",
           "10:44  Job 8  'AcctReport.pdf'  STATUS: QUEUED (waiting on Job 7)",
@@ -67,9 +40,9 @@ export const SCENARIOS: SimScenario[] = [
     ],
     goal: "Get Dana's report printing. Find why the queue is stuck and clear the blocker.",
     hint:
-      "The printer shows Ready and pings fine, so it isn't hardware or network. Look at what's at the FRONT of the print queue.",
+      "The printer shows Ready and pings fine, so it isn't hardware or network. Look at what's at the front of the print queue.",
     successMessage:
-      "Nailed it. Job 7 hit ERROR_PRINTER_OFFLINE and jammed everything queued behind it. Clearing it released the rest. Reinstalling drivers or swapping cables would've burned 20 minutes — the help-desk instinct is: read the log, rule out hardware + network, then fix the actual blocker.",
+      "Nailed it. Job 7 hit ERROR_PRINTER_OFFLINE and jammed everything queued behind it. Clearing it released the rest. Reinstalling drivers or swapping cables would have burned 20 minutes. The help-desk instinct is simple: read the log, rule out hardware and network, then fix the actual blocker.",
     commands: [
       {
         aliases: ["printer status", "status", "stat"],
@@ -78,8 +51,7 @@ export const SCENARIOS: SimScenario[] = [
       },
       {
         aliases: ["view log spooler", "tail spooler", "logs", "log", "cat spooler.log"],
-        output:
-          "Job 7  ERROR_PRINTER_OFFLINE  <-- stuck, head of queue\nJob 8..11  QUEUED, waiting on Job 7",
+        output: "Job 7  ERROR_PRINTER_OFFLINE  <-- stuck, head of queue\nJob 8..11  QUEUED, waiting on Job 7",
       },
       {
         aliases: ["ping hp-acct-2", "ping printer", "ping"],
@@ -87,47 +59,47 @@ export const SCENARIOS: SimScenario[] = [
       },
       {
         aliases: ["clear queue", "purge queue", "cancel job 7", "clear job 7", "flush queue"],
-        output:
-          "Cleared the stuck job. Jobs 8-11 released — Dana's report is printing now.",
+        output: "Cleared the stuck job. Jobs 8-11 released. Dana's report is printing now.",
         resolvesTicket: true,
         tone: "success",
       },
       {
         aliases: ["restart spooler", "restart service", "net stop spooler"],
         output:
-          "Spooler restarted... Job 7 is STILL at the head of the queue. Restarting the service didn't clear the jammed job itself.",
+          "Spooler restarted. Job 7 is STILL at the head of the queue. Restarting the service didn't clear the jammed job itself.",
         tone: "warn",
       },
       {
         aliases: ["reinstall driver", "update driver", "reinstall drivers"],
-        output:
-          "Driver reinstalled — still stuck. The driver was fine; the log shows a jammed QUEUE, not a driver fault.",
+        output: "Driver reinstalled, still stuck. The driver was fine; the log shows a jammed queue, not a driver fault.",
         tone: "warn",
       },
       {
         aliases: ["replace cable", "check cable", "swap cable"],
-        output:
-          "The cable's fine — `ping` already showed the printer ONLINE. This is a software queue jam, not a physical link.",
+        output: "The cable is fine. ping already showed the printer ONLINE. This is a software queue jam, not a physical link.",
         tone: "warn",
       },
       {
         aliases: ["restart printer", "reboot printer", "power cycle"],
-        output:
-          "Power-cycled the printer. The stuck spooler job survives the reboot — you need to clear the QUEUE, not the printer.",
+        output: "Power-cycled the printer. The stuck spooler job survives the reboot. You need to clear the queue, not the printer.",
         tone: "warn",
       },
     ],
   },
   {
     id: "wifi-confroom-drops",
+    track: "helpdesk",
+    rank: "Tier 1 Support",
+    rankLevel: 1,
     difficulty: "Intermediate",
-    reward: 55,
+    reward: 60,
+    xp: 45,
     ticket: {
-      from: "Marcus — Sales",
+      from: "Marcus, Sales",
       subject: "Wi-Fi keeps dropping in Conf Room B",
       priority: "Medium",
       body:
-        "Every meeting in Conf Room B my laptop drops Wi-Fi for ~30 seconds then reconnects. Only that room — my desk is fine. It's killing my client calls.",
+        "Every meeting in Conf Room B my laptop drops Wi-Fi for ~30 seconds then reconnects. Only that room, my desk is fine. It's killing my client calls.",
     },
     evidence: [
       {
@@ -145,49 +117,55 @@ export const SCENARIOS: SimScenario[] = [
     ],
     goal: "Stop Marcus's Wi-Fi from dropping in Conf Room B.",
     hint:
-      "It's ONE room and EVERY client there is affected, not just Marcus. So it's the access point / its channel, not his laptop. Check what else is crowding its channel.",
+      "It's one room and every client there is affected, not just Marcus. So it's the access point or its channel, not his laptop. Check what else is crowding its channel.",
     successMessage:
-      "Right read. A weak signal plus 38 clients jammed onto a congested channel 6 = handshake timeouts and drops. Moving to a clear channel fixes it. Rebooting the AP or blaming Marcus's laptop are the rookie moves — the log pointed at the wireless link, not the LAN.",
+      "Right read. A weak signal plus 38 clients jammed onto a congested channel 6 equals handshake timeouts and drops. Moving to a clear channel fixes it. Rebooting the AP or blaming Marcus's laptop are the rookie moves; the log pointed at the wireless link, not the LAN.",
     commands: [
       {
         aliases: ["wifi status", "status", "ap status"],
-        output:
-          "Conf Room B served by AP-FLOOR2-B. Signal at the table: -78 dBm (weak). 38 clients. Channel 6.",
+        output: "Conf Room B served by AP-FLOOR2-B. Signal at the table: -78 dBm (weak). 38 clients. Channel 6.",
       },
       {
         aliases: ["view log", "logs", "log", "tail wifi"],
-        output:
-          "Marcus-MBP: repeated 'Disassociated from AP-FLOOR2-B (4WAY-HANDSHAKE-TIMEOUT)', then roams to AP-FLOOR2-A.",
+        output: "Marcus-MBP: repeated 'Disassociated from AP-FLOOR2-B (4WAY-HANDSHAKE-TIMEOUT)', then roams to AP-FLOOR2-A.",
       },
       {
         aliases: ["ping gateway", "ping", "ping gw"],
-        output:
-          "Reply, time<2ms — when he's connected the wired network is fine. The drops are the WIRELESS link, not the LAN.",
+        output: "Reply, time<2ms. When he's connected the wired network is fine. The drops are the wireless link, not the LAN.",
       },
       {
         aliases: ["scan channels", "survey", "channel scan", "scan"],
-        output:
-          "Channel 6: 41 networks (heavily congested). Channel 1: 22. Channel 11: 6 networks (clear).",
+        output: "Channel 6: 41 networks (heavily congested). Channel 1: 22. Channel 11: 6 networks (clear).",
       },
       {
         aliases: ["set channel 11", "move ap to channel 11", "change channel 11", "channel 11"],
-        output:
-          "Moved AP-FLOOR2-B to channel 11. Handshakes stop timing out — Marcus stays connected through his next meeting.",
+        output: "Moved AP-FLOOR2-B to channel 11. Handshakes stop timing out. Marcus stays connected through his next meeting.",
         resolvesTicket: true,
         tone: "success",
       },
       {
         aliases: ["reboot ap", "restart ap", "power cycle ap"],
-        output:
-          "Rebooted the AP — helps for a few minutes, but it comes back up on congested channel 6 and the drops return.",
+        output: "Rebooted the AP. Helps for a few minutes, but it comes back up on congested channel 6 and the drops return.",
         tone: "warn",
       },
       {
         aliases: ["replace wifi card", "replace laptop", "swap card", "reimage laptop"],
-        output:
-          "Marcus's card is fine — EVERY client in Conf B drops, not just him. It's the AP/channel, not one laptop.",
+        output: "Marcus's card is fine. Every client in Conf B drops, not just him. It's the AP and channel, not one laptop.",
         tone: "warn",
       },
     ],
   },
 ];
+
+const GENERATED = generated as unknown as SimScenario[];
+
+export const SCENARIOS: SimScenario[] = [...STARTERS, ...GENERATED];
+
+/** Scenarios for one track, ordered by rank (intern first). */
+export function scenariosForTrack(track: Track): SimScenario[] {
+  return SCENARIOS.filter((s) => s.track === track).sort((a, b) => a.rankLevel - b.rankLevel);
+}
+
+export function getScenario(id: string): SimScenario | undefined {
+  return SCENARIOS.find((s) => s.id === id);
+}
