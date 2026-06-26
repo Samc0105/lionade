@@ -268,6 +268,44 @@ export function useUserBadges(userId: string | undefined) {
   );
 }
 
+/** Wallet transactions (Wallet page) — persisted SWR so the list paints
+ *  instantly from cache on re-entry instead of cold-fetching with a skeleton
+ *  on every visit. */
+export function useTransactions(userId: string | undefined, limit = 20) {
+  return useSWR(
+    userId ? `wallet-transactions/${userId}/${limit}` : null,
+    async () => {
+      const { data, error } = await supabase
+        .from("coin_transactions")
+        .select("id, amount, type, description, created_at")
+        .eq("user_id", userId!)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
+    },
+    { keepPreviousData: true, dedupingInterval: 10_000 }
+  );
+}
+
+/** Recent Fang activity (Profile activity card). */
+export function useRecentActivity(userId: string | undefined, limit = 8) {
+  return useSWR(
+    userId ? `recent-activity/${userId}/${limit}` : null,
+    async () => {
+      const { data, error } = await supabase
+        .from("coin_transactions")
+        .select("amount, type, description, created_at")
+        .eq("user_id", userId!)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data ?? [];
+    },
+    { keepPreviousData: true }
+  );
+}
+
 /** Weekly (coins-this-week) leaderboard. */
 export function useWeeklyLeaderboard(limit = 200) {
   return useSWR(
