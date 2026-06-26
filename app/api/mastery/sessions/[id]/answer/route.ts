@@ -130,7 +130,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const newAttempts = (currentProg?.attempts ?? 0) + 1;
     const newCorrect = (currentProg?.correct ?? 0) + (wasCorrect ? 1 : 0);
     const newStreak = wasCorrect ? (currentProg?.current_streak ?? 0) + 1 : 0;
-    const newDisplayPct = displayPct(newPMastery, newAttempts, exam.mastery_bkt_target);
+    const newDisplayPct = displayPct(newPMastery, newAttempts, exam.mastery_bkt_target, newCorrect);
 
     const nowIso = new Date().toISOString();
     await supabaseAdmin
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       const num = (subRes.data ?? []).reduce((acc, s) => {
         if (s.id === pendingQ.subtopicId) return acc + s.weight * newDisplayPct;
         const p = progMap.get(s.id);
-        return acc + s.weight * (p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target) : 0);
+        return acc + s.weight * (p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target, p.correct ?? 0) : 0);
       }, 0);
       return Math.round((num / totalW) * 10) / 10;
     })();
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     let feedbackMsg: Awaited<ReturnType<typeof insertFeedback>> | null = null;
     const feedbackContent = wasCorrect
       ? pickCorrectOpener(newStreak)
-      : "Not quite.";
+      : pickWrongOpener(q.options[selectedIndex]);
     const feedbackPayload: Record<string, unknown> = {
       wasCorrect,
       correctIndex: q.correct_index,
@@ -321,6 +321,23 @@ function pickCorrectOpener(streak: number): string {
   if (streak >= 5) return `Five in a row — you're on a run.`;
   if (streak >= 3) return `Three straight. Nice lock-in.`;
   return `Got it.`;
+}
+
+// Varied wrong-answer opener that names the option the user actually picked, so
+// every miss doesn't read as the same flat "Not quite." Deterministic spread by
+// the chosen text (no Math.random — keeps the route reproducible).
+function pickWrongOpener(choice: string | undefined): string {
+  if (!choice) return `Time ran out on that one.`;
+  const label = choice.length > 44 ? `${choice.slice(0, 42)}...` : choice;
+  const lines = [
+    `"${label}" isn't it.`,
+    `Not "${label}". Let's break down why.`,
+    `"${label}" is a tempting pick, but no.`,
+    `Close, but "${label}" misses it.`,
+  ];
+  let h = 0;
+  for (let i = 0; i < choice.length; i++) h = (h * 31 + choice.charCodeAt(i)) | 0;
+  return lines[Math.abs(h) % lines.length];
 }
 
 function shapeMessage(m: {

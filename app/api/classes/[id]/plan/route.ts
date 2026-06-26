@@ -180,7 +180,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
           .order("display_order"),
         supabaseAdmin
           .from("mastery_progress")
-          .select("subtopic_id, p_mastery, attempts")
+          .select("subtopic_id, p_mastery, attempts, correct")
           .eq("user_id", userId),
       ]);
       const progMap = new Map((progRes.data ?? []).map(p => [p.subtopic_id, p]));
@@ -192,7 +192,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
           examId: exam.id,
           examTitle: exam.title,
           subtopicName: sub.name,
-          displayPct: p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target) : 0,
+          displayPct: p ? displayPct(p.p_mastery, p.attempts, exam.mastery_bkt_target, p.correct ?? 0) : 0,
           attempts: p?.attempts ?? 0,
         });
       }
