@@ -1645,7 +1645,7 @@ export default function GamesPage() {
               aria-hidden="true"
             >
               <img
-                src={cdnUrl("/image-name.png")}
+                src={cdnUrl("/logo-icon.png")}
                 alt=""
                 className="w-full h-full object-contain"
                 style={{ filter: "drop-shadow(0 0 32px rgba(255,215,0,0.40))" }}

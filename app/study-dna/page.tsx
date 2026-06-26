@@ -216,7 +216,7 @@ function IdentityCard({ dna }: { dna: DnaResponse }) {
           <HeadlineStat icon={<Fire size={14} weight="fill" />} value={`${identity.streak}d`} label="Streak" accent="#F97316" />
           <HeadlineStat icon={<TrendUp size={14} weight="bold" />} value={`${Math.round(totals.accuracy * 100)}%`} label="Accuracy" accent="#22C55E" />
           <HeadlineStat icon={<Trophy size={14} weight="fill" />} value={String(identity.level)} label="Level" accent="#A855F7" />
-          <HeadlineStat icon={<Coin size={14} weight="fill" />} value={formatCompact(identity.lifetimeFangs)} label="Lifetime F" accent="#FFD700" />
+          <HeadlineStat icon={<Coin size={14} weight="fill" />} value={formatCompact(identity.lifetimeFangs)} label="Lifetime Fangs" accent="#FFD700" />
         </div>
       </div>
     </section>

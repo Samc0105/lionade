@@ -78,7 +78,7 @@ export default function ContactPage() {
 
         {/* Direct channels */}
         <section
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10 animate-slide-up"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10 animate-slide-up"
           style={{ animationDelay: "0.05s" }}
         >
           <a
@@ -95,7 +95,7 @@ export default function ContactPage() {
             className="rounded-2xl border border-white/[0.08] p-4 hover:border-electric/40 transition-all hover:-translate-y-0.5 block"
             style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
           >
-            <Lifebuoy size={20} weight="duotone" color="#A78BFA" aria-hidden="true" />
+            <Lifebuoy size={20} weight="duotone" color="#4C96E1" aria-hidden="true" />
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Team</p>
             <p className="text-cream text-sm font-semibold mt-1">About Lionade</p>
           </Link>

@@ -793,7 +793,7 @@ export default function QuizPage() {
                     className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                     style={{ background: `${color}15`, border: `1px solid ${color}30`, color: difficulty === d ? color : `${color}80` }}
                   >
-                    {mult} coins
+                    {mult} Fangs
                   </span>
                 </button>
               ))}
@@ -1359,7 +1359,7 @@ function ResultsScreen({
             <Fire size={28} weight="fill" color="#FFD700" aria-hidden="true" />
             <div className="text-left">
               <p className="font-bebas text-lg text-[#FFD700] tracking-wider leading-none">3 QUIZZES IN A ROW!</p>
-              <p className="text-cream/55 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
+              <p className="text-cream/55 text-xs mt-0.5">Bonus +{bonusFangs} Fangs added to your wallet</p>
             </div>
             <span className="font-bebas text-2xl text-[#FFD700] ml-auto inline-flex items-center gap-1">+{bonusFangs} <Coin size={20} weight="fill" aria-hidden="true" /></span>
           </div>

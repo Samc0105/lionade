@@ -267,7 +267,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in…</p>
+          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in...</p>
         </div>
       </div>
     );

@@ -742,7 +742,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
                       <span className="text-cream/75 text-xs truncate">{a.description}</span>
                     </div>
                     <span className={`font-bebas text-sm flex-shrink-0 tracking-wider ${a.amount > 0 ? "text-gold" : "text-cream/55"}`}>
-                      {a.amount > 0 ? `+${a.amount}` : "+0"}
+                      {a.amount > 0 ? `+${a.amount}` : ""}
                     </span>
                   </div>
                 );
@@ -1878,7 +1878,7 @@ function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
                 <p className="text-cream/55 text-xs">{new Date(a.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
               <span className={`font-bebas text-lg flex-shrink-0 ${a.amount > 0 ? "text-gold" : "text-cream/55"}`}>
-                {a.amount > 0 ? `+${a.amount}` : "+0"}
+                {a.amount > 0 ? `+${a.amount}` : ""}
               </span>
             </div>
           ))}
