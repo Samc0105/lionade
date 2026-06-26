@@ -127,10 +127,14 @@ export function displayPct(
 }
 
 /**
- * Pick the next subtopic to drill. Score = weight × gap so we spend time on
- * the biggest weighted weakness. Small recency bonus so we don't hammer the
- * same subtopic forever when it's borderline — breaks ties in favor of
- * variety without letting variety win over genuine weakness.
+ * Pick the next subtopic to drill. Score = weight × gap × accFactor, so we
+ * spend the most time on the biggest weighted weakness AND lean harder toward
+ * topics the user is actually getting WRONG (low accuracy counts up to ~2x).
+ * A small recency bonus plus a bounded just-served penalty rotate a borderline
+ * leader to the next-weakest so one topic isn't hammered forever, while a
+ * genuinely much-weaker topic still recurs. Fully deterministic + abuse-safe:
+ * every input is a server-computed BKT/accuracy value, and answering wrong only
+ * earns MORE practice on that topic, never a reward.
  */
 export function pickNextSubtopic(
   subtopics: {
@@ -138,16 +142,29 @@ export function pickNextSubtopic(
     weight: number;
     pMastery: number;
     lastSeenAt?: number | null;
+    attempts?: number | null;
+    correct?: number | null;
   }[],
   now: number = Date.now(),
+  lastSubtopicId?: string | null,
 ): string | null {
   if (subtopics.length === 0) return null;
 
+  const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+
   const scored = subtopics.map(t => {
     const gap = Math.max(0, 0.85 - t.pMastery);
+    // Accuracy lean: a low-accuracy topic counts up to ~2x toward selection
+    // (factor 1.0 → 2.0), so the user gets more questions where they miss.
+    const attempts = t.attempts ?? 0;
+    const accuracy = attempts > 0 ? clamp01((t.correct ?? 0) / attempts) : null;
+    const accFactor = accuracy === null ? 1 : 1 + (1 - accuracy);
     const recencySec = t.lastSeenAt ? (now - t.lastSeenAt) / 1000 : 1e9;
     const recencyBonus = Math.min(0.05, recencySec / 60_000); // 1 min → ~0.001
-    return { id: t.subtopicId, score: t.weight * gap + recencyBonus };
+    // Bounded penalty on the topic served last turn — small enough that a
+    // genuinely much-weaker topic still wins, big enough to rotate near-ties.
+    const justServed = lastSubtopicId && t.subtopicId === lastSubtopicId ? 0.15 * t.weight : 0;
+    return { id: t.subtopicId, score: t.weight * gap * accFactor + recencyBonus - justServed };
   });
 
   scored.sort((a, b) => b.score - a.score);

@@ -202,6 +202,8 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         weight: s.weight,
         pMastery: p?.p_mastery ?? 0.10,
         lastSeenAt: p?.last_seen_at ? new Date(p.last_seen_at).getTime() : null,
+        attempts: p?.attempts ?? 0,
+        correct: p?.correct ?? 0,
       };
     });
 
@@ -372,7 +374,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
     // Pick next subtopic: prefer weighted-gap leader; if mastered, fall back
     // to any subtopic so the practice-forever mode still has something to drill.
-    let picked = pickNextSubtopic(subtopicsForScore);
+    let picked = pickNextSubtopic(subtopicsForScore, Date.now(), runtime.last_subtopic_id);
     if (!picked) {
       // All gaps closed — pick lowest-mastery subtopic as a "keep sharp" pick.
       const sorted = [...subtopicsForScore].sort((a, b) => a.pMastery - b.pMastery);
