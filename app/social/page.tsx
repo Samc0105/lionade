@@ -1303,7 +1303,7 @@ export default function SocialPage() {
                             {rival.username}
                           </p>
                           <p className="font-bebas text-3xl text-electric tabular-nums leading-none">
-                            {rival.coinsThisWeek}
+                            <CountUp id="social-rivalweekly" value={rival.coinsThisWeek} duration={500} />
                             <span className="text-cream/55 text-sm ml-1.5">Fangs</span>
                           </p>
                         </div>

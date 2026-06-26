@@ -12,6 +12,7 @@ import {
 } from "@/lib/db";
 import type { UserPreferences } from "@/lib/db";
 import { getLevelProgress, formatCoins } from "@/lib/mockData";
+import { EDUCATION_LEVELS, STUDY_GOALS } from "@/lib/profile-options";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
@@ -130,13 +131,8 @@ const ADVENTURER_BG_COLORS = [
   { label: "Slate",    value: "607D8B" },
 ];
 
-const EDUCATION_LEVELS = [
-  "Middle School","High School","Undergraduate","Graduate","Self-Taught",
-];
-
-const STUDY_GOALS = [
-  "Improve Grades","Test Prep","Learn for Fun","Career Growth","Competition Prep",
-];
+// EDUCATION_LEVELS + STUDY_GOALS imported from @/lib/profile-options (canonical
+// list shared with signup, so a saved value always has a matching option).
 
 const RESERVED = ["admin","root","lionade","support","help","ninny"];
 
@@ -1011,6 +1007,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
             <select id="profile-education" value={education} onChange={e => setEducation(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
+              {education && !EDUCATION_LEVELS.includes(education) && <option value={education}>{education}</option>}
               {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
@@ -1020,6 +1017,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
             <select id="profile-studygoal" value={studyGoal} onChange={e => setStudyGoal(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
+              {studyGoal && !STUDY_GOALS.includes(studyGoal) && <option value={studyGoal}>{studyGoal}</option>}
               {STUDY_GOALS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>

@@ -23,35 +23,12 @@ import {
   Megaphone,
 } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
+import { EDUCATION_LEVELS, STUDY_GOALS } from "@/lib/profile-options";
 
 type Tab = "login" | "signup";
 
-const EDUCATION_LEVELS = [
-  "Middle School",
-  "High School Freshman",
-  "High School Sophomore",
-  "High School Junior",
-  "High School Senior",
-  "College Freshman",
-  "College Sophomore",
-  "College Junior",
-  "College Senior",
-  "Graduate Student",
-  "Working Professional",
-  "Self Taught / Independent Learner",
-  "Other",
-];
-
-const STUDY_GOALS = [
-  "Improve my grades",
-  "Prepare for SAT / ACT / GRE",
-  "Study for certifications (AWS, CompTIA, etc.)",
-  "Learn coding and tech skills",
-  "Study for professional exams (CPA, Bar, MCAT)",
-  "General knowledge and self improvement",
-  "Compete and win rewards",
-  "Other",
-];
+// EDUCATION_LEVELS + STUDY_GOALS now live in @/lib/profile-options (shared with
+// the profile editor so the two screens can't drift).
 
 const REFERRAL_SOURCES = [
   "TikTok",

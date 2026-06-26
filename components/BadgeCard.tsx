@@ -79,12 +79,10 @@ export default function BadgeCard({ badge, size = "md", earned = true }: BadgeCa
         </p>
       )}
 
-      {/* Lock overlay */}
+      {/* Lock chip — corner only, never stacked over the name/description */}
       {!earned && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl">
-          <span className="text-2xl inline-flex items-center justify-center">
-            <Lock size={28} weight="regular" aria-hidden="true" />
-          </span>
+        <div className="absolute top-2 right-2" aria-hidden="true">
+          <Lock size={16} weight="fill" color="rgba(245,235,218,0.4)" />
         </div>
       )}
     </div>

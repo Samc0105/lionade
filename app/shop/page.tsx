@@ -1299,12 +1299,12 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
 
               <div className="mt-1 mb-4">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-bebas text-4xl text-gold tracking-wider leading-none">{formatCoins(pack.fangs)}</span>
+                  <span className="font-bebas text-4xl text-gold tracking-wider leading-none">{pack.fangs.toLocaleString()}</span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">Fangs</span>
                 </div>
                 {pack.bonus > 0 && (
                   <p className="text-[11px] text-cream/55 mt-1">
-                    Base 5,000 + <span className="text-gold/80 font-bold">{formatCoins(pack.bonus)}</span> bonus
+                    Base 5,000 + <span className="text-gold/80 font-bold">{pack.bonus.toLocaleString()}</span> bonus
                   </p>
                 )}
               </div>
@@ -1313,7 +1313,7 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
                 type="button"
                 onClick={() => handleBuyPack(pack)}
                 disabled={disabled || isPending}
-                aria-label={`Buy ${pack.name}: ${formatCoins(pack.fangs)} Fangs for $${pack.priceUSD.toFixed(2)}`}
+                aria-label={`Buy ${pack.name}: ${pack.fangs.toLocaleString()} Fangs for $${pack.priceUSD.toFixed(2)}`}
                 aria-busy={isPending}
                 className={`mt-auto inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl py-2.5 px-4 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                   disabled
