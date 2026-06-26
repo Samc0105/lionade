@@ -1,1 +1,1278 @@
-[]
+[
+  {
+    "id": "pl-mailbox-full",
+    "track": "helpdesk",
+    "difficulty": "Intermediate",
+    "reward": 50,
+    "xp": 40,
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "Renee Alvarado",
+      "role": "Accounts Payable Clerk",
+      "vip": false
+    },
+    "subject": "Email stopped working this morning, can't send or receive",
+    "ticketBody": "Since about 9am I can't send or receive any email. When I try to send, Outlook gives me a bounce that says something about my mailbox being over its limit. I already closed and reopened Outlook twice and it didn't help. A coworker said I should just reinstall Outlook but I wanted to check with you first before I mess anything up. I have a vendor payment confirmation I need to send out today so this is a little urgent. Nothing changed on my end that I know of, I just have a lot of old emails I never deleted.",
+    "evidence": [
+      {
+        "label": "Non-delivery report received by user",
+        "lines": [
+          "Your message did not reach some or all of the intended recipients.",
+          "Subject: Re: Vendor payment confirmation",
+          "Sent: Mon 9:04 AM",
+          "The following recipient(s) could not be reached:",
+          "",
+          "rene.alvarado@corp.example (sender mailbox)",
+          "552 5.2.2 The recipient's mailbox is full and can't accept messages now.",
+          "Diagnostic: STOREDRV.Deliver; mailbox full QuotaExceeded"
+        ]
+      },
+      {
+        "label": "Outlook status bar (bottom of window)",
+        "lines": [
+          "This folder is up to date. Connected to: Microsoft Exchange",
+          "You are approaching the storage limit for this mailbox.",
+          "You will not be able to send or receive mail until you reduce your mailbox size."
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "get-mailboxstatistics rene.alvarado",
+          "mailboxstats",
+          "quota"
+        ],
+        "output": "DisplayName       : Renee Alvarado\nTotalItemSize     : 50.0 GB (53,687,091,200 bytes)\nIssueWarningQuota : 49.0 GB\nProhibitSendQuota : 49.5 GB\nProhibitSendRecv  : 50.0 GB\nItemCount         : 214,883\nStatus            : MailboxFull / SendReceiveProhibited",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "get-mailboxfolderstatistics rene.alvarado",
+          "folderstats"
+        ],
+        "output": "Name                FolderSize\n----                ----------\nDeleted Items       18.4 GB\nSent Items          14.1 GB\nInbox               11.9 GB\nArchive (old)        5.2 GB\nCalendar             0.4 GB\n\nNote: Deleted Items + Sent Items account for 32.5 GB of the 50 GB total.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "test-outlookconnectivity rene.alvarado",
+          "outlook connectivity",
+          "ping exchange"
+        ],
+        "output": "Autodiscover     : Success\nRPC/MAPI         : Success\nMailbox Server   : EXCH02 reachable, latency 11ms\nClient Profile   : Healthy, no corruption detected\n\nClient and transport are healthy. Delivery is being refused at the store, not the client.",
+        "step": "diag"
+      }
+    ],
+    "kbArticle": {
+      "id": "KB-2207",
+      "title": "Mailbox full: ProhibitSendReceive quota reached",
+      "tags": [
+        "exchange",
+        "mailbox",
+        "quota",
+        "email",
+        "552-5.2.2"
+      ],
+      "body": [
+        "When a mailbox reaches its ProhibitSendReceive quota, the Exchange store refuses both outbound and inbound mail. Senders receive a 552 5.2.2 or QuotaExceeded non-delivery report. This is a server-side storage limit and is not caused by a corrupt Outlook profile. Reinstalling Outlook, rebuilding the OST, or rebooting the workstation will not restore mail flow because the client is healthy and the limit lives on the mailbox.",
+        "There are two supported resolutions. First, reduce the mailbox size below the ProhibitSend threshold by archiving or permanently removing large folders. The fastest wins are usually Deleted Items and Sent Items. Emptying Deleted Items and moving old Sent Items into a local or online archive typically frees enough space to clear the block within a few minutes of the store recalculating the quota.",
+        "Second, if the user has a legitimate business need for the volume, raise the mailbox quota for that user (IssueWarningQuota, ProhibitSendQuota, ProhibitSendReceiveQuota) per the storage policy, then have them archive on a normal schedule. Either path restores send and receive. Do not reinstall the client, recreate the profile, or reimage the machine for a quota-full condition, as connectivity diagnostics will show the client is healthy."
+      ]
+    },
+    "actions": [
+      {
+        "id": "reinstall-outlook",
+        "label": "Reinstall Outlook and rebuild the OST profile",
+        "detail": "Uninstall Outlook, clear the cached profile, and set it up fresh to fix the broken client.",
+        "correct": false,
+        "csat": -7,
+        "teach": "The connectivity test shows the client is healthy and delivery is being refused at the store, not the client. Reinstalling Outlook touches the wrong layer entirely and wastes the user's morning. Read the bounce: 552 5.2.2 mailbox full is a server-side quota, not a client bug."
+      },
+      {
+        "id": "reboot-machine",
+        "label": "Tell the user to reboot and try again",
+        "detail": "Have them restart the workstation since closing Outlook twice did not help.",
+        "correct": false,
+        "csat": -5,
+        "teach": "A reboot restarts the client, but the block lives on the mailbox quota on the Exchange store. Rebooting cannot reduce a 50 GB mailbox below its limit. The user already tried the close-and-reopen version of this and it changed nothing, which is the tell that this is server-side."
+      },
+      {
+        "id": "delete-all-mail",
+        "label": "Hard-delete the entire mailbox to free space immediately",
+        "detail": "Run a server-side purge of all folders so the mailbox drops to zero and mail flows again.",
+        "correct": false,
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Never destroy a user's data to clear a quota. This is an Accounts Payable mailbox with vendor and payment records that likely have a retention obligation. Archiving Deleted Items and old Sent Items frees plenty of room without nuking business records. A purge here is a data-loss and compliance incident."
+      },
+      {
+        "id": "archive-or-raise-quota",
+        "label": "Archive Deleted Items and old Sent Items, or raise the mailbox quota",
+        "detail": "Empty Deleted Items and move old Sent Items to archive to drop below the ProhibitSend threshold, or raise the user's quota per the storage policy if the volume is legitimate. Confirm mail flow returns.",
+        "correct": true,
+        "requires": [
+          "kb",
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Correct. The NDR (552 5.2.2 mailbox full), the Outlook status bar warning, and the 50 GB / 50 GB quota all point to one cause: the mailbox hit its ProhibitSendReceive limit. Per KB-2207 the fix is to reduce size by archiving the largest folders (Deleted Items and Sent Items alone are 32.5 GB here) or to raise the quota. Both restore send and receive without touching the healthy client."
+      }
+    ],
+    "goal": "Recognize that the user's mail block is a server-side mailbox quota limit and resolve it by archiving large folders or raising the quota, not by touching the client.",
+    "hint": "The user already restarted the client twice with no change. Check where the message is actually being refused before you decide what to fix, and read the exact bounce code."
+  },
+  {
+    "id": "pl-startup-bloat",
+    "track": "helpdesk",
+    "difficulty": "Entry",
+    "reward": 35,
+    "xp": 28,
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "Dana Whitfield",
+      "role": "Accounts Payable Clerk"
+    },
+    "subject": "My desktop takes about 8 minutes to be usable after I turn it on",
+    "ticketBody": "Every morning I press the power button, log in, and then I just sit there. The desktop appears but everything is frozen for a long time. The disk light is solid for the whole stretch. I timed it today and it was roughly 8 minutes before I could actually open Outlook without it hanging. The machine is only about a year old. A coworker told me to just ask for more memory or a fresh reimage, but I wanted IT to look first. It runs fine once it finally settles down.",
+    "evidence": [
+      {
+        "label": "Resource Monitor at login (first 6 minutes)",
+        "lines": [
+          "Disk active time: 100% (sustained)",
+          "Disk queue length: 14.2 average",
+          "CPU: 22% average",
+          "Memory in use: 6.1 GB of 16 GB (62% free)",
+          "Top disk writers: GameLauncherSvc, CloudSyncA, CloudSyncB, VendorUpdater"
+        ]
+      },
+      {
+        "label": "Boot timing summary (Event Log, last 5 boots)",
+        "lines": [
+          "Avg time to desktop responsive: 7m 51s",
+          "Critical path: startup app initialization",
+          "Slowest contributors: disk I/O contention at user logon",
+          "No disk SMART warnings, no paging-to-disk pressure"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "startup list",
+          "list startup",
+          "show startup apps",
+          "startup"
+        ],
+        "output": "Auto-launch items enabled at logon (12):\n  VendorUpdater.exe        Impact: High\n  PrinterUpdater.exe       Impact: Medium\n  AudioCardUpdater.exe     Impact: Medium\n  CloudSyncA.exe           Impact: High\n  CloudSyncB.exe           Impact: High\n  GameLauncherSvc.exe      Impact: High\n  ChatHelper.exe           Impact: Medium\n  ToolbarAssistant.exe     Impact: Low\n  ShoppingCoupons.exe      Impact: Low\n  WeatherWidget.exe        Impact: Low\n  QuickNoteTray.exe        Impact: Low\n  SpotifyHelper.exe        Impact: Medium\nNote: 9 of these are non-essential to this user's role.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "mem check",
+          "memory check",
+          "check ram",
+          "free mem"
+        ],
+        "output": "Physical memory: 16 GB installed\nIn use at peak logon: 6.1 GB\nAvailable: 9.9 GB\nPage file activity: negligible\nVerdict: memory is not the constraint."
+      },
+      {
+        "aliases": [
+          "disk health",
+          "smart status",
+          "check disk",
+          "smartctl"
+        ],
+        "output": "Drive model: 512 GB NVMe SSD\nSMART overall health: PASSED\nReallocated sectors: 0\nMedia wear: 4%\nVerdict: drive is healthy. Slowness is from I/O contention, not a failing disk.",
+        "step": "diag"
+      }
+    ],
+    "actions": [
+      {
+        "id": "disable-startup",
+        "label": "Disable the non-essential startup items, then reboot to confirm",
+        "detail": "Turn off the high-impact auto-launchers the user does not need at logon (game launcher, second cloud sync, vendor and toolbar updaters, coupon and weather widgets). Leave the one cloud sync the role requires. Reboot and recheck time-to-desktop.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Right call. The diagnostics show a healthy SSD and plenty of free RAM, but a dozen apps all hammering the disk at logon. Trimming the non-essential auto-launch items removes the I/O contention and the boot drops back to normal. No hardware change needed."
+      },
+      {
+        "id": "add-ram",
+        "label": "Order and install 16 GB more RAM",
+        "detail": "Assume the slow boot is a memory shortage and double the RAM.",
+        "correct": false,
+        "csat": -7,
+        "teach": "The memory check shows 62% free at peak logon and no paging pressure. RAM was never the bottleneck. You would spend money and downtime and the 8-minute boot would come back unchanged, because the cause is disk contention from startup bloat."
+      },
+      {
+        "id": "reimage",
+        "label": "Wipe and reimage the machine from the standard build",
+        "detail": "Back up the user's files and lay down a fresh OS image to clear out whatever is slowing it.",
+        "correct": false,
+        "csat": -9,
+        "teach": "Reimaging is a sledgehammer for a problem you have not diagnosed. The standard image plus the user's usual app installs would likely reintroduce the same startup items within a week. Hours of downtime and data-restore risk for something a startup trim fixes in two minutes."
+      },
+      {
+        "id": "replace-ssd",
+        "label": "Replace the SSD because the disk is pegged at 100%",
+        "detail": "The disk shows 100% active time at login, so swap the drive for a faster one.",
+        "correct": false,
+        "csat": -8,
+        "teach": "100% active time means the disk is busy, not failing. SMART reports the SSD healthy with 4% wear and zero reallocated sectors. A new drive would sit at 100% too, because a dozen apps still launch at once. You are treating the symptom and missing the cause."
+      },
+      {
+        "id": "disable-all-services",
+        "label": "Disable every startup item and every non-Microsoft service to be safe",
+        "detail": "Clean-boot the machine permanently by turning off all auto-launch entries and third-party services.",
+        "correct": false,
+        "csat": -5,
+        "teach": "Too blunt. Killing everything including the cloud sync the user needs for their job, plus device drivers riding in those services, trades a slow boot for broken functionality and a follow-up ticket. Disable the non-essential items only, not the ones the role depends on."
+      }
+    ],
+    "goal": "Identify that the 8-minute boot comes from startup bloat, not failing or undersized hardware, and disable only the non-essential auto-launch items.",
+    "hint": "The hardware looks fine on paper. Check what is actually fighting for the disk the moment the user logs in before you spend money on parts."
+  },
+  {
+    "id": "pl-shared-perms",
+    "track": "helpdesk",
+    "difficulty": "Intermediate",
+    "reward": 50,
+    "xp": 40,
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "Dana Okafor",
+      "role": "Senior Payroll Analyst, Finance"
+    },
+    "subject": "Cannot open the Payroll share since my team move",
+    "ticketBody": "Hi, since I moved from FP&A over to the Payroll team last week I can no longer open our payroll folder at \\\\fileserver01\\Finance\\Payroll. When I double click it I get \"You do not have permission to access this network location. Contact your administrator.\" I need it today to finish the biweekly run. Nothing else changed on my laptop that I know of. My old FP&A shares still open fine. Can you sort out whatever access I am missing? Thanks.",
+    "evidence": [
+      {
+        "label": "Share ACL, \\fileserver01\\Finance\\Payroll",
+        "lines": [
+          "Permissions are granted to security groups only, not individual users.",
+          "GRP-FIN-Payroll-RW    Modify",
+          "GRP-FIN-Payroll-RO    Read",
+          "Domain Admins         Full Control",
+          "(no individual user entries present)"
+        ]
+      },
+      {
+        "label": "Dana Okafor, directory group memberships",
+        "lines": [
+          "GRP-FIN-FPA-RW        (former team, still assigned)",
+          "GRP-All-Staff",
+          "GRP-VPN-Users",
+          "Note: not a member of GRP-FIN-Payroll-RW or GRP-FIN-Payroll-RO",
+          "Team field updated to Payroll on 2026-06-09; group membership not updated"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "add-payroll-group",
+        "label": "Add Dana to GRP-FIN-Payroll-RW and remove the stale FP&A group",
+        "detail": "Match access to her current role: grant the Payroll modify group the share already trusts, then drop GRP-FIN-FPA-RW now that she left that team.",
+        "correct": true,
+        "csat": 14,
+        "teach": "Access problems after a team move are almost always group membership. The share trusts groups, Dana was never added to the Payroll group, and she still carries the old FP&A group. Grant the correct least privilege group and clean up the stale one. This is the textbook fix.",
+        "outcome": "resolved",
+        "ends": true
+      },
+      {
+        "id": "grant-local-admin",
+        "label": "Give Dana local admin on her laptop to get her unblocked fast",
+        "detail": "Elevate her account so the permission prompt stops appearing.",
+        "correct": false,
+        "csat": -9,
+        "teach": "Local admin has nothing to do with a network share ACL. It would not grant access to the payroll folder, and handing out admin rights for an access ticket is a serious over-permission habit. The block is a missing group, not a local privilege.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "email-files",
+        "label": "Export the payroll files and email them to Dana so she can finish the run",
+        "detail": "Zip the current payroll folder and send it to her so she is not blocked today.",
+        "correct": false,
+        "csat": -12,
+        "teach": "Emailing payroll data sidesteps every access control on that share and scatters sensitive records into mailboxes. The right answer is to fix the access, never to copy the protected data around it. This is how data leaks start.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "add-to-domain-admins",
+        "label": "Add Dana to Domain Admins since that group already has Full Control",
+        "detail": "Use the Domain Admins entry on the ACL to give her access in one step.",
+        "correct": false,
+        "csat": -11,
+        "teach": "Domain Admins would work, and that is exactly the problem. You would hand a payroll analyst keys to the entire directory to open one folder. Always grant the narrowest group that fits the role, which here is GRP-FIN-Payroll-RW.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "open-acl-for-everyone",
+        "label": "Add an individual permission entry for Dana directly on the folder",
+        "detail": "Skip the group and put Dana's user account straight onto the share ACL.",
+        "correct": false,
+        "csat": -5,
+        "teach": "It would unblock her, but it breaks the group based model this share is built on. Per user ACL entries rot fast and become impossible to audit. The share is managed by groups on purpose, so add her to the group, not the folder.",
+        "outcome": "mishandled",
+        "ends": true
+      }
+    ],
+    "goal": "Restore Dana's access to the Payroll share using least privilege, without over-permissioning her or moving the data.",
+    "hint": "Compare what the share grants against what Dana is actually a member of. The change happened when she switched teams, so ask what should have changed with her and did not."
+  },
+  {
+    "id": "pl-vpn-split-dns",
+    "track": "helpdesk",
+    "difficulty": "Advanced",
+    "reward": 70,
+    "xp": 56,
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Dana Whitfield",
+      "role": "Field Sales, working remote from a hotel"
+    },
+    "subject": "VPN says connected but I can't open any of our internal tools",
+    "ticketBody": "Hi support. I'm on the road this week and the VPN is acting weird. It connects fine, the tray icon is green and it says I got an IP address. The thing is, when I try to open the SharePoint at portal.corp.internal or hit the wiki at wiki.corp.internal, my browser just spins and then says the site can't be reached. Google and our public marketing site load instantly, so my hotel wifi is definitely working. A teammate told me to ping the file server by its IP and that actually worked, which makes no sense to me if the VPN is broken. I have a customer demo in two hours that needs the internal pricing tool. Please help. I have not touched any settings, this worked last week before my laptop got reimaged.",
+    "evidence": [
+      {
+        "label": "Ticket context (from intake notes)",
+        "lines": [
+          "VPN client: connected, tunnel up, assigned 10.20.40.112",
+          "User CAN ping internal host by IP (10.20.10.5 = fileserver)",
+          "User CANNOT load internal hostnames (portal.corp.internal, wiki.corp.internal)",
+          "Public sites (google.com, marketing site) load fine",
+          "Laptop was reimaged last week; first remote session since"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "ipconfig /all",
+          "ipconfig",
+          "ifconfig"
+        ],
+        "output": "VPN adapter Corp-Tunnel:\n   Connection-specific DNS Suffix . :\n   IPv4 Address. . . . . . . . . . . : 10.20.40.112\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   DNS Servers . . . . . . . . . . . : 10.20.10.53\n   NetBIOS over Tcpip. . . . . . . . : Enabled\n\nNote: Connection-specific DNS Suffix is EMPTY. No search domain (corp.internal) is configured on the tunnel adapter.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "nslookup portal.corp.internal",
+          "nslookup portal",
+          "nslookup"
+        ],
+        "output": "Server:  dns01.corp.internal\nAddress:  10.20.10.53\n\nName:    portal.corp.internal\nAddress:  10.20.10.22\n\n(FQDN resolves correctly against the internal DNS server. The short name 'portal' alone returns: *** can't find portal: Non-existent domain, because no search suffix is appended.)",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "ping 10.20.10.5",
+          "ping fileserver-ip",
+          "ping internal-ip"
+        ],
+        "output": "Pinging 10.20.10.5 with 32 bytes of data:\nReply from 10.20.10.5: bytes=32 time=41ms TTL=126\nReply from 10.20.10.5: bytes=32 time=39ms TTL=126\n\nReply received. Routing into the internal network over the tunnel works. Layer 3 is fine."
+      },
+      {
+        "aliases": [
+          "ping portal",
+          "ping portal.corp.internal",
+          "ping internal-name"
+        ],
+        "output": "Ping request could not find host portal. Please check the name and try again.\n\nName resolution fails for the short name. The tunnel is up and the route exists, the client just can't turn the name into an address."
+      }
+    ],
+    "actions": [
+      {
+        "id": "push-dns-suffix",
+        "label": "Push the internal DNS suffix to the client",
+        "detail": "Update the VPN profile to assign the corp.internal search domain (and confirm the tunnel's internal DNS server 10.20.10.53) so short and FQDN internal names resolve. Have the user reconnect to pull the corrected profile.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Tunnel up, IPs reachable, FQDN resolves against the internal DNS server, but the short name fails and the adapter's connection-specific DNS suffix is empty. That is a missing search domain, not a broken VPN. Pushing corp.internal as the DNS suffix lets the client append the domain to short names and complete the internal lookups."
+      },
+      {
+        "id": "use-public-dns",
+        "label": "Tell the user to set their DNS to 8.8.8.8",
+        "detail": "Switch the client to a public resolver to 'fix the slow internal sites.'",
+        "correct": false,
+        "csat": -10,
+        "teach": "Public resolvers have no records for corp.internal and never will. This guarantees internal names stay broken and can also break split-DNS for everyone who copies the workaround. Internal names must be resolved by the internal DNS server reached over the tunnel."
+      },
+      {
+        "id": "reinstall-client",
+        "label": "Have the user uninstall and reinstall the VPN client",
+        "detail": "Assume the client is corrupt and rebuild it from scratch before the demo.",
+        "correct": false,
+        "csat": -7,
+        "teach": "The tunnel is up, the user has an IP, routing works, and the internal DNS server answers correctly. Nothing points at a broken client. A reinstall burns the time before the demo and, unless the profile pushes the suffix, the same gap returns the moment they reconnect."
+      },
+      {
+        "id": "edit-hosts-file",
+        "label": "Walk the user through hardcoding entries in the hosts file",
+        "detail": "Manually map portal.corp.internal and wiki.corp.internal to their current IPs on the laptop.",
+        "correct": false,
+        "csat": -8,
+        "teach": "A hosts file edit is a brittle per-machine hack that goes stale the instant an internal IP changes and covers only the handful of names you happen to type. It hides the real fix, which is a one-line profile change that corrects every internal name for every reimaged user at once."
+      },
+      {
+        "id": "escalate-firewall-outage",
+        "label": "Escalate to network team as an internal firewall outage",
+        "detail": "Open a P1 claiming internal sites are down behind the firewall.",
+        "correct": false,
+        "csat": -5,
+        "teach": "Nothing is down. The fileserver pings, the internal DNS server resolves the FQDN, and only this reimaged client is affected. Escalating a non-outage as P1 wastes the on-call's time. The evidence localizes the problem to one client's missing DNS suffix."
+      }
+    ],
+    "goal": "Recognize that an up tunnel with reachable IPs but failing internal names is a DNS suffix problem, and push the internal search domain to the client rather than blaming the whole VPN.",
+    "hint": "Connected is not the same as resolving. Separate the three layers: does the tunnel route packets, does an IP work, does a name turn into that IP? Check the adapter's DNS suffix and try an FQDN versus a short name before you decide what is actually broken."
+  },
+  {
+    "id": "pl-soc-powershell",
+    "track": "soc",
+    "difficulty": "Advanced",
+    "reward": 70,
+    "xp": 56,
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "EDR Automated Alerting",
+      "role": "CrowdStrike Falcon detection feed",
+      "vip": false
+    },
+    "subject": "[Detection] Encoded PowerShell spawned by Office macro on FIN-WS-114, active C2 beacon",
+    "ticketBody": "Auto-generated from EDR detection CS-2026-0615-44192. Severity High.\n\nHost FIN-WS-114 (finance department workstation, user j.okafor) triggered a behavioral detection at 09:41 local. A WINWORD.EXE process opened an email attachment and spawned a child powershell.exe with an encoded command line (-enc / base64). The PowerShell process has since opened repeating outbound TLS connections to an external host on an unusual port.\n\nNo analyst has touched this host yet. The detection is in \"new\" state. The user is still logged in and reports the machine \"feels slow.\" Asset tag confirms this box has mapped drives to the finance file share.\n\nWe need defensive triage only: confirm the encoded process and its document parent, then contain the host so the beacon stops and IR can collect memory. Do not attempt to decode or run the payload yourself. Use the host investigation console below to confirm before you act.",
+    "goal": "Confirm the encoded PowerShell process and its macro-document parent, then network-isolate the host while keeping it powered and preserve it for IR.",
+    "hint": "Trace the process tree to its document parent and check what would re-launch it before you contain. Stopping the beacon is not the same as stopping the host from re-spawning it.",
+    "evidence": [
+      {
+        "label": "EDR detection summary CS-2026-0615-44192",
+        "lines": [
+          "host: FIN-WS-114   user: j.okafor   os: Windows 10 22H2",
+          "tactic: Execution / Command and Scripting Interpreter (T1059.001)",
+          "trigger: suspicious_parent_child + encoded_command",
+          "parent: WINWORD.EXE  ->  child: powershell.exe -enc <base64>",
+          "network: 4 outbound TLS conns to 91.203.x.x:8443 over last 6 min",
+          "state: NEW  (no containment, no remediation applied)"
+        ]
+      },
+      {
+        "label": "Mapped resources on FIN-WS-114",
+        "lines": [
+          "Z:\\  ->  \\\\fin-fs01\\quarterly  (read/write, user j.okafor)",
+          "Y:\\  ->  \\\\fin-fs01\\payroll   (read, user j.okafor)",
+          "note: lateral exposure if credentials or token are harvested"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "ps",
+          "ps tree",
+          "process tree",
+          "tasklist",
+          "show processes"
+        ],
+        "output": "PID    PPID   IMAGE              COMMAND LINE\n5180   4972   WINWORD.EXE        \"C:\\Program Files\\...\\WINWORD.EXE\" /n \"C:\\Users\\j.okafor\\AppData\\...\\Q2_invoice_review.docm\"\n6624   5180   powershell.exe     powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQ...[truncated 1.4kb]\n6912   6624   conhost.exe        \\\\?\\C:\\WINDOWS\\system32\\conhost.exe 0xffffffff\n\nNote: WINWORD opened a macro-enabled document (.docm). powershell.exe (6624) is a direct child.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "netstat",
+          "conns",
+          "connections",
+          "netconns",
+          "show network"
+        ],
+        "output": "PROTO  LOCAL              FOREIGN              STATE        PID\nTCP    10.4.18.114:50331  91.203.x.x:8443      ESTABLISHED  6624\nTCP    10.4.18.114:50338  91.203.x.x:8443      TIME_WAIT    6624\nTCP    10.4.18.114:50344  91.203.x.x:8443      ESTABLISHED  6624\n\nForeign IP 91.203.x.x has no business reputation. Port 8443 beaconing on a fixed interval. Owner PID 6624 is the encoded powershell child.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "autoruns",
+          "persistence",
+          "scheduled tasks",
+          "schtasks",
+          "check persistence"
+        ],
+        "output": "Scheduled Tasks (user context j.okafor):\n  \\Microsoft\\Windows\\UpdateOrchestrator\\AppHostSync   ->  triggers at logon, runs powershell.exe -enc ...\n\nRun key (HKCU):\n  HKCU\\...\\Run\\OfficeTelemetryAgent  ->  wscript launcher\n\nNote: a logon-triggered task and a Run key both re-launch the loader. Killing PID 6624 alone will not stop re-spawn.",
+        "step": "diag"
+      }
+    ],
+    "actions": [
+      {
+        "id": "isolate-preserve",
+        "label": "Network-isolate FIN-WS-114 (keep powered) and hand to IR for memory capture",
+        "detail": "Apply EDR host containment so only the management channel stays up. Leave the machine running so volatile memory and the live process survive. Snapshot the .docm parent and the encoded command line into the case, then page IR for acquisition.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Correct. Encoded PowerShell with a .docm parent and unreputed beacon is a classic macro dropper. Containment stops the C2 and lateral reach while keeping the host powered so IR can capture memory and the running process. You confirmed parent, child, and persistence before acting, which is exactly the order containment should follow.",
+        "outcome": "resolved"
+      },
+      {
+        "id": "kill-process",
+        "label": "Kill powershell.exe PID 6624 and close the ticket",
+        "detail": "End the encoded process so the beacon drops.",
+        "correct": false,
+        "csat": -8,
+        "teach": "The beacon stops for a moment, then comes back. The persistence check showed a logon task and a Run key that re-launch the loader, so the parent re-spawns the child within minutes. Killing one PID is not containment. Isolate the host first.",
+        "outcome": "mishandled"
+      },
+      {
+        "id": "reimage-now",
+        "label": "Pull the drive and reimage FIN-WS-114 immediately to be safe",
+        "detail": "Wipe and rebuild from the golden image so the box is clean.",
+        "correct": false,
+        "csat": -12,
+        "teach": "Reimaging now destroys exactly the evidence IR needs: the live process, volatile memory, the staged document, and the persistence artifacts. You also never scoped what was taken from the mapped finance shares. Contain and preserve first, remediate after acquisition.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "ask-user-reboot",
+        "label": "Call j.okafor and ask them to reboot the workstation",
+        "detail": "A reboot may clear the slow behavior the user reported.",
+        "correct": false,
+        "csat": -6,
+        "teach": "A reboot tears down the memory image and live connections that IR depends on, and the logon-triggered task simply runs the loader again on next sign-in. Calling the user and asking for a reboot accomplishes nothing useful for the investigation while destroying volatile evidence. Isolate via EDR, do not reboot.",
+        "outcome": "mishandled"
+      }
+    ]
+  },
+  {
+    "id": "pl-soc-impossible-travel",
+    "track": "soc",
+    "difficulty": "Intermediate",
+    "reward": 50,
+    "xp": 40,
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Identity Threat Detection",
+      "role": "Automated alert (Okta ITP rule IT-114)"
+    },
+    "subject": "Impossible travel: a.okafor@lionade.io signed in from Lagos, NG 12 min after Denver, US",
+    "ticketBody": "Automated rule IT-114 fired on user a.okafor@lionade.io (Ada Okafor, Finance). Two successful interactive logins resolved to different countries inside a 12 minute window, which is faster than any physical travel between them.\n\nLogin A: 14:02:17 MDT from Denver, CO (203.0.113.44, Comcast) on her enrolled MacBook, device id MBP-OKAFOR-1, MFA satisfied.\n\nLogin B: 14:14:03 MDT from Lagos, NG (105.112.x.x, MTN Nigeria) from an unrecognized device, MFA shown as satisfied via a push that was approved 3 seconds after the foreign sign-in started.\n\nBefore you contain anything, rule out the boring explanations. Is the Lagos IP a corporate VPN egress or a known travel pattern for this user, or is it a genuinely new device and ASN? The terminal has the geo, device, and session inventory. Confirm the cause, then act. Do not close this as a VPN false positive on a hunch, and do not do half the job.",
+    "evidence": [
+      {
+        "label": "IT-114 alert detail",
+        "lines": [
+          "user        a.okafor@lionade.io (Ada Okafor, Finance)",
+          "rule        IT-114 impossible_travel  threshold 800 km/h",
+          "implied vel 11,200 km/h (Denver -> Lagos in 12 min)",
+          "loginA      14:02:17 MDT  Denver,US   203.0.113.44   device MBP-OKAFOR-1   MFA=ok",
+          "loginB      14:14:03 MDT  Lagos,NG    105.112.x.x    device UNKNOWN-83f1   MFA=push-approved",
+          "risk        HIGH   new_device=true  new_asn=true  new_country=true"
+        ]
+      },
+      {
+        "label": "User context",
+        "lines": [
+          "role        Finance, has access to billing console + payout exports",
+          "travel      no approved travel on file; last 90d logins all Denver metro",
+          "vpn         corp VPN egress is AWS us-east (3.x.x.x), not MTN Nigeria",
+          "manager     pinged on Slack; user is at her desk in Denver and did not sign in from Lagos"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "geoip 105.112.x.x",
+          "whois 105.112.x.x",
+          "lookup lagos ip",
+          "check foreign ip"
+        ],
+        "output": "ASN      AS29465 MTN-NIGERIA-Plc\ncountry  NG (Lagos)\ntype     mobile_carrier  (consumer, not datacenter/VPN)\ncorp_vpn no match against known egress ranges\ntor/prox no match against threat feeds\nverdict  NOT a corporate VPN and NOT on file as known travel egress",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "device lagos",
+          "show device unknown-83f1",
+          "device inventory",
+          "check device"
+        ],
+        "output": "device   UNKNOWN-83f1\nenrolled never seen before this session (first_seen=loginB)\nos       Windows 10 (user's only enrolled device is MBP-OKAFOR-1, macOS)\nmgmt     not MDM-managed, not in device trust inventory\nverdict  unrecognized, unmanaged device. Not the user's hardware.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "sessions a.okafor",
+          "list sessions",
+          "active sessions",
+          "show tokens"
+        ],
+        "output": "session  S-1  Denver  MBP-OKAFOR-1  issued 14:02  status ACTIVE\nsession  S-2  Lagos   UNKNOWN-83f1  issued 14:14  status ACTIVE  <-- foreign, still live\ntoken    S-2 rode a refresh token; push approved without the user initiating a login\nnote     two live sessions concurrently; S-2 is reading the billing console now"
+      }
+    ],
+    "actions": [
+      {
+        "id": "confirm-revoke-reset-mfa",
+        "label": "Confirm not-VPN, then revoke the Lagos session, force password reset, and re-verify MFA",
+        "detail": "Geo shows MTN consumer mobile (not corp VPN, no travel on file) and an unenrolled Windows device. Kill session S-2 immediately, force a credential reset, and re-enroll/verify MFA so a stolen token cannot be replayed.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Correct. Impossible travel that survives the VPN and travel checks is likely token or credential theft. You confirmed first, then did the FULL containment: revoke the live foreign session AND reset the password AND re-verify MFA. Revoking and resetting closes both the active access and the path back in.",
+        "outcome": "resolved",
+        "ends": true
+      },
+      {
+        "id": "dismiss-as-vpn",
+        "label": "Close as a VPN false positive",
+        "detail": "Finance people travel and use VPNs. Mark benign and move on.",
+        "correct": false,
+        "csat": -11,
+        "teach": "You guessed. The geo lookup shows MTN consumer mobile, not a corporate VPN egress, with no travel on file and a brand new Windows device. Dismissing impossible travel without running the VPN/device check is exactly how a live account takeover gets waved through.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "reset-password-only",
+        "label": "Force a password reset and close it",
+        "detail": "Reset her password to lock the attacker out.",
+        "correct": false,
+        "csat": -7,
+        "teach": "Half a fix. The Lagos session S-2 is already authenticated and still live, so a password reset alone does not log it out. You have to revoke the active foreign session too, or the attacker keeps the access they already have.",
+        "outcome": "mishandled"
+      },
+      {
+        "id": "revoke-session-only",
+        "label": "Revoke the Lagos session and close it",
+        "detail": "Kill session S-2. Problem solved.",
+        "correct": false,
+        "csat": -6,
+        "teach": "Better, but incomplete. If the credential or refresh token was stolen, the attacker just signs back in and gets a fresh session. Revoke the session AND reset the password AND re-verify MFA, not one of the three.",
+        "outcome": "mishandled"
+      },
+      {
+        "id": "email-user-ask",
+        "label": "Email the user to ask if it was really her",
+        "detail": "Send a note asking Ada to confirm whether she logged in from Lagos.",
+        "correct": false,
+        "csat": -4,
+        "teach": "Too slow and you already have the answer. Her manager confirmed she is at her desk in Denver and the device is an unenrolled Windows box. Waiting on email while the foreign session reads the billing console is time the attacker uses. Contain now, notify after.",
+        "outcome": "mishandled"
+      }
+    ],
+    "goal": "Confirm the Lagos login is not a VPN or known travel, then fully contain: revoke the foreign session, force a password reset, and re-verify MFA.",
+    "hint": "Run the geo and device checks before you decide. Then ask yourself: if the token was stolen, does resetting the password alone actually log the attacker out?"
+  },
+  {
+    "id": "pl-soc-usb-autorun",
+    "track": "soc",
+    "difficulty": "Intermediate",
+    "reward": 50,
+    "xp": 40,
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "EDR Console (auto-generated)",
+      "role": "Endpoint Detection alert relay"
+    },
+    "subject": "[EDR] Blocked autorun execution on removable media on host LAB-PC-07",
+    "ticketBody": "Automated alert promoted to a ticket for analyst review.\n\nA contractor (badge guest-2241, escorted) plugged a USB drive into LAB-PC-07 in the imaging lab at 14:02. The drive carried an autorun.inf pointing at an executable. The EDR autorun-prevention rule fired and blocked the process before it spawned. The contractor says it is \"just my project files\" and has already pulled the drive.\n\nThe block is logged but the alert is open. We do not yet know whether anything else on that host was touched, and the fleet-wide autorun policy that let this attempt even reach the EDR is still in its default permissive state. Please triage: confirm scope on the host and decide what to do about the broader exposure. Do not assume \"blocked\" means \"nothing to do.\"",
+    "evidence": [
+      {
+        "label": "EDR detection record: LAB-PC-07",
+        "lines": [
+          "14:02:11  REMOVABLE_MEDIA_MOUNT  vol=E:  serial=07AC-3319  fs=exFAT",
+          "14:02:11  AUTORUN_INF_PARSED  open=.\\setup_v3.exe  label=PROJECTFILES",
+          "14:02:12  PROCESS_CREATE_BLOCKED  image=E:\\setup_v3.exe  rule=ASR-AutorunRemovable  verdict=PREVENTED",
+          "14:02:12  child processes spawned: 0   network connections: 0",
+          "14:02:39  REMOVABLE_MEDIA_REMOVE  vol=E:  (user-initiated)",
+          "Host containment status: NOT isolated   Last full AV scan: 9 days ago"
+        ]
+      },
+      {
+        "label": "Fleet policy state: Removable Media",
+        "lines": [
+          "Policy: Autorun / AutoPlay for removable drives",
+          "Current setting: ALLOW (Windows default, never overridden)",
+          "Scope: applies to all 312 managed workstations",
+          "EDR ASR rule blocked THIS attempt at the process layer.",
+          "The OS-level autorun policy itself was not the thing that stopped it."
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "pull-and-close",
+        "label": "USB is already out and nothing ran. Close the alert.",
+        "detail": "Mark resolved, note that EDR did its job, move on.",
+        "csat": -8,
+        "teach": "A block is a near-miss, not a non-event. The host was never isolated or rescanned, so you have not actually confirmed nothing else was touched, and the permissive autorun policy is still live on all 312 machines. Closing here means the next contractor's drive gets the same free shot.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "reimage-now",
+        "label": "Reimage LAB-PC-07 immediately to be safe.",
+        "detail": "Wipe and rebuild the lab PC before doing anything else.",
+        "csat": -7,
+        "teach": "You destroyed the evidence before confirming scope. The EDR log already shows zero child processes and zero network activity, so a scan would almost certainly clear this host. Nuking first throws away the only artifacts you would need if it turned out something HAD run, and it does nothing about the fleet-wide policy gap.",
+        "outcome": "mishandled"
+      },
+      {
+        "id": "ban-contractor",
+        "label": "Report the contractor for a malware attempt and revoke their badge.",
+        "detail": "Escalate to physical security as a deliberate insider action.",
+        "csat": -5,
+        "teach": "Nothing in the evidence shows intent. An autorun.inf with a setup executable is exactly what a sloppy vendor installer USB looks like, and the contractor was escorted. Confirm scope and close the technical risk first. Accusing people on a single blocked alert burns trust and still leaves the real gap, the permissive policy, wide open.",
+        "outcome": "reported"
+      },
+      {
+        "id": "isolate-scan-disable-autorun",
+        "label": "Isolate and scan LAB-PC-07 to confirm scope, then push a policy disabling autorun fleet-wide.",
+        "detail": "Network-isolate the host, run a full on-demand scan to confirm nothing executed, document the clean result, then deploy the GPO that sets removable-media autorun to DISABLED across all workstations.",
+        "correct": true,
+        "csat": 14,
+        "teach": "Right call. Treat a blocked autorun as a near-miss: contain the one host and rescan to confirm the EDR log's zero-child-process reading is real, then close the entire class of risk by disabling autorun on all 312 machines so the next drive cannot even try. Remove the stick AND the door it walked through.",
+        "outcome": "resolved"
+      }
+    ],
+    "goal": "Confirm nothing executed on the affected host and close the broader autorun exposure, not just remove the USB drive.",
+    "hint": "EDR blocking the process is one event on one host. Read both panels: what is the host's current containment and scan state, and what does the fleet policy still allow for the next drive?"
+  },
+  {
+    "id": "pl-soc-dns-tunnel",
+    "track": "soc",
+    "difficulty": "Advanced",
+    "reward": 70,
+    "xp": 56,
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "Resolver Telemetry Bot",
+      "role": "DNS Firewall (auto-filed)",
+      "vip": false
+    },
+    "subject": "Anomaly: host LAB-WS-114 high-rate long TXT queries to single new domain",
+    "ticketBody": "Auto-filed by the recursive resolver anomaly job. In the last 40 minutes a single internal host, LAB-WS-114 (10.20.4.114), generated roughly 9,400 DNS queries to one domain, q7x-update[.]net. The query type is almost entirely TXT, the QNAMEs are unusually long (60+ char labels of base32-looking text), and the domain was registered 3 days ago. No other host on the network has ever resolved this domain. Normal background DNS for this host is a few hundred queries an hour to known CDNs and update servers. Please triage before the analyst queue picks it up.\n\nThe resolver can sinkhole a domain and EDR can network-isolate a host. Both are available to you. Confirm what this is, then act.",
+    "evidence": [
+      {
+        "label": "Resolver anomaly summary (LAB-WS-114, last 40m)",
+        "lines": [
+          "domain                queries  qtype   first_seen      avg_qname_len",
+          "q7x-update[.]net       9,412    TXT     3 days ago      71 chars",
+          "cdn.windowsupdate.com    188    A       baseline        24 chars",
+          "telemetry.local           54    A       baseline        18 chars",
+          "",
+          "domain age (whois)  : registered 3 days ago, privacy-proxied",
+          "other hosts querying: 0",
+          "resolver action     : none yet (alert only)"
+        ]
+      },
+      {
+        "label": "Sample QNAMEs (truncated for the ticket)",
+        "lines": [
+          "mfzg4ylumvzxiidtmvsgk3....q7x-update[.]net  TXT",
+          "nbswy3dpfqqho33snrscc4....q7x-update[.]net  TXT",
+          "ovxhi4tpmzqw45dfojss2c....q7x-update[.]net  TXT",
+          "(labels are high-entropy base32, one query roughly every 0.25s, steady)"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "dns-stats q7x-update.net",
+          "stats q7x-update.net",
+          "resolver stats"
+        ],
+        "output": "domain        : q7x-update[.]net\nqtype mix     : TXT 99.2%, NULL 0.6%, A 0.2%\nqname entropy : 4.81 bits/char (random-string range; English text is ~2.6)\nrate          : ~4 queries/sec, sustained, no diurnal dip\nuniq qnames   : 9,388 of 9,412 (almost every query is unique)\nresponse size : avg 412 bytes TXT payload returned per query\nnote          : unique high-entropy subdomains + large TXT answers = bidirectional data channel",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "whois q7x-update.net",
+          "whois",
+          "domain age"
+        ],
+        "output": "domain     : q7x-update[.]net\ncreated    : 3 days ago\nregistrar  : low-cost reseller, privacy proxy enabled\nname server: ns1.q7x-update[.]net (authoritative is the domain itself)\nreputation : not in any allowlist; no legitimate software vendor association\nnote       : self-hosted authoritative NS for a brand-new domain is the classic tunneling setup",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "host LAB-WS-114",
+          "edr host",
+          "asset lookup"
+        ],
+        "output": "host    : LAB-WS-114 (10.20.4.114)\nowner   : shared lab workstation, no single assigned user\nedr     : online, isolation supported, last check-in 30s ago\nproc    : svc_netupd.exe spawning nslookup-style resolver calls in a tight loop\nparent  : powershell.exe (started 41 min ago from a temp dir)\nnote    : process is generating the query loop; host is the source, not a victim resolver passthrough",
+        "step": "diag"
+      }
+    ],
+    "actions": [
+      {
+        "id": "block-and-isolate",
+        "label": "Sinkhole q7x-update[.]net AND network-isolate LAB-WS-114, preserve for IR",
+        "detail": "Sinkhole the domain at the resolver to kill the channel network-wide, isolate the host in EDR so it cannot pivot or switch to a backup domain, snapshot memory and the temp-dir artifacts, then escalate to IR.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Correct. High-entropy unique TXT QNAMEs to a brand-new self-hosted domain at a steady multi-per-second rate is DNS tunneling, a covert command-and-control and exfil channel. You must do both: sinkhole the domain to cut the channel, AND isolate the host because it is already compromised and the implant can rotate to a backup domain the moment you block this one. Preserving memory and the temp artifacts keeps IR's options open."
+      },
+      {
+        "id": "block-domain-only",
+        "label": "Sinkhole q7x-update[.]net at the resolver and close the ticket",
+        "detail": "Blackhole the one domain and consider the channel cut.",
+        "correct": false,
+        "csat": -9,
+        "teach": "Half a fix. Blocking the single domain stops this exact channel, but the host is still compromised and the implant is built to fail over. Tunneling malware commonly carries a backup domain list or a DGA, so it just resolves the next one and you are blind again. You have to isolate the host, not only the domain."
+      },
+      {
+        "id": "ignore-just-dns",
+        "label": "Mark as benign, it is only DNS / probably an update client",
+        "detail": "Treat port 53 traffic to an update-sounding domain as normal noise.",
+        "correct": false,
+        "csat": -12,
+        "teach": "This is the trap. The name looks like an updater but the behavior does not: 9,000+ unique high-entropy TXT queries to a 3-day-old privacy-proxied domain that self-hosts its own nameserver is not how update clients behave. DNS is not automatically benign, it is a favorite exfil channel precisely because people wave it through. Letting it ride leaves an active C2 and exfil path open.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "reimage-now",
+        "label": "Immediately wipe and reimage LAB-WS-114 to be safe",
+        "detail": "Pull the host and reimage it on the spot.",
+        "correct": false,
+        "csat": -6,
+        "teach": "Too aggressive, too early. Reimaging before isolation and capture destroys the running implant, the temp-dir artifacts, and any indicators IR needs to find the backup domains and scope the breach. Contain first by isolating, preserve memory and artifacts, then let IR decide on reimage."
+      }
+    ],
+    "goal": "Recognize the long high-entropy TXT queries to one new domain as DNS tunneling, then both sinkhole the domain and isolate the host while preserving evidence for IR.",
+    "hint": "Look past the update-sounding name. Check the query type, the randomness of the names, the rate, and how old the domain is. Then ask whether killing the domain alone actually stops a compromised host."
+  },
+  {
+    "id": "pl-swe-oom",
+    "track": "swe",
+    "difficulty": "Advanced",
+    "reward": 70,
+    "xp": 56,
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Priya Nadkarni",
+      "role": "On-call SRE, Platform"
+    },
+    "subject": "notify-worker pod OOMKilled on a ~40 min cycle since the 2.14 deploy",
+    "ticketBody": "notify-worker (the outbound email/push fan-out service) has been getting OOMKilled and restarted roughly every 40 minutes since the 2.14.0 rollout yesterday afternoon. No traffic spike correlates with the restarts, throughput is flat. RSS climbs in a straight line from about 180 MB at boot until it hits the 512 MB cgroup limit, then the kernel kills it and it starts over. Restarts are clean so users mostly see a few seconds of delayed notifications, but the on-call pages are constant and we are masking a real problem. I grabbed a heap snapshot before the last kill. Please find root cause and fix it, do not just paper over the pages.",
+    "evidence": [
+      {
+        "label": "kubectl describe pod notify-worker-7c9 (trimmed)",
+        "lines": [
+          "Last State:   Terminated",
+          "  Reason:     OOMKilled",
+          "  Exit Code:  137",
+          "Restart Count: 19",
+          "Limits:  memory: 512Mi",
+          "Requests: memory: 256Mi",
+          "Events: Back-off restarting failed container (x19)"
+        ]
+      },
+      {
+        "label": "RSS sampled every 5 min (one cycle, MB)",
+        "lines": [
+          "t+00m  184",
+          "t+10m  267",
+          "t+20m  351",
+          "t+30m  438",
+          "t+38m  509  -> OOMKilled, container restarts",
+          "t+40m  186  (fresh process, climb begins again)"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "heap",
+          "heap snapshot",
+          "node --heap-summary heap.heapsnapshot",
+          "heap retainers"
+        ],
+        "output": "Top retainers by retained size:\n  1. Map @SubscriptionRegistry._byTenant   312.4 MB   (entries: 1,840,221)\n  2. (array) EventEmitter[notify].listeners 38.9 MB   (count: 412,003)\n  3. Buffer pool                             9.1 MB\n\n_byTenant grew +84 MB since previous snapshot (same tenant set, ~14 active tenants).\nEntries are keyed by a per-request correlationId and are never deleted.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "git",
+          "git log --oneline v2.13.0..v2.14.0 -- src/notify",
+          "diff",
+          "changes"
+        ],
+        "output": "a91f4c2  notify: cache subscription lookups per request to cut DB reads\n   + SubscriptionRegistry._byTenant.set(correlationId, sub)\n   + bus.on('flush', () => drain(sub))      // listener added per request\n   - // no corresponding .delete() or bus.off() on request completion\n7d20e8b  notify: bump batch size 50 -> 200",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "restarts",
+          "kubectl get events",
+          "events"
+        ],
+        "output": "LAST SEEN   TYPE      REASON      OBJECT                 MESSAGE\n2m          Warning   OOMKilling  pod/notify-worker-7c9  Memory cgroup out of memory: killed process\n42m         Warning   OOMKilling  pod/notify-worker-4f1  Memory cgroup out of memory: killed process\n81m         Warning   OOMKilling  pod/notify-worker-9b2  Memory cgroup out of memory: killed process"
+      }
+    ],
+    "actions": [
+      {
+        "id": "raise-limit",
+        "label": "Raise the memory limit to 2Gi and move on",
+        "detail": "Edit the deployment so the cgroup limit is 2Gi, which stops the pages.",
+        "csat": -8,
+        "teach": "The memory never plateaus, it climbs in a straight line. A bigger ceiling just buys a longer interval between the same OOM kills. Raising a limit is correct for a service that genuinely needs more headroom, not for one that leaks without bound."
+      },
+      {
+        "id": "add-replicas",
+        "label": "Scale notify-worker from 2 to 6 replicas",
+        "detail": "More pods spread the load so each one fills up slower.",
+        "csat": -9,
+        "teach": "Every replica runs the same leaking code, so every replica climbs to 512 MB and gets killed on its own clock. You multiply the pages instead of fixing them, and throughput per pod is already flat so there is no load to spread."
+      },
+      {
+        "id": "restart-cron",
+        "label": "Add a cron that rolling-restarts the pods every 30 minutes",
+        "detail": "Pre-empt the OOM kill with a scheduled restart so it is graceful instead of a kill -9.",
+        "csat": -6,
+        "teach": "Scheduled restarts hide the leak behind a tidier failure but the leak is still there, growing, and one slow tenant could still blow the limit before the cron fires. Treating the symptom on a timer is not a root cause fix."
+      },
+      {
+        "id": "fix-leak",
+        "label": "Release the leaked references: bound the cache and remove the per-request listener",
+        "detail": "Delete the _byTenant entry and call bus.off('flush', ...) when each request completes (or scope the cache to the request and drop the global registry), then redeploy.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Linear memory growth plus periodic OOM means a leak. The heap snapshot and the v2.14 diff both point at the same thing: a per-request entry written to a process-wide Map and a listener added to a shared EventEmitter, with no matching delete or bus.off on completion. Free the references at the source and RSS plateaus. Always fix unbounded growth where it is created, not at the memory ceiling.",
+        "outcome": "resolved",
+        "ends": true
+      }
+    ],
+    "goal": "Identify that notify-worker has a memory leak (not an undersized limit) and fix the unbounded growth at its source.",
+    "hint": "A straight memory climb that resets only on restart is not a sizing problem. Compare the heap retainers against what changed in the last deploy and ask what gets added per request but never removed."
+  },
+  {
+    "id": "pl-swe-expired-token",
+    "track": "swe",
+    "difficulty": "Entry",
+    "reward": 35,
+    "xp": 28,
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Dana Okoro",
+      "role": "On-call SRE, Billing Platform"
+    },
+    "subject": "Stripe sync integration throwing 401 since midnight, no deploys overnight",
+    "ticketBody": "The billing reconciliation worker started failing at 00:00 sharp. Every call to the payments provider comes back 401 Unauthorized. Nothing shipped overnight, the worker config is untouched, and the provider status page is green. It worked fine at 23:59 and has failed every run since. I paused the worker so it stops looping. Can you confirm what flipped and get the sync healthy before the morning invoice batch at 08:00.",
+    "evidence": [
+      {
+        "label": "worker.log (last healthy run to first failure)",
+        "lines": [
+          "2026-06-14 23:59:02Z INFO  sync.run ok status=200 records=412",
+          "2026-06-15 00:00:01Z ERROR sync.run http=401 body={\"error\":\"invalid_api_key\",\"message\":\"This token has expired.\"}",
+          "2026-06-15 00:05:01Z ERROR sync.run http=401 body={\"error\":\"invalid_api_key\",\"message\":\"This token has expired.\"}",
+          "2026-06-15 00:10:01Z ERROR sync.run http=401 body={\"error\":\"invalid_api_key\",\"message\":\"This token has expired.\"}"
+        ]
+      },
+      {
+        "label": "Provider status page (cached)",
+        "lines": [
+          "Payments API ......... Operational",
+          "Webhooks ............. Operational",
+          "Last incident: 9 days ago (resolved)"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "provider api token list",
+          "list tokens",
+          "token list"
+        ],
+        "output": "TOKEN_ID            LABEL                CREATED       EXPIRES       STATUS\nsk_live_a1b2...c9   billing-sync-worker  2025-06-14    2026-06-14    EXPIRED\nsk_live_f4e5...77   webhook-verify       2026-01-02    2027-01-02    active",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "date -u",
+          "date",
+          "clock"
+        ],
+        "output": "Mon Jun 15 00:11:43 UTC 2026",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "curl payments api whoami",
+          "curl whoami",
+          "test token"
+        ],
+        "output": "HTTP/2 401\n{\"error\":\"invalid_api_key\",\"message\":\"This token has expired.\"}",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "deploy log last 24h",
+          "deploy history",
+          "git log overnight"
+        ],
+        "output": "No deployments in the last 24h. Last deploy: 2026-06-13 16:20Z (billing-worker v3.8.1).",
+        "step": "diag"
+      }
+    ],
+    "actions": [
+      {
+        "id": "rotate-and-alert",
+        "label": "Rotate the expired API token, redeploy the worker with the new secret, and add an expiry alert",
+        "detail": "Mint a fresh billing-sync token, update the secret store, restart the worker, then schedule a calendar/monitor alert 14 days before the next expiry.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Correct. A wall of 401s starting at a clean 00:00 boundary with the message \"This token has expired\" and a token list showing EXPIRES 2026-06-14 STATUS EXPIRED is a credential that aged out, not an outage. Rotate the secret, redeploy, and add an expiry alarm so the next renewal happens before it lapses, not after."
+      },
+      {
+        "id": "blame-provider",
+        "label": "Open a P1 with the payments provider for an unannounced auth outage",
+        "detail": "Escalate to the vendor and demand an RCA for breaking our integration.",
+        "correct": false,
+        "csat": -7,
+        "teach": "The status page is green, the error body literally says the token expired, and the token list shows EXPIRES on yesterday's date. This is our expired credential, not their outage. Escalating to the vendor burns time and goodwill on a problem we own."
+      },
+      {
+        "id": "retry-loop",
+        "label": "Wrap the call in an aggressive retry loop so it keeps trying until it succeeds",
+        "detail": "Add a tight retry with no backoff so the sync self-heals.",
+        "correct": false,
+        "csat": -11,
+        "teach": "A 401 from an expired token will never succeed on retry, the credential is dead. Hammering the provider with no backoff just risks rate-limit bans or an abuse flag. Retries are for transient 5xx and timeouts, not for fixed auth failures."
+      },
+      {
+        "id": "disable-auth",
+        "label": "Comment out the auth header to unblock the morning batch, fix the token later",
+        "detail": "Ship a quick patch that drops the Authorization header so requests stop 401ing.",
+        "correct": false,
+        "csat": -12,
+        "teach": "Stripping auth does not make requests succeed, it makes them fail differently or, worse, sends billing data over an unauthenticated path. Never disable authentication to silence an auth error. Rotate the credential instead.",
+        "ends": true,
+        "outcome": "mishandled"
+      }
+    ],
+    "goal": "Confirm the integration is failing because its API token expired, then rotate the credential and add an expiry alert before the next lapse.",
+    "hint": "No deploy changed, yet it broke at exactly 00:00. Check what the error body actually says and when the credential was set to expire before you decide whose fault it is."
+  },
+  {
+    "id": "pl-swe-flaky-race",
+    "track": "swe",
+    "difficulty": "Advanced",
+    "reward": 70,
+    "xp": 56,
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "Priya Nandakumar",
+      "role": "Backend Engineer, Wallet Service"
+    },
+    "subject": "test_wallet_credit_then_debit fails ~1 in 5 in CI, green every time locally",
+    "ticketBody": "Opening this so we have a record before someone reaches for the quarantine button.\n\nThe test test_wallet_credit_then_debit passes every single time on my laptop. In CI it fails roughly 1 run in 5. The assertion checks the final balance after a credit and a debit are applied. When it fails, the final balance is the credit-only value, as if the debit never landed, or sometimes a value that only makes sense if the two operations were applied out of order.\n\nI pulled the test and the code under test. The test kicks off both operations and then asserts on the balance, but it never waits for both to finish. The code under test fires the two updates without synchronizing them either, so whichever task the event loop happens to schedule last is the one that \"wins\" the read. Locally my machine is fast and consistent so the ordering happens to come out the same way every time. CI is loaded and slower, so the ordering flips occasionally.\n\nTwo people have already pinged me asking to just mark it flaky-skip or add a retry so the pipeline stops going red. I want a second opinion before we do that, because the pattern smells like a real bug, not a fussy test.\n\nNeed a call on how to handle this.",
+    "evidence": [
+      {
+        "label": "CI run #4471 (failing) vs run #4472 (passing), same commit",
+        "lines": [
+          "FAIL test_wallet_credit_then_debit",
+          "  start balance: 100",
+          "  credit(+50), debit(-30)  => expected final 120",
+          "  actual final: 150   (debit never observed)",
+          "",
+          "PASS test_wallet_credit_then_debit  (rerun, no code change)",
+          "  actual final: 120",
+          "",
+          "note: failure rate across last 40 CI runs = 9/40 (~22%)",
+          "note: local rate across 200 runs = 0/200"
+        ]
+      },
+      {
+        "label": "test body + code under test (excerpt)",
+        "lines": [
+          "# test",
+          "wallet.credit(acct, 50)        # returns a coroutine/Task, not awaited",
+          "wallet.debit(acct, 30)         # returns a coroutine/Task, not awaited",
+          "assert wallet.balance(acct) == 120",
+          "",
+          "# code under test",
+          "async def credit(acct, amt): bal = await read(acct); await write(acct, bal + amt)",
+          "async def debit(acct, amt):  bal = await read(acct); await write(acct, bal - amt)",
+          "# read-modify-write on each, no lock, no awaited ordering between the two"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "fix-synchronize",
+        "label": "Fix the synchronization: await both operations in order (and serialize the read-modify-write on the account) so the result is deterministic",
+        "detail": "The test launches credit and debit without awaiting, and the code does an unguarded read-modify-write per operation. Make the test await each operation to completion before asserting, and serialize the two updates against the account so one fully commits before the next reads. Then the balance is 120 every run, local and CI.",
+        "correct": true,
+        "csat": 14,
+        "teach": "Correct. An intermittently failing async test almost always reflects a real race, not a flaky test. Here both the test and the production code fail to synchronize: the test asserts before the operations finish, and the read-modify-write pairs can interleave. The same race that flips the test 1 in 5 in CI will silently corrupt balances in prod under load. Fixing the synchronization removes the nondeterminism at its source."
+      },
+      {
+        "id": "add-retry",
+        "label": "Wrap the test in a retry: rerun it up to 3 times and pass if any attempt is green",
+        "csat": -8,
+        "teach": "This is papering over a real bug. The 1-in-5 failure is the race surfacing, and a retry just lowers the odds CI catches it. The same unsynchronized read-modify-write runs in production, where concurrent credits and debits will drop or reorder updates and corrupt balances. You would be hiding a money-affecting defect to turn the pipeline green."
+      },
+      {
+        "id": "add-sleep",
+        "label": "Add a short sleep before the assert so the async tasks have time to settle",
+        "csat": -7,
+        "teach": "A sleep makes the ordering happen to come out right most of the time on a fast box, which is exactly why it already passes locally. It does not synchronize anything. On a loaded CI runner or in prod the tasks can still interleave, and you have made the test slower and more deceptive. Synchronize the operations instead of guessing at timing."
+      },
+      {
+        "id": "flaky-skip",
+        "label": "Mark the test @flaky / skip it in CI and file a backlog item to revisit later",
+        "csat": -11,
+        "teach": "Quarantining the test silences the one signal pointing at a real concurrency bug in wallet code. The race does not go away, it just stops being visible, and balance corruption ships to production. Never skip a money-path test to unblock a pipeline. Treat the intermittent failure as the bug report it is and fix the synchronization."
+      },
+      {
+        "id": "rerun-and-close",
+        "label": "Conclude it is a CI infrastructure hiccup, retrigger the job, and close the ticket once it goes green",
+        "csat": -9,
+        "teach": "The evidence rules out infrastructure: same commit, deterministic local runs, and the failures show a specific wrong balance (debit not observed) rather than timeouts or runner errors. That is a logic race, not a flaky runner. Closing on a green retrigger leaves the production race in place."
+      }
+    ],
+    "goal": "Recognize that the intermittent async test failure reflects a real race in both test and production code, and resolve it by synchronizing the operations rather than hiding it with retries, sleeps, or a skip.",
+    "hint": "Compare the failing and passing runs against the same commit, then read how the test and the code under test order their async work. Ask whether the test is fussy or whether it is reporting something the production code also does."
+  },
+  {
+    "id": "pl-swe-log-spam",
+    "track": "swe",
+    "difficulty": "Intermediate",
+    "reward": 50,
+    "xp": 40,
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Priya Anand",
+      "role": "On-call Engineer, Checkout Platform"
+    },
+    "subject": "/api/checkout/quote returns 500 intermittently, logs are unreadable",
+    "ticketBody": "Customers are getting 500s from POST /api/checkout/quote, maybe 1 in 20 requests. I tried to find the failing request in the service logs and gave up. The log file is completely flooded with \"cache miss\" lines, thousands per second, all at INFO. I cannot scroll back far enough to find anything else. tail just shows a wall of the same line.\n\nI need to know what is actually failing so I can fix it. Please dig into quote-service and figure out where the real error is. Do not just silence the logs and call it done, I still need the error.",
+    "evidence": [
+      {
+        "label": "tail -f /var/log/quote-service.log (last 1s)",
+        "lines": [
+          "2026-06-15T14:02:11.401Z INFO  [pricing.cache] cache miss key=region:US",
+          "2026-06-15T14:02:11.401Z INFO  [pricing.cache] cache miss key=region:US",
+          "2026-06-15T14:02:11.401Z INFO  [pricing.cache] cache miss key=region:US",
+          "2026-06-15T14:02:11.402Z INFO  [pricing.cache] cache miss key=region:US",
+          "2026-06-15T14:02:11.402Z INFO  [pricing.cache] cache miss key=region:US",
+          "... (4,118 identical lines in the last second) ..."
+        ]
+      },
+      {
+        "label": "logging.yaml (excerpt)",
+        "lines": [
+          "loggers:",
+          "  pricing.cache:",
+          "    level: INFO        # logs every miss; on a cold key this fires per-call",
+          "  checkout.quote:",
+          "    level: WARN",
+          "root:",
+          "  level: INFO"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "grep -c \"cache miss\" /var/log/quote-service.log",
+          "grep -c 'cache miss' quote-service.log",
+          "wc -l on cache miss"
+        ],
+        "output": "2974061\n# 2.9M lines and counting. The miss log dominates the file."
+      },
+      {
+        "aliases": [
+          "grep -i error /var/log/quote-service.log | tail",
+          "grep error quote-service.log",
+          "grep -i error"
+        ],
+        "output": "(no output)\n# Real ERROR lines exist but are written at a level the noisy logger drowns out at this volume; a blind grep over a 2.9M-line file times out before it reaches them.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "grep -v \"cache miss\" /var/log/quote-service.log | tail -n 5",
+          "grep -v 'cache miss' quote-service.log | tail",
+          "filter out cache miss"
+        ],
+        "output": "2026-06-15T14:01:58.220Z INFO  [checkout.quote] quote computed region=US items=3\n2026-06-15T14:02:03.770Z ERROR [pricing.fx] FxRateError: no rate for currency=GBP (fell through to null, NumberFormatException downstream)\n2026-06-15T14:02:09.118Z INFO  [checkout.quote] quote computed region=US items=2\n# Exclude the noise and the real ERROR surfaces: GBP quotes 500 because pricing.fx has no GBP rate loaded.",
+        "step": "diag"
+      }
+    ],
+    "actions": [
+      {
+        "id": "raise-cache-level",
+        "label": "Set pricing.cache logger to WARN, then fix the FxRateError (load GBP rate)",
+        "detail": "Correct the misconfigured logger so the miss spam stops, confirm the real ERROR is the GBP FxRateError surfaced by the filtered tail, then add the missing GBP rate to pricing.fx.",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "Right call. The cache miss line was a per-call INFO on a cold key, drowning the file at thousands per second. Raising just that one logger to WARN stops the noise without losing anything important, and the buried ERROR (no GBP FX rate) becomes visible and fixable. Quiet the noisy source, keep the signal."
+      },
+      {
+        "id": "disable-all-logging",
+        "label": "Set root logger to ERROR to kill the spam",
+        "detail": "Turn the root level up so the flood stops immediately.",
+        "correct": false,
+        "csat": -9,
+        "teach": "This stops the flood but it is too blunt. Raising root hides the INFO context you may still need and, worse, you did it before reading the ERROR you were sent to find. You silenced the haystack and the needle. Fix the noisy source's level, not the whole system's.",
+        "outcome": "mishandled",
+        "ends": true
+      },
+      {
+        "id": "grep-and-giveup",
+        "label": "Report back that logs are unreadable and ask Priya to reproduce with more detail",
+        "detail": "The file is too big to grep; bounce it back for a cleaner repro.",
+        "correct": false,
+        "csat": -6,
+        "teach": "Giving up at the wall of noise is the trap. A blind grep over 2.9M lines stalls, but excluding the known noise line (grep -v 'cache miss') or quieting the source surfaces the real ERROR in seconds. The signal was there the whole time."
+      },
+      {
+        "id": "restart-service",
+        "label": "Restart quote-service to clear the log and flush the cache",
+        "detail": "Bounce the service so the cache warms and the miss spam stops.",
+        "correct": false,
+        "csat": -8,
+        "teach": "A restart warms the cache so the miss spam pauses, but the FxRateError returns the moment a GBP quote comes in, and you have destroyed the live evidence. Treating the symptom (noisy cold cache) without finding the cause (missing GBP rate) just resets the clock on the same 500s."
+      }
+    ],
+    "goal": "Quiet the misconfigured noisy logger so the buried ERROR surfaces, then fix that error (the missing GBP FX rate) without killing all logging.",
+    "hint": "A wall of identical INFO lines is a logging misconfiguration, not the bug. Find a way to read past the noise, or stop the one source making it, before you decide nothing is there."
+  }
+]
