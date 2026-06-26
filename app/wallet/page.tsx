@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, useTransactions } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
@@ -10,7 +10,6 @@ import AmbientOrbs from "@/components/AmbientOrbs";
 import CountUp from "@/components/CountUp";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
-import { supabase } from "@/lib/supabase";
 import {
   BookOpen,
   Sword,

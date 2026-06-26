@@ -177,7 +177,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const [progRes, seenEventsRes] = await Promise.all([
       // Bound to current exam's subtopics — was full-user scan
       subtopicIds.length === 0
-        ? Promise.resolve({ data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; last_taught_at: string | null; last_seen_at: string | null }> })
+        ? Promise.resolve({ data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; correct: number; last_taught_at: string | null; last_seen_at: string | null }> })
         : supabaseAdmin
             .from("mastery_progress")
             .select("subtopic_id, p_mastery, attempts, correct, last_taught_at, last_seen_at")

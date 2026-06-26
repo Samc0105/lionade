@@ -176,25 +176,27 @@ export default function ProfilePage() {
   // Data — persisted SWR hooks so a re-visit paints the last-seen profile
   // instantly from cache and revalidates silently, instead of cold-fetching all
   // five sources with a page-wide skeleton on every navigation.
-  const { data: allBadgesData } = useAllBadges();
-  const { data: earnedBadgesData } = useUserBadges(user?.id);
-  const { data: subjectStatsData } = useSubjectStats(user?.id, { lifetime: true });
-  const { data: quizHistoryData } = useQuizHistory(user?.id, 30);
-  const { data: activityData } = useRecentActivity(user?.id, 30);
+  const { data: allBadgesData, error: allBadgesErr } = useAllBadges();
+  const { data: earnedBadgesData, error: earnedBadgesErr } = useUserBadges(user?.id);
+  const { data: subjectStatsData, error: subjectStatsErr } = useSubjectStats(user?.id, { lifetime: true });
+  const { data: quizHistoryData, error: quizHistoryErr } = useQuizHistory(user?.id, 30);
+  const { data: activityData, error: activityErr } = useRecentActivity(user?.id, 30);
 
   const allBadges = (allBadgesData ?? []) as any[];
   const earnedBadges = (earnedBadgesData ?? []) as any[];
   const subjectStats = (subjectStatsData ?? []) as any[];
   const quizHistory = (quizHistoryData ?? []) as any[];
   const activity = (activityData ?? []) as any[];
-  // No flash-of-zero: "loading" only until each source has resolved at least
-  // once (undefined). With the persisted cache that's instant on re-entry.
+  // No flash-of-zero, and no infinite skeleton on a transient failure: a source
+  // is "loading" only while it's still in flight (undefined AND no error). A
+  // failed fetch degrades gracefully to empty data (matching the old
+  // .catch(() => []) behaviour) instead of a perpetual skeleton.
   const loading =
-    allBadgesData === undefined ||
-    earnedBadgesData === undefined ||
-    subjectStatsData === undefined ||
-    quizHistoryData === undefined ||
-    activityData === undefined;
+    (allBadgesData === undefined && !allBadgesErr) ||
+    (earnedBadgesData === undefined && !earnedBadgesErr) ||
+    (subjectStatsData === undefined && !subjectStatsErr) ||
+    (quizHistoryData === undefined && !quizHistoryErr) ||
+    (activityData === undefined && !activityErr);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (user) refreshUser(); }, [user?.id]);

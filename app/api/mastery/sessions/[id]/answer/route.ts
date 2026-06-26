@@ -12,18 +12,23 @@ import { callAI, LLM_CHEAP } from "@/lib/ai";
  *
  * Validates the challenge token against runtime_state.pending (server owns
  * "what question is in flight"), runs the BKT update, writes the user's
- * answer message + Ninny's feedback message, and — if the answer was wrong
- * and we haven't blown the socratic budget — kicks off a socratic probe
- * ("why'd you pick that?") that gates on a follow-up /socratic call.
+ * answer message + Ninny's feedback message. On a WRONG answer, within the
+ * per-session AI budget, it generates an explanation tailored to the option
+ * the user picked (gpt-4o-mini) and surfaces it immediately as the feedback
+ * explanation. Falls back to the bank explanation (spending no budget turn)
+ * on model failure or exhausted budget. The old reflect-first socratic probe
+ * was removed; the standalone /socratic route is retained but no longer fed.
  *
  * Response:
  *   { wasCorrect, correctIndex, explanation,
- *     socraticProbe: true | false,
- *     message: <feedback message>,
- *     pPass, displayPct, pMasteryForSubtopic }
+ *     socraticProbe: false (legacy field, always false now),
+ *     answerMessage, feedbackMessage, socraticProbeMessage: null,
+ *     pPass, displayPct, pMasteryForSubtopic, streakAtSubtopic }
  */
 
-const SOCRATIC_TURNS_PER_SESSION = 8; // hard cap on Haiku socratic spends
+// Per-session cap on the gpt-4o-mini wrong-answer feedback spends. Shares the
+// `socratic_turns_spent` column with the (now-unfed) legacy /socratic route.
+const SOCRATIC_TURNS_PER_SESSION = 8;
 const STREAK_CONTRIBUTION_CAP = 10;   // matches /api/ninny/complete pattern
 
 type RouteCtx = { params: { id: string } };
@@ -307,7 +312,7 @@ function pickCorrectOpener(streak: number): string {
 // every miss doesn't read as the same flat "Not quite." Deterministic spread by
 // the chosen text (no Math.random — keeps the route reproducible).
 function pickWrongOpener(choice: string | undefined): string {
-  if (!choice) return `Time ran out on that one.`;
+  if (!choice) return `Let's look at this one.`;
   const label = choice.length > 44 ? `${choice.slice(0, 42)}...` : choice;
   const lines = [
     `"${label}" isn't it.`,
@@ -326,19 +331,21 @@ function pickWrongOpener(choice: string | undefined): string {
 // Returns null on failure/empty so the caller falls back to the bank explanation
 // and spends NO budget turn.
 async function generateWrongFeedback(
-  q: { question: string; options: string[]; correct_index: number; explanation: string | null },
+  q: { question: string; options: unknown; correct_index: number; explanation: string | null },
   selectedIndex: number,
   userId: string,
 ): Promise<string | null> {
-  const wrongOpt = q.options[selectedIndex];
-  const correctOpt = q.options[q.correct_index];
+  // options is a jsonb column (untyped at runtime); coerce defensively.
+  const options = Array.isArray(q.options) ? q.options.map((o) => String(o)) : [];
+  const wrongOpt = options[selectedIndex];
+  const correctOpt = options[q.correct_index];
   if (!wrongOpt || !correctOpt) return null;
   try {
     const res = await callAI({
       model: LLM_CHEAP,
       maxTokens: 220,
       temperature: 0.5,
-      timeoutMs: 8_000,
+      timeoutMs: 5_000,
       system:
         "You are Ninny, a study companion. Warm, direct, and specific. No emojis, no 'as an AI', no markdown headings, no dashes. Keep it under 70 words.",
       userContent:
@@ -347,7 +354,7 @@ async function generateWrongFeedback(
 In 2 to 3 sentences, specific to THIS question (never generic): name the trap that makes "${wrongOpt}" tempting, contrast it with why "${correctOpt}" is right, and end with one sharp takeaway they should remember.
 
 Question: ${q.question}
-Options: ${q.options.map((o, i) => `${i}. ${o}`).join(" | ")}
+Options: ${options.map((o, i) => `${i}. ${o}`).join(" | ")}
 Reference (background, do not quote verbatim): ${q.explanation ?? "n/a"}`,
       telemetry: { route: "mastery/answer-feedback", promptVersion: "v1-2026-06-26", userId },
     });
