@@ -101,6 +101,10 @@ export interface NightDef {
   power: boolean;
   powerDrainPerSec: number;
   flipCost: number;
+  /** A feed periodically drops to static; the intruder can hide in the dark. */
+  outages?: boolean;
+  outageEverySec?: number;
+  outageDurSec?: number;
   /** "Phone guy" briefing, shown before the night. */
   intro?: string;
 }
@@ -126,12 +130,42 @@ export const NIGHTS: NightDef[] = [
   {
     n: 4, name: "Night 4", secondsPerHour: 24, advanceSeconds: [5.5, 5, 4.5, 4, 3.5, 3],
     threats: 2, power: true, powerDrainPerSec: 0.45, flipCost: 1.2,
+    outages: true, outageEverySec: 22, outageDurSec: 4,
   },
   {
     n: 5, name: "Night 5", secondsPerHour: 23, advanceSeconds: [5, 4.5, 4, 3.5, 3, 2.5],
     threats: 2, power: true, powerDrainPerSec: 0.5, flipCost: 1.5,
+    outages: true, outageEverySec: 18, outageDurSec: 5,
+  },
+  {
+    n: 6, name: "Night 6", secondsPerHour: 23, advanceSeconds: [4.5, 4, 3.5, 3, 2.5, 2],
+    threats: 2, power: true, powerDrainPerSec: 0.5, flipCost: 1.5,
+    outages: true, outageEverySec: 16, outageDurSec: 5,
   },
 ];
+
+/** Build an ad-hoc night from the player's chosen difficulty (Custom Night). */
+export function makeCustomNight(threats: number, speed: "slow" | "normal" | "fast" | "insane"): NightDef {
+  const speeds: Record<string, number[]> = {
+    slow: [7, 6.5, 6, 5.5, 5, 4.5],
+    normal: [6, 5.5, 5, 4.5, 4, 3.5],
+    fast: [5, 4.5, 4, 3.5, 3, 2.5],
+    insane: [4, 3.5, 3, 2.5, 2, 1.8],
+  };
+  return {
+    n: 0,
+    name: "Custom Night",
+    secondsPerHour: 24,
+    advanceSeconds: speeds[speed],
+    threats: Math.max(1, Math.min(3, threats)),
+    power: true,
+    powerDrainPerSec: 0.45,
+    flipCost: 1.2,
+    outages: speed === "fast" || speed === "insane",
+    outageEverySec: 18,
+    outageDurSec: 5,
+  };
+}
 
 // ── Progression (local) ──
 const NIGHT_KEY = "lionade.techhub.nightshift.v1";

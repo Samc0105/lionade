@@ -3,10 +3,10 @@
 import { useEffect, useReducer, useRef, useState, type Dispatch } from "react";
 import {
   Monitor, VideoCamera, ShieldWarning, Pulse, Warning, Moon, Lightning,
-  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning,
+  SpeakerHigh, SpeakerSlash, ArrowClockwise, LockSimple, CheckCircle, BatteryWarning, Sliders,
 } from "@phosphor-icons/react";
 import {
-  FEEDS, NIGHT, NIGHTS, hourLabel, getMaxNightSurvived, recordNightSurvived,
+  FEEDS, NIGHT, NIGHTS, hourLabel, getMaxNightSurvived, recordNightSurvived, makeCustomNight,
   type Feed, type FeedKind, type NightDef,
 } from "@/lib/liondesk/nightshift";
 import {
@@ -19,13 +19,17 @@ import {
 type Status = "menu" | "playing" | "won" | "lost";
 interface Threat { feed: string; timer: number }
 interface NState {
-  nightIdx: number;
+  def: NightDef;
+  nightIdx: number; // index into NIGHTS, or -1 for a custom night
   hour: number;
   secInHour: number;
   threats: Threat[];
   activeFeed: string;
   depth: number;
   power: number;
+  offlineFeed: string | null;
+  offlineTimer: number;
+  outageCountdown: number;
   status: Status;
   containments: number;
   advanceCount: number;
@@ -34,7 +38,7 @@ interface NState {
 
 type NAction =
   | { t: "MENU" }
-  | { t: "START"; nightIdx: number }
+  | { t: "START"; def: NightDef; nightIdx: number }
   | { t: "TICK" }
   | { t: "SELECT"; feed: string }
   | { t: "CONTAIN" };
@@ -49,10 +53,13 @@ function advanceSecondsFor(def: NightDef, hour: number): number {
 }
 
 function menuState(): NState {
-  return { nightIdx: 0, hour: 0, secInHour: 0, threats: [], activeFeed: NIGHT.startActiveFeed, depth: 0, power: 100, status: "menu", containments: 0, advanceCount: 0, flicker: 0 };
+  return {
+    def: NIGHTS[0], nightIdx: 0, hour: 0, secInHour: 0, threats: [], activeFeed: NIGHT.startActiveFeed,
+    depth: 0, power: 100, offlineFeed: null, offlineTimer: 0, outageCountdown: 0, status: "menu",
+    containments: 0, advanceCount: 0, flicker: 0,
+  };
 }
-function startState(nightIdx: number): NState {
-  const def = NIGHTS[nightIdx];
+function startState(def: NightDef, nightIdx: number): NState {
   const used = [NIGHT.startActiveFeed];
   const threats: Threat[] = [];
   for (let i = 0; i < def.threats; i++) {
@@ -60,7 +67,11 @@ function startState(nightIdx: number): NState {
     used.push(f);
     threats.push({ feed: f, timer: def.advanceSeconds[0] });
   }
-  return { nightIdx, hour: 0, secInHour: 0, threats, activeFeed: NIGHT.startActiveFeed, depth: 0, power: 100, status: "playing", containments: 0, advanceCount: 0, flicker: 0 };
+  return {
+    def, nightIdx, hour: 0, secInHour: 0, threats, activeFeed: NIGHT.startActiveFeed,
+    depth: 0, power: 100, offlineFeed: null, offlineTimer: 0, outageCountdown: def.outageEverySec ?? 999,
+    status: "playing", containments: 0, advanceCount: 0, flicker: 0,
+  };
 }
 
 function reducer(s: NState, a: NAction): NState {
@@ -68,27 +79,26 @@ function reducer(s: NState, a: NAction): NState {
     case "MENU":
       return menuState();
     case "START":
-      return startState(a.nightIdx);
+      return startState(a.def, a.nightIdx);
     case "SELECT": {
       if (s.status !== "playing") return s;
-      const def = NIGHTS[s.nightIdx];
-      const power = def.power ? Math.max(0, s.power - def.flipCost) : s.power;
+      const power = s.def.power ? Math.max(0, s.power - s.def.flipCost) : s.power;
       return { ...s, activeFeed: a.feed, power };
     }
     case "CONTAIN": {
       if (s.status !== "playing") return s;
-      const def = NIGHTS[s.nightIdx];
-      if (def.power && s.power <= 0) return s; // blind: no containing
+      if (s.def.power && s.power <= 0) return s; // blind: power out
+      if (s.activeFeed === s.offlineFeed) return s; // feed is dark, can't contain what you can't see
       const idx = s.threats.findIndex((t) => t.feed === s.activeFeed);
       if (idx < 0) return s;
       const used = s.threats.map((t) => t.feed).concat(s.activeFeed);
       const newFeed = pickFeed(used);
-      const threats = s.threats.map((t, i) => (i === idx ? { feed: newFeed, timer: advanceSecondsFor(def, s.hour) } : t));
+      const threats = s.threats.map((t, i) => (i === idx ? { feed: newFeed, timer: advanceSecondsFor(s.def, s.hour) } : t));
       return { ...s, threats, depth: Math.max(0, s.depth - 1), containments: s.containments + 1 };
     }
     case "TICK": {
       if (s.status !== "playing") return s;
-      const def = NIGHTS[s.nightIdx];
+      const def = s.def;
       let hour = s.hour;
       let secInHour = s.secInHour + 1;
       if (secInHour >= def.secondsPerHour) {
@@ -97,6 +107,22 @@ function reducer(s: NState, a: NAction): NState {
         if (hour >= NIGHT.hours) return { ...s, hour: NIGHT.hours, secInHour: 0, status: "won" };
       }
       const power = def.power ? Math.max(0, s.power - def.powerDrainPerSec) : s.power;
+
+      // Feed outages.
+      let offlineFeed = s.offlineFeed;
+      let offlineTimer = s.offlineTimer;
+      let outageCountdown = s.outageCountdown;
+      if (def.outages) {
+        if (offlineFeed) {
+          offlineTimer -= 1;
+          if (offlineTimer <= 0) { offlineFeed = null; outageCountdown = def.outageEverySec ?? 20; }
+        } else {
+          outageCountdown -= 1;
+          if (outageCountdown <= 0) { offlineFeed = pickFeed([]); offlineTimer = def.outageDurSec ?? 5; }
+        }
+      }
+
+      // Threats advance.
       let depth = s.depth;
       let advanceCount = s.advanceCount;
       const threats = s.threats.map((t) => ({ ...t }));
@@ -105,13 +131,12 @@ function reducer(s: NState, a: NAction): NState {
         if (threats[i].timer <= 0) {
           depth += 1;
           advanceCount += 1;
-          if (depth >= NIGHT.core) return { ...s, hour, secInHour, power, depth: NIGHT.core, advanceCount, status: "lost" };
-          const used = threats.map((x) => x.feed);
-          threats[i].feed = pickFeed(used);
+          if (depth >= NIGHT.core) return { ...s, hour, secInHour, power, offlineFeed, offlineTimer, outageCountdown, depth: NIGHT.core, advanceCount, status: "lost" };
+          threats[i].feed = pickFeed(threats.map((x) => x.feed));
           threats[i].timer = advanceSecondsFor(def, hour);
         }
       }
-      return { ...s, hour, secInHour, power, depth, advanceCount, threats, flicker: s.flicker + 1 };
+      return { ...s, hour, secInHour, power, offlineFeed, offlineTimer, outageCountdown, depth, advanceCount, threats, flicker: s.flicker + 1 };
     }
     default:
       return s;
@@ -129,27 +154,30 @@ export default function NightShift() {
   const [muted, setMutedState] = useState(false);
   const [maxSurvived, setMaxSurvived] = useState(0);
   const [introNight, setIntroNight] = useState<number | null>(null);
+  const [customOpen, setCustomOpen] = useState(false);
 
   useEffect(() => {
     setMutedState(isMuted());
     setMaxSurvived(getMaxNightSurvived());
   }, []);
 
-  const def = NIGHTS[state.nightIdx];
+  const def = state.def;
   const tension = state.depth / NIGHT.core;
   const blind = def.power && state.power <= 0 && state.status === "playing";
+  const offline = state.status === "playing" && state.activeFeed === state.offlineFeed;
 
-  // Real-time clock.
   useEffect(() => {
     if (state.status !== "playing") return;
     const id = setInterval(() => dispatch({ t: "TICK" }), 1000);
     return () => clearInterval(id);
   }, [state.status]);
 
-  // Ambient lifecycle + record a survived night.
   useEffect(() => {
     if (state.status === "playing") startAmbient();
-    if (state.status === "won") { stopAmbient(); playWin(); recordNightSurvived(NIGHTS[state.nightIdx].n); setMaxSurvived(getMaxNightSurvived()); }
+    if (state.status === "won") {
+      stopAmbient(); playWin();
+      if (state.nightIdx >= 0 && state.nightIdx < NIGHTS.length) { recordNightSurvived(NIGHTS[state.nightIdx].n); setMaxSurvived(getMaxNightSurvived()); }
+    }
     if (state.status === "lost") { stopAmbient(); playStinger(); }
     return () => { if (state.status === "playing") stopAmbient(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +187,9 @@ export default function NightShift() {
 
   const prevAdvance = useRef(0);
   useEffect(() => {
+    // advanceCount resets to 0 on START; rebase here so the first advances of a
+    // replayed or next night aren't silently swallowed by a stale baseline.
+    if (state.advanceCount === 0) { prevAdvance.current = 0; return; }
     if (state.advanceCount > prevAdvance.current && state.status === "playing") playAlarm();
     prevAdvance.current = state.advanceCount;
   }, [state.advanceCount, state.status]);
@@ -173,15 +204,20 @@ export default function NightShift() {
 
   function chooseNight(i: number) {
     if (NIGHTS[i].intro) setIntroNight(i);
-    else { resumeAudio(); dispatch({ t: "START", nightIdx: i }); }
+    else { resumeAudio(); dispatch({ t: "START", def: NIGHTS[i], nightIdx: i }); }
+  }
+  function startCustom(threats: number, speed: "slow" | "normal" | "fast" | "insane") {
+    resumeAudio();
+    dispatch({ t: "START", def: makeCustomNight(threats, speed), nightIdx: -1 });
+    setCustomOpen(false);
   }
 
   const activeFeed = FEEDS.find((f) => f.id === state.activeFeed)!;
-  const threatHere = state.status === "playing" && !blind && state.threats.some((t) => t.feed === state.activeFeed);
+  const threatHere = state.status === "playing" && !blind && !offline && state.threats.some((t) => t.feed === state.activeFeed);
   const integrity = Math.round(100 * (1 - state.depth / NIGHT.core));
   const integrityColor = integrity >= 70 ? "#2BBE6B" : integrity >= 40 ? "#F59E0B" : "#EF4444";
   const powerColor = state.power >= 50 ? "#2BBE6B" : state.power >= 20 ? "#F59E0B" : "#EF4444";
-  const nextNightIdx = state.nightIdx + 1 < NIGHTS.length ? state.nightIdx + 1 : null;
+  const nextNightIdx = state.nightIdx >= 0 && state.nightIdx + 1 < NIGHTS.length ? state.nightIdx + 1 : null;
 
   return (
     <div className="relative rounded-2xl border border-white/[0.08] overflow-hidden bg-[#04060c] select-none" style={{ boxShadow: `inset 0 0 120px rgba(239,68,68,${tension * 0.28})` }}>
@@ -194,7 +230,6 @@ export default function NightShift() {
         .ns-noise { background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.12) 0, rgba(0,0,0,0.12) 1px, rgba(255,255,255,0.08) 2px, rgba(0,0,0,0.1) 3px); }
       `}</style>
 
-      {/* advance flash */}
       {state.status === "playing" && (
         <div key={state.advanceCount} className="pointer-events-none absolute inset-0 z-10" style={{ background: "radial-gradient(circle, rgba(239,68,68,0) 30%, rgba(239,68,68,0.35) 100%)", animation: state.advanceCount > 0 ? "ns-flash 600ms ease-out" : undefined, opacity: 0 }} />
       )}
@@ -242,6 +277,7 @@ export default function NightShift() {
           {FEEDS.map((f) => {
             const Icon = FEED_ICON[f.kind];
             const active = state.activeFeed === f.id;
+            const down = state.status === "playing" && state.offlineFeed === f.id;
             return (
               <button
                 key={f.id}
@@ -249,9 +285,10 @@ export default function NightShift() {
                 disabled={state.status !== "playing" || blind}
                 className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition-colors ${active ? "border-[#2BBE6B]/60 bg-[#2BBE6B]/10" : "border-white/[0.07] hover:bg-white/[0.04]"} disabled:opacity-40`}
               >
-                <Icon size={15} weight={active ? "fill" : "regular"} color={active ? "#2BBE6B" : "#9FB2CC"} aria-hidden="true" />
-                <span className="font-mono text-[11px]" style={{ color: active ? "#F5EBDA" : "rgba(159,178,204,0.85)" }}>{f.short}</span>
-                {active && state.status === "playing" && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#2BBE6B]" style={{ animation: "ns-blink 1.4s infinite" }} />}
+                <Icon size={15} weight={active ? "fill" : "regular"} color={down ? "#6B7280" : active ? "#2BBE6B" : "#9FB2CC"} aria-hidden="true" />
+                <span className="font-mono text-[11px]" style={{ color: down ? "#6B7280" : active ? "#F5EBDA" : "rgba(159,178,204,0.85)" }}>{f.short}</span>
+                {down ? <span className="ml-auto font-mono text-[8px] text-red-400/70" style={{ animation: "ns-blink 0.5s infinite" }}>OFFLINE</span>
+                  : active && state.status === "playing" ? <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#2BBE6B]" style={{ animation: "ns-blink 1.4s infinite" }} /> : null}
               </button>
             );
           })}
@@ -260,7 +297,6 @@ export default function NightShift() {
         {/* active feed */}
         <div className="relative p-4">
           <div className={`ns-scan rounded-xl border h-full min-h-[380px] p-4 flex flex-col relative overflow-hidden ${threatHere ? "border-red-500/50" : "border-white/[0.08]"}`} style={{ background: threatHere ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.015)" }}>
-            {/* flip static */}
             {state.status === "playing" && !blind && <div key={state.activeFeed} className="ns-noise pointer-events-none absolute inset-0 z-10" style={{ animation: "ns-static 260ms ease-out", opacity: 0 }} />}
 
             <div className="flex items-center gap-2 mb-3">
@@ -275,6 +311,11 @@ export default function NightShift() {
                 <p className="font-bebas text-2xl text-red-400 tracking-wider mt-2">POWER OUT</p>
                 <p className="font-mono text-[11px] text-cream/40 mt-1">the feeds are dark. you can't see it coming.</p>
               </div>
+            ) : offline ? (
+              <div className="ns-noise flex-1 flex flex-col items-center justify-center text-center rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <p className="font-bebas text-2xl text-cream/70 tracking-wider">SIGNAL LOST</p>
+                <p className="font-mono text-[11px] text-cream/40 mt-1">this feed dropped. it could be hiding here.</p>
+              </div>
             ) : (
               <FeedBody feed={activeFeed} threat={threatHere} flicker={state.flicker} />
             )}
@@ -284,7 +325,7 @@ export default function NightShift() {
                 <button onClick={() => { playContain(); dispatch({ t: "CONTAIN" }); }} className="w-full min-h-[44px] rounded-xl font-bold text-sm text-[#04080F] transition-transform active:scale-[0.99]" style={{ background: "linear-gradient(135deg,#EF4444,#F59E0B)" }}>
                   ⚠ CONTAIN: {activeFeed.containLabel}
                 </button>
-              ) : state.status === "playing" && !blind ? (
+              ) : state.status === "playing" && !blind && !offline ? (
                 <p className="text-center font-mono text-[11px] text-cream/30">no anomaly on this feed. keep watching the others.</p>
               ) : null}
             </div>
@@ -293,14 +334,15 @@ export default function NightShift() {
       </div>
 
       {/* overlays */}
-      {state.status === "menu" && introNight === null && (
-        <NightMenu maxSurvived={maxSurvived} onChoose={chooseNight} />
+      {state.status === "menu" && introNight === null && !customOpen && (
+        <NightMenu maxSurvived={maxSurvived} onChoose={chooseNight} onCustom={() => setCustomOpen(true)} />
       )}
+      {customOpen && <CustomCard onStart={startCustom} onBack={() => setCustomOpen(false)} />}
       {introNight !== null && (
-        <IntroCard night={NIGHTS[introNight]} onBegin={() => { resumeAudio(); dispatch({ t: "START", nightIdx: introNight }); setIntroNight(null); }} onBack={() => setIntroNight(null)} />
+        <IntroCard night={NIGHTS[introNight]} onBegin={() => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[introNight], nightIdx: introNight }); setIntroNight(null); }} onBack={() => setIntroNight(null)} />
       )}
       {(state.status === "won" || state.status === "lost") && (
-        <ResultCard won={state.status === "won"} state={state} nextNightIdx={state.status === "won" ? nextNightIdx : null} dispatch={dispatch} onNext={(i) => { resumeAudio(); dispatch({ t: "START", nightIdx: i }); }} onRetry={() => { resumeAudio(); dispatch({ t: "START", nightIdx: state.nightIdx }); }} />
+        <ResultCard won={state.status === "won"} state={state} nextNightIdx={state.status === "won" ? nextNightIdx : null} dispatch={dispatch} onNext={(i) => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[i], nightIdx: i }); }} onRetry={() => { resumeAudio(); dispatch({ t: "START", def: state.def, nightIdx: state.nightIdx }); }} />
       )}
     </div>
   );
@@ -353,14 +395,14 @@ function FeedBody({ feed, threat, flicker }: { feed: Feed; threat: boolean; flic
 
 /* ───────────────────────── overlays ───────────────────────── */
 
-function NightMenu({ maxSurvived, onChoose }: { maxSurvived: number; onChoose: (i: number) => void }) {
+function NightMenu({ maxSurvived, onChoose, onCustom }: { maxSurvived: number; onChoose: (i: number) => void; onCustom: () => void }) {
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#04060c]/95 p-4">
       <div className="text-center max-w-md w-full">
         <Moon size={38} weight="fill" color="#6E8BC0" aria-hidden="true" className="mx-auto mb-2" />
         <h3 className="font-bebas text-3xl text-cream tracking-wider">THE NIGHT SHIFT</h3>
         <p className="text-cream/55 text-xs mt-1.5 mb-4">Watch the feeds. Catch the intruder. Survive to 6 AM. Sound on.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {NIGHTS.map((nd, i) => {
             const unlocked = i <= maxSurvived;
             const beaten = nd.n <= maxSurvived;
@@ -374,7 +416,35 @@ function NightMenu({ maxSurvived, onChoose }: { maxSurvived: number; onChoose: (
             );
           })}
         </div>
+        <button onClick={onCustom} disabled={maxSurvived < 1} className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40" title={maxSurvived < 1 ? "Survive Night 1 to unlock" : "Set your own difficulty"}>
+          <Sliders size={15} weight="fill" /> Custom Night
+        </button>
         <p className="font-mono text-[10px] text-cream/35 mt-3">Survive a night to unlock the next. It gets worse.</p>
+      </div>
+    </div>
+  );
+}
+
+function CustomCard({ onStart, onBack }: { onStart: (threats: number, speed: "slow" | "normal" | "fast" | "insane") => void; onBack: () => void }) {
+  const [threats, setThreats] = useState(2);
+  const [speed, setSpeed] = useState<"slow" | "normal" | "fast" | "insane">("normal");
+  const seg = (active: boolean) => `px-3 py-1.5 rounded-md font-mono text-[11px] border transition-colors ${active ? "border-[#6E8BC0]/70 bg-[#6E8BC0]/15 text-cream" : "border-white/12 text-cream/60 hover:bg-white/[0.05]"}`;
+  return (
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#04060c]/96 p-4">
+      <div className="max-w-sm w-full text-center">
+        <Sliders size={30} weight="fill" color="#6E8BC0" aria-hidden="true" className="mx-auto mb-2" />
+        <h3 className="font-bebas text-2xl text-cream tracking-wider">CUSTOM NIGHT</h3>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 mt-3 mb-1.5">intruders</p>
+        <div className="flex gap-2 justify-center">{[1, 2, 3].map((n) => <button key={n} className={seg(threats === n)} onClick={() => setThreats(n)}>{n}</button>)}</div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 mt-4 mb-1.5">speed</p>
+        <div className="flex gap-2 justify-center flex-wrap">{(["slow", "normal", "fast", "insane"] as const).map((sp) => <button key={sp} className={seg(speed === sp)} onClick={() => setSpeed(sp)}>{sp}</button>)}</div>
+        {(speed === "fast" || speed === "insane") && <p className="font-mono text-[9px] text-red-300/70 mt-2">feed outages enabled at this speed</p>}
+        <div className="flex gap-2 justify-center mt-5">
+          <button onClick={onBack} className="px-4 py-2.5 rounded-xl border border-white/15 text-cream/70 text-sm hover:bg-white/[0.06]">Back</button>
+          <button onClick={() => onStart(threats, speed)} className="px-6 py-2.5 min-h-[44px] rounded-xl font-bold text-sm text-[#04080F] inline-flex items-center gap-2" style={{ background: "linear-gradient(135deg,#EF4444,#F59E0B)" }}>
+            <Lightning size={16} weight="fill" /> Begin
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -404,7 +474,7 @@ function ResultCard({ won, state, nextNightIdx, dispatch, onNext, onRetry }: { w
         {won ? (
           <>
             <h3 className="font-bebas text-4xl tracking-wider" style={{ color: "#2BBE6B" }}>6:00 AM</h3>
-            <p className="text-cream/75 text-sm mt-2">You survived {NIGHTS[state.nightIdx].name}. The intruder never reached the core.</p>
+            <p className="text-cream/75 text-sm mt-2">You survived {state.def.name}. The intruder never reached the core.</p>
           </>
         ) : (
           <>
