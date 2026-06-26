@@ -85,13 +85,74 @@ export const FEEDS: Feed[] = [
 
 export const NIGHT = {
   hours: 6, // 12 AM -> 6 AM
-  secondsPerHour: 26,
   core: 5, // advances-to-core that ends the night in a breach
-  /** Seconds between threat advances, by hour (gets faster). */
-  advanceSeconds: [7, 6.5, 6, 5, 4.5, 4],
-  startThreatFeed: "net",
   startActiveFeed: "logs",
 };
+
+export interface NightDef {
+  n: number;
+  name: string;
+  secondsPerHour: number;
+  /** Seconds between a threat's advances, by hour (gets faster). */
+  advanceSeconds: number[];
+  /** How many intruders are loose at once. */
+  threats: number;
+  /** Whether the power/attention resource is active this night. */
+  power: boolean;
+  powerDrainPerSec: number;
+  flipCost: number;
+  /** "Phone guy" briefing, shown before the night. */
+  intro?: string;
+}
+
+export const NIGHTS: NightDef[] = [
+  {
+    n: 1, name: "Night 1", secondsPerHour: 26, advanceSeconds: [7, 6.5, 6, 5.5, 5, 4.5],
+    threats: 1, power: false, powerDrainPerSec: 0, flipCost: 0,
+    intro:
+      "Uh, hello? Hello? Welcome to your first night on the desk. So the deal is simple: something is already inside, and it moves around. It only shows up on the feed it is sitting on, so keep flipping the feeds. The second you spot it, hit CONTAIN, fast. Don't let it reach the core five times. You'll be fine. Probably. See you at six.",
+  },
+  {
+    n: 2, name: "Night 2", secondsPerHour: 25, advanceSeconds: [6.5, 6, 5.5, 5, 4.5, 4],
+    threats: 1, power: true, powerDrainPerSec: 0.3, flipCost: 1,
+    intro:
+      "Hey, good, you made it. Tonight the monitors run off the backup power, and it drains while you watch. Flipping feeds costs a little too, so don't just mash through them. If the power hits zero the feeds go dark and you're blind. Pace yourself.",
+  },
+  {
+    n: 3, name: "Night 3", secondsPerHour: 24, advanceSeconds: [6, 5.5, 5, 4.5, 4, 3.5],
+    threats: 2, power: true, powerDrainPerSec: 0.35, flipCost: 1,
+    intro: "So, uh, there are two of them now. Two intruders, moving independently. Watch the depth meter, contain whichever one you can find, and keep that power up. You've got this.",
+  },
+  {
+    n: 4, name: "Night 4", secondsPerHour: 24, advanceSeconds: [5.5, 5, 4.5, 4, 3.5, 3],
+    threats: 2, power: true, powerDrainPerSec: 0.45, flipCost: 1.2,
+  },
+  {
+    n: 5, name: "Night 5", secondsPerHour: 23, advanceSeconds: [5, 4.5, 4, 3.5, 3, 2.5],
+    threats: 2, power: true, powerDrainPerSec: 0.5, flipCost: 1.5,
+  },
+];
+
+// ── Progression (local) ──
+const NIGHT_KEY = "lionade.techhub.nightshift.v1";
+
+export function getMaxNightSurvived(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    return parseInt(window.localStorage.getItem(NIGHT_KEY) || "0", 10) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function recordNightSurvived(n: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (n > getMaxNightSurvived()) window.localStorage.setItem(NIGHT_KEY, String(n));
+  } catch {
+    /* ignore */
+  }
+}
 
 export function hourLabel(hour: number): string {
   // 0 -> 12 AM, 1 -> 1 AM, ... 6 -> 6 AM
