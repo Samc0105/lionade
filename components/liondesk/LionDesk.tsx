@@ -72,6 +72,10 @@ interface State {
   // a senior reveals the right move on the open item. Spend them wisely.
   lifelines: { coffee: number; senior: number };
   revealed: string[];
+  // Consecutive correct resolves. Builds a Fangs/XP preview multiplier; a wrong
+  // move resets it. Preview-only; the server still clamps the real grant.
+  streak: number;
+  bestStreak: number;
 }
 
 type Action =
@@ -158,6 +162,8 @@ function buildInitial(shift: Shift): State {
     feedSeq: 0,
     lifelines: { coffee: 1, senior: 2 },
     revealed: [],
+    streak: 0,
+    bestStreak: 0,
   };
 }
 
@@ -224,7 +230,7 @@ function makeReducer(shift: Shift) {
           if (ai && rt && ai.channel === "phone" && !isTerminal(rt.status) && rt.patience != null && !rt.steps.includes("phone") && elapsed >= ai.arriveAfter) {
             const np = rt.patience - PATIENCE_DECAY * DIFF[ns.difficulty].patience;
             if (np <= 0) {
-              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null };
+              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null, streak: 0 };
               ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up faster and ask the right question first.`, "bad");
               if (shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
             } else {
@@ -305,7 +311,7 @@ function makeReducer(shift: Shift) {
         let ns: State = { ...state, items: { ...state.items, [a.id]: { ...it, steps, phoneChoice: a.index, patience } } };
         if (!a.correct) {
           if (patience === 0) {
-            ns = { ...ns, items: { ...ns.items, [a.id]: { ...ns.items[a.id], status: "mishandled", attempts: it.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null };
+            ns = { ...ns, items: { ...ns.items, [a.id]: { ...ns.items[a.id], status: "mishandled", attempts: it.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null, streak: 0 };
             ns = pushFeed(ns, "The caller hung up. Too many wrong questions.", "bad");
           } else {
             ns = pushFeed(ns, "That wasn't what they needed. They're getting impatient.", "bad");
@@ -341,14 +347,22 @@ function makeReducer(shift: Shift) {
           csatDelta = Math.round(scaled);
         }
         const csat = clamp(state.csat + csatDelta);
+        // Resolve streak: consecutive correct fixes build a preview multiplier.
+        const streak = correct ? state.streak + 1 : 0;
+        const mult = correct ? (streak >= 5 ? 1.5 : streak >= 3 ? 1.25 : 1) : 1;
         let ns: State = {
           ...state,
           csat,
-          fangs: state.fangs + (correct ? item.reward : 0),
-          xp: state.xp + (correct ? item.xp : 0),
+          fangs: state.fangs + (correct ? Math.round(item.reward * mult) : 0),
+          xp: state.xp + (correct ? Math.round(item.xp * mult) : 0),
+          streak,
+          bestStreak: Math.max(state.bestStreak, streak),
           items: { ...state.items, [item.id]: { ...it, status: newStatus, attempts: it.attempts + 1 } },
         };
         ns = pushFeed(ns, action.teach, correct ? "good" : "bad");
+        if (correct && (streak === 3 || streak === 5 || streak === 8 || streak === 12)) {
+          ns = pushFeed(ns, `On a roll: ${streak} in a row. Fangs x${mult}.`, "good");
+        }
 
         // Incident storm: correctly fixing the root cause mass-resolves the
         // flood of duplicate tickets behind it. One root cause, one fix.
@@ -720,6 +734,11 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
           </span>
           <span style={{ color: csatColor }}>{state.csat}%</span>
         </span>
+        {state.streak >= 2 && (
+          <span className="flex items-center gap-1 tabular-nums" style={{ color: state.streak >= 5 ? "#FF6B35" : "#F59E0B" }} title="Resolve streak">
+            <Lightning size={12} weight="fill" aria-hidden="true" />x{state.streak}
+          </span>
+        )}
         <span className="text-gold tabular-nums">{state.fangs} Fangs</span>
         <span className="text-cream/55 tabular-nums">{resolved}/{total}</span>
         <button onClick={onToggleMute} title={muted ? "Unmute" : "Mute"} aria-label={muted ? "Unmute sounds" : "Mute sounds"} className="w-7 h-7 rounded-md border border-white/15 text-cream/60 hover:bg-white/[0.06] hover:text-cream transition-colors flex items-center justify-center">
