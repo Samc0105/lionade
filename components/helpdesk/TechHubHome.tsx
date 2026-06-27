@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -29,7 +29,7 @@ export default function TechHubHome() {
   return (
     <div className="space-y-6">
       {/* Combination modes — a different mix of tickets + mutators every session. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Link href="/learn/techhub/surprise?daily=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.14) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.3)" }}>
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.14)", border: "1px solid rgba(255,215,0,0.4)" }}>
@@ -73,6 +73,21 @@ export default function TechHubHome() {
               <p className="text-cream/60 text-xs mt-1">Pick the track, size, and modifiers. Save your favorite combos.</p>
             </div>
             <ArrowRight size={16} weight="bold" color="#C9A2F2" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+        <Link href="/learn/techhub/surprise?daily=1&chaos=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(239,68,68,0.16) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(239,68,68,0.3)" }}>
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(239,68,68,0.14)", border: "1px solid rgba(239,68,68,0.4)" }}>
+              <Lightning size={20} weight="fill" color="#F87171" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-bebas text-lg text-cream tracking-wider leading-none">DAILY CHAOS</p>
+                <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/30">brutal</span>
+              </div>
+              <p className="text-cream/60 text-xs mt-1">Today's gauntlet: 3 to 4 mutators stacked. Same for everyone.</p>
+            </div>
+            <ArrowRight size={16} weight="bold" color="#F87171" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
       </div>

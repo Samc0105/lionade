@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask } from "@phosphor-icons/react";
+import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask, ShareNetwork } from "@phosphor-icons/react";
 import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/generate";
 import { getCombos, saveCombo, deleteCombo, type SavedCombo } from "@/lib/liondesk/savedCombos";
+import { encodeCombo, decodeCombo } from "@/lib/liondesk/combocode";
 import type { Shift } from "@/lib/liondesk/types";
 import type { Track } from "@/lib/helpdesk/types";
 
@@ -26,6 +27,8 @@ export default function MutatorLab() {
   const [shift, setShift] = useState<Shift | null>(null);
   const [lastOpts, setLastOpts] = useState<GenerateOpts>({});
   const [runKey, setRunKey] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
 
   useEffect(() => { setCombos(getCombos()); }, []);
 
@@ -48,6 +51,20 @@ export default function MutatorLab() {
     setTrack(c.track ?? "any");
     setCount(c.count);
     setEnabled(c.modifierIds);
+  }
+  function shareCombo() {
+    const code = encodeCombo({ track: trackOpt(), count, modifierIds: enabled });
+    const url = `${window.location.origin}/learn/techhub/surprise?combo=${code}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }).catch(() => {});
+    }
+  }
+  function loadFromCode() {
+    const raw = codeInput.trim();
+    if (!raw) return;
+    const code = raw.includes("combo=") ? raw.split("combo=")[1].split("&")[0] : raw;
+    const c = decodeCombo(code);
+    if (c) { setTrack(c.track ?? "any"); setCount(c.count); setEnabled(c.modifierIds); setCodeInput(""); }
   }
 
   /* ── playing ── */
@@ -118,11 +135,19 @@ export default function MutatorLab() {
           <button onClick={() => play({ track: trackOpt(), count, chaos: true, name: "Chaos Shift" })} className="px-4 py-2.5 rounded-xl border border-red-500/35 text-red-200/85 text-sm hover:bg-red-500/10 inline-flex items-center gap-2">
             <Flask size={15} weight="fill" /> Chaos
           </button>
+          <button onClick={shareCombo} className="px-4 py-2.5 rounded-xl border border-white/15 text-cream/70 text-sm hover:bg-white/[0.06] inline-flex items-center gap-2">
+            <ShareNetwork size={15} weight="fill" /> {copied ? "Link copied" : "Share combo"}
+          </button>
         </div>
 
         <div className="flex items-center gap-2 pt-1 border-t border-white/[0.06]">
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="name this combo..." maxLength={28} className="flex-1 bg-black/20 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none" />
           <button onClick={doSave} disabled={!name.trim()} className="px-3 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40 inline-flex items-center gap-1.5"><FloppyDisk size={14} weight="fill" /> Save</button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input value={codeInput} onChange={(e) => setCodeInput(e.target.value)} placeholder="paste a shared combo code or link..." className="flex-1 bg-black/20 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none" />
+          <button onClick={loadFromCode} disabled={!codeInput.trim()} className="px-3 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40">Load code</button>
         </div>
       </div>
 

@@ -28,16 +28,30 @@ const REWARD_BY_DIFF: Record<string, { reward: number; xp: number }> = {
   Expert: { reward: 90, xp: 72 },
 };
 
+export interface IncidentGroup { group: string; track: Track; items: ShiftItem[] }
+
 const basePool: PoolEntry[] = [];
 const kbAll: KbArticle[] = [];
 const invAll: InventoryItem[] = [];
 const adAll: AdUser[] = [];
+const incidentMap: Record<string, IncidentGroup> = {};
 for (const s of SHIFTS) {
   kbAll.push(...s.kb);
   invAll.push(...s.inventory);
   adAll.push(...s.adUsers);
-  for (const it of s.items) if (!it.incident) basePool.push({ item: it, track: s.track });
+  for (const it of s.items) {
+    if (it.incident) {
+      const g = it.incident.group;
+      if (!incidentMap[g]) incidentMap[g] = { group: g, track: s.track, items: [] };
+      incidentMap[g].items.push(it);
+    } else {
+      basePool.push({ item: it, track: s.track });
+    }
+  }
 }
+
+/** Full incident groups (root + duplicates), for the Doubles modifier. */
+export const INCIDENT_GROUPS: IncidentGroup[] = Object.values(incidentMap);
 
 // Extra authored tickets. Each entry carries track/difficulty/reward/xp metadata
 // plus the ticket content (and an optional inline kbArticle we fold into the KB).

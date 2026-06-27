@@ -5,7 +5,7 @@
 
 import type { Shift, ShiftItem, ShiftModifier } from "./types";
 import type { Track } from "@/lib/helpdesk/types";
-import { POOL, MASTER_KB, MASTER_INVENTORY, MASTER_AD, type PoolEntry } from "./pool";
+import { POOL, MASTER_KB, MASTER_INVENTORY, MASTER_AD, INCIDENT_GROUPS, type PoolEntry } from "./pool";
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -34,6 +34,7 @@ export const MODIFIERS: ShiftModifier[] = [
   { id: "phishwave", label: "Phishing Wave", desc: "Extra phishing landing in the inbox." },
   { id: "audit", label: "Audit", desc: "A reviewer is watching. Wrong moves cost double." },
   { id: "graveyard", label: "Graveyard", desc: "Lights down, clock tight. The night-desk vibe." },
+  { id: "doubles", label: "Doubles", desc: "An incident storm hits mid-shift. Find the root." },
 ];
 
 /** Deterministic seed for "today" so a Daily Combo is the same for everyone. */
@@ -92,6 +93,12 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     if (has("vip") && rnd() < 0.5) it = { ...it, from: { ...it.from, vip: true } };
     return it;
   });
+
+  // Doubles: drop a full incident storm (root + duplicates) into the queue.
+  if (has("doubles") && INCIDENT_GROUPS.length > 0) {
+    const g = INCIDENT_GROUPS[Math.floor(rnd() * INCIDENT_GROUPS.length)];
+    g.items.forEach((it, k) => items.push({ ...it, arriveAfter: 30 + k * 6 }));
+  }
 
   const slaScales: number[] = [];
   if (has("rush")) slaScales.push(0.6);
