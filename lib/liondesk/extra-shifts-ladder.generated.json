@@ -1,0 +1,462 @@
+[
+  {
+    "id": "soc-shift-3",
+    "track": "soc",
+    "order": 2,
+    "name": "SOC Shift 3: The Hunt",
+    "rank": "SOC Analyst III",
+    "accent": "#2BBE6B",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-lolbin-hunt",
+        "title": "Living off the land: validating an encoded PowerShell finding",
+        "tags": [
+          "threat hunting",
+          "powershell",
+          "lolbin",
+          "soc"
+        ],
+        "body": [
+          "Attackers prefer trusted, signed binaries already on the box so they blend into normal admin activity. Encoded PowerShell spawned by a document process is a classic tell, but it is a lead, not a verdict.",
+          "Confirm the lineage before you call it. A child PowerShell under a document process, with a hidden window and a base64 encoded command, that contacts an unknown host, is real. PowerShell that an admin or a deployment tool launched on its own is not. Decode the intent, check the parent, then contain the host and preserve it. Do not blanket-block PowerShell across the fleet on one host's evidence."
+        ]
+      },
+      {
+        "id": "kb-dns-tunneling",
+        "title": "DNS tunneling vs a noisy app",
+        "tags": [
+          "dns",
+          "exfiltration",
+          "tunneling",
+          "false positive"
+        ],
+        "body": [
+          "High volume long TXT queries to one rare domain can be data smuggled over DNS, or a misconfigured app or security tool that legitimately encodes data in DNS. The query pattern alone does not decide it.",
+          "Validate first. Check the resolving process, whether the domain belongs to a known vendor, and whether the lookups carry real subdomain entropy that looks like encoded payload. If it is a sanctioned vendor agent, document and tune. If the process is unknown and the subdomains look like encoded data leaving the network, treat it as exfiltration and contain the host. Do not null-route a domain you have not identified, you may break a production service."
+        ]
+      },
+      {
+        "id": "kb-persistence-scope",
+        "title": "Persistence found: preserve and scope before you rip it out",
+        "tags": [
+          "persistence",
+          "scheduled task",
+          "scope",
+          "incident"
+        ],
+        "body": [
+          "A single persistence mechanism is rarely the whole story. Removing it the instant you find it feels productive, but it tips off an active actor and erases the trail to every other host they touched.",
+          "When you find one persistence artifact, your first job is scope. Preserve the artifact, hunt the same indicator across the fleet, and let IR decide on coordinated removal so the actor cannot re-establish on a host you missed. Remove in isolation only when the host is already contained and the indicator is being hunted everywhere else."
+        ]
+      },
+      {
+        "id": "kb-benign-no-dismiss",
+        "title": "Calling a detection benign without dismissing the category",
+        "tags": [
+          "false positive",
+          "triage",
+          "credential access",
+          "tuning"
+        ],
+        "body": [
+          "A detection that fires on sanctioned tooling is a true positive for the technique and a false positive for the threat. Both halves matter.",
+          "Confirm the actor is the sanctioned system, verify the behavior matches its known profile, then close as benign with a documented reason and a tuning note so the same source stops crying wolf. Never globally suppress the detection category, the next time it fires it may be the real thing on a host that is not your backup agent."
+        ]
+      },
+      {
+        "id": "kb-expand-scope-ir",
+        "title": "Expanding scope responsibly when the hunt finds more",
+        "tags": [
+          "scope",
+          "incident response",
+          "escalation",
+          "out of scope"
+        ],
+        "body": [
+          "A hunt scoped to one host that uncovers a second compromised host has outgrown its authorization. Quietly chasing it on your own, or worse touching a system you were never cleared to act on, creates legal and operational risk and can burn the wider investigation.",
+          "Document the new finding, preserve the evidence, and loop in the IR lead to widen the authorized scope before you act on the new host. Production and out-of-scope systems are report and escalate only. Expansion is a decision for IR, not a solo improvisation."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "soc-shift-3-lolbin",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Threat hunt hypothesis",
+          "role": "Hunt queue"
+        },
+        "subject": "Encoded PowerShell spawned by a document process on FIN-WKS-04",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 52,
+        "xp": 44,
+        "ticketBody": "Your hunt hypothesis: an attacker is living off the land. The process tree on FIN-WKS-04 shows an Office document process spawning a hidden PowerShell with a base64 encoded command. Decide whether the evidence supports a real attack and contain it the right way.",
+        "evidence": [
+          {
+            "label": "Process tree, FIN-WKS-04",
+            "lines": [
+              "winword.exe -> powershell.exe -w hidden -enc <base64 blob>",
+              "Decoded command downloads a payload from 185.243.* (unknown host)",
+              "powershell.exe is signed by Microsoft but launched by a document, hidden window",
+              "No deployment tool or admin session correlates to this launch"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "tree",
+              "process",
+              "edr"
+            ],
+            "output": "winword.exe is the parent of a hidden powershell.exe running an encoded command. Decoded, it pulls a payload from an unknown external host. No sanctioned admin or deploy job matches. This is a living-off-the-land execution.",
+            "step": "diag"
+          },
+          {
+            "aliases": [
+              "decode",
+              "intent"
+            ],
+            "output": "The encoded blob resolves to a downloader that fetches a second stage from 185.243.x.x, a host with no reputation and not on any allowlist."
+          }
+        ],
+        "kbArticleId": "kb-lolbin-hunt",
+        "goal": "Your hypothesis looks confirmed. Validate the lineage, then contain without destroying the lead.",
+        "hint": "A document spawning hidden encoded PowerShell to an unknown host is the tell. But what does the right containment preserve, and what does it NOT do to the rest of the fleet?",
+        "actions": [
+          {
+            "id": "isolate-preserve",
+            "label": "Confirm the lineage, isolate FIN-WKS-04 via EDR, and preserve it for forensics",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "outcome": "escalated",
+            "teach": "That is the senior move. The decoded intent and the document parent confirm a living-off-the-land attack. EDR isolation stops the download and any spread while the host stays powered so memory and the process tree survive for the investigation."
+          },
+          {
+            "id": "block-powershell-fleet",
+            "label": "Block PowerShell execution across the entire fleet",
+            "correct": false,
+            "csat": -8,
+            "teach": "PowerShell is legitimate admin tooling everywhere else. Blanket-blocking it fleet-wide on one host's evidence breaks operations and still leaves the compromised host live. Isolate the affected host instead."
+          },
+          {
+            "id": "kill-process-only",
+            "label": "Just kill the PowerShell process and close the lead",
+            "correct": false,
+            "csat": -7,
+            "teach": "Killing the process ends one execution but leaves the host compromised, the persistence intact, and the operator free to relaunch. Contain the host, do not swat a single process."
+          },
+          {
+            "id": "reimage-now",
+            "label": "Reimage FIN-WKS-04 immediately to be safe",
+            "correct": false,
+            "csat": -11,
+            "ends": true,
+            "outcome": "mishandled",
+            "teach": "Reimaging destroys the exact evidence your hunt was built to capture: the decoded intent, the second-stage host, and how the document landed. Isolate and preserve first, remediate after the investigation has what it needs."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-3-dns-tunnel",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "DNS analytics",
+          "role": "Network detection"
+        },
+        "subject": "Thousands of long TXT queries from ENG-WKS-11 to one rare domain",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 46,
+        "xp": 39,
+        "ticketBody": "One host is generating thousands of unusually long TXT-record DNS queries to a single rarely seen domain. This could be DNS tunneling exfiltration, or a misconfigured app. Validate before you act.",
+        "evidence": [
+          {
+            "label": "DNS query sample, ENG-WKS-11",
+            "lines": [
+              "4,180 TXT queries in 30 min to *.q7x2k.datahub-sync.io",
+              "Subdomains are long, high-entropy, base32-looking strings",
+              "Resolving process: an unknown binary in a user temp path, unsigned",
+              "datahub-sync.io: registered last month, not a known vendor, not in the allowlist"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "resolve",
+              "process",
+              "who"
+            ],
+            "output": "The TXT lookups are issued by an unsigned binary in a user temp folder, not a sanctioned agent. The subdomains carry high-entropy base32-style labels consistent with encoded data, not normal lookups.",
+            "step": "diag"
+          },
+          {
+            "aliases": [
+              "domain",
+              "whois",
+              "vendor"
+            ],
+            "output": "datahub-sync.io was registered last month, maps to no known vendor, and is not on any allowlist. No business owner claims it."
+          }
+        ],
+        "kbArticleId": "kb-dns-tunneling",
+        "goal": "Decide if this is exfiltration or a noisy app, then act proportionally.",
+        "hint": "An unknown unsigned process and high-entropy subdomains to an unowned domain point one way. What would have been different if it were a real vendor agent?",
+        "actions": [
+          {
+            "id": "validate-isolate",
+            "label": "Validate the process and domain, then isolate ENG-WKS-11 and preserve it",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 13,
+            "outcome": "escalated",
+            "teach": "Right. The resolver is an unsigned temp-path binary and the subdomains carry encoded high-entropy data to a domain no one owns. That is tunneling exfiltration, not a misconfigured vendor agent. Isolate the host and preserve it for the investigation."
+          },
+          {
+            "id": "null-route-only",
+            "label": "Null-route datahub-sync.io at the resolver and close it",
+            "correct": false,
+            "csat": -7,
+            "teach": "You blocked one channel but left the compromised host live, free to switch to a backup domain. And had this been a real but unidentified vendor service, you might have broken production. Identify the process, then contain the host."
+          },
+          {
+            "id": "assume-misconfig",
+            "label": "Assume it is a misconfigured app and close as benign",
+            "correct": false,
+            "csat": -9,
+            "teach": "An unsigned temp-path process sending high-entropy encoded labels to an unowned domain is the exact signature of tunneling. Calling it a misconfig without checking the resolving process is how an exfil runs all shift."
+          },
+          {
+            "id": "page-everyone",
+            "label": "Declare a breach and page the whole company",
+            "correct": false,
+            "csat": -6,
+            "teach": "You have not yet confirmed the process or the domain. Paging the company before a five-minute validation burns the credibility you will need for the confirmed incident. Validate, then escalate through IR."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-3-persistence",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Persistence hunt",
+          "role": "Hunt queue"
+        },
+        "subject": "3am scheduled task masquerading as a Windows update on HR-WKS-08",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 47,
+        "xp": 40,
+        "ticketBody": "A scheduled task was created at 03:00, named to look like a Windows update, pointing at a script in a temp folder. This is persistence. Decide whether to remove it now or preserve it and scope the spread first.",
+        "evidence": [
+          {
+            "label": "Scheduled task detail, HR-WKS-08",
+            "lines": [
+              "Task 'WindowsUpdateSvc' created 03:04, no matching update history",
+              "Action: runs update_check.ps1 from C:\\Users\\Public\\Temp",
+              "Trigger: at logon and every 4 hours, hidden",
+              "Same task name and script hash already seen on 2 other hosts in the EDR data"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "task",
+              "persistence",
+              "schtasks"
+            ],
+            "output": "The task imitates a Windows update name but has no update history, runs a script from a public temp path, and re-triggers every 4 hours. The same name and script hash appear on at least 2 other hosts. This is fleet-wide persistence, not a one-off.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-persistence-scope",
+        "goal": "You found the persistence. Decide your first move: remove it, or preserve and scope.",
+        "hint": "The same artifact is already on other hosts. If you delete it here right now, what do you tip off, and what do you lose?",
+        "actions": [
+          {
+            "id": "preserve-scope-ir",
+            "label": "Preserve the task, hunt the indicator fleet-wide, and loop in IR for coordinated removal",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "outcome": "escalated",
+            "teach": "Correct. The artifact already exists on other hosts, so this is scope, not cleanup. Preserve it, hunt the name and hash everywhere, and let IR coordinate removal so the actor cannot re-establish on a host you missed. Ripping it out of one box first tips them off and erases the trail."
+          },
+          {
+            "id": "delete-task-now",
+            "label": "Delete the scheduled task on HR-WKS-08 right away",
+            "correct": false,
+            "csat": -8,
+            "teach": "Deleting the only copy you have studied tips off an active actor and destroys the artifact before you have scoped it. The same task is on other hosts, so they simply persist elsewhere. Preserve and scope before removal."
+          },
+          {
+            "id": "ignore-update",
+            "label": "It is named like a Windows update, leave it and close",
+            "correct": false,
+            "csat": -10,
+            "teach": "A task created at 3am with no update history, running a temp-folder script every 4 hours, is persistence wearing a costume. The legitimate-looking name is the disguise, not the alibi."
+          },
+          {
+            "id": "reboot-host",
+            "label": "Reboot HR-WKS-08 to clear it",
+            "correct": false,
+            "csat": -7,
+            "teach": "A logon and interval trigger survives a reboot by design, that is the point of persistence. Rebooting clears nothing and may discard volatile evidence. Preserve, scope, then let IR coordinate removal."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-3-benign-dc",
+        "channel": "ticket",
+        "priority": "P3",
+        "from": {
+          "name": "EDR alert",
+          "role": "Endpoint"
+        },
+        "subject": "Possible credential dumping on DC-CORE-01",
+        "slaMinutes": 30,
+        "arriveAfter": 22,
+        "reward": 41,
+        "xp": 34,
+        "ticketBody": "An alert fired for credential-access behavior on a domain controller: a process reading LSASS-related memory. On a DC this is alarming. But the evidence points at the sanctioned backup agent. Triage it without dismissing the whole category.",
+        "evidence": [
+          {
+            "label": "Detection context, DC-CORE-01",
+            "lines": [
+              "Process: backup-agent.exe, signed by the approved backup vendor",
+              "Path and hash match the deployed enterprise agent on every server",
+              "Change calendar: nightly backup window is ACTIVE now",
+              "Behavior matches this agent's documented profile, fires nightly on the same schedule"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "verify",
+              "agent",
+              "signature"
+            ],
+            "output": "The process is the approved backup vendor's signed agent at its expected path and hash. It runs in the active backup window and matches its documented profile. This is the sanctioned agent, not an operator.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-benign-no-dismiss",
+        "goal": "Confirm whether this is the sanctioned backup agent, then triage correctly.",
+        "hint": "It is a true positive for the technique and a false positive for the threat. How do you close it without blinding yourself to the real thing next time?",
+        "actions": [
+          {
+            "id": "benign-with-tuning",
+            "label": "Confirm it is the signed backup agent and close as benign with a tuning note for this source only",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 12,
+            "outcome": "resolved",
+            "teach": "Good triage. The signed agent, the matching hash, and the active backup window confirm sanctioned activity. Close benign with a documented reason and tune out this specific source so it stops crying wolf, while the detection still fires for everything else."
+          },
+          {
+            "id": "suppress-category",
+            "label": "Globally suppress the credential-dumping detection so it stops alerting",
+            "correct": false,
+            "csat": -10,
+            "teach": "You just blinded the SOC to one of the most serious techniques on your most sensitive host. Calling one sanctioned source benign does not mean the category is noise. Tune the source, never the whole detection."
+          },
+          {
+            "id": "isolate-dc",
+            "label": "Isolate DC-CORE-01 immediately, it is a domain controller",
+            "correct": false,
+            "csat": -8,
+            "teach": "Isolating a domain controller mid-backup over a verified-benign agent causes a self-inflicted outage and breaks your backups. Verify the actor first, the evidence already names the sanctioned agent."
+          },
+          {
+            "id": "ignore-no-note",
+            "label": "Close it benign and leave no note",
+            "correct": false,
+            "csat": -5,
+            "teach": "It is benign this time, but with no documented reason and no tuning the same alert burns the next analyst's time and the source keeps firing. Close with a reason and a source-specific tuning note."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-3-expand-scope",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Hunt finding",
+          "role": "Hunt queue"
+        },
+        "subject": "Second beaconing host found outside your scoped hunt",
+        "slaMinutes": 15,
+        "arriveAfter": 44,
+        "reward": 54,
+        "xp": 45,
+        "ticketBody": "While hunting the original host, your pivot surfaced a second host, SRV-PAY-02, beaconing to the same infrastructure. SRV-PAY-02 is a production payments server you were never scoped or authorized to touch. Decide how to expand scope responsibly.",
+        "evidence": [
+          {
+            "label": "Pivot result",
+            "lines": [
+              "SRV-PAY-02 beacons to the same C2 infrastructure as the original host",
+              "SRV-PAY-02 is a production payments server, OUTSIDE your authorized hunt scope",
+              "Your hunt authorization covers only the original workstation segment",
+              "Acting on production systems requires IR sign-off and change control"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-expand-scope-ir",
+        "goal": "The hunt outgrew its scope. Expand it the right way.",
+        "hint": "It is the same actor, but a production payments box you were never cleared to touch. Whose decision is it to widen the scope, and what do you do meanwhile?",
+        "actions": [
+          {
+            "id": "document-escalate-ir",
+            "label": "Document the finding, preserve the evidence, and loop in the IR lead to widen authorized scope before acting",
+            "correct": true,
+            "csat": 16,
+            "outcome": "escalated",
+            "teach": "That is the responsible expansion. The second host is the same actor but a production system outside your authorization. You preserve the evidence and escalate to IR to widen scope and engage change control. Expansion is an IR decision, not a solo improvisation, and IR can also engage the right stakeholders for a payments server."
+          },
+          {
+            "id": "isolate-payments-solo",
+            "label": "Isolate the payments server yourself right now",
+            "correct": false,
+            "csat": -9,
+            "teach": "Isolating a production payments server on your own authority, outside your scope and without change control, can cause a revenue-impacting outage and overstep your authorization. Escalate to IR so the expansion is sanctioned and coordinated."
+          },
+          {
+            "id": "ignore-out-of-scope",
+            "label": "It is out of scope, ignore it and finish the original hunt",
+            "correct": false,
+            "csat": -12,
+            "ends": true,
+            "outcome": "mishandled",
+            "teach": "Knowing a payments server is beaconing to the same C2 and saying nothing is the worst outcome. Out of scope means report and escalate, never ignore. Document it and bring in IR immediately."
+          },
+          {
+            "id": "email-payments-owner",
+            "label": "Email the payments team to ask if their server looks fine",
+            "correct": false,
+            "csat": -7,
+            "teach": "Asking the system owner to self-assess a possible compromise tips off anyone watching and skips the people who own the response. Route confirmed beaconing through IR, not a casual question to the asset owner."
+          }
+        ]
+      }
+    ]
+  },

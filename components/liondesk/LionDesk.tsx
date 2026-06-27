@@ -35,7 +35,7 @@ const isTerminal = (s: ItemStatus) => TERMINAL_STATUSES.includes(s);
 type FeedTone = "good" | "bad" | "info";
 interface FeedEntry { seq: number; text: string; tone: FeedTone }
 
-interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null; patience: number | null }
+interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null; patience: number | null; opened: boolean }
 
 const GOOD_FOR_REVEAL: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
 /** A chained follow-up (revealedBy) is "live" only once its trigger matched. A
@@ -137,7 +137,7 @@ function leadFor(p: { leadSeconds?: number; vendor: string }): number {
 
 function buildInitial(shift: Shift): State {
   const items: Record<string, ItemRuntime> = {};
-  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null, patience: i.channel === "phone" ? 100 : null }; });
+  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null, patience: i.channel === "phone" ? 100 : null, opened: false }; });
   const stock: Record<string, number> = {};
   shift.inventory.forEach((p) => { stock[p.sku] = p.stock; });
   const adStatus: Record<string, string> = {};
@@ -161,7 +161,9 @@ function buildInitial(shift: Shift): State {
     items,
     feed: [],
     feedSeq: 0,
-    lifelines: { coffee: 1, senior: 2 },
+    // START sets the real lifeline counts from the chosen difficulty; the desk
+    // is unreachable until then, so these baselines stay zero.
+    lifelines: { coffee: 0, senior: 0 },
     revealed: [],
     streak: 0,
     bestStreak: 0,
@@ -223,30 +225,39 @@ function makeReducer(shift: Shift) {
           }
         }
 
-        // Phone patience: while you are on an unresolved call and haven't pinned
-        // the issue, the caller drains. Hit zero and they hang up.
-        if (ns.activeItemId) {
-          const ai = shift.items.find((i) => i.id === ns.activeItemId);
-          const rt = ai ? ns.items[ai.id] : null;
-          if (ai && rt && ai.channel === "phone" && !isTerminal(rt.status) && rt.patience != null && !rt.steps.includes("phone") && elapsed >= ai.arriveAfter) {
-            const np = rt.patience - PATIENCE_DECAY * DIFF[ns.difficulty].patience;
-            if (np <= 0) {
-              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null, streak: 0 };
-              ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up faster and ask the right question first.`, "bad");
-              if (shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
-            } else {
-              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: np } } };
-            }
+        // Phone patience: once a call is picked up (opened), the caller drains
+        // until you pin the issue, whether or not the call is the open tab. Hit
+        // zero and they hang up (a mishandled call).
+        let hungUp = false;
+        for (const ai of shift.items) {
+          if (ai.channel !== "phone") continue;
+          const rt = ns.items[ai.id];
+          if (!rt.opened || isTerminal(rt.status) || rt.patience == null || rt.steps.includes("phone") || elapsed < ai.arriveAfter) continue;
+          const np = rt.patience - PATIENCE_DECAY * DIFF[ns.difficulty].patience;
+          if (np <= 0) {
+            ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), streak: 0 };
+            if (ns.activeItemId === ai.id) ns = { ...ns, activeItemId: null };
+            ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up and ask the right question sooner.`, "bad");
+            hungUp = true;
+          } else {
+            ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: np } } };
           }
         }
+        if (hungUp && shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
 
         if (nextLeft === 0) ns = { ...ns, ended: true };
         return ns;
       }
       case "APP":
         return { ...state, activeApp: a.app, activeItemId: null };
-      case "OPEN":
-        return { ...state, activeItemId: a.id };
+      case "OPEN": {
+        // Opening a call is picking it up. From then on the caller's patience
+        // keeps draining even if you navigate away (they are on hold), so you
+        // cannot peek at a call and close it to dodge the clock.
+        const it = state.items[a.id];
+        const items = it && !it.opened ? { ...state.items, [a.id]: { ...it, opened: true } } : state.items;
+        return { ...state, activeItemId: a.id, items };
+      }
       case "CLOSE":
         return { ...state, activeItemId: null };
       case "STEP": {
@@ -350,7 +361,7 @@ function makeReducer(shift: Shift) {
         const csat = clamp(state.csat + csatDelta);
         // Resolve streak: consecutive correct fixes build a preview multiplier.
         const streak = correct ? state.streak + 1 : 0;
-        const mult = correct ? (streak >= 5 ? 1.5 : streak >= 3 ? 1.25 : 1) : 1;
+        const mult = correct ? (streak >= 8 ? 1.75 : streak >= 5 ? 1.5 : streak >= 3 ? 1.25 : 1) : 1;
         let ns: State = {
           ...state,
           csat,
@@ -779,7 +790,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
-            const remaining = (st.landedAt ?? i.arriveAfter) + slaBudget(shift, i.priority, state.difficulty) - elapsed;
+            const remaining = (st.landedAt ?? (i.revealedBy ? elapsed : i.arriveAfter)) + slaBudget(shift, i.priority, state.difficulty) - elapsed;
             return (
               <li key={i.id}>
                 <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
@@ -938,7 +949,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
   const it = state.items[item.id];
   const [showHint, setShowHint] = useState(false);
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const slaRemaining = (it.landedAt ?? item.arriveAfter) + slaBudget(shift, item.priority, state.difficulty) - elapsed;
+  const slaRemaining = (it.landedAt ?? (item.revealedBy ? elapsed : item.arriveAfter)) + slaBudget(shift, item.priority, state.difficulty) - elapsed;
   const kbArticle = item.kbArticleId ? shift.kb.find((a) => a.id === item.kbArticleId) ?? null : null;
   const part = item.part ? shift.inventory.find((p) => p.sku === item.part!.sku) ?? null : null;
   const stepDone = (k: string) => (k === "kb" ? state.kbRead.includes(item.kbArticleId ?? "") : it.steps.includes(k));
