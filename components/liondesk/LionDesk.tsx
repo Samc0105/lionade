@@ -32,7 +32,7 @@ const isTerminal = (s: ItemStatus) => TERMINAL_STATUSES.includes(s);
 type FeedTone = "good" | "bad" | "info";
 interface FeedEntry { seq: number; text: string; tone: FeedTone }
 
-interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null }
+interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null; patience: number | null }
 
 const GOOD_FOR_REVEAL: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
 /** A chained follow-up (revealedBy) is "live" only once its trigger matched. A
@@ -95,13 +95,19 @@ const BREACH_PENALTY: Record<Priority, number> = { P1: 10, P2: 7, P3: 5, P4: 3 }
 // the express lane; CDW-grade hardware vendors are slower.
 const DEFAULT_LEAD = 30;
 const VENDOR_LEAD: Record<string, number> = { "Amazon Biz": 18, Newegg: 28, CDW: 42, Dell: 45, Apple: 38 };
+// Phone-call patience: a caller you've picked up loses patience every second you
+// stay on the line without pinning the issue. A wrong diagnostic question costs a
+// chunk. Hit zero and they hang up, which is a mishandled call plus a CSAT hit.
+const PATIENCE_DECAY = 2;
+const PATIENCE_WRONG = 18;
+const PATIENCE_HANGUP_PENALTY = 12;
 function leadFor(p: { leadSeconds?: number; vendor: string }): number {
   return p.leadSeconds ?? VENDOR_LEAD[p.vendor] ?? DEFAULT_LEAD;
 }
 
 function buildInitial(shift: Shift): State {
   const items: Record<string, ItemRuntime> = {};
-  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null }; });
+  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null, patience: i.channel === "phone" ? 100 : null }; });
   const stock: Record<string, number> = {};
   shift.inventory.forEach((p) => { stock[p.sku] = p.stock; });
   const adStatus: Record<string, string> = {};
@@ -181,6 +187,23 @@ function makeReducer(shift: Shift) {
           }
         }
 
+        // Phone patience: while you are on an unresolved call and haven't pinned
+        // the issue, the caller drains. Hit zero and they hang up.
+        if (ns.activeItemId) {
+          const ai = shift.items.find((i) => i.id === ns.activeItemId);
+          const rt = ai ? ns.items[ai.id] : null;
+          if (ai && rt && ai.channel === "phone" && !isTerminal(rt.status) && rt.patience != null && !rt.steps.includes("phone") && elapsed >= ai.arriveAfter) {
+            const np = rt.patience - PATIENCE_DECAY;
+            if (np <= 0) {
+              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null };
+              ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up faster and ask the right question first.`, "bad");
+              if (shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
+            } else {
+              ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: np } } };
+            }
+          }
+        }
+
         if (nextLeft === 0) ns = { ...ns, ended: true };
         return ns;
       }
@@ -244,8 +267,22 @@ function makeReducer(shift: Shift) {
       case "PHONE": {
         const it = state.items[a.id];
         let steps = it.steps;
-        if (a.correct && !steps.includes("phone")) steps = [...steps, "phone"];
-        return { ...state, items: { ...state.items, [a.id]: { ...it, steps, phoneChoice: a.index } } };
+        let patience = it.patience;
+        if (a.correct) {
+          if (!steps.includes("phone")) steps = [...steps, "phone"];
+        } else if (patience != null) {
+          patience = Math.max(0, patience - PATIENCE_WRONG);
+        }
+        let ns: State = { ...state, items: { ...state.items, [a.id]: { ...it, steps, phoneChoice: a.index, patience } } };
+        if (!a.correct) {
+          if (patience === 0) {
+            ns = { ...ns, items: { ...ns.items, [a.id]: { ...ns.items[a.id], status: "mishandled", attempts: it.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null };
+            ns = pushFeed(ns, "The caller hung up. Too many wrong questions.", "bad");
+          } else {
+            ns = pushFeed(ns, "That wasn't what they needed. They're getting impatient.", "bad");
+          }
+        }
+        return ns;
       }
       case "RESOLVE": {
         const item = shift.items.find((i) => i.id === a.id)!;
@@ -863,16 +900,32 @@ function KbInline({ article, read, onRead }: { article: { id: string; title: str
 function PhoneThread({ item, runtime, dispatch }: { item: ShiftItem; runtime: ItemRuntime; dispatch: Dispatch<Action> }) {
   const fu = item.phone!.followups;
   const chosen = runtime.phoneChoice;
+  const pinned = runtime.steps.includes("phone");
+  const patience = runtime.patience ?? 100;
+  const onCall = !pinned && !isTerminal(runtime.status);
+  const pColor = patience >= 60 ? "#2BBE6B" : patience >= 30 ? "#F59E0B" : "#EF4444";
   return (
     <div className="mt-3 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+      {/* live patience meter while you're on the line */}
+      {onCall && (
+        <div className="flex items-center gap-2 mb-2.5">
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45">Caller patience</span>
+          <span className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/10">
+            <span className="block h-full transition-[width] duration-500" style={{ width: `${patience}%`, background: pColor }} />
+          </span>
+          <span className="font-mono text-[10px] tabular-nums" style={{ color: pColor }}>{patience}%</span>
+        </div>
+      )}
       <div className="space-y-2">
         <Bubble who="user" text={item.phone!.opener} />
         {chosen !== null && <Bubble who="you" text={fu[chosen].label} />}
         {chosen !== null && <Bubble who="user" text={fu[chosen].reply} />}
       </div>
-      {!runtime.steps.includes("phone") && (
+      {pinned ? (
+        <p className="mt-3 font-mono text-[10px] text-[#2BBE6B]">✓ You pinned the issue. Choose your fix below.</p>
+      ) : !isTerminal(runtime.status) && (
         <div className="mt-3">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45 mb-1.5">Text back:</p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45 mb-1.5">Text back (ask the right question first):</p>
           <div className="grid gap-1.5">
             {fu.map((f, i) => (
               <button key={i} onClick={() => dispatch({ t: "PHONE", id: item.id, index: i, correct: !!f.correct })} className="text-left text-xs rounded-lg border border-white/[0.1] px-2.5 py-1.5 text-cream/85 hover:bg-white/[0.05]">{f.label}</button>
