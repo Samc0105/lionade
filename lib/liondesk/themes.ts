@@ -18,6 +18,7 @@ export const THEMES: DeskTheme[] = [
   { id: "graveyard", name: "Graveyard", unlock: "dawn", bg: "#04060c", scanlines: true },
   { id: "neon", name: "Neon", unlock: "promoted", bg: "#0a0418", scanlines: true },
   { id: "holo", name: "Holo", unlock: "beloved", bg: "#04121a", scanlines: true },
+  { id: "crimson", name: "Crimson", unlock: "iron-desk", bg: "#140404", scanlines: true },
   { id: "legend", name: "Gold Desk", unlock: "desk-legend", bg: "#0c0a04" },
 ];
 

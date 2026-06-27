@@ -22,13 +22,15 @@ export interface TechhubStats {
   careerXp: number;
   bestShiftScore: number;
   weeklyCleared: boolean;
+  hardCleared: boolean;
+  selfMade: boolean;
 }
 
 const STATS_KEY = "lionade.techhub.stats.v1";
 const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
 
 function emptyStats(): TechhubStats {
-  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0, weeklyCleared: false };
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0, weeklyCleared: false, hardCleared: false, selfMade: false };
 }
 
 export function getStats(): TechhubStats {
@@ -91,6 +93,8 @@ const DEFS: (Achievement & { check: (c: CheckCtx) => boolean })[] = [
   { id: "weekly-warrior", name: "Weekly Warrior", desc: "Clear a Weekly Challenge.", check: (c) => c.stats.weeklyCleared },
   { id: "trusted", name: "Trusted", desc: "Get a department to 90 reputation.", check: (c) => Object.values(c.reputation).some((v) => v >= 90) },
   { id: "beloved", name: "Beloved", desc: "Every department at 70 or above.", check: (c) => REP_DEPTS.every((d) => (c.reputation[d] ?? 50) >= 70) },
+  { id: "iron-desk", name: "Iron Desk", desc: "Clear a shift on Hard.", check: (c) => c.stats.hardCleared },
+  { id: "self-made", name: "Self-Made", desc: "Clear a Normal or Hard shift using no lifelines.", check: (c) => c.stats.selfMade },
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -146,6 +150,8 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   }
   s.bestShiftScore = Math.max(s.bestShiftScore, r.score);
   if (r.csat >= 100 && cleared) s.perfectShifts++;
+  if (cleared && r.difficulty === "hard") s.hardCleared = true;
+  if (cleared && r.difficulty !== "easy" && !r.usedLifeline) s.selfMade = true;
   const modIds = (shift.modifiers ?? []).map((m) => m.id);
   for (const id of modIds) if (!s.mutatorsSeen.includes(id)) s.mutatorsSeen.push(id);
   if (!s.tracksPlayed.includes(shift.track)) s.tracksPlayed.push(shift.track);

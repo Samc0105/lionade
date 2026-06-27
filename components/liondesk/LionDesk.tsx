@@ -21,6 +21,8 @@ export interface ShiftResult {
   xp: number;
   resolved: number;
   total: number;
+  difficulty: "easy" | "normal" | "hard";
+  usedLifeline: boolean;
 }
 
 /* ───────────────────────── state ───────────────────────── */
@@ -427,7 +429,8 @@ function computeResult(shift: Shift, state: State): ShiftResult {
   const total = Math.max(1, live.length);
   const score = Math.round(state.csat * 0.6 + (resolved / total) * 40);
   const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
-  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total };
+  const usedLifeline = (DIFF[state.difficulty].coffee - state.lifelines.coffee) > 0 || (DIFF[state.difficulty].senior - state.lifelines.senior) > 0;
+  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline };
 }
 
 /* ───────────────────────── component ───────────────────────── */
