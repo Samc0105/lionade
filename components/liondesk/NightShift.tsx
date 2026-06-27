@@ -14,7 +14,7 @@ import {
   startAmbient, stopAmbient, setAmbientTension, playAlarm, playContain, playStinger,
   playWin, resumeAudio, isMuted, setMuted,
 } from "@/lib/liondesk/sound";
-import { refreshAchievements } from "@/lib/liondesk/stats";
+import { refreshAchievements, recordHistoryEntry } from "@/lib/liondesk/stats";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 
 /* ───────────────────────── state ───────────────────────── */
@@ -193,11 +193,13 @@ export default function NightShift() {
     if (state.status === "won") {
       stopAmbient(); playWin();
       if (state.nightIdx >= 0 && state.nightIdx < NIGHTS.length) { recordNightSurvived(NIGHTS[state.nightIdx].n); setMaxSurvived(getMaxNightSurvived()); }
+      recordHistoryEntry({ kind: "night", label: state.def.name, detail: "survived to 6 AM", at: Date.now() });
       setNewAch(refreshAchievements());
     }
     if (state.status === "lost") {
       stopAmbient(); playStinger();
       if (state.def.endless) { recordEndlessBest(state.hour * state.def.secondsPerHour + state.secInHour); setEndlessBest(getEndlessBest()); }
+      recordHistoryEntry({ kind: "night", label: state.def.name, detail: state.def.endless ? `lasted ${fmtSec(state.hour * state.def.secondsPerHour + state.secInHour)}` : "breached", at: Date.now() });
       setNewAch(refreshAchievements());
     }
     return () => { if (state.status === "playing") stopAmbient(); };

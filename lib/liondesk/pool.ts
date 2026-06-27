@@ -8,6 +8,7 @@ import { SHIFTS } from "./shifts";
 import type { ShiftItem, KbArticle, InventoryItem, AdUser } from "./types";
 import type { Track } from "@/lib/helpdesk/types";
 import extraRaw from "./pool-extra.generated.json";
+import { EXTRA_TICKETS, EXTRA_INCIDENT_GROUPS } from "./extra-tickets";
 
 export interface PoolEntry { item: ShiftItem; track: Track }
 
@@ -50,8 +51,10 @@ for (const s of SHIFTS) {
   }
 }
 
+for (const e of EXTRA_TICKETS) basePool.push({ item: e.item, track: e.track });
+
 /** Full incident groups (root + duplicates), for the Doubles modifier. */
-export const INCIDENT_GROUPS: IncidentGroup[] = Object.values(incidentMap);
+export const INCIDENT_GROUPS: IncidentGroup[] = [...Object.values(incidentMap), ...EXTRA_INCIDENT_GROUPS];
 
 // Extra authored tickets. Each entry carries track/difficulty/reward/xp metadata
 // plus the ticket content (and an optional inline kbArticle we fold into the KB).

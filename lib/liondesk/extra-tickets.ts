@@ -1,0 +1,162 @@
+// Hand-authored pool extras that show off the chain mechanics, plus a second
+// incident template for the Doubles modifier. Kept here (not in the generated
+// JSON) because chains and incident groups are structural, not flat tickets.
+
+import type { ShiftItem } from "./types";
+import type { Track } from "@/lib/helpdesk/types";
+
+export const EXTRA_TICKETS: { item: ShiftItem; track: Track }[] = [
+  {
+    track: "helpdesk",
+    item: {
+      id: "onboard-laptop",
+      channel: "ticket",
+      priority: "P3",
+      from: { name: "HR Onboarding", role: "People Ops" },
+      subject: "Provision a new hire's laptop for Monday",
+      slaMinutes: 60,
+      arriveAfter: 0,
+      reward: 40,
+      xp: 32,
+      ticketBody: "New hire starts Monday. Their laptop needs to be imaged and enrolled before then.",
+      goal: "Get the new hire's laptop ready.",
+      hint: "Onboarding is a sequence. Image and enroll the device the standard way.",
+      actions: [
+        { id: "image-enroll", label: "Image the laptop and enroll it in MDM", correct: true, csat: 11, teach: "Standard onboarding. The device is ready. A laptop is only half of it though." },
+        { id: "hand-blank", label: "Hand them the laptop as-is", csat: -5, teach: "An un-imaged, unenrolled laptop has no apps, no policies, no security baseline. Image and enroll it first." },
+        { id: "local-admin", label: "Give them local admin and let them set it up", csat: -6, teach: "Handing a new hire local admin on an unmanaged box is a security and support nightmare. Provision it properly." },
+      ],
+      chainOnResolve: {
+        id: "onboard-mailbox",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Sasha (new hire)", role: "Sales" },
+        subject: "I can log in but I have no email",
+        slaMinutes: 45,
+        arriveAfter: 0,
+        reward: 34,
+        xp: 26,
+        ticketBody: "The laptop works but Outlook says there's no account. I can't see any email.",
+        goal: "Finish the onboarding: get their mailbox working.",
+        hint: "The device is done; the identity side isn't. What did onboarding still owe them?",
+        actions: [
+          { id: "provision-mailbox", label: "Provision their mailbox and assign the license", correct: true, csat: 11, teach: "That's the other half of onboarding: device plus identity. Now they're fully set up." },
+          { id: "reinstall-outlook", label: "Reinstall Outlook", csat: -4, teach: "Outlook is fine; there's no mailbox to connect to yet. Provision the account, not the app." },
+          { id: "wait-sync", label: "Tell them it'll sync eventually", csat: -5, teach: "It won't sync a mailbox that was never created. Provision it." },
+        ],
+      },
+    },
+  },
+  {
+    track: "helpdesk",
+    item: {
+      id: "slow-pc-callback",
+      channel: "ticket",
+      priority: "P3",
+      from: { name: "Ben Carter", role: "Finance" },
+      subject: "My PC has been really slow all morning",
+      slaMinutes: 45,
+      arriveAfter: 0,
+      reward: 38,
+      xp: 30,
+      ticketBody: "Everything is sluggish today, opening anything takes forever. Can you take a look?",
+      evidence: [{ label: "Task Manager (shared)", lines: ["process 'idx_helper.exe' pinned at 95% CPU", "started 08:02, never settled", "everything else starved for CPU"] }],
+      goal: "Actually fix Ben's slow PC.",
+      hint: "There's a real cause in the task list. Don't fob him off with a generic restart.",
+      actions: [
+        { id: "kill-indexer", label: "End the runaway indexer process and stop it auto-starting", correct: true, csat: 12, teach: "Right. A stuck indexer was eating the CPU. Killing it and stopping the auto-start fixes the actual problem." },
+        { id: "add-ram-slow", label: "Order him more RAM", csat: -5, teach: "It's a pegged CPU from one process, not memory pressure. More RAM won't touch it." },
+        { id: "fob-off", label: "Tell him to just restart and close the ticket", csat: -8, ends: true, outcome: "mishandled", teach: "You closed it without finding the cause. A restart clears it for a minute, but the auto-starting indexer pegs the CPU again. Fobbing users off is how tickets come back angrier." },
+      ],
+      chainOnFail: {
+        id: "slow-pc-angry",
+        channel: "ticket",
+        priority: "P1",
+        from: { name: "Ben Carter", role: "Finance", vip: true },
+        subject: "It is STILL slow and I've lost an hour",
+        slaMinutes: 15,
+        arriveAfter: 0,
+        reward: 30,
+        xp: 24,
+        ticketBody: "I restarted like you said and it's slow AGAIN. I've wasted my whole morning. Fix it properly this time.",
+        evidence: [{ label: "Task Manager", lines: ["'idx_helper.exe' back at 95% CPU after the reboot", "it auto-starts at login"] }],
+        goal: "Make it right, and find the real cause this time.",
+        hint: "It came back because the cause was never addressed. The process auto-starts.",
+        actions: [
+          { id: "kill-indexer-2", label: "End the indexer and disable its auto-start", correct: true, csat: 10, teach: "Fixed at the source this time. The lesson stings but sticks: solve the cause the first time, or it comes back worse." },
+          { id: "reimage-angry", label: "Reimage his machine to be safe", csat: -6, teach: "A full reimage over one runaway process is overkill and more downtime for an already-furious user. Kill the process." },
+        ],
+      },
+    },
+  },
+];
+
+// A second incident group (file-server outage) so Doubles has more variety.
+export const EXTRA_INCIDENT_GROUPS: { group: string; track: Track; items: ShiftItem[] }[] = [
+  {
+    group: "fileserver-down",
+    track: "helpdesk",
+    items: [
+      {
+        id: "fs-root",
+        channel: "ticket",
+        priority: "P1",
+        from: { name: "Multiple users", role: "Floor 2" },
+        subject: "Nobody can open shared files",
+        slaMinutes: 15,
+        arriveAfter: 0,
+        reward: 55,
+        xp: 44,
+        incident: { group: "fileserver-down", root: true },
+        ticketBody: "A wave of tickets: nobody on floor 2 can open anything on the S: drive.",
+        evidence: [{ label: "File service", lines: ["fileserver01: 'LanmanServer' service STOPPED (crashed 10:31)", "disk and network healthy", "all share access fails"] }],
+        commands: [{ aliases: ["status", "services", "service"], output: "fileserver01: the file-sharing service crashed at 10:31. Disk and network are fine. Restarting the service restores all shares.", step: "diag" }],
+        goal: "Restore file access for the floor. Find the single cause.",
+        hint: "Every share fails at once and the server's disk and network are fine. What do they all depend on?",
+        actions: [
+          { id: "restart-fs-service", label: "Restart the file-sharing service", correct: true, requires: ["diag"], csat: 16, teach: "That's the incident. The file service crashed, so every share went dark at once. Restarting it brings them all back and clears the flood of duplicates." },
+          { id: "reboot-fs", label: "Reboot the whole file server", csat: -5, teach: "A full reboot works but takes the server offline for minutes when only one service needed restarting." },
+          { id: "restore-fs", label: "Start restoring from backup", csat: -7, teach: "Nothing was lost; the service just stopped. Restoring from backup is a huge needless operation. Restart the service." },
+        ],
+      },
+      {
+        id: "fs-dup-1",
+        channel: "ticket",
+        priority: "P2",
+        from: { name: "Tara", role: "Accounting" },
+        subject: "S: drive won't open",
+        slaMinutes: 20,
+        arriveAfter: 8,
+        reward: 8,
+        xp: 6,
+        incident: { group: "fileserver-down" },
+        ticketBody: "My S: drive gives an error. Is it just me?",
+        goal: "Handle it. Familiar?",
+        hint: "Others are reporting the same thing right now.",
+        actions: [
+          { id: "ack-fs-1", label: "Link it to the file-server incident", correct: true, csat: 2, outcome: "resolved", teach: "Right, it's the outage. The root fix closes this." },
+          { id: "remap-1", label: "Walk her through remapping the drive", csat: -3, teach: "Her mapping is fine; the server's service is down. It's the incident, not her PC." },
+        ],
+      },
+      {
+        id: "fs-dup-2",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Owen", role: "Sales" },
+        subject: "can't get to the shared folder",
+        slaMinutes: 25,
+        arriveAfter: 16,
+        reward: 8,
+        xp: 6,
+        incident: { group: "fileserver-down" },
+        ticketBody: "Shared folder throws an error for me too.",
+        goal: "Same incident.",
+        hint: "Fix the root and this closes itself.",
+        actions: [
+          { id: "ack-fs-2", label: "Link it to the file-server incident", correct: true, csat: 2, outcome: "resolved", teach: "Yep, the root fix mass-resolves these." },
+          { id: "reboot-owen", label: "Tell him to reboot his PC", csat: -4, teach: "His PC is fine. It's a server-side outage." },
+        ],
+      },
+    ],
+  },
+];

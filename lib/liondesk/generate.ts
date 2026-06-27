@@ -25,6 +25,19 @@ function shuffle<T>(arr: readonly T[], rnd: () => number): T[] {
   return a;
 }
 
+// Flatten chain tickets: the trigger keeps everything but its chain fields, and
+// each follow-up becomes a hidden item revealed when the trigger resolves/fails.
+function expandChains(items: ShiftItem[]): ShiftItem[] {
+  const out: ShiftItem[] = [];
+  for (const it of items) {
+    const { chainOnResolve, chainOnFail, ...base } = it;
+    out.push(base as ShiftItem);
+    if (chainOnResolve) out.push({ ...chainOnResolve, arriveAfter: 0, revealedBy: { itemId: it.id, on: "resolve" } });
+    if (chainOnFail) out.push({ ...chainOnFail, arriveAfter: 0, revealedBy: { itemId: it.id, on: "fail" } });
+  }
+  return out;
+}
+
 export const MODIFIERS: ShiftModifier[] = [
   { id: "rush", label: "Rush Hour", desc: "Tighter SLAs across the board. The clock is mean." },
   { id: "vip", label: "VIP Day", desc: "Half the queue is VIPs, and they remember a botched call." },
@@ -107,6 +120,8 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
   if (has("audit")) penScales.push(2);
   if (has("graveyard")) penScales.push(1.5);
 
+  const expanded = expandChains(items);
+
   return {
     id: `surprise-${seed}`,
     track: opts.track ?? "helpdesk",
@@ -119,7 +134,7 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     inventory: has("budget") ? [] : MASTER_INVENTORY,
     kb: MASTER_KB,
     adUsers: MASTER_AD,
-    items,
+    items: expanded,
     slaScale: slaScales.length ? Math.min(...slaScales) : undefined,
     noHints: has("skeleton") ? true : undefined,
     penaltyScale: penScales.length ? Math.max(...penScales) : undefined,

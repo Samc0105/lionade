@@ -107,6 +107,13 @@ export interface ShiftItem {
    */
   incident?: { group: string; root?: boolean };
 
+  /** Resolving this correctly reveals a chained follow-up ticket. */
+  chainOnResolve?: ShiftItem;
+  /** Mishandling this reveals an angrier callback ticket. */
+  chainOnFail?: ShiftItem;
+  /** Set on a follow-up: it stays hidden until its trigger reaches `on`. */
+  revealedBy?: { itemId: string; on: "resolve" | "fail" };
+
   // ── resolution ──
   actions: ActionCard[];
   goal: string;

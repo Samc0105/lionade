@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
 import { playArrival, playResolve, playBreach, playFail, playWin, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
+import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 
 export interface ShiftResult {
   shiftId: string;
@@ -31,6 +32,16 @@ type FeedTone = "good" | "bad" | "info";
 interface FeedEntry { seq: number; text: string; tone: FeedTone }
 
 interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean }
+
+const GOOD_FOR_REVEAL: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
+/** A chained follow-up (revealedBy) is "live" only once its trigger matched. A
+ *  non-follow-up item is always live. */
+function isLive(i: ShiftItem, m: Record<string, ItemRuntime>): boolean {
+  if (!i.revealedBy) return true;
+  const st = m[i.revealedBy.itemId]?.status;
+  if (!st) return false;
+  return i.revealedBy.on === "resolve" ? GOOD_FOR_REVEAL.includes(st) : st === "mishandled";
+}
 
 interface State {
   secondsLeft: number;
@@ -118,7 +129,7 @@ function makeReducer(shift: Shift) {
         const breached: string[] = [];
         shift.items.forEach((i) => {
           const it = items[i.id];
-          if (it.breached || isTerminal(it.status) || elapsed < i.arriveAfter) return;
+          if (it.breached || isTerminal(it.status) || elapsed < i.arriveAfter || !isLive(i, items)) return;
           if (elapsed >= i.arriveAfter + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
             const base = BREACH_PENALTY[i.priority];
             const pen = i.from.vip ? Math.round(base * 1.5) : base;
@@ -242,7 +253,7 @@ function makeReducer(shift: Shift) {
         }
 
         if (isTerminal(newStatus)) ns = { ...ns, activeItemId: null };
-        const allDone = shift.items.every((i) => isTerminal(ns.items[i.id].status));
+        const allDone = shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items));
         if (allDone) ns = { ...ns, ended: true };
         return ns;
       }
@@ -274,8 +285,9 @@ const STATUS_COLOR: Record<ItemStatus, string> = {
 const GOOD_STATUSES: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
 
 function computeResult(shift: Shift, state: State): ShiftResult {
-  const resolved = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
-  const total = shift.items.length;
+  const live = shift.items.filter((i) => isLive(i, state.items));
+  const resolved = live.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
+  const total = Math.max(1, live.length);
   const score = Math.round(state.csat * 0.6 + (resolved / total) * 40);
   const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
   return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total };
@@ -327,9 +339,10 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ended]);
 
-  // ── Sound ──
+  // ── Sound + theme ──
   const [muted, setMutedState] = useState(false);
-  useEffect(() => { setMutedState(isMuted()); }, []);
+  const [theme, setTheme] = useState<DeskTheme | null>(null);
+  useEffect(() => { setMutedState(isMuted()); setTheme(getEquippedTheme()); }, []);
   // The browser needs a gesture before audio can play; resume on first input.
   useEffect(() => {
     const resume = () => resumeAudio();
@@ -343,7 +356,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   const soundPrev = useRef<{ landed: number; resolved: number; breached: number; mishandled: number; ended: boolean } | null>(null);
   useEffect(() => {
     const el = shift.durationSeconds - state.secondsLeft;
-    const landedN = shift.items.filter((i) => el >= i.arriveAfter).length;
+    const landedN = shift.items.filter((i) => el >= i.arriveAfter && isLive(i, state.items)).length;
     const resolvedN = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
     const breachedN = shift.items.filter((i) => state.items[i.id].breached).length;
     const mishandledN = shift.items.filter((i) => state.items[i.id].status === "mishandled").length;
@@ -368,10 +381,11 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   }
 
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const landed = (i: ShiftItem) => elapsed >= i.arriveAfter;
+  const landed = (i: ShiftItem) => elapsed >= i.arriveAfter && isLive(i, state.items);
   const activeItem = state.activeItemId ? shift.items.find((i) => i.id === state.activeItemId) ?? null : null;
 
-  const resolvedCount = shift.items.filter((i) => isTerminal(state.items[i.id].status)).length;
+  const liveItems = shift.items.filter((i) => isLive(i, state.items));
+  const resolvedCount = liveItems.filter((i) => isTerminal(state.items[i.id].status)).length;
 
   // unread/open counts per app for dock badges
   const openByApp = (app: AppId): number => {
@@ -381,9 +395,9 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   };
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] overflow-hidden" style={{ background: shift.graveyard ? "#04060c" : "#070b14" }}>
+    <div className="rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
-      <StatusBar shift={shift} state={state} resolved={resolvedCount} total={shift.items.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
+      <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
 
       <div className="grid grid-cols-[64px_1fr] min-h-[560px]">
         {/* Dock */}
@@ -870,10 +884,11 @@ function Toasts({ feed }: { feed: FeedEntry[] }) {
 /* ───────────────────────── shift report ───────────────────────── */
 
 function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: State; onReplay?: () => void; onExit?: () => void }) {
-  const resolved = shift.items.filter((i) => ["resolved", "escalated", "archived", "reported"].includes(state.items[i.id].status));
-  const fumbled = shift.items.filter((i) => state.items[i.id].status === "mishandled");
-  const open = shift.items.filter((i) => state.items[i.id].status === "queued");
-  const breaches = shift.items.filter((i) => state.items[i.id].breached).length;
+  const live = shift.items.filter((i) => isLive(i, state.items));
+  const resolved = live.filter((i) => ["resolved", "escalated", "archived", "reported"].includes(state.items[i.id].status));
+  const fumbled = live.filter((i) => state.items[i.id].status === "mishandled");
+  const open = live.filter((i) => state.items[i.id].status === "queued");
+  const breaches = live.filter((i) => state.items[i.id].breached).length;
   const { score, grade } = computeResult(shift, state);
   const gradeColor = grade === "S" || grade === "A" ? "#2BBE6B" : grade === "B" ? "#4A90D9" : grade === "C" ? "#F59E0B" : "#EF4444";
 
@@ -891,7 +906,7 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
 
         <div className="grid grid-cols-4 gap-2 mb-4">
           {[
-            { label: "resolved", value: `${resolved.length}/${shift.items.length}`, color: "#2BBE6B" },
+            { label: "resolved", value: `${resolved.length}/${live.length}`, color: "#2BBE6B" },
             { label: "CSAT", value: `${state.csat}%`, color: "#4A90D9" },
             { label: "Fangs", value: `${state.fangs}`, color: "#FFD700" },
             { label: "XP", value: `${state.xp}`, color: "#A855F7" },

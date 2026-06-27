@@ -2,21 +2,31 @@
 
 import { useEffect, useState } from "react";
 import { Trophy, LockSimple, CheckCircle } from "@phosphor-icons/react";
-import { ACHIEVEMENTS, computeUnlocked, getStats, type TechhubStats } from "@/lib/liondesk/stats";
+import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, type TechhubStats, type HistoryEntry } from "@/lib/liondesk/stats";
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
+import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked } from "@/lib/liondesk/themes";
 
 export default function AchievementsPanel() {
   const [mounted, setMounted] = useState(false);
   const [unlocked, setUnlocked] = useState<string[]>([]);
   const [stats, setStats] = useState<TechhubStats | null>(null);
   const [night, setNight] = useState({ max: 0, endless: 0 });
+  const [equipped, setEquipped] = useState("standard");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
     setMounted(true);
     setUnlocked(computeUnlocked());
     setStats(getStats());
     setNight({ max: getMaxNightSurvived(), endless: getEndlessBest() });
+    setEquipped(getEquippedThemeId());
+    setHistory(getHistory());
   }, []);
+
+  function equip(id: string) {
+    setEquippedTheme(id);
+    setEquipped(id);
+  }
 
   const total = ACHIEVEMENTS.length;
   const got = mounted ? unlocked.length : 0;
@@ -56,6 +66,44 @@ export default function AchievementsPanel() {
           </div>
         ))}
       </div>
+
+      {/* desk themes */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">desk themes</p>
+        <div className="flex flex-wrap gap-2">
+          {THEMES.map((t) => {
+            const ok = mounted && isThemeUnlocked(t, unlocked);
+            const on = equipped === t.id;
+            const need = t.unlock ? ACHIEVEMENTS.find((a) => a.id === t.unlock)?.name ?? t.unlock : null;
+            return (
+              <button key={t.id} disabled={!ok} onClick={() => equip(t.id)} className={`rounded-lg border px-3 py-2 text-left transition-colors ${on ? "border-gold/60 bg-gold/10" : ok ? "border-white/12 hover:bg-white/[0.05]" : "border-white/[0.06] opacity-40 cursor-not-allowed"}`}>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-sm border border-white/15" style={{ backgroundColor: t.bg }} />
+                  <span className="text-cream text-sm">{t.name}</span>
+                  {on && <span className="font-mono text-[8px] uppercase tracking-wider text-gold ml-1">equipped</span>}
+                </div>
+                {!ok && need && <p className="font-mono text-[9px] text-cream/40 mt-1">unlock: {need}</p>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* recent runs */}
+      {history.length > 0 && (
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">recent runs</p>
+          <ul className="space-y-1.5">
+            {history.slice(0, 10).map((h, i) => (
+              <li key={i} className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.015] px-3 py-2">
+                <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: h.kind === "night" ? "#9DB4E0" : "#C9A2F2", background: h.kind === "night" ? "rgba(110,139,192,0.12)" : "rgba(168,85,247,0.12)" }}>{h.kind}</span>
+                <span className="text-cream text-sm font-semibold truncate">{h.label}</span>
+                <span className="ml-auto font-mono text-[10px] text-cream/45 truncate text-right">{h.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* achievement grid */}
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">

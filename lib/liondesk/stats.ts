@@ -41,6 +41,31 @@ function saveStats(s: TechhubStats): void {
   try { window.localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch { /* ignore */ }
 }
 
+// ── Run history ──
+export interface HistoryEntry { kind: "shift" | "night"; label: string; detail: string; at: number }
+const HISTORY_KEY = "lionade.techhub.history.v1";
+
+export function getHistory(): HistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as HistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordHistoryEntry(e: HistoryEntry): void {
+  if (typeof window === "undefined") return;
+  try {
+    const list = [e, ...getHistory()].slice(0, 20);
+    window.localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
+
 export interface Achievement { id: string; name: string; desc: string }
 interface CheckCtx { stats: TechhubStats; maxNight: number; endlessBest: number }
 
@@ -111,6 +136,8 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   if (cleared && modIds.includes("skeleton")) s.skeletonWins++;
   if (cleared && modIds.includes("audit")) s.auditWins++;
   saveStats(s);
+  const mods = (shift.modifiers ?? []).map((m) => m.label);
+  recordHistoryEntry({ kind: "shift", label: shift.name, detail: `${r.grade} · ${r.csat}% CSAT${mods.length ? " · " + mods.join(", ") : ""}`, at: Date.now() });
   return syncUnlocked();
 }
 

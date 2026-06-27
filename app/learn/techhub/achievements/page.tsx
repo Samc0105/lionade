@@ -14,8 +14,8 @@ export default function AchievementsPage() {
         <div className="flex items-center gap-3 mb-4 animate-slide-up">
           <Trophy size={34} weight="fill" color="#FFD700" aria-hidden="true" />
           <div>
-            <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-wider leading-none">ACHIEVEMENTS</h1>
-            <p className="text-cream/50 text-sm mt-0.5">Goals to chase across every track, mutator, and night.</p>
+            <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-wider leading-none">PROFILE</h1>
+            <p className="text-cream/50 text-sm mt-0.5">Your stats, unlockable desk themes, recent runs, and achievements.</p>
           </div>
         </div>
 
