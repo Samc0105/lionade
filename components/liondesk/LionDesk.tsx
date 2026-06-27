@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
 import { playArrival, playResolve, playBreach, playFail, playWin, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
+import { managerReviewFor } from "@/lib/liondesk/managerReview";
 
 export interface ShiftResult {
   shiftId: string;
@@ -957,6 +958,36 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
         {breaches > 0 && (
           <p className="font-mono text-[10px] text-red-400/80 mb-3">{breaches} ticket{breaches === 1 ? "" : "s"} breached SLA. Triage the high-priority queue faster next shift.</p>
         )}
+
+        {(() => {
+          const r = managerReviewFor({
+            track: shift.track,
+            shiftId: shift.id,
+            grade,
+            resolved: resolved.length,
+            total: live.length,
+            breaches,
+            fumbles: fumbled.length,
+          });
+          return (
+            <div className="mb-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5">
+              <div className="flex items-start gap-3">
+                <span
+                  className="shrink-0 grid h-9 w-9 place-items-center rounded-full font-bebas text-lg leading-none"
+                  style={{ background: `${r.accent}22`, color: r.accent, border: `1px solid ${r.accent}55` }}
+                  aria-hidden="true"
+                >
+                  {r.initial}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-cream/90 text-xs font-semibold leading-none">{r.name}</p>
+                  <p className="font-mono text-[9px] uppercase tracking-wider text-cream/40 mt-1">{r.role} · debrief</p>
+                  <p className="text-cream/75 text-[13px] leading-relaxed mt-2">{r.verdict}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <p className="font-mono text-[10px] text-cream/35 leading-relaxed mb-4">
           Fangs and XP are a preview. They are granted for real once a shift is validated server-side, so the economy stays tamper-proof.
