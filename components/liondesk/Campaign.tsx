@@ -8,6 +8,7 @@ import { shiftsForTrack } from "@/lib/liondesk/shifts";
 import { getAllRecords, recordShift, gradeFor, PASS_SCORE, type ShiftRecord } from "@/lib/liondesk/campaignProgress";
 import { apiPost } from "@/lib/api-client";
 import { recordShiftResult } from "@/lib/liondesk/stats";
+import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import LionDesk, { type ShiftResult } from "@/components/liondesk/LionDesk";
 
@@ -47,6 +48,7 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
     setRecords(getAllRecords());
     const played = shifts.find((s) => s.id === r.shiftId);
     if (played) setNewAch(recordShiftResult(played, r));
+    recordPlayDay();
     // Best-effort server sync: records the completion and grants Fangs ONCE,
     // server-side (the route owns the reward ceiling). Safe no-op if the
     // migration isn't applied yet (route returns { pending: true }). Local

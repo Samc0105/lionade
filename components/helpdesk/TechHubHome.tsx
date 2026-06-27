@@ -7,6 +7,7 @@ import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
 import { computeUnlocked, ACHIEVEMENTS } from "@/lib/liondesk/stats";
+import { getPlayStreak } from "@/lib/liondesk/playstreak";
 import { trackIconFor } from "@/components/helpdesk/icons";
 
 export default function TechHubHome() {
@@ -29,6 +30,7 @@ export default function TechHubHome() {
   const achTotal = ACHIEVEMENTS.length;
   const achGot = mounted ? computeUnlocked().length : 0;
   const achPct = Math.round((achGot / achTotal) * 100);
+  const streak = useMemo(() => (mounted ? getPlayStreak() : { current: 0, best: 0, lastDay: "" }), [mounted, version]);
 
   return (
     <div className="space-y-6">
@@ -122,6 +124,18 @@ export default function TechHubHome() {
           </div>
         </Link>
       </div>
+
+      {/* Daily play streak */}
+      {mounted && streak.current >= 1 && (
+        <div className="flex items-center gap-3 rounded-2xl border border-orange-400/25 bg-orange-400/[0.05] p-3">
+          <Lightning size={20} weight="fill" color="#FB923C" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="font-syne font-semibold text-sm text-cream">{streak.current}-day shift streak</p>
+            <p className="text-cream/55 text-[11px]">Clock in once a day to keep it alive.{streak.best > streak.current ? ` Best: ${streak.best} days.` : ""}</p>
+          </div>
+          <span className="font-bebas text-2xl tabular-nums" style={{ color: "#FB923C" }}>{streak.current}</span>
+        </div>
+      )}
 
       {/* Achievements progress */}
       {mounted && (

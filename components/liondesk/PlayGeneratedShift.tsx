@@ -5,6 +5,7 @@ import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, dateSeed, weekSeed } from "@/lib/liondesk/generate";
 import { decodeCombo } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
+import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
 
@@ -67,7 +68,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
           ))}
         </div>
       )}
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => setNewAch(recordShiftResult(shift, r))} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => { recordPlayDay(); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {daily
           ? "Today's challenge is the same for everyone and rerolls at midnight."
