@@ -7,6 +7,8 @@ import { getTrack } from "@/lib/helpdesk/tracks";
 import { shiftsForTrack } from "@/lib/liondesk/shifts";
 import { getAllRecords, recordShift, gradeFor, PASS_SCORE, type ShiftRecord } from "@/lib/liondesk/campaignProgress";
 import { apiPost } from "@/lib/api-client";
+import { recordShiftResult } from "@/lib/liondesk/stats";
+import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import LionDesk, { type ShiftResult } from "@/components/liondesk/LionDesk";
 
 const gradeColor = (g: string) => (g === "S" || g === "A" ? "#2BBE6B" : g === "B" ? "#4A90D9" : g === "C" ? "#F59E0B" : "#EF4444");
@@ -22,6 +24,7 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
     () => (initialShiftId && shiftsForTrack(track).some((s) => s.id === initialShiftId) ? initialShiftId : null),
   );
   const [runKey, setRunKey] = useState(0);
+  const [newAch, setNewAch] = useState<string[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -42,6 +45,8 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
   function handleComplete(r: ShiftResult) {
     recordShift(r.shiftId, r.score, r.csat);
     setRecords(getAllRecords());
+    const played = shifts.find((s) => s.id === r.shiftId);
+    if (played) setNewAch(recordShiftResult(played, r));
     // Best-effort server sync: records the completion and grants Fangs ONCE,
     // server-side (the route owns the reward ceiling). Safe no-op if the
     // migration isn't applied yet (route returns { pending: true }). Local
@@ -56,6 +61,7 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
         <button onClick={() => setSelectedId(null)} className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream/55 hover:text-electric transition-colors">
           <ArrowLeft size={14} weight="bold" aria-hidden="true" /> {def?.name ?? "campaign"} shifts
         </button>
+        <AchievementBanner ids={newAch} />
         <LionDesk
           key={`${selected.id}-${runKey}`}
           shift={selected}

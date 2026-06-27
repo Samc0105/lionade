@@ -1,0 +1,120 @@
+// TechHub lifetime stats + achievements. Local only (display + goals). Shift
+// results feed in via recordShiftResult; night data is read from the Night
+// Shift stores. Achievements are derived, and newly-unlocked ones are returned
+// so the UI can celebrate them.
+
+import type { Shift } from "./types";
+import type { ShiftResult } from "@/components/liondesk/LionDesk";
+import { getMaxNightSurvived, getEndlessBest } from "./nightshift";
+
+const PASS = 50;
+
+export interface TechhubStats {
+  shiftsCleared: number;
+  perfectShifts: number;
+  doublesCleared: number;
+  chaosCleared: number;
+  skeletonWins: number;
+  auditWins: number;
+  tracksPlayed: string[];
+  mutatorsSeen: string[];
+}
+
+const STATS_KEY = "lionade.techhub.stats.v1";
+const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
+
+function emptyStats(): TechhubStats {
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [] };
+}
+
+export function getStats(): TechhubStats {
+  if (typeof window === "undefined") return emptyStats();
+  try {
+    const raw = window.localStorage.getItem(STATS_KEY);
+    return raw ? { ...emptyStats(), ...JSON.parse(raw) } : emptyStats();
+  } catch {
+    return emptyStats();
+  }
+}
+function saveStats(s: TechhubStats): void {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch { /* ignore */ }
+}
+
+export interface Achievement { id: string; name: string; desc: string }
+interface CheckCtx { stats: TechhubStats; maxNight: number; endlessBest: number }
+
+const DEFS: (Achievement & { check: (c: CheckCtx) => boolean })[] = [
+  { id: "first-day", name: "First Day", desc: "Clear your first shift.", check: (c) => c.stats.shiftsCleared >= 1 },
+  { id: "survivor", name: "Survivor", desc: "Clear 10 shifts.", check: (c) => c.stats.shiftsCleared >= 10 },
+  { id: "clean-sweep", name: "Clean Sweep", desc: "Finish a shift at 100% CSAT.", check: (c) => c.stats.perfectShifts >= 1 },
+  { id: "incident-commander", name: "Incident Commander", desc: "Clear a Doubles shift.", check: (c) => c.stats.doublesCleared >= 1 },
+  { id: "into-chaos", name: "Into the Chaos", desc: "Clear a Chaos shift (3+ mutators).", check: (c) => c.stats.chaosCleared >= 1 },
+  { id: "no-net", name: "No Net", desc: "Win a Skeleton Crew shift (no hints).", check: (c) => c.stats.skeletonWins >= 1 },
+  { id: "under-audit", name: "Under Audit", desc: "Win an Audit shift.", check: (c) => c.stats.auditWins >= 1 },
+  { id: "generalist", name: "Generalist", desc: "Play all four tracks.", check: (c) => ["helpdesk", "soc", "swe", "redteam"].every((t) => c.stats.tracksPlayed.includes(t)) },
+  { id: "mutated", name: "Mutated", desc: "See six different mutators.", check: (c) => c.stats.mutatorsSeen.length >= 6 },
+  { id: "night-owl", name: "Night Owl", desc: "Survive a night.", check: (c) => c.maxNight >= 1 },
+  { id: "dawn", name: "Dawn", desc: "Survive Night 6.", check: (c) => c.maxNight >= 6 },
+  { id: "unkillable", name: "Unkillable", desc: "Last 3 minutes in Endless.", check: (c) => c.endlessBest >= 180 },
+];
+
+export const ACHIEVEMENTS: Achievement[] = [
+  ...DEFS.map(({ id, name, desc }) => ({ id, name, desc })),
+  { id: "desk-legend", name: "Desk Legend", desc: "Unlock every other achievement." },
+];
+
+function ctx(): CheckCtx {
+  return { stats: getStats(), maxNight: getMaxNightSurvived(), endlessBest: getEndlessBest() };
+}
+
+/** All achievement ids currently satisfied. */
+export function computeUnlocked(): string[] {
+  const c = ctx();
+  const base = DEFS.filter((d) => d.check(c)).map((d) => d.id);
+  if (base.length === DEFS.length) base.push("desk-legend");
+  return base;
+}
+
+export function getUnlocked(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(UNLOCKED_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Recompute, persist, and return ids unlocked since last time. */
+function syncUnlocked(): string[] {
+  const now = computeUnlocked();
+  const prev = getUnlocked();
+  const fresh = now.filter((id) => !prev.includes(id));
+  if (fresh.length && typeof window !== "undefined") {
+    try { window.localStorage.setItem(UNLOCKED_KEY, JSON.stringify(now)); } catch { /* ignore */ }
+  }
+  return fresh;
+}
+
+/** Record a finished shift. Returns newly-unlocked achievement ids. */
+export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
+  const cleared = r.score >= PASS;
+  const s = getStats();
+  if (cleared) s.shiftsCleared++;
+  if (r.csat >= 100 && cleared) s.perfectShifts++;
+  const modIds = (shift.modifiers ?? []).map((m) => m.id);
+  for (const id of modIds) if (!s.mutatorsSeen.includes(id)) s.mutatorsSeen.push(id);
+  if (!s.tracksPlayed.includes(shift.track)) s.tracksPlayed.push(shift.track);
+  if (cleared && modIds.includes("doubles")) s.doublesCleared++;
+  if (cleared && modIds.length >= 3) s.chaosCleared++;
+  if (cleared && modIds.includes("skeleton")) s.skeletonWins++;
+  if (cleared && modIds.includes("audit")) s.auditWins++;
+  saveStats(s);
+  return syncUnlocked();
+}
+
+/** Called after a night ends so night-based achievements unlock promptly. */
+export function refreshAchievements(): string[] {
+  return syncUnlocked();
+}

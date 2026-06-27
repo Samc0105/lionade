@@ -14,6 +14,8 @@ import {
   startAmbient, stopAmbient, setAmbientTension, playAlarm, playContain, playStinger,
   playWin, resumeAudio, isMuted, setMuted,
 } from "@/lib/liondesk/sound";
+import { refreshAchievements } from "@/lib/liondesk/stats";
+import AchievementBanner from "@/components/liondesk/AchievementBanner";
 
 /* ───────────────────────── state ───────────────────────── */
 
@@ -167,6 +169,7 @@ export default function NightShift() {
   const [customOpen, setCustomOpen] = useState(false);
   const [endlessBest, setEndlessBest] = useState(0);
   const [showScare, setShowScare] = useState(false);
+  const [newAch, setNewAch] = useState<string[]>([]);
 
   useEffect(() => {
     setMutedState(isMuted());
@@ -190,10 +193,12 @@ export default function NightShift() {
     if (state.status === "won") {
       stopAmbient(); playWin();
       if (state.nightIdx >= 0 && state.nightIdx < NIGHTS.length) { recordNightSurvived(NIGHTS[state.nightIdx].n); setMaxSurvived(getMaxNightSurvived()); }
+      setNewAch(refreshAchievements());
     }
     if (state.status === "lost") {
       stopAmbient(); playStinger();
       if (state.def.endless) { recordEndlessBest(state.hour * state.def.secondsPerHour + state.secInHour); setEndlessBest(getEndlessBest()); }
+      setNewAch(refreshAchievements());
     }
     return () => { if (state.status === "playing") stopAmbient(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -386,6 +391,12 @@ export default function NightShift() {
           <div className="ns-noise absolute inset-0" style={{ opacity: 0.55 }} />
           <div className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(239,68,68,0.55), #000 70%)", animation: "ns-blink 0.12s infinite" }} />
           <ShieldWarning size={130} weight="fill" color="#EF4444" aria-hidden="true" style={{ animation: "ns-blink 0.1s infinite" }} />
+        </div>
+      )}
+
+      {newAch.length > 0 && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm pointer-events-none">
+          <AchievementBanner ids={newAch} />
         </div>
       )}
     </div>

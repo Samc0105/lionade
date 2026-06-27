@@ -6,6 +6,8 @@ import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/generate";
 import { getCombos, saveCombo, deleteCombo, type SavedCombo } from "@/lib/liondesk/savedCombos";
 import { encodeCombo, decodeCombo } from "@/lib/liondesk/combocode";
+import { recordShiftResult } from "@/lib/liondesk/stats";
+import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
 import type { Track } from "@/lib/helpdesk/types";
 
@@ -29,6 +31,7 @@ export default function MutatorLab() {
   const [runKey, setRunKey] = useState(0);
   const [copied, setCopied] = useState(false);
   const [codeInput, setCodeInput] = useState("");
+  const [newAch, setNewAch] = useState<string[]>([]);
 
   useEffect(() => { setCombos(getCombos()); }, []);
 
@@ -74,6 +77,7 @@ export default function MutatorLab() {
         <button onClick={() => setShift(null)} className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream/55 hover:text-[#C9A2F2] transition-colors">
           <ArrowLeft size={14} weight="bold" aria-hidden="true" /> back to the lab
         </button>
+        <AchievementBanner ids={newAch} />
         {shift.modifiers && shift.modifiers.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">modifiers</span>
@@ -82,7 +86,7 @@ export default function MutatorLab() {
             ))}
           </div>
         )}
-        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onReplay={() => play(lastOpts)} onExit={() => setShift(null)} />
+        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => setNewAch(recordShiftResult(shift, r))} onReplay={() => play(lastOpts)} onExit={() => setShift(null)} />
       </div>
     );
   }

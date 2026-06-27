@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, dateSeed } from "@/lib/liondesk/generate";
 import { decodeCombo } from "@/lib/liondesk/combocode";
+import { recordShiftResult } from "@/lib/liondesk/stats";
+import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
 export default function PlayGeneratedShift({ daily = false, chaos = false, comboCode }: Props) {
   const [shift, setShift] = useState<Shift | null>(null);
   const [runKey, setRunKey] = useState(0);
+  const [newAch, setNewAch] = useState<string[]>([]);
 
   function makeShift(): Shift {
     if (comboCode) {
@@ -53,6 +56,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, combo
 
   return (
     <div className="space-y-3">
+      <AchievementBanner ids={newAch} />
       {shift.modifiers && shift.modifiers.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">modifiers</span>
@@ -61,7 +65,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, combo
           ))}
         </div>
       )}
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => setNewAch(recordShiftResult(shift, r))} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {daily
           ? "Today's challenge is the same for everyone and rerolls at midnight."

@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
+import { computeUnlocked, ACHIEVEMENTS } from "@/lib/liondesk/stats";
 import { trackIconFor } from "@/components/helpdesk/icons";
 
 export default function TechHubHome() {
@@ -25,6 +26,9 @@ export default function TechHubHome() {
   // real dependency, not just an incidental re-render. Keeps a lint cleanup from
   // silently deleting `version` and breaking the on-focus progress refresh.
   const resolvedTotal = useMemo(() => (mounted ? totalCleared() : 0), [mounted, version]);
+  const achTotal = ACHIEVEMENTS.length;
+  const achGot = mounted ? computeUnlocked().length : 0;
+  const achPct = Math.round((achGot / achTotal) * 100);
 
   return (
     <div className="space-y-6">
@@ -91,6 +95,23 @@ export default function TechHubHome() {
           </div>
         </Link>
       </div>
+
+      {/* Achievements progress */}
+      {mounted && (
+        <Link href="/learn/techhub/achievements" className="group flex items-center gap-3 rounded-2xl border border-gold/20 bg-gold/[0.04] p-3 hover:bg-gold/[0.07] transition-colors">
+          <Trophy size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold/90">achievements</span>
+              <span className="font-mono text-[10px] tabular-nums text-cream/55">{achGot} / {achTotal}</span>
+            </div>
+            <div className="h-1 rounded-full overflow-hidden bg-white/10">
+              <div className="h-full" style={{ width: `${achPct}%`, background: "linear-gradient(90deg,#FFD700,#FFA500)" }} />
+            </div>
+          </div>
+          <ArrowRight size={14} weight="bold" color="#FFD700" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+      )}
 
       {/* Night Shift — the FNAF-style monitoring mode. */}
       <Link
