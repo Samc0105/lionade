@@ -12,11 +12,17 @@ import { SOC_SHIFT_1 } from "./soc-shift1";
 import { SWE_SHIFT_1 } from "./swe-shift1";
 import { REDTEAM_SHIFT_1 } from "./redteam-shift1";
 import extraShifts from "./extra-shifts.generated.json";
+import ladderShifts from "./extra-shifts-ladder.generated.json";
 
 // Authored campaign shifts + the workflow-authored second shifts (SOC/SWE/Red
-// Team), which auto-register once extra-shifts.generated.json is populated.
+// Team) + the shift 3-5 ladder that fills out every track's Intern->senior climb.
+// All auto-register from their generated JSON files.
 const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1];
-export const SHIFTS: Shift[] = [...AUTHORED, ...(extraShifts as unknown as Shift[])];
+export const SHIFTS: Shift[] = [
+  ...AUTHORED,
+  ...(extraShifts as unknown as Shift[]),
+  ...(ladderShifts as unknown as Shift[]),
+];
 
 export function shiftsForTrack(track: Track): Shift[] {
   return SHIFTS.filter((s) => s.track === track).sort((a, b) => a.order - b.order);

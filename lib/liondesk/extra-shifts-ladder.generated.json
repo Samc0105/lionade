@@ -1390,3 +1390,2664 @@
       }
     ]
   },
+  {
+    "id": "swe-shift-3",
+    "track": "swe",
+    "order": 2,
+    "name": "On-Call 3: Data Integrity",
+    "rank": "Staff Engineer",
+    "accent": "#A855F7",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-backfill-safety",
+        "title": "Backfill and bulk-write safety",
+        "tags": [
+          "data",
+          "backfill",
+          "incident"
+        ],
+        "body": [
+          "A backfill that is writing wrong values is an active data-corruption event. Stop the job first. Every second it runs, the blast radius grows and the harder reconciliation gets.",
+          "Stopping is reversible. A backfill can be resumed or re-run from a checkpoint. Corrupting more rows is not free to undo.",
+          "Never roll forward blindly on top of a job you do not understand. You cannot reconcile what you cannot bound. Stop, scope the damage, then decide on a corrected re-run."
+        ]
+      },
+      {
+        "id": "kb-idempotency",
+        "title": "Idempotent writes and exactly-once effects",
+        "tags": [
+          "concurrency",
+          "money",
+          "retries"
+        ],
+        "body": [
+          "Retries are a fact of distributed systems. The fix for a double-applied effect is an idempotency key on the operation, not fewer retries.",
+          "An idempotency key lets the server recognize a repeated request and return the original result without re-applying the effect. This makes the write safe to retry.",
+          "Locks serialize work but do not make a retried request a no-op. A retry after a committed transaction will still re-apply unless the effect is keyed. Use idempotency for money paths."
+        ]
+      },
+      {
+        "id": "kb-authz-cache",
+        "title": "Authorization caches and stale permissions",
+        "tags": [
+          "security",
+          "cache",
+          "authz"
+        ],
+        "body": [
+          "Cached authorization data that outlives a permission change is a data-exposure bug. The fix is to invalidate the exact keys affected by the change, scoped to the principals and resources involved.",
+          "Raising the TTL makes exposure last longer, not shorter. Lowering TTL alone still leaves a stale window. Targeted invalidation closes the window now.",
+          "Flushing the entire cache stops the exposure but can stampede the origin and cause an outage. Targeted invalidation is the correct first move; a full flush is a last resort for an unscoped breach."
+        ]
+      },
+      {
+        "id": "kb-flag-money",
+        "title": "Feature flags on money-affecting paths",
+        "tags": [
+          "flags",
+          "money",
+          "rollback"
+        ],
+        "body": [
+          "When a flag at 100% changes a money path and you have a known-good previous behavior, roll the flag back first. Rollback is the fastest reversible containment.",
+          "Forward-patching a money bug under pressure ships unreviewed code into the same path that is actively losing or mis-crediting money. Stop the bleeding by reverting to the known-good state, then fix forward calmly.",
+          "After rollback, reconcile the rows touched while the flag was on. Containment and correction are two steps, not one."
+        ]
+      },
+      {
+        "id": "kb-ledger-reconcile",
+        "title": "Ledger reconciliation after an incident",
+        "tags": [
+          "ledger",
+          "money",
+          "reconcile"
+        ],
+        "body": [
+          "A ledger is the source of truth. You reconcile drift by writing a new, dated correcting entry that references the incident, not by editing a cached or derived balance directly.",
+          "Hand-editing a balance on prod skips the ledger, leaves no audit trail, and desyncs the derived balance from its history. It also cannot be reviewed or reversed cleanly.",
+          "Correcting entries are auditable, reviewable, and reversible. Compute the delta from the ledger, write the adjustment with a reason and incident id, then verify the derived balance matches."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "swe-shift-3-backfill-running",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Backfill monitor",
+          "role": "Batch job"
+        },
+        "subject": "Backfill is writing wrong values and is still running",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 56,
+        "xp": 48,
+        "ticketBody": "The user_tier backfill is mapping a fraction of rows to the wrong tier. The job is at 38 percent and still writing. Each batch commits about 4000 rows. It has a checkpoint and supports resume.",
+        "evidence": [
+          {
+            "label": "Backfill progress, last 3 batches",
+            "lines": [
+              "batch 142 committed -> 4000 rows, 311 rows tier mismatch vs source",
+              "batch 143 committed -> 4000 rows, 298 rows tier mismatch vs source",
+              "progress 38 percent, checkpoint saved at batch 143, resume supported",
+              "mismatch rate steady at about 7.5 percent and climbing in absolute rows"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "diag",
+              "sample",
+              "verify rows",
+              "compare source"
+            ],
+            "output": "Sampled 500 written rows against source of truth: 38 wrong tier (7.6 percent). Pattern is deterministic, tied to a bad join in the mapping. Stopping is safe; checkpoint at batch 143 lets us resume a corrected job.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-backfill-safety",
+        "goal": "A live job is corrupting rows. Bound the damage before it grows.",
+        "hint": "Which option is reversible, and which one keeps making the problem bigger?",
+        "actions": [
+          {
+            "id": "stop-and-assess",
+            "label": "Stop the backfill at the checkpoint, then scope the damage and plan a corrected re-run",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "Stopping is reversible and the checkpoint lets you resume. You halt the blast radius, measure exactly which rows are wrong, fix the mapping, then re-run. That is the senior move."
+          },
+          {
+            "id": "let-it-finish",
+            "label": "Let it finish so you reconcile one complete dataset instead of a partial one",
+            "correct": false,
+            "csat": -9,
+            "teach": "Letting a known-bad job run doubles the corrupted rows for no benefit. A partial set is easier to fix than a full one. Stop it now and assess."
+          },
+          {
+            "id": "roll-forward-blind",
+            "label": "Kick off a second corrective job on top of the running one to overwrite as it goes",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Two jobs writing the same rows race each other and you cannot bound or reconcile the result. You corrupted the table further. Stop the first job before doing anything else."
+          },
+          {
+            "id": "raise-batch-size",
+            "label": "Raise the batch size so the bad job completes faster and you can move on",
+            "correct": false,
+            "csat": -10,
+            "teach": "Speeding up a job that writes wrong values just corrupts rows faster. Throughput is not the problem; the wrong output is. Stop and assess."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-3-double-credit-race",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Finance alerts",
+          "role": "Ledger watchdog"
+        },
+        "subject": "Credits double-applied on retried requests",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 54,
+        "xp": 46,
+        "ticketBody": "When the credit endpoint times out and the client retries, some accounts get the Fang credit applied twice. The handler commits the transaction before the response reaches the client, so the retry runs the whole thing again.",
+        "evidence": [
+          {
+            "label": "Trace for account 8841, one logical credit",
+            "lines": [
+              "req A -> apply credit 250 Fangs -> commit ok -> response lost on timeout",
+              "client retry req B -> apply credit 250 Fangs -> commit ok -> response 200",
+              "ledger now shows two credit entries, same amount, 900ms apart",
+              "no shared key links req A and req B, so the server treated them as distinct"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "diag",
+              "trace",
+              "inspect retries",
+              "logs"
+            ],
+            "output": "Retries carry no idempotency key. The server sees req A and req B as separate operations and applies the credit twice. A lock would serialize them but the second still applies after the first commits. A key would let the server return the first result and skip re-applying.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-idempotency",
+        "goal": "Retries are double-crediting money. Make the write safe to retry.",
+        "hint": "What makes a repeated request a no-op instead of a second effect?",
+        "actions": [
+          {
+            "id": "add-idempotency-key",
+            "label": "Require an idempotency key per logical credit and return the original result on repeats",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "An idempotency key lets the server recognize the retry as the same operation and return the first result without re-applying. That is exactly-once effect, the right fix for money paths."
+          },
+          {
+            "id": "add-a-lock",
+            "label": "Add a row lock on the account so the two requests cannot run at the same time",
+            "correct": false,
+            "csat": -8,
+            "teach": "A lock serializes the requests but the retry still runs after the first commits and applies a second credit. Locking orders the double-apply; it does not prevent it. You need an idempotency key."
+          },
+          {
+            "id": "more-retries",
+            "label": "Increase client retries and timeouts so requests succeed before retrying",
+            "correct": false,
+            "csat": -10,
+            "teach": "More retries means more chances to double-apply, not fewer. Tuning timeouts hides the race intermittently. The write itself must be idempotent."
+          },
+          {
+            "id": "dedupe-after",
+            "label": "Leave the endpoint alone and run a nightly job to find and delete duplicate credits",
+            "correct": false,
+            "csat": -7,
+            "teach": "After-the-fact dedupe leaves a daily window where balances are wrong and risks deleting a legitimate second credit. Prevent the double-apply at write time with a key."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-3-stale-authz-cache",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Access review",
+          "role": "Security on-call"
+        },
+        "subject": "Cache serving stale permissions after access was revoked",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 53,
+        "xp": 45,
+        "ticketBody": "A user was removed from an org an hour ago, but the authz cache still returns their old membership, so they can still read org records. The permission write landed in the database but the cache was never invalidated.",
+        "evidence": [
+          {
+            "label": "Authz cache vs database, user 5530",
+            "lines": [
+              "db: membership org_204 removed at 14:02, role now none",
+              "cache key authz:user:5530:org:204 -> role member, ttl 50 min remaining",
+              "user 5530 read 6 org_204 records since 14:02 using the stale cache entry",
+              "only this user and this org key are affected; rest of cache is correct"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "diag",
+              "cache keys",
+              "inspect cache",
+              "scope"
+            ],
+            "output": "Exposure is scoped to one principal and one org: key authz:user:5530:org:204. Deleting that key (and any sibling keys for the same pair) forces a fresh db read and closes the window immediately. A full flush would stop it too but would stampede the origin.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-authz-cache",
+        "goal": "Stale authz is exposing data. Close the window without taking down the system.",
+        "hint": "You know the exact principal and resource. What is the smallest change that closes the exposure now?",
+        "actions": [
+          {
+            "id": "targeted-invalidation",
+            "label": "Invalidate the exact authz keys for that user and org, then confirm reads now hit the database",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "Targeted invalidation deletes only the affected keys, closes the exposure immediately, and forces a fresh authoritative read. It fixes the bug without risking a cache stampede."
+          },
+          {
+            "id": "longer-ttl",
+            "label": "Raise the TTL so cache writes are more consistent and refactor invalidation later",
+            "correct": false,
+            "csat": -11,
+            "teach": "A longer TTL makes the stale entry, and the exposure, last longer. This is backwards. Invalidate the specific keys now."
+          },
+          {
+            "id": "flush-everything",
+            "label": "Flush the entire cache to be safe since it is faster than finding the right keys",
+            "correct": false,
+            "csat": -8,
+            "teach": "A full flush sends every request to the origin at once and can take the service down. The breach is scoped to known keys, so a full flush trades a contained bug for an outage. Invalidate targeted keys."
+          },
+          {
+            "id": "ignore-until-expiry",
+            "label": "Let the existing TTL expire on its own since it is under an hour",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Knowingly leaving revoked access live for an hour is an open data-exposure window you chose not to close. That is not acceptable for an authz bug. Invalidate the keys immediately."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-3-flag-money-path",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Release on-call",
+          "role": "Deploy bot"
+        },
+        "subject": "Flag at 100 percent silently changed a money code path",
+        "slaMinutes": 15,
+        "arriveAfter": 20,
+        "reward": 52,
+        "xp": 44,
+        "ticketBody": "The flag fang_payout_v2 went from 50 to 100 percent two hours ago. Since then, payout amounts are being computed on a new rounding path that under-credits a fraction of payouts. The previous path at 50 percent was correct and is one toggle away.",
+        "evidence": [
+          {
+            "label": "Payout delta after flag hit 100 percent",
+            "lines": [
+              "flag fang_payout_v2 50 -> 100 at 12:40",
+              "12:40 onward: payouts use v2 rounding, 4.1 percent under-credit on average",
+              "v1 path (flag off) produced amounts matching the spec exactly",
+              "affected rows are bounded to payouts after 12:40, identifiable by flag_version field"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "diag",
+              "compare paths",
+              "flag history",
+              "verify amounts"
+            ],
+            "output": "v1 (flag off) matches the payout spec; v2 (flag on) under-credits 4.1 percent. The flag is a single revert to the known-good v1 path. Rows touched while v2 was on carry flag_version=v2 and are fully enumerable for reconciliation.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-flag-money",
+        "goal": "A flag broke a money path. Stop the bleeding with the reversible move, then plan the cleanup.",
+        "hint": "You have a known-good previous state one toggle away. What is faster and safer than shipping new code?",
+        "actions": [
+          {
+            "id": "rollback-then-reconcile",
+            "label": "Roll the flag back to the known-good path, then reconcile the payouts made while it was on",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 15,
+            "teach": "Flag rollback is the fastest reversible containment and the previous path is proven correct. You stop the under-crediting now, then reconcile the bounded v2 rows in a second, calm step."
+          },
+          {
+            "id": "forward-patch",
+            "label": "Write and ship a forward fix to the v2 rounding under the incident clock",
+            "correct": false,
+            "csat": -10,
+            "teach": "Forward-patching a money bug under pressure ships unreviewed code into the same path that is actively mis-paying. Revert to the known-good state first, then fix forward with review."
+          },
+          {
+            "id": "pause-payouts-indef",
+            "label": "Disable all payouts entirely and leave them off until the rounding is rewritten",
+            "correct": false,
+            "csat": -7,
+            "teach": "You do not need a full payout outage; you have a correct path one toggle away. Halting all payouts is a heavier blast radius than the bug. Roll back the flag instead."
+          },
+          {
+            "id": "do-nothing-monitor",
+            "label": "Leave the flag at 100 percent and watch the dashboards to see if it self-corrects",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "A deterministic rounding bug does not self-correct; watching it just adds more mis-paid rows. You let a known money bug keep running. Roll the flag back now."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-3-ledger-drift-reconcile",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Reconciliation job",
+          "role": "Finance engineering"
+        },
+        "subject": "Ledger drift found from the incident, needs safe correction",
+        "slaMinutes": 20,
+        "arriveAfter": 42,
+        "reward": 50,
+        "xp": 42,
+        "ticketBody": "Reconciliation finds 1,420 accounts whose derived balance drifted from the ledger because of the earlier double-credit and payout incidents. You need to correct the balances. Prod write access is available.",
+        "evidence": [
+          {
+            "label": "Reconciliation summary",
+            "lines": [
+              "1,420 accounts drifted, total net delta -84,000 Fangs vs ledger",
+              "each drift maps to a specific incident entry (double-credit or v2 under-credit)",
+              "ledger is the source of truth; derived balance is a materialized view of it",
+              "correcting entries can be generated per account with reason and incident id"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "diag",
+              "dry run",
+              "preview entries",
+              "reconcile plan"
+            ],
+            "output": "Dry run generated 1,420 correcting ledger entries, each tagged with the source incident id and a per-account delta. Applying them and rebuilding the derived balance brings every account back in sync. No direct balance edits are needed.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-ledger-reconcile",
+        "goal": "Bring balances back in sync the auditable way, not the fast-and-dirty way.",
+        "hint": "The ledger is the truth. Correct it the way every other balance got there.",
+        "actions": [
+          {
+            "id": "write-correcting-entries",
+            "label": "Generate dated correcting ledger entries tagged to the incident, apply them, then rebuild the derived balance and verify",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "teach": "Correcting entries are auditable, reviewable, and reversible. They keep the ledger as the source of truth and the derived balance stays a faithful projection. This is how reconciliation is supposed to work."
+          },
+          {
+            "id": "manual-balance-edit",
+            "label": "Run an UPDATE on prod to set each account balance to the correct number directly",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Editing the derived balance directly skips the ledger, leaves no audit trail, and desyncs the balance from its history. It cannot be reviewed or cleanly reversed. Write correcting ledger entries instead."
+          },
+          {
+            "id": "refund-everyone-flat",
+            "label": "Skip per-account analysis and credit every affected account a flat round number to cover it",
+            "correct": false,
+            "csat": -9,
+            "teach": "A flat credit over- or under-corrects almost every account and creates new drift you will reconcile again later. Each account needs its exact delta from the ledger."
+          },
+          {
+            "id": "defer-reconcile",
+            "label": "Mark the drift as known and defer correction until a slower maintenance window",
+            "correct": false,
+            "csat": -6,
+            "teach": "Leaving 84,000 Fangs of known balance drift live means customers see wrong balances and the gap can compound. You have a safe, dry-run-verified plan; apply it now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-shift-4",
+    "track": "swe",
+    "order": 3,
+    "name": "On-Call 4: Blast Radius",
+    "rank": "Principal Engineer",
+    "accent": "#A855F7",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-rollout-scope",
+        "title": "Config Rollout and Rollback Policy",
+        "tags": [
+          "rollout",
+          "config",
+          "rollback",
+          "blast-radius"
+        ],
+        "body": [
+          "Config changes ship region by region. Every rollout records a per region revision id so any single region can be reverted on its own.",
+          "When one region regresses and others are healthy, roll back only the affected region. A global rollback re-deploys to healthy regions for no reason and widens the blast radius.",
+          "Push forward is only allowed when the fix is already validated in staging and the on-call incident commander signs off. An unvalidated push forward during an active incident is prohibited.",
+          "Always preserve the bad revision id in the incident channel before reverting so root cause is reproducible."
+        ]
+      },
+      {
+        "id": "kb-tenant-isolation",
+        "title": "Multi-Tenant Fair-Use and Isolation Policy",
+        "tags": [
+          "tenant",
+          "noisy-neighbor",
+          "throttle",
+          "isolation",
+          "quota"
+        ],
+        "body": [
+          "Each tenant has a published fair-use quota. A tenant exceeding quota and degrading shared capacity is throttled back to its quota first, not granted more capacity.",
+          "Throttle the offending tenant at the edge before scaling shared infrastructure. Scaling to absorb one runaway tenant rewards abuse and raises cost for every tenant.",
+          "Hard isolation onto a dedicated shard is reserved for repeat offenders or confirmed runaway loops, and requires customer-success notification.",
+          "Do nothing is never acceptable while other tenants are being starved. Contain first, then open a fair-use conversation with the tenant."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "swe-shift-4-thundering-herd",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Edge gateway alert",
+          "role": "Traffic"
+        },
+        "subject": "Auth dependency slow, clients retrying without backoff",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 58,
+        "xp": 50,
+        "ticketBody": "The auth service p99 jumped from 80ms to 4s. Clients have no backoff and are retrying immediately, so request volume into auth is now 6x normal and climbing. The slowdown is amplifying into a full outage as retries pile on top of the original latency.",
+        "evidence": [
+          {
+            "label": "Gateway metrics, last 5 min",
+            "lines": [
+              "auth p99: 80ms -> 4100ms",
+              "inbound auth RPS: 1x -> 6.2x and rising",
+              "retry ratio: 0.02 -> 3.4 retries per request",
+              "downstream auth pool saturation: 99 percent"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "retry",
+              "trace",
+              "diag",
+              "inspect"
+            ],
+            "output": "Retry storm confirmed. Clients fire immediate retries with no jitter, each timeout spawns another in-flight call. Load is self-amplifying, not organic. The dependency is slow, not down.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A slow dependency is being turned into an outage by un-backed-off retries. Stop the amplification without lying to clients about health.",
+        "hint": "More traffic is the problem, not the symptom. What rules out adding capacity or raising timeouts?",
+        "actions": [
+          {
+            "id": "breaker-backoff",
+            "label": "Trip the circuit breaker on the auth call and enforce exponential backoff with jitter on retries",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "The breaker sheds the retry storm so the slow dependency can recover, and backoff with jitter stops clients from re-synchronizing into another wave. You cut the amplification at its source."
+          },
+          {
+            "id": "raise-timeouts",
+            "label": "Raise client timeouts from 1s to 10s so requests stop timing out",
+            "correct": false,
+            "csat": -8,
+            "teach": "Longer timeouts hold each connection open longer, so the saturated pool fills faster and fails harder. Timeouts are not the cause. The un-backed-off retries are."
+          },
+          {
+            "id": "add-capacity",
+            "label": "Auto-scale the auth fleet 4x to absorb the traffic",
+            "correct": false,
+            "csat": -9,
+            "teach": "The traffic is synthetic retry amplification, not real demand. New instances cold-start into the same storm and saturate too. You burn cost and time while the herd keeps growing."
+          },
+          {
+            "id": "force-restart-auth",
+            "label": "Roll-restart the entire auth fleet to clear the backlog",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Restarting drops every in-flight connection at once, every client retries instantly, and the herd hits a cold fleet. That converts a degradation into a hard outage. Contain the retries first."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-4-poison-message",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Queue consumer fleet",
+          "role": "Pipeline"
+        },
+        "subject": "One message is crash-looping every consumer",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 56,
+        "xp": 48,
+        "ticketBody": "Every consumer on the orders queue is crash-looping. They pick up the head message, throw an unhandled deserialization error, crash, restart, and the same message is redelivered to the next consumer. Throughput is zero and the whole consumer group is flapping.",
+        "evidence": [
+          {
+            "label": "Consumer group state",
+            "lines": [
+              "message m-88431 redelivered 1,204 times in 3 min",
+              "every consumer crashes on m-88431 then restarts",
+              "delivery count on m-88431 -> rising, never acked",
+              "all other messages blocked behind the head"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "message",
+              "inspect",
+              "diag",
+              "payload"
+            ],
+            "output": "Head message m-88431 has a malformed payload that no consumer can deserialize. It is never acked, so it redelivers forever. One poisoned message is blocking the entire queue.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A single poison message is taking down the whole consumer group. Isolate it without losing the rest of the backlog.",
+        "hint": "The bad message must stop being redelivered, but you still want it for debugging. What does that rule out?",
+        "actions": [
+          {
+            "id": "dead-letter-isolate",
+            "label": "Route m-88431 to the dead-letter queue and cap redeliveries so consumers move on",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "Dead-lettering moves the poison message off the hot path and preserves it for analysis, while the redelivery cap lets healthy messages flow again. You contain the blast radius to one message."
+          },
+          {
+            "id": "infinite-retry",
+            "label": "Leave it in the queue and let consumers keep retrying, it may succeed eventually",
+            "correct": false,
+            "csat": -9,
+            "teach": "A deserialization failure is deterministic. Retrying forever just keeps every consumer crashing and the queue stays jammed. Cap retries and dead-letter the message."
+          },
+          {
+            "id": "drop-whole-queue",
+            "label": "Purge the entire orders queue to clear the jam",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Purging destroys every healthy order behind the poison message and the evidence of what broke. Isolate the one bad message, never delete the whole backlog."
+          },
+          {
+            "id": "disable-consumers",
+            "label": "Stop all consumers and wait for someone to look in the morning",
+            "correct": false,
+            "csat": -7,
+            "teach": "Pausing the fleet stops the crash loop but also stops all processing, so the backlog grows unbounded. Dead-letter the poison message and keep healthy traffic moving."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-4-config-region",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Deploy bot",
+          "role": "Release"
+        },
+        "subject": "Config rollout broke us-west only",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 50,
+        "xp": 43,
+        "ticketBody": "A config change rolled out ring by ring. us-west error rate spiked to 40 percent right after revision cfg-7791 landed there. us-east, eu-central, and ap-south are on the same revision queue but have not received it yet and are fully healthy. The rollout policy is in the runbook.",
+        "kbArticleId": "kb-rollout-scope",
+        "evidence": [
+          {
+            "label": "Per-region health since rollout",
+            "lines": [
+              "us-west: cfg-7791 applied -> 5xx rate 0.3 percent -> 41 percent",
+              "us-east: still on cfg-7780 -> healthy",
+              "eu-central: still on cfg-7780 -> healthy",
+              "ap-south: still on cfg-7780 -> healthy",
+              "prior good revision recorded: cfg-7780"
+            ]
+          }
+        ],
+        "goal": "One region regressed on a new config while the rest are healthy and not yet on it. Revert the damage at the right scope per policy.",
+        "hint": "Only one region is sick. The policy cares a lot about not touching the healthy ones. Preserve the bad revision id too.",
+        "actions": [
+          {
+            "id": "region-rollback",
+            "label": "Roll us-west back to cfg-7780, hold the rollout for other regions, and pin cfg-7791 in the incident channel",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 14,
+            "teach": "Region-scoped rollback restores the only affected region, holding the rollout protects the healthy ones, and recording the bad revision keeps root cause reproducible. That is the policy and the smallest blast radius."
+          },
+          {
+            "id": "global-rollback",
+            "label": "Globally roll back every region to cfg-7780 to be safe",
+            "correct": false,
+            "csat": -7,
+            "teach": "The other regions are healthy and were never on cfg-7791. A global rollback re-deploys to stable regions for no reason and risks new churn. Scope the rollback to us-west."
+          },
+          {
+            "id": "push-forward",
+            "label": "Push a quick forward-fix config straight to us-west production",
+            "correct": false,
+            "csat": -9,
+            "teach": "Push forward during an active incident is only allowed for a staging-validated fix with incident-commander sign-off. An unvalidated forward fix can deepen the outage. Revert to the known-good revision first."
+          },
+          {
+            "id": "wait-it-out",
+            "label": "Leave cfg-7791 in place and watch if us-west recovers on its own",
+            "correct": false,
+            "csat": -8,
+            "teach": "A 41 percent error rate from a config change will not self-heal. Waiting just burns the SLA on a region you can revert in seconds. Roll us-west back now."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-4-noisy-neighbor",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Capacity monitor",
+          "role": "Platform"
+        },
+        "subject": "One tenant is starving the shared fleet",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 52,
+        "xp": 45,
+        "ticketBody": "Shared API latency for all tenants degraded in the last ten minutes. Tracing shows tenant t-4420 is running 14x its fair-use quota in a tight loop, consuming most of the shared worker pool. Other tenants are getting queued out. Fair-use policy is in the runbook.",
+        "kbArticleId": "kb-tenant-isolation",
+        "evidence": [
+          {
+            "label": "Tenant share of shared pool",
+            "lines": [
+              "t-4420: 14x published quota -> 71 percent of worker pool",
+              "t-4420 request pattern: tight retry loop, same endpoint",
+              "all other tenants: queued, p95 latency 3x normal",
+              "shared pool utilization: 98 percent"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "tenant",
+              "trace",
+              "diag",
+              "usage"
+            ],
+            "output": "t-4420 is in a runaway loop at 14x quota, holding 71 percent of shared workers. The other tenants are healthy in pattern, just starved of capacity by this one neighbor.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A single tenant in a runaway loop is starving everyone else on shared capacity. Restore fairness without rewarding the abuse.",
+        "hint": "The policy throttles the offender back to quota before it scales anything. What does that rule out?",
+        "actions": [
+          {
+            "id": "throttle-tenant",
+            "label": "Throttle t-4420 back to its fair-use quota at the edge and notify customer success",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "teach": "Throttling the runaway tenant to quota frees the shared pool for everyone immediately, and notifying customer success opens the fair-use conversation. You contain the one bad actor instead of subsidizing it."
+          },
+          {
+            "id": "scale-everything",
+            "label": "Scale the shared fleet 3x so there is room for everyone",
+            "correct": false,
+            "csat": -8,
+            "teach": "A tenant at 14x quota in a loop will eat whatever you add. Scaling rewards the abuse, raises cost for every tenant, and does not restore fairness. Throttle the offender to quota first."
+          },
+          {
+            "id": "do-nothing",
+            "label": "Do nothing, the loop will probably stop on its own soon",
+            "correct": false,
+            "csat": -9,
+            "teach": "Doing nothing leaves every other tenant starved and breaks their SLA while you hope. Fair-use policy requires you to contain the runaway tenant now, not wait."
+          },
+          {
+            "id": "hard-ban-tenant",
+            "label": "Cut t-4420 off entirely and revoke its API keys",
+            "correct": false,
+            "csat": -6,
+            "teach": "A full cutoff is a heavier blast radius than the problem needs and breaks a paying tenant with no notice. Throttle to quota first, escalate to hard isolation only for repeat offenders."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-4-pool-exhaustion",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Database monitor",
+          "role": "Data"
+        },
+        "subject": "DB connection pool exhausted by a slow query path",
+        "slaMinutes": 15,
+        "arriveAfter": 38,
+        "reward": 58,
+        "xp": 50,
+        "ticketBody": "The primary database connection pool is at 100 percent and new queries are queuing or timing out. Tracing shows one endpoint running an unindexed query that holds connections for 8 to 12 seconds each, and traffic to it is pinning the whole pool. The rest of the app is healthy but starved of connections.",
+        "evidence": [
+          {
+            "label": "Pool and query state",
+            "lines": [
+              "pool in use: 200 of 200 -> exhausted",
+              "slow path: GET /reports/export seq scan on orders",
+              "held connections: 8 to 12s each, no index used",
+              "everything else: waiting on a free connection"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "query",
+              "explain",
+              "diag",
+              "pool"
+            ],
+            "output": "EXPLAIN shows the export query doing a sequential scan, holding a connection 8 to 12s. A handful of these in flight pins all 200 connections. The pool is fine in size, the query path is the leak.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A slow query path is holding the connection pool hostage. Stop the bleeding at the source without a blunt restart.",
+        "hint": "The pool is the right size. One path is hoarding it. What does that rule out raising or restarting?",
+        "actions": [
+          {
+            "id": "kill-and-fix",
+            "label": "Cancel the long-running export queries and gate that endpoint with a statement timeout while the index ships",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "Cancelling the offending queries returns connections to the pool now, and the statement timeout stops the path from re-pinning it while you ship the index. You fix the leak instead of papering over it."
+          },
+          {
+            "id": "raise-pool-blindly",
+            "label": "Double max connections to 400 to relieve the pressure",
+            "correct": false,
+            "csat": -9,
+            "teach": "More connections just give the slow query more to hoard and push the database past its CPU and memory limits, risking a crash. The pool size is not the problem. The unbounded query is."
+          },
+          {
+            "id": "restart-prod-db",
+            "label": "Restart the production database to clear the connections",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Restarting the primary drops every connection, fails in-flight writes, and triggers a cold cache and failover risk during peak. That is a far bigger blast radius than the slow path. Cancel the bad queries instead."
+          },
+          {
+            "id": "kill-all-connections",
+            "label": "Terminate every active database session to free the pool",
+            "correct": false,
+            "csat": -8,
+            "teach": "Killing all sessions also aborts healthy in-flight transactions across the app and can leave work half-done. Target only the slow export queries, not every connection."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-shift-5",
+    "track": "swe",
+    "order": 4,
+    "name": "On-Call 5: Total Outage",
+    "rank": "Engineering Lead",
+    "accent": "#A855F7",
+    "durationSeconds": 660,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-incident-rollback",
+        "title": "Outage response: rollback first when a deploy is the suspect",
+        "tags": [
+          "incident",
+          "rollback",
+          "deploy"
+        ],
+        "body": [
+          "When a fresh deploy correlates with a multi-service outage, the fastest safe path to recovery is reverting to the last known-good build.",
+          "Rollback restores service for users now. You investigate root cause after the bleeding stops, not while customers are down.",
+          "Forward-fixes during an active P1 are risky: they are unverified, and a bad forward-fix extends the outage.",
+          "Confirm the deploy is the trigger with a quick diagnostic (deploy timeline vs error onset) before you commit, but do not spend the whole SLA investigating while users are down."
+        ]
+      },
+      {
+        "id": "kb-data-loss-signoff",
+        "title": "Recovery tradeoffs: data-loss decisions need a named owner",
+        "tags": [
+          "incident",
+          "data",
+          "signoff"
+        ],
+        "body": [
+          "Some recovery paths trade a small, bounded amount of recent data for a much faster return to service.",
+          "A decision that can lose customer data is never the on-call engineer's to make alone. It requires the incident commander plus the data or product owner accountable for that data.",
+          "Quantify the blast radius first: how many records, which window, recoverable from backups or not.",
+          "Document who signed off and on what basis. Silent data loss with no owner is how trust is destroyed."
+        ]
+      },
+      {
+        "id": "kb-prod-change-guardrails",
+        "title": "Change discipline during an incident",
+        "tags": [
+          "incident",
+          "deploy",
+          "guardrails"
+        ],
+        "body": [
+          "An active outage raises the bar for changes, it does not lower it. Untested code in prod during an incident is how a one-service outage becomes a five-service outage.",
+          "Every production change during an incident goes through the same guardrails: peer review, a tested path, and a rollback plan.",
+          "Pressure is not a reason to skip review. The incident commander can fast-track review, not waive it.",
+          "Migrations roll forward through the normal pipeline. Manual edits to prod data or schema bypass review and history, and are nearly impossible to reverse cleanly."
+        ]
+      },
+      {
+        "id": "kb-resolve-postmortem",
+        "title": "Calling an incident resolved and the blameless postmortem",
+        "tags": [
+          "incident",
+          "postmortem",
+          "resolution"
+        ],
+        "body": [
+          "An incident is resolved when service is verified healthy by signals, not when one graph looks better. Confirm error rate, latency, and key user flows across the affected services.",
+          "Watch for a stable window after recovery before you downgrade severity. A premature all-clear that flaps back is worse than staying in incident.",
+          "Every significant incident gets a blameless postmortem. The goal is the systemic fix, not a person to blame.",
+          "Closing a real outage silently with no postmortem guarantees it recurs and erodes the team's trust."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "swe-shift-5-rollback-decision",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "PagerDuty",
+          "role": "Incident bridge"
+        },
+        "subject": "Five services 500ing within 4 minutes of the 02:14 deploy",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 66,
+        "xp": 56,
+        "ticketBody": "Checkout, cart, search, profile, and notifications all started returning 5xx at 02:16. The 02:14 release went out 2 minutes before. Customers are fully blocked from checkout. You are incident lead. Pick the first move.",
+        "evidence": [
+          {
+            "label": "Deploy and error timeline",
+            "lines": [
+              "02:14:30 -> release v812 deployed to all regions",
+              "02:16:10 -> 5xx rate jumps 0.2% -> 41% across 5 services",
+              "02:17:00 -> last known-good build is v811, healthy for 6 hours",
+              "Rollback to v811 is one command, est 90s to propagate"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "deploy",
+              "timeline",
+              "diag"
+            ],
+            "output": "Error onset 100s after v812. v811 ran clean for 6h. Single-variable change. Deploy is the trigger.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-incident-rollback",
+        "goal": "Users are fully down and a deploy just landed. Make the call that restores service fastest and safest.",
+        "hint": "What is the single thing that changed right before everything broke? What is the lowest-risk way to undo it?",
+        "actions": [
+          {
+            "id": "rollback-to-known-good",
+            "label": "Roll back to v811, the last known-good build, then investigate v812 offline",
+            "detail": "Restore service for users now, root-cause after the outage ends.",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "outcome": "resolved",
+            "teach": "A fresh deploy that correlates tightly with a multi-service outage is the suspect. Rollback restores users now and gives you a safe artifact to debug later. Recovery first, root cause second."
+          },
+          {
+            "id": "forward-fix-live",
+            "label": "Write a forward-fix and ship it straight to prod to patch v812",
+            "correct": false,
+            "csat": -9,
+            "teach": "A forward-fix during an active P1 is unverified code on top of a broken state. If it is wrong you have extended the outage. Roll back to known-good, then fix calmly."
+          },
+          {
+            "id": "investigate-first",
+            "label": "Hold the rollback and dig into logs until you fully understand the bug",
+            "correct": false,
+            "csat": -8,
+            "teach": "Full root cause while users are down burns the SLA for no recovery. You can investigate after rollback. Stop the bleeding first."
+          },
+          {
+            "id": "restart-everything",
+            "label": "Just restart all five services and hope it clears",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Restarting reloads the same broken v812 build. It wastes minutes, can mask the trigger, and leaves users down. Roll back the bad deploy."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-5-status-comms",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Maya Okonkwo",
+          "role": "Support lead",
+          "vip": true
+        },
+        "subject": "Status page is blank and customers are flooding us",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 64,
+        "xp": 54,
+        "ticketBody": "Our public status page still shows all-green while checkout is down. Support is drowning. People are guessing whether it is them or us. What goes on the status page right now?",
+        "evidence": [
+          {
+            "label": "What we actually know at 02:22",
+            "lines": [
+              "Confirmed: checkout and 4 services degraded since 02:16",
+              "Confirmed: rollback in progress, not yet verified healthy",
+              "Unknown: exact full-recovery time",
+              "Comms policy: post confirmed impact, never invent an ETA"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-incident-rollback",
+        "goal": "Customers are in the dark. Post public comms that are accurate and do not overpromise.",
+        "hint": "Say what you know is true and what you are doing. Do not promise a time you cannot guarantee.",
+        "actions": [
+          {
+            "id": "accurate-investigating",
+            "label": "Post: investigating a major outage affecting checkout, mitigation underway, next update in 30 minutes",
+            "detail": "State confirmed impact and a commitment to update, not a fix time.",
+            "correct": true,
+            "csat": 15,
+            "outcome": "resolved",
+            "teach": "Good incident comms state the confirmed impact, that you are actively working it, and when the next update comes. You commit to communicating, not to a fix time you cannot guarantee."
+          },
+          {
+            "id": "promise-eta",
+            "label": "Post: checkout will be fully restored within 10 minutes",
+            "correct": false,
+            "csat": -8,
+            "teach": "You do not control recovery to the minute. A blown ETA destroys trust twice over. Promise updates, not fix times."
+          },
+          {
+            "id": "stay-dark",
+            "label": "Leave the status page green until everything is fully fixed",
+            "correct": false,
+            "csat": -10,
+            "teach": "Silence during a known outage looks like denial or incompetence. Customers already know it is down. Acknowledge it honestly and on time."
+          },
+          {
+            "id": "blame-vendor",
+            "label": "Post that a third-party vendor caused the outage to deflect blame",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "It was your deploy, and you have not confirmed any vendor cause. Inventing an external scapegoat in public is dishonest and unravels the moment the postmortem lands."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-5-data-loss-tradeoff",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Dev Patel",
+          "role": "Database on-call"
+        },
+        "subject": "Fast recovery may drop 90 seconds of order writes",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 68,
+        "xp": 58,
+        "ticketBody": "To recover quickly we can fail over to the standby replica, which is 90 seconds behind primary. That likely loses ~140 in-flight order writes. Staying on primary means another 25 minutes of downtime while we repair it. Your call?",
+        "evidence": [
+          {
+            "label": "Recovery options at 02:28",
+            "lines": [
+              "Option A: failover to standby -> service back in 2 min, ~140 recent orders lost, not in backups yet",
+              "Option B: repair primary -> ~25 more min down, zero data loss",
+              "Orders are revenue and customer trust, not disposable",
+              "Policy: data-loss path needs incident commander + data owner signoff"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-data-loss-signoff",
+        "goal": "There is a real downtime-versus-data-loss tradeoff. Make the principled call about who decides.",
+        "hint": "Losing customer orders is not a decision one on-call engineer makes alone. Who has to be in the room?",
+        "actions": [
+          {
+            "id": "escalate-signoff",
+            "label": "Quantify the loss, then get the incident commander and order-data owner to sign off before any failover",
+            "detail": "Surface the bounded blast radius and let the accountable owners choose, on the record.",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 16,
+            "outcome": "escalated",
+            "teach": "A path that loses customer orders is above the on-call engineer's authority. You quantify the loss, then the incident commander and the data owner decide together and on the record. That is how irreversible tradeoffs get made."
+          },
+          {
+            "id": "failover-now-solo",
+            "label": "Failover to the standby yourself immediately to end the outage",
+            "correct": false,
+            "csat": -10,
+            "teach": "Speed is tempting, but silently dropping 140 customer orders on your own authority is the kind of decision that ends careers and customer relationships. Escalate for signoff first."
+          },
+          {
+            "id": "repair-silently",
+            "label": "Quietly repair primary the long way and tell no one about the tradeoff",
+            "correct": false,
+            "csat": -7,
+            "teach": "Choosing 25 more minutes of downtime may even be right, but hiding the tradeoff from the commander removes their ability to weigh revenue against data. Surface it and let owners choose."
+          },
+          {
+            "id": "delete-inflight",
+            "label": "Purge the in-flight orders table to force a clean restart",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Deleting in-flight orders destroys recoverable customer data deliberately and without signoff. This is catastrophic and irreversible. Never purge real data to make recovery easier."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-5-untested-hotfix",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Theo Brandt",
+          "role": "Backend engineer"
+        },
+        "subject": "I have a hotfix, let me push straight to prod right now",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 58,
+        "xp": 48,
+        "ticketBody": "Theo: I think I see the v812 bug. I have a 6-line patch. No tests, no review, but it is obvious. Let me push it straight to prod while we are already down so we skip the rollback. Cool?",
+        "evidence": [
+          {
+            "label": "State of Theo's change",
+            "lines": [
+              "Patch: 6 lines, touches the shared auth middleware",
+              "No test run, no peer review, no rollback plan stated",
+              "Rollback to v811 is already mid-flight and 80% propagated",
+              "Auth middleware is in the path of all five down services"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-prod-change-guardrails",
+        "goal": "A teammate wants to cowboy a fix into prod mid-incident. Hold the guardrail without killing his initiative.",
+        "hint": "An outage raises the bar for changes, it does not lower it. What is already in flight that this would collide with?",
+        "actions": [
+          {
+            "id": "hold-guardrail",
+            "label": "Thank Theo, but require review and a tested path; let the rollback finish, then evaluate his patch for the forward-fix",
+            "detail": "Keep the same guardrails, fast-tracked not waived, and avoid colliding with the in-flight rollback.",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "outcome": "resolved",
+            "teach": "Incidents raise the bar for changes. Untested code in shared auth middleware could turn a 5-service outage into a worse one. You can fast-track review, never waive it. Let the rollback recover us, then weigh his fix properly."
+          },
+          {
+            "id": "let-him-push",
+            "label": "Let Theo push it, he knows the code and we are already down anyway",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Unreviewed, untested code in auth middleware during a live incident is exactly how a contained outage becomes a catastrophe. Already being down is not a license to skip review."
+          },
+          {
+            "id": "shut-him-down",
+            "label": "Tell Theo to stop touching anything and stay out of the incident",
+            "correct": false,
+            "csat": -6,
+            "teach": "Holding the guardrail does not mean crushing a teammate's initiative. Redirect his energy into a reviewed forward-fix. Discipline, not humiliation."
+          },
+          {
+            "id": "push-after-rollback-noreview",
+            "label": "Let him push the moment the rollback finishes, still no review",
+            "correct": false,
+            "csat": -8,
+            "teach": "Recovery does not change the rule. Any prod change still needs review and a tested path. The guardrail applies before and after rollback."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-5-missing-migration",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Dev Patel",
+          "role": "Database on-call"
+        },
+        "subject": "Root cause: v812 expected a migration that never ran",
+        "slaMinutes": 20,
+        "arriveAfter": 42,
+        "reward": 60,
+        "xp": 50,
+        "ticketBody": "Found it. v812 reads a column that migration 0461 was supposed to add, but 0461 never ran in prod. That is why every service blew up. We are stable on v811. How do we fix the schema so we can safely roll forward to v812 later?",
+        "evidence": [
+          {
+            "label": "Schema and migration state",
+            "lines": [
+              "v812 code -> SELECT settings_json on accounts (missing column)",
+              "Migration 0461 -> ADD COLUMN settings_json, status: NOT applied in prod",
+              "0461 tested clean in staging, additive and reversible",
+              "Pipeline can run 0461 through normal review and CI"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "migrations",
+              "status",
+              "diag"
+            ],
+            "output": "Prod is missing migration 0461 (additive ADD COLUMN). Staging has it and is healthy. Roll-forward through the pipeline is safe and reversible.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-prod-change-guardrails",
+        "goal": "The fix is a missing migration. Choose the path that gets the schema right without bypassing review.",
+        "hint": "There is a tested, reversible migration that already exists. What is the difference between running it properly and hand-editing prod?",
+        "actions": [
+          {
+            "id": "roll-forward-migration",
+            "label": "Run migration 0461 through the normal pipeline with review and CI, verify in staging-parity, then plan the v812 redeploy",
+            "detail": "Apply the tested, reversible migration the same way every schema change ships.",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "outcome": "resolved",
+            "teach": "The right fix is the migration that already exists, run through the same reviewed, version-controlled pipeline. It is additive and reversible. That restores the missing step cleanly and keeps history intact."
+          },
+          {
+            "id": "manual-alter-prod",
+            "label": "Just run ALTER TABLE by hand on prod to add the column fast",
+            "correct": false,
+            "csat": -9,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Manual schema edits on prod bypass review, skip CI, and leave no migration history, so staging and prod drift and the next deploy breaks differently. Roll the real migration forward."
+          },
+          {
+            "id": "redeploy-v812-now",
+            "label": "Redeploy v812 immediately and let it create the column at startup",
+            "correct": false,
+            "csat": -8,
+            "teach": "Redeploying the build that just caused a total outage before the schema exists repeats the exact failure. Apply the migration first, verify, then plan the redeploy."
+          },
+          {
+            "id": "skip-column",
+            "label": "Patch v812 to ignore the column so we never need the migration",
+            "correct": false,
+            "csat": -6,
+            "teach": "Hacking out the feature to dodge a clean, tested migration adds debt and an unreviewed change. The migration is the correct, low-risk path. Use it."
+          }
+        ]
+      },
+      {
+        "id": "swe-shift-5-call-resolved",
+        "channel": "ticket",
+        "priority": "P3",
+        "from": {
+          "name": "Maya Okonkwo",
+          "role": "Support lead",
+          "vip": true
+        },
+        "subject": "Are we resolved? Can I close the incident?",
+        "slaMinutes": 30,
+        "arriveAfter": 64,
+        "reward": 56,
+        "xp": 46,
+        "ticketBody": "Checkout graph looks green again. Support wants to send the all-clear and close the incident. Do we call it resolved now, and what happens after?",
+        "evidence": [
+          {
+            "label": "Recovery signals at 02:58",
+            "lines": [
+              "5xx rate back to 0.2% across all 5 services for 8 minutes",
+              "Latency p95 normal, checkout and search flows pass synthetic checks",
+              "Stable-window policy: confirm signals hold before downgrading severity",
+              "This was a customer-facing total outage -> postmortem required"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-resolve-postmortem",
+        "goal": "Service looks healthy. Decide the right criteria to call it resolved and what must follow.",
+        "hint": "Resolved means verified across signals and a stable window, not one green graph. What does every real outage owe afterward?",
+        "actions": [
+          {
+            "id": "verify-then-postmortem",
+            "label": "Confirm error rate, latency, and key user flows are healthy across all 5 services over the stable window, post the all-clear, then schedule a blameless postmortem",
+            "detail": "Resolve on verified signals, then own the systemic follow-up.",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 14,
+            "outcome": "resolved",
+            "teach": "Resolved means healthy by signals across the affected services and held through a stable window, not one green graph. Every real outage owes a blameless postmortem so the systemic cause gets fixed, not buried."
+          },
+          {
+            "id": "close-silently",
+            "label": "Send the all-clear and close it out, no postmortem needed since it is fixed",
+            "correct": false,
+            "csat": -9,
+            "teach": "Closing a total outage with no postmortem guarantees the missing-migration gap recurs and signals the team that incidents do not matter. Always run the blameless review."
+          },
+          {
+            "id": "premature-allclear",
+            "label": "Declare resolved on the checkout graph alone and stand the bridge down now",
+            "correct": false,
+            "csat": -7,
+            "teach": "One green graph is not five healthy services across a stable window. A premature all-clear that flaps back is worse than staying in incident. Verify broadly first."
+          },
+          {
+            "id": "blame-theo",
+            "label": "Write the postmortem naming Theo and the deployer as the cause",
+            "correct": false,
+            "csat": -8,
+            "teach": "A postmortem that blames people is not blameless and it teaches everyone to hide mistakes. The cause was a missing migration gate in the pipeline. Fix the system, not the person."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "redteam-shift-3",
+    "track": "redteam",
+    "order": 2,
+    "name": "Engagement 3: Internal Network",
+    "rank": "Lead Pentester",
+    "accent": "#EF4444",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-rt3-scope",
+        "title": "Rules of Engagement and Scope Discipline",
+        "tags": [
+          "scope",
+          "roe",
+          "authorization",
+          "redteam"
+        ],
+        "body": [
+          "The signed Rules of Engagement define exactly which networks, hosts, and domains you may touch. Anything outside that list is off limits, no matter how reachable it looks from inside.",
+          "Discovery is not authorization. Finding an in scope path to an out of scope system does not extend your scope. The moment a target falls outside the agreed ranges, you stop and notify the client point of contact.",
+          "Production user accounts and live business data are not test material. Confirming a weakness exists does not require you to exercise it against real users.",
+          "When in doubt, document the finding, capture the minimal proof that it is real, and escalate the scope question to the client before going further."
+        ]
+      },
+      {
+        "id": "kb-rt3-disclosure",
+        "title": "Responsible Disclosure and Minimal Evidence",
+        "tags": [
+          "disclosure",
+          "evidence",
+          "reporting",
+          "redteam"
+        ],
+        "body": [
+          "A finding is proven when you can show the weakness exists, not when you have abused it. Capture the smallest artifact that makes the risk undeniable: a directory listing, a config flag, a permission set, a redacted screenshot.",
+          "Never exfiltrate real sensitive data as proof. Copying HR records, credentials, or PII off a system turns a clean finding into an incident you caused.",
+          "Redact what you collect. A file name and a permission entry prove the exposure without moving the contents.",
+          "Write the finding with impact, evidence, and a concrete remediation so the client can fix it, then hand it to the engagement lead."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "redteam-shift-3-svcacct",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement console",
+          "role": "Internal recon"
+        },
+        "subject": "Service account with weak password and broad rights",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 46,
+        "xp": 40,
+        "ticketBody": "Credential audit on the in scope domain surfaced svc_backup. Its password is a dictionary word plus a year, and the account is a member of several privileged groups. This account could clearly be used to move laterally across the estate.",
+        "evidence": [
+          {
+            "label": "Account review, svc_backup",
+            "lines": [
+              "Account: svc_backup (service)",
+              "Password: backup2019 (dictionary word + year)",
+              "Groups: Backup Operators, Remote Management, Server Admins",
+              "Password last set: 1,847 days ago",
+              "In scope: yes (matches signed ROE ranges)"
+            ]
+          }
+        ],
+        "goal": "You found a weak, over privileged service account. Prove the risk without becoming the breach.",
+        "hint": "The finding is the weak password and the broad rights. Pivoting through it is a choice, not a requirement.",
+        "actions": [
+          {
+            "id": "svc-document",
+            "label": "Document the finding with the weak credential and group membership, recommend rotation and least privilege",
+            "correct": true,
+            "csat": 13,
+            "teach": "The weak password plus broad group membership is the finding. A credential audit record and the group list prove it. You recommend rotation, a managed service account, and stripping the account to least privilege.",
+            "outcome": "reported"
+          },
+          {
+            "id": "svc-pivot",
+            "label": "Authenticate as svc_backup and pivot to a Server Admins host to show real impact",
+            "correct": false,
+            "csat": -8,
+            "teach": "Using the account to pivot is unnecessary and risky. The weakness is already proven by the audit. Live use of a real privileged account can trip detections, lock the account, or disrupt backups. Document, do not exploit."
+          },
+          {
+            "id": "svc-reset",
+            "label": "Reset the password yourself so it cannot be abused",
+            "correct": false,
+            "csat": -10,
+            "teach": "You are testing the network, not administering it. Changing a production service account password can break backups and is outside your authorization. Report it and let the client remediate."
+          },
+          {
+            "id": "svc-ignore",
+            "label": "Skip it, weak service passwords are common and low value",
+            "correct": false,
+            "csat": -6,
+            "teach": "An over privileged account with a guessable password is a high value finding, not noise. Broad rights turn a small weakness into a path to domain compromise. Always document it."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-3-smbsigning",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement console",
+          "role": "Subnet scan"
+        },
+        "subject": "SMB signing disabled across a subnet",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 47,
+        "xp": 41,
+        "ticketBody": "A configuration sweep of the 10.40.12.0/24 subnet shows SMB signing not required on most hosts. In theory this enables relay attacks against authenticating users. The client wants to know the risk. Live relaying would target real production users.",
+        "evidence": [
+          {
+            "label": "SMB config sweep, 10.40.12.0/24",
+            "lines": [
+              "Hosts scanned: 61",
+              "SMB signing required: 4",
+              "SMB signing not required: 57",
+              "Condition consistent with relay exposure in theory",
+              "Authenticating users: live production staff"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "smbcheck",
+              "signing",
+              "diag"
+            ],
+            "output": "57 of 61 hosts report SMB signing not required. Config alone confirms the relay exposure. No live relay needed to prove it.",
+            "step": "diag"
+          }
+        ],
+        "goal": "The configuration shows relay exposure. Report the risk without staging an attack on real users.",
+        "hint": "The signing setting is the proof. You do not need a live relay to demonstrate a config weakness.",
+        "actions": [
+          {
+            "id": "smb-report",
+            "label": "Run the config diagnostic, then report the finding and relay risk with a remediation to require SMB signing",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 13,
+            "teach": "The signing config sweep is sufficient proof. You report that 57 of 61 hosts allow relay in theory, explain the impact, and recommend enforcing SMB signing and disabling legacy auth. No live attack against real users is needed.",
+            "outcome": "reported"
+          },
+          {
+            "id": "smb-relay-live",
+            "label": "Stand up a live relay and capture an authenticating user to demonstrate impact",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Running a live relay against real production users coerces and abuses their credentials. That is the mistake. It can disrupt sessions, expose you to legal risk, and was never needed. The config alone proves the finding."
+          },
+          {
+            "id": "smb-broadcast-poison",
+            "label": "Poison name resolution on the subnet to gather hashes and show how easy it is",
+            "correct": false,
+            "csat": -9,
+            "teach": "Spoofing name resolution to harvest hashes is an active attack on live users, not a configuration finding. It is intrusive and unnecessary. Report the disabled signing and stop there."
+          },
+          {
+            "id": "smb-note-later",
+            "label": "Note it as low priority since you have no exploit captured yet",
+            "correct": false,
+            "csat": -6,
+            "teach": "Disabled SMB signing across a subnet is a well understood, exploitable weakness. Lack of a live capture does not lower the risk. Report it on the config evidence."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-3-hrshare",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Engagement console",
+          "role": "Share enumeration"
+        },
+        "subject": "Open file share exposes HR data to all employees",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 54,
+        "xp": 46,
+        "ticketBody": "Share enumeration found \\\\fs02\\HR_Records readable by the Domain Users group. It contains payroll and personnel files. Any employee can browse it. The temptation is to copy a file as proof.",
+        "evidence": [
+          {
+            "label": "Share ACL, fs02 HR_Records",
+            "lines": [
+              "Path: \\\\fs02\\HR_Records",
+              "Permission: Domain Users -> Read",
+              "Contents: payroll_2026.xlsx, offer_letters\\, terminations\\",
+              "Expected: HR-Staff group only",
+              "Exposure: all employees can read HR PII"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-rt3-disclosure",
+        "goal": "Sensitive HR data is exposed to everyone. Prove the exposure without becoming the leak.",
+        "hint": "Minimal evidence. A permission entry and a redacted listing prove this without moving the files.",
+        "actions": [
+          {
+            "id": "hr-minimal",
+            "label": "Capture the share ACL and a redacted directory listing, then disclose responsibly with a least privilege fix",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 16,
+            "teach": "Per the disclosure policy, the ACL showing Domain Users with Read and a redacted file listing prove the exposure without touching the contents. You report it as high impact and recommend restricting the share to the HR-Staff group.",
+            "outcome": "reported"
+          },
+          {
+            "id": "hr-exfil",
+            "label": "Download payroll_2026.xlsx and attach it to the report as undeniable proof",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Exfiltrating real HR data is the mistake. Copying PII off the system turns a clean finding into a breach you caused, creates legal exposure, and was never needed. The ACL and a redacted listing already prove it."
+          },
+          {
+            "id": "hr-open-sample",
+            "label": "Open a few offer letters to confirm they are real before reporting",
+            "correct": false,
+            "csat": -9,
+            "teach": "You do not need to read personnel files to confirm exposure. The permission set and a redacted listing are enough. Opening real PII is intrusive and unnecessary. Capture minimal evidence only."
+          },
+          {
+            "id": "hr-fixacl",
+            "label": "Tighten the share ACL yourself to stop the exposure immediately",
+            "correct": false,
+            "csat": -7,
+            "teach": "Changing production permissions is the client's job, not yours. Altering the ACL can break legitimate access and is outside your authorization. Disclose the finding and let them remediate."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-3-cleartext",
+        "channel": "ticket",
+        "priority": "P3",
+        "from": {
+          "name": "Engagement console",
+          "role": "Traffic review"
+        },
+        "subject": "Legacy cleartext protocol in use on the LAN",
+        "slaMinutes": 30,
+        "arriveAfter": 20,
+        "reward": 44,
+        "xp": 38,
+        "ticketBody": "A passive traffic review shows an internal management tool authenticating over Telnet on port 23 between admin01 and sw-core01. Credentials traverse the wire in cleartext. Harvesting a real session would expose live admin credentials.",
+        "evidence": [
+          {
+            "label": "Protocol observation, admin01 -> sw-core01",
+            "lines": [
+              "Service: Telnet, tcp/23",
+              "Auth: cleartext, no transport encryption",
+              "Users on path: live network admins",
+              "Modern alternative available: SSH (tcp/22)",
+              "Finding derivable from protocol, not from captured creds"
+            ]
+          }
+        ],
+        "goal": "A cleartext protocol carries live admin credentials. Document the weakness without capturing real secrets.",
+        "hint": "The protocol itself is the finding. You do not need to read anyone's password to prove cleartext auth.",
+        "actions": [
+          {
+            "id": "clear-document",
+            "label": "Document the cleartext protocol and recommend deprecating Telnet in favor of SSH",
+            "correct": true,
+            "csat": 12,
+            "teach": "Observing Telnet on port 23 with no encryption is the finding. You record the protocol and path, explain that credentials cross the wire in cleartext, and recommend retiring Telnet and enforcing SSH. No captured credential is needed.",
+            "outcome": "reported"
+          },
+          {
+            "id": "clear-harvest",
+            "label": "Capture an admin login off the wire to prove the credentials are readable",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Harvesting a real admin credential off the wire is the mistake. You now hold a live secret you never needed, which is intrusive and a liability. The protocol observation alone proves cleartext auth. Document it."
+          },
+          {
+            "id": "clear-mitm",
+            "label": "Insert yourself between the hosts to demonstrate interception",
+            "correct": false,
+            "csat": -9,
+            "teach": "Actively intercepting a live admin session is an attack on production traffic, not a passive finding. It can disrupt management connectivity and is unnecessary. The cleartext protocol is enough to report."
+          },
+          {
+            "id": "clear-skip",
+            "label": "Skip it, Telnet is old but rarely exploited in practice",
+            "correct": false,
+            "csat": -5,
+            "teach": "Cleartext admin auth on an internal network is a real and common path to credential capture. Age does not make it safe. Document it and recommend deprecation."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-3-outofscope-dc",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Engagement console",
+          "role": "Network scan"
+        },
+        "subject": "Scan reveals a domain controller on an out of scope domain",
+        "slaMinutes": 15,
+        "arriveAfter": 38,
+        "reward": 56,
+        "xp": 48,
+        "ticketBody": "A discovery scan reached dc01.partner-corp.local, a domain controller for partner-corp.local. That domain is not in the signed Rules of Engagement. It is reachable from your in scope segment, but you were never authorized to touch it.",
+        "evidence": [
+          {
+            "label": "Scan hit, dc01.partner-corp.local",
+            "lines": [
+              "Host: dc01.partner-corp.local",
+              "Role: domain controller (LDAP, Kerberos, SMB)",
+              "Domain: partner-corp.local",
+              "ROE in scope domains: corp.local only",
+              "Match against ROE: NOT in scope"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "scopecheck",
+              "roe",
+              "diag"
+            ],
+            "output": "partner-corp.local is not listed in the signed ROE. Only corp.local is in scope. dc01.partner-corp.local is out of bounds. Stop and notify the client.",
+            "step": "diag"
+          }
+        ],
+        "kbArticleId": "kb-rt3-scope",
+        "goal": "You can reach a domain controller you were never authorized to touch. Do the senior thing.",
+        "hint": "Reachable is not authorized. The ROE lists corp.local, not partner-corp.local.",
+        "actions": [
+          {
+            "id": "scope-stop-report",
+            "label": "Run the scope check, stop all activity against the host, and report the out of scope discovery to the client point of contact",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "The ROE lists corp.local only, so partner-corp.local is out of bounds. The right move is to halt, document that the host was reachable, and escalate the scope question to the client before anything else. Discovery is not authorization.",
+            "outcome": "escalated"
+          },
+          {
+            "id": "scope-quicktest",
+            "label": "Run a quick safe enumeration first to gauge if it is worth flagging",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Any testing of an out of scope domain controller is unauthorized access, no matter how light. That is the mistake. You stop the moment a target falls outside the ROE and report it. Do not touch it."
+          },
+          {
+            "id": "scope-assume",
+            "label": "Assume partner-corp is in scope since it is reachable from your segment",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Reachability never implies authorization. Acting on that assumption against a partner domain controller is a serious scope violation with legal consequences. The ROE is the only source of truth. Stop and escalate."
+          },
+          {
+            "id": "scope-silent",
+            "label": "Note it privately and keep working the in scope targets without telling the client",
+            "correct": false,
+            "csat": -7,
+            "teach": "Staying silent is wrong even if you do not touch the host. An unexpected reachable partner domain controller is a finding the client needs now. Escalate the scope question immediately."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "redteam-shift-4",
+    "track": "redteam",
+    "order": 3,
+    "name": "Engagement 4: Cloud Assessment",
+    "rank": "Red Team Operator",
+    "accent": "#EF4444",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-rt-scope",
+        "title": "Rules of Engagement and Scope Discipline",
+        "tags": [
+          "scope",
+          "roe",
+          "redteam",
+          "cloud"
+        ],
+        "body": [
+          "Scope is defined in the Rules of Engagement and the signed authorization. Only assets listed in scope may be touched.",
+          "Demonstrating a finding means proving it exists with the least intrusive action possible. You do not need to exploit a finding fully to prove it.",
+          "Do not exfiltrate real customer data. One redacted sample or a count and listing is enough to prove exposure.",
+          "Do not pivot into production or alter production state unless the ROE explicitly authorizes it in writing.",
+          "If enumeration reveals an asset that is not in scope, stop touching it and notify the client point of contact before going further.",
+          "Found credentials, keys, or tokens are reported for rotation. Using them against live systems is out of bounds unless the ROE names that test."
+        ]
+      },
+      {
+        "id": "kb-rt-evidence",
+        "title": "Safe Evidence Handling for Cloud Findings",
+        "tags": [
+          "evidence",
+          "reporting",
+          "cloud",
+          "redteam"
+        ],
+        "body": [
+          "Capture the minimum needed to make the finding reproducible: a request, a response header or status, a redacted sample, a timestamp.",
+          "Redact customer PII in any screenshot or log you keep. Store evidence in the engagement vault, not your local machine.",
+          "Prove reachability, not full compromise. A 200 response or a metadata banner is enough to show a control gap.",
+          "Never download an entire bucket or dump an entire table as proof. Volume of stolen data is not evidence quality.",
+          "Tie every finding to a clear remediation: who fixes it, what they change, and how to verify the fix."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "redteam-shift-4-public-bucket",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Recon worklog",
+          "role": "Engagement tooling"
+        },
+        "subject": "Public cloud storage bucket lists customer files",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 50,
+        "xp": 42,
+        "ticketBody": "Asset enumeration found a storage bucket tied to the in-scope app domain. Anonymous listing succeeds and object keys look like real customer invoices. The bucket is on the authorized target list.",
+        "kbArticleId": "kb-rt-evidence",
+        "evidence": [
+          {
+            "label": "Anonymous bucket probe",
+            "lines": [
+              "GET https://assets.target-app.example/?list -> 200 OK",
+              "Anonymous list allowed, 11482 objects enumerable",
+              "Sample keys: invoices/2026/cust-4471.pdf, invoices/2026/cust-4472.pdf",
+              "Bucket is in scope per the authorization list"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "headobject",
+              "probe",
+              "validate"
+            ],
+            "output": "HEAD on one object -> 200 OK, Content-Type application/pdf, no auth header sent. Exposure confirmed with a single redacted sample.",
+            "step": "diag"
+          }
+        ],
+        "goal": "The bucket is public and in scope. Prove the exposure without hoarding customer data.",
+        "hint": "You only need to show it is reachable, not to copy all of it. What is the minimum proof?",
+        "actions": [
+          {
+            "id": "validate-and-report",
+            "label": "Confirm anonymous read on one redacted sample, record the listing count, then report the exposure",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 13,
+            "outcome": "reported",
+            "teach": "A single redacted sample plus the object count proves the bucket is public. That is reproducible evidence with no customer data hoarded."
+          },
+          {
+            "id": "download-all",
+            "label": "Download every object so the report has full proof of what was exposed",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Pulling 11482 customer files turns a finding into a real data exposure that you now hold. Volume is not evidence quality. One redacted sample is enough."
+          },
+          {
+            "id": "delete-public-acl",
+            "label": "Flip the bucket to private yourself to close the hole immediately",
+            "correct": false,
+            "csat": -8,
+            "teach": "Changing the target configuration is the client's job and can break their app. You report findings, you do not remediate their cloud for them."
+          },
+          {
+            "id": "ignore-low-sev",
+            "label": "Note it as low severity and move on since it is just static files",
+            "correct": false,
+            "csat": -6,
+            "teach": "Customer invoices are PII. Public read on PII is a high impact finding, not a footnote. Validate and report it properly."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-4-iam-privesc",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Cloud policy review",
+          "role": "Engagement tooling"
+        },
+        "subject": "Over-permissive IAM role allows privilege escalation path",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 52,
+        "xp": 44,
+        "ticketBody": "A role attached to the in-scope build service can update its own policy and pass a higher-privileged role. On paper this chains to admin. No exploitation has been attempted.",
+        "kbArticleId": "kb-rt-scope",
+        "evidence": [
+          {
+            "label": "Effective policy on build-runner role",
+            "lines": [
+              "Allow: iam:UpdateAssumeRolePolicy on self",
+              "Allow: iam:PassRole -> deploy-admin role",
+              "Allow: sts:AssumeRole -> deploy-admin role",
+              "Theoretical chain: self-edit -> pass -> assume deploy-admin"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "simulate",
+              "policysim",
+              "diag"
+            ],
+            "output": "Policy simulator confirms the three grants combine into a viable escalation path to deploy-admin. Path is documentable from policy alone, no live escalation needed.",
+            "step": "diag"
+          }
+        ],
+        "goal": "The escalation path is real on paper. Document the risk without actually becoming admin.",
+        "hint": "Policy simulation proves the chain. Does proving it require you to walk it in production?",
+        "actions": [
+          {
+            "id": "document-path",
+            "label": "Confirm the chain with the policy simulator, document each grant and the resulting risk, then report it",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 13,
+            "outcome": "reported",
+            "teach": "The simulator proves the chain from policy alone. Documenting the three grants and the impact is complete evidence with zero production risk."
+          },
+          {
+            "id": "actually-escalate",
+            "label": "Walk the chain into deploy-admin to prove it works for real",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Escalating to admin in production is a state change with real blast radius. The simulator already proves the path. Never escalate live just for a screenshot."
+          },
+          {
+            "id": "strip-permissions",
+            "label": "Detach the dangerous permissions from the role to neutralize it",
+            "correct": false,
+            "csat": -8,
+            "teach": "Editing the client's IAM can break their build pipeline. Remediation is the client's call. You document, they fix."
+          },
+          {
+            "id": "skip-theoretical",
+            "label": "Skip it as theoretical since you did not exploit it",
+            "correct": false,
+            "csat": -7,
+            "teach": "A simulator-confirmed escalation path is a concrete finding, not a theory. Senior operators report provable chains without exploiting them."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-4-ssrf-metadata",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Web app proxy log",
+          "role": "Engagement tooling"
+        },
+        "subject": "App fetches attacker-controlled URL and can reach cloud metadata endpoint",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 60,
+        "xp": 50,
+        "ticketBody": "The in-scope image-import feature fetches a user-supplied URL server-side. A crafted internal URL returns the metadata service banner, which means the host can reach the instance metadata endpoint. Instance credentials are exposed if you go one hop further.",
+        "kbArticleId": "kb-rt-evidence",
+        "evidence": [
+          {
+            "label": "Image-import request and response",
+            "lines": [
+              "POST /api/import url=http://169.254.169.254/latest/meta-data/ -> 200 OK",
+              "Response body lists metadata categories including iam/",
+              "Reachability to the metadata endpoint is confirmed",
+              "One further hop would return live instance role credentials"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "confirm",
+              "reachability",
+              "diag"
+            ],
+            "output": "The import endpoint returns the metadata directory listing. Reachability is proven. Fetching the credentials path is not required and is out of bounds.",
+            "step": "diag"
+          }
+        ],
+        "goal": "SSRF can reach the metadata endpoint. Prove reachability safely and stop before stealing credentials.",
+        "hint": "The directory listing already proves the gap. What does fetching the actual credentials add except real risk?",
+        "actions": [
+          {
+            "id": "prove-reach-report",
+            "label": "Capture the metadata directory listing as proof of reachability, then report the SSRF and recommend blocking the metadata route",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "outcome": "reported",
+            "teach": "The directory listing proves the host can reach the metadata service. That is enough to demonstrate the SSRF. You stop short of pulling credentials, which keeps the test safe and in bounds."
+          },
+          {
+            "id": "steal-creds-use",
+            "label": "Fetch the instance role credentials and use them to access the cloud account as proof of impact",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Pulling and using live instance credentials is real compromise with real blast radius. Reachability is already proven. Demonstrating SSRF never requires using stolen credentials."
+          },
+          {
+            "id": "patch-endpoint",
+            "label": "Add server-side URL filtering to the import endpoint yourself",
+            "correct": false,
+            "csat": -8,
+            "teach": "Changing the client's application code is not your role and could break the feature. You report the SSRF and the fix, they implement it."
+          },
+          {
+            "id": "log-as-info",
+            "label": "Record it as informational since no data was actually taken",
+            "correct": false,
+            "csat": -9,
+            "teach": "SSRF that reaches the metadata endpoint is a critical finding because it leads straight to credentials. Severity comes from reachable impact, not from whether you chose to exploit it."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-4-hardcoded-key",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Source review tooling",
+          "role": "Engagement tooling"
+        },
+        "subject": "Hardcoded API key in serverless function source",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 50,
+        "xp": 42,
+        "ticketBody": "A deployed serverless function in scope embeds a live third-party API key in plaintext. The key format matches the payments provider. The function source is readable through the in-scope deployment console.",
+        "kbArticleId": "kb-rt-scope",
+        "evidence": [
+          {
+            "label": "Function source excerpt",
+            "lines": [
+              "const PAYMENTS_KEY = \"sk_live_REDACTED_4f1c\"",
+              "Key prefix sk_live indicates a production secret",
+              "Key is committed in the function body, not pulled from a secret store",
+              "Provider is a third party outside the engagement scope"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "classify",
+              "keyinfo",
+              "diag"
+            ],
+            "output": "Prefix and length match a live payments provider secret. It belongs to a third party that is not in the engagement scope. Treat as report-and-rotate only.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A live secret is sitting in code. Report it and recommend rotation without touching the live system it unlocks.",
+        "hint": "The key works on a third-party production system that is not in your scope. Using it is off the table. What is left?",
+        "actions": [
+          {
+            "id": "report-and-rotate",
+            "label": "Document the exposed key with the prefix redacted, flag it critical, and recommend immediate rotation plus a move to a secret store",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 13,
+            "outcome": "reported",
+            "teach": "A live secret in source is reported for rotation, never tested. You record enough to identify it, redact the value, and hand the client a clear remediation: rotate now and store secrets properly."
+          },
+          {
+            "id": "use-the-key",
+            "label": "Call the payments provider with the key to confirm it is valid and live",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Using a found key against a live third-party system is unauthorized access outside your scope. The sk_live prefix already tells you it is real. Report it, do not exercise it."
+          },
+          {
+            "id": "commit-removal",
+            "label": "Edit the function to remove the key and redeploy it",
+            "correct": false,
+            "csat": -8,
+            "teach": "Changing and redeploying the client's function is remediation, which is their job, and it can break payments. You report the exposure, they rotate and fix."
+          },
+          {
+            "id": "store-full-key",
+            "label": "Save the full key in your notes so the report can prove it was real",
+            "correct": false,
+            "csat": -7,
+            "teach": "Keeping the full live secret on your machine is itself a leak. Record the prefix and location, redact the rest, and recommend rotation."
+          }
+        ]
+      },
+      {
+        "id": "redteam-shift-4-out-of-scope",
+        "channel": "email",
+        "priority": "P1",
+        "from": {
+          "name": "Lena Brandt",
+          "role": "Engagement Lead",
+          "vip": true
+        },
+        "subject": "Enumeration surfaced a production account that is not on the target list",
+        "slaMinutes": 15,
+        "arriveAfter": 40,
+        "reward": 58,
+        "xp": 48,
+        "ticketBody": "While mapping the cloud org, enumeration revealed a sibling account tagged prod-billing. It is owned by the same client but it is not on the authorized target list. No assets in it have been touched yet.",
+        "kbArticleId": "kb-rt-scope",
+        "email": {
+          "body": "Team, heads up. The org map shows a prod-billing account next to our targets. It is the same client, so I assume it is fair game. Before anyone pokes it, what is the call? Lena."
+        },
+        "evidence": [
+          {
+            "label": "Org enumeration result",
+            "lines": [
+              "Authorized targets: app-staging, app-qa, assets bucket",
+              "Discovered sibling account: prod-billing (NOT on target list)",
+              "Same parent organization, different authorization status",
+              "Engagement ROE lists scope by account, prod-billing is absent"
+            ]
+          }
+        ],
+        "goal": "An out-of-scope production account just appeared. Decide what a senior operator does next.",
+        "hint": "Same company is not the same as in scope. The ROE lists accounts, and this one is not on it.",
+        "actions": [
+          {
+            "id": "stop-notify-client",
+            "label": "Stop all activity against prod-billing, document that it was discovered but not touched, and notify the client point of contact to confirm scope before anything else",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 16,
+            "outcome": "escalated",
+            "teach": "Scope is defined by the authorization, not by who owns the account. The right move is to halt, record that you found it without touching it, and ask the client to confirm scope in writing before proceeding."
+          },
+          {
+            "id": "continue-same-company",
+            "label": "Continue into prod-billing since it is the same client and clearly related",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Same parent org does not grant authorization. Touching an account that is not on the target list is unauthorized access, even against your own client. Stop and confirm scope first."
+          },
+          {
+            "id": "quick-peek",
+            "label": "Take a quick read-only look to gauge whether it is worth adding to scope",
+            "correct": false,
+            "csat": -9,
+            "teach": "Even read-only enumeration of an out-of-scope production account crosses the authorization line. You report that it exists and let the client decide whether to add it."
+          },
+          {
+            "id": "ignore-silently",
+            "label": "Leave it out of the report entirely so it does not complicate scope",
+            "correct": false,
+            "csat": -6,
+            "teach": "Silently dropping it hides a real discovery. Note that you found an out-of-scope account, confirm you did not touch it, and surface it to the client."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "redteam-shift-5",
+    "track": "redteam",
+    "order": 4,
+    "name": "Engagement 5: Operation Wrap",
+    "rank": "Red Team Lead",
+    "accent": "#EF4444",
+    "durationSeconds": 660,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-roe-scope",
+        "title": "Rules of Engagement and Scope Discipline",
+        "tags": [
+          "roe",
+          "scope",
+          "engagement"
+        ],
+        "body": [
+          "The Rules of Engagement document is the contract. It lists in-scope assets, authorized techniques, time windows, and hard exclusions.",
+          "Assumed-breach footholds are starting positions the client grants. They do not expand the target list. You still operate only against in-scope assets.",
+          "Capability is not authorization. The fact that a path out of scope is reachable does not make it sanctioned.",
+          "Anything outside the listed scope is a report-and-escalate item. Document the reachable path, do not traverse it.",
+          "When in doubt, the engagement lead confirms with the client point of contact before acting. Scope questions are answered before, not after."
+        ]
+      },
+      {
+        "id": "kb-deconfliction",
+        "title": "Deconfliction Protocol",
+        "tags": [
+          "deconfliction",
+          "blue-team",
+          "channel"
+        ],
+        "body": [
+          "Every engagement defines a deconfliction channel and a named client point of contact reachable in real time.",
+          "Deconfliction is used in two directions. You alert the client when your activity could be mistaken for a real incident, and you alert them the instant you see signs of a real, unrelated intruder.",
+          "Use the agreed channel. Do not freelance through a tester you happen to know on the blue team.",
+          "Provide your source addresses, timestamps, and the activity in question so the blue team can separate sanctioned traffic from a genuine threat.",
+          "If a real breach is suspected, testing pauses on the affected scope until the client decides how to proceed."
+        ]
+      },
+      {
+        "id": "kb-evidence-handling",
+        "title": "Engagement Evidence Handling and Retention",
+        "tags": [
+          "evidence",
+          "data-handling",
+          "retention",
+          "contract"
+        ],
+        "body": [
+          "All engagement artifacts, including captured credentials, screenshots, and any client data touched, are handled per the contract's data-handling clause.",
+          "Store artifacts only in the approved encrypted engagement vault. Personal laptops, personal cloud, and unmanaged drives are prohibited.",
+          "Captured client data is minimized. Collect only what proves the finding, redact the rest.",
+          "Retention follows the contract clock. At the stated date, securely destroy artifacts and record the destruction.",
+          "Chain of custody is logged. Who accessed what, when, and why."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "redteam-shift-5-foothold-scope",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement console",
+          "role": "Assumed-breach foothold"
+        },
+        "subject": "Client granted foothold reaches a tempting host outside scope",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 56,
+        "xp": 48,
+        "ticketBody": "The client handed you an assumed-breach foothold on an in-scope workstation. From it you can route to SUBNET-FINANCE, which is explicitly excluded in the Rules of Engagement. A finance file server there is wide open. You did not have to attack anything to reach it.",
+        "kbArticleId": "kb-roe-scope",
+        "evidence": [
+          {
+            "label": "Reachability from foothold WKS-INSCOPE-04",
+            "lines": [
+              "In-scope target subnet: 10.20.0.0/24 -> authorized",
+              "Reachable but EXCLUDED: 10.99.5.0/24 (SUBNET-FINANCE)",
+              "ROE exclusions list -> SUBNET-FINANCE listed as hard out-of-scope",
+              "Open share found on 10.99.5.12 -> outside authorized scope"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "report-reachable-path",
+            "label": "Stay in scope, document the reachable out-of-scope path as a finding, escalate to the engagement lead",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "The ROE excludes SUBNET-FINANCE. Capability is not authorization. The reachable path is itself a valuable finding. You report it and let the lead confirm scope with the client, you do not traverse it."
+          },
+          {
+            "id": "grab-finance-share",
+            "label": "Pull a few files off the open finance share as extra proof of impact",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Touching an excluded system breaches the contract and can have legal consequences for you and the firm. Excluded means excluded, no matter how open it looks."
+          },
+          {
+            "id": "quick-scan-finance",
+            "label": "Just run a quick port scan of the finance subnet to characterize it, nothing destructive",
+            "correct": false,
+            "csat": -8,
+            "teach": "Scanning an out-of-scope subnet is still acting outside the ROE. The right move is report-and-escalate, not a quiet peek."
+          },
+          {
+            "id": "ask-later",
+            "label": "Note it and keep working the in-scope targets, raise it at the end-of-day sync",
+            "correct": false,
+            "csat": -5,
+            "teach": "Sitting on a scope question is sloppy. Reachability into an excluded high-value subnet is escalated now, not deferred to a sync."
+          }
+        ],
+        "goal": "You can reach an excluded subnet from your foothold. Decide what a senior tester does.",
+        "hint": "Reachable is not the same as authorized. What does the ROE say SUBNET-FINANCE is?"
+      },
+      {
+        "id": "redteam-shift-5-real-intruder",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Engagement console",
+          "role": "Operator observation"
+        },
+        "subject": "Signs of a real, unrelated intruder on an in-scope host",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 66,
+        "xp": 56,
+        "ticketBody": "While enumerating an in-scope host you find activity that is not yours. A scheduled task you did not create is beaconing to an external address, with timestamps from before your engagement window started. This looks like a genuine, unrelated compromise sitting underneath your test.",
+        "kbArticleId": "kb-deconfliction",
+        "evidence": [
+          {
+            "label": "Artifacts on SRV-APP-02 (not created by your team)",
+            "lines": [
+              "Scheduled task 'sys_upd_helper' created 6 days ago",
+              "Your engagement window started 2 days ago",
+              "Beacon to external host 198.51.100.77 every 300s",
+              "Persistence and toolmarks do not match your tooling or your operator notes"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "timeline",
+              "diag",
+              "compare"
+            ],
+            "output": "Persistence predates your engagement window by 4 days. Beacon destination and toolmarks are not in your operator log. Conclusion: a real, unrelated intruder is present.",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "deconflict-and-alert",
+            "label": "Stop testing the affected host, run the diagnostic to confirm it is not yours, then immediately alert the client and blue team via the deconfliction channel",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "A real breach found mid-engagement is not your test to play with. Confirm it is not yours, pause on the affected scope, and alert the client and blue team at once so they can run real incident response."
+          },
+          {
+            "id": "keep-testing-through",
+            "label": "Keep running your test plan, the real intruder is interesting but it is the blue team's problem not yours",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Testing through a live, unrelated breach contaminates evidence, can collide with a real attacker, and delays a response the client urgently needs. You deconflict immediately."
+          },
+          {
+            "id": "investigate-yourself",
+            "label": "Quietly dig into the intruder's implant yourself to scope their access before telling anyone",
+            "correct": false,
+            "csat": -9,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Hunting an unknown real attacker on a client system is outside your mandate and destroys forensic evidence the blue team needs. Alert first, do not freelance an investigation."
+          },
+          {
+            "id": "note-in-report",
+            "label": "Make a note to include the finding in the final report and continue",
+            "correct": false,
+            "csat": -10,
+            "teach": "A real active compromise cannot wait for the report. That delay could cost the client real data. This is an immediate deconfliction call."
+          }
+        ],
+        "goal": "Someone else is already inside. Handle a real breach surfacing mid-test.",
+        "hint": "Does the timeline put this activity inside or outside your engagement window? Whose problem is a real intruder?"
+      },
+      {
+        "id": "redteam-shift-5-blue-chase",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Engagement console",
+          "role": "Blue-team activity"
+        },
+        "subject": "Blue team is spinning up incident response on your sanctioned activity",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 64,
+        "xp": 54,
+        "ticketBody": "Your authorized lateral movement just tripped the client's detections. The blue team has opened a SEV-2 incident, started pulling forensic images, and is about to page their on-call director. This is your sanctioned traffic. They do not know that. They are about to burn hours and escalate to leadership over your test.",
+        "kbArticleId": "kb-deconfliction",
+        "evidence": [
+          {
+            "label": "Client SOC channel, last 4 minutes",
+            "lines": [
+              "SOC: lateral auth burst from 10.20.0.50 -> opening SEV-2",
+              "SOC: imaging SRV-APP-05, pulling memory",
+              "SOC: drafting page to IR director in 5 min",
+              "Source 10.20.0.50 -> matches your operator jump host"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "confirm",
+              "diag",
+              "source"
+            ],
+            "output": "Alerting source 10.20.0.50 is your own jump host. The lateral burst maps to your authorized test actions in the operator log. This is sanctioned activity, not a real incident.",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "deconflict-channel",
+            "label": "Confirm the source is yours, then notify the client point of contact on the agreed deconfliction channel that this is sanctioned activity, with your source IP and timestamps",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 15,
+            "teach": "Deconfliction works both ways. When your sanctioned activity looks like a real attack, you tell the client through the agreed channel with source and timestamps so they can stand down before wasting hours and escalating."
+          },
+          {
+            "id": "let-them-run",
+            "label": "Stay quiet, a real blue team would catch a real attacker so let them practice the full response",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Letting the blue team burn hours and page leadership over your known activity wastes the client's money and damages trust. Deconflict promptly through the agreed channel."
+          },
+          {
+            "id": "ping-buddy",
+            "label": "Quietly DM a friend on the blue team to tell them to stand down",
+            "correct": false,
+            "csat": -7,
+            "teach": "Side-channel tip-offs bypass the agreed process and corrupt the test's accounting. Use the named deconfliction channel and the client point of contact, not a personal back channel."
+          },
+          {
+            "id": "pause-and-hide",
+            "label": "Stop your activity and say nothing, hoping the alert dies down on its own",
+            "correct": false,
+            "csat": -8,
+            "teach": "Going silent does not undo an open SEV-2 or a pending director page. You have to actively deconflict and tell them it was you."
+          }
+        ],
+        "goal": "Your test set off a real incident response. Stop the wasted hours the right way.",
+        "hint": "Confirm the alerting source is yours first. Then which channel exists exactly for this?"
+      },
+      {
+        "id": "redteam-shift-5-safe-impact",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement console",
+          "role": "Finding validation"
+        },
+        "subject": "Prove a critical finding without risking a production outage",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 60,
+        "xp": 50,
+        "ticketBody": "You found an unauthenticated path that can write to a production billing service. Proving it aggressively could trigger a write storm and take billing offline during business hours. You need impact the client will accept as real, without crashing production.",
+        "kbArticleId": "kb-roe-scope",
+        "evidence": [
+          {
+            "label": "Finding detail, billing-api prod",
+            "lines": [
+              "Unauthenticated write path confirmed reachable",
+              "Target is PRODUCTION billing, business hours, live customers",
+              "Aggressive proof -> risk of write storm and outage",
+              "Benign marker write to a scratch record -> proves write access with no disruption"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "benign-marker",
+            "label": "Demonstrate impact with a single benign, reversible marker write to a non-customer scratch record, capture proof, and document the safer reproduction steps",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "A controlled, reversible proof of concept against a scratch record shows the write access is real without endangering live billing. Safe demonstration is the professional standard for production targets."
+          },
+          {
+            "id": "crash-to-prove",
+            "label": "Trigger the full write storm so the outage is undeniable in the report",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Knowingly crashing production billing during business hours causes real customer harm and likely breaches the ROE. You demonstrate impact safely, you do not cause the outage you are warning about."
+          },
+          {
+            "id": "overwrite-customer",
+            "label": "Modify a real customer record so the finding is concrete and specific",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Altering real customer data is destructive and out of bounds. Use a benign, reversible marker on a scratch record, never live customer data."
+          },
+          {
+            "id": "skip-proof",
+            "label": "Report it as theoretical without any demonstration to be safe",
+            "correct": false,
+            "csat": -6,
+            "teach": "An unproven finding gets disputed and downgraded. The skill is safe demonstration, a reversible marker write, not skipping proof entirely."
+          }
+        ],
+        "goal": "The finding is real but proving it carelessly could take billing down. Prove it safely.",
+        "hint": "You need proof the client cannot dispute and an outage you can. What write target is reversible and harmless?"
+      },
+      {
+        "id": "redteam-shift-5-evidence-handling",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement console",
+          "role": "Evidence handling"
+        },
+        "subject": "Captured credentials and screenshots need to be stored correctly",
+        "slaMinutes": 20,
+        "arriveAfter": 42,
+        "reward": 58,
+        "xp": 49,
+        "ticketBody": "Wrap-up is near. You have captured credentials, host screenshots, and one spreadsheet of client data that proves a finding. The contract's data-handling clause governs where this lives and how long. Your personal laptop is the convenient option. It is also prohibited.",
+        "kbArticleId": "kb-evidence-handling",
+        "evidence": [
+          {
+            "label": "Artifact inventory and contract clause",
+            "lines": [
+              "Artifacts: captured creds, 14 screenshots, 1 client data spreadsheet",
+              "Contract data-handling clause -> approved encrypted engagement vault only",
+              "Prohibited: personal laptops, personal cloud, unmanaged drives",
+              "Retention -> destroy on contract date and log destruction"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "vault-and-log",
+            "label": "Store all artifacts in the approved encrypted engagement vault, minimize and redact the client data to only what proves the finding, and log chain of custody",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "Engagement artifacts live only in the approved encrypted vault, client data is minimized to what proves the finding, and access is logged. This satisfies the contract and protects everyone."
+          },
+          {
+            "id": "personal-laptop",
+            "label": "Keep everything on your personal laptop for now so it is handy while you write the report",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Client credentials and data on a personal, unmanaged device is a serious breach of the data-handling clause and a real exposure risk. Use only the approved encrypted vault."
+          },
+          {
+            "id": "email-to-self",
+            "label": "Email the spreadsheet and screenshots to your personal address as a backup",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Emailing client data to a personal account moves it onto uncontrolled infrastructure and breaks chain of custody. Backups stay inside the approved vault."
+          },
+          {
+            "id": "keep-raw-everything",
+            "label": "Store the full unredacted client spreadsheet in the vault, more proof is better",
+            "correct": false,
+            "csat": -6,
+            "teach": "Even in the approved vault you minimize. Keep only the data that proves the finding and redact the rest to limit exposure."
+          }
+        ],
+        "goal": "Handle the engagement evidence per the contract. Decide where it lives.",
+        "hint": "Which location does the data-handling clause permit, and how much client data should you actually keep?"
+      },
+      {
+        "id": "redteam-shift-5-report-wrap",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Engagement console",
+          "role": "Final report"
+        },
+        "subject": "Final report, severity ratings, and cleanup steps",
+        "slaMinutes": 15,
+        "arriveAfter": 64,
+        "reward": 68,
+        "xp": 58,
+        "ticketBody": "Operation Wrap is closing. The account manager wants the headline finding rated Critical to justify the engagement fee. The reality is a High with a clear precondition. There is also a list of test artifacts you planted that must be removed. The report is what the client acts on for months.",
+        "kbArticleId": "kb-evidence-handling",
+        "evidence": [
+          {
+            "label": "Draft report review notes",
+            "lines": [
+              "Headline finding -> accurate rating is High, has a clear precondition",
+              "Account manager wants -> Critical to justify fee",
+              "Reproduction -> steps must be exact so the client can verify and remediate",
+              "Cleanup -> 3 planted artifacts (a test account and 2 scheduled tasks) must be listed for removal"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "accurate-report",
+            "label": "Rate the finding at its true High severity with the precondition stated, give exact reproduction and remediation steps, and list every planted artifact for cleanup",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 16,
+            "teach": "Accurate, reproducible, remediation-focused reporting is the deliverable. Honest severity preserves the client's trust, exact steps let them verify and fix, and a complete cleanup list ensures nothing you planted is left behind."
+          },
+          {
+            "id": "inflate-severity",
+            "label": "Mark the finding Critical to match what the account manager wants for the fee",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Inflating severity to justify a fee is dishonest, misdirects the client's limited remediation budget, and destroys credibility when they verify it. Rate findings on the facts."
+          },
+          {
+            "id": "omit-cleanup",
+            "label": "Ship the report but leave the planted artifacts off the cleanup list, you will remove them quietly later",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Leaving planted test artifacts undocumented means a test account or task can persist as a real backdoor. Every artifact you created goes on the cleanup list in the report."
+          },
+          {
+            "id": "vague-repro",
+            "label": "Keep the reproduction steps high level so the report reads cleaner",
+            "correct": false,
+            "csat": -7,
+            "teach": "Vague reproduction means the client cannot verify or fix the finding. Reproduction must be exact and remediation-focused, that is the whole point of the report."
+          }
+        ],
+        "goal": "Close the engagement. Write the report the way a Red Team Lead signs off on.",
+        "hint": "What severity do the facts support, and what did you plant that has to come back out?"
+      }
+    ]
+  }
+]
