@@ -212,6 +212,8 @@ function makeReducer(shift: Shift) {
           if (correct) csatDelta += 2;
           else if (action.ends) csatDelta -= 3;
         }
+        // Audit / Graveyard: wrong moves cost more.
+        if (csatDelta < 0 && shift.penaltyScale) csatDelta = Math.round(csatDelta * shift.penaltyScale);
         const csat = clamp(state.csat + csatDelta);
         let ns: State = {
           ...state,
@@ -379,7 +381,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   };
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] overflow-hidden bg-[#070b14]">
+    <div className="rounded-2xl border border-white/[0.08] overflow-hidden" style={{ background: shift.graveyard ? "#04060c" : "#070b14" }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={shift.items.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
 

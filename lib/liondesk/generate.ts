@@ -32,6 +32,8 @@ export const MODIFIERS: ShiftModifier[] = [
   { id: "overload", label: "Overload", desc: "Two extra tickets jammed into the queue." },
   { id: "budget", label: "Budget Freeze", desc: "Stockroom closed. No part orders allowed." },
   { id: "phishwave", label: "Phishing Wave", desc: "Extra phishing landing in the inbox." },
+  { id: "audit", label: "Audit", desc: "A reviewer is watching. Wrong moves cost double." },
+  { id: "graveyard", label: "Graveyard", desc: "Lights down, clock tight. The night-desk vibe." },
 ];
 
 /** Deterministic seed for "today" so a Daily Combo is the same for everyone. */
@@ -52,13 +54,16 @@ export interface GenerateOpts {
   track?: Track;
   count?: number;
   modifierIds?: string[];
+  /** Roll 3-4 modifiers instead of 1-2. */
+  chaos?: boolean;
   name?: string;
 }
 
 export function generateShift(opts: GenerateOpts = {}): Shift {
   const seed = (opts.seed ?? Math.floor(Math.random() * 1e9)) >>> 0;
   const rnd = mulberry32(seed);
-  const mods = opts.modifierIds ?? rollModifiers(rnd);
+  const mods = opts.modifierIds
+    ?? (opts.chaos ? shuffle(MODIFIERS.map((m) => m.id), rnd).slice(0, 3 + Math.floor(rnd() * 2)) : rollModifiers(rnd));
   const has = (id: string) => mods.includes(id);
 
   let count = opts.count ?? 6;
@@ -88,21 +93,30 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     return it;
   });
 
+  const slaScales: number[] = [];
+  if (has("rush")) slaScales.push(0.6);
+  if (has("graveyard")) slaScales.push(0.75);
+  const penScales: number[] = [];
+  if (has("audit")) penScales.push(2);
+  if (has("graveyard")) penScales.push(1.5);
+
   return {
     id: `surprise-${seed}`,
     track: opts.track ?? "helpdesk",
     order: -1,
     name: opts.name ?? "Surprise Shift",
     rank: "Mixed Queue",
-    accent: "#A855F7",
+    accent: has("graveyard") ? "#6E8BC0" : "#A855F7",
     durationSeconds: 600,
     startingBudget: has("budget") ? 0 : 3000,
     inventory: has("budget") ? [] : MASTER_INVENTORY,
     kb: MASTER_KB,
     adUsers: MASTER_AD,
     items,
-    slaScale: has("rush") ? 0.6 : undefined,
+    slaScale: slaScales.length ? Math.min(...slaScales) : undefined,
     noHints: has("skeleton") ? true : undefined,
+    penaltyScale: penScales.length ? Math.max(...penScales) : undefined,
+    graveyard: has("graveyard") ? true : undefined,
     modifiers: mods.map((id) => MODIFIERS.find((m) => m.id === id)).filter(Boolean) as ShiftModifier[],
   };
 }

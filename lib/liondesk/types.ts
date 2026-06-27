@@ -141,4 +141,8 @@ export interface Shift {
   noHints?: boolean;
   /** Active modifiers, for display. */
   modifiers?: ShiftModifier[];
+  /** Multiplies the CSAT cost of wrong moves (Audit / Graveyard). Default 1. */
+  penaltyScale?: number;
+  /** Darker, tenser chrome (Graveyard modifier). */
+  graveyard?: boolean;
 }
