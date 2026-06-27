@@ -6,6 +6,7 @@
 import type { Shift, ShiftItem, ShiftModifier } from "./types";
 import type { Track } from "@/lib/helpdesk/types";
 import { POOL, MASTER_KB, MASTER_INVENTORY, MASTER_AD, INCIDENT_GROUPS, type PoolEntry } from "./pool";
+import { getReputation, departmentOf } from "./reputation";
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -86,6 +87,9 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
   const mods = opts.modifierIds
     ?? (opts.chaos ? shuffle(MODIFIERS.map((m) => m.id), rnd).slice(0, 3 + Math.floor(rnd() * 2)) : rollModifiers(rnd));
   const has = (id: string) => mods.includes(id);
+  // Reputation bites only in non-seeded (personal) shifts, so seeded Daily/Weekly
+  // stay identical for everyone. A neglected department arrives impatient (VIP).
+  const rep = opts.seed == null ? getReputation() : null;
 
   let count = opts.count ?? 6;
   if (has("overload")) count += 2;
@@ -111,6 +115,7 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     const arriveAfter = i < 3 ? 0 : (i - 2) * 18;
     let it: ShiftItem = { ...p.item, arriveAfter };
     if (has("vip") && rnd() < 0.5) it = { ...it, from: { ...it.from, vip: true } };
+    if (rep && (rep[departmentOf(it.from.role)] ?? 50) < 40 && rnd() < 0.6) it = { ...it, from: { ...it.from, vip: true } };
     return it;
   });
 
