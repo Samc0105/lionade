@@ -345,6 +345,23 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ended]);
 
+  // Keyboard shortcuts: number keys switch apps, Esc closes a ticket. Ignored
+  // while typing in the terminal or a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) return;
+      if (e.key === "Escape" && state.activeItemId) { dispatch({ t: "CLOSE" }); return; }
+      const n = parseInt(e.key, 10);
+      if (!Number.isNaN(n) && n >= 1) {
+        const app = APPS.filter((a) => usedApps.has(a.id))[n - 1];
+        if (app) dispatch({ t: "APP", app: app.id });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [state.activeItemId, usedApps]);
+
   // ── Sound + theme ──
   const [muted, setMutedState] = useState(false);
   const [theme, setTheme] = useState<DeskTheme | null>(null);
