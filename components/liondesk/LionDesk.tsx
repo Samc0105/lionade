@@ -31,7 +31,7 @@ const isTerminal = (s: ItemStatus) => TERMINAL_STATUSES.includes(s);
 type FeedTone = "good" | "bad" | "info";
 interface FeedEntry { seq: number; text: string; tone: FeedTone }
 
-interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean }
+interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null }
 
 const GOOD_FOR_REVEAL: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
 /** A chained follow-up (revealedBy) is "live" only once its trigger matched. A
@@ -85,7 +85,7 @@ const BREACH_PENALTY: Record<Priority, number> = { P1: 10, P2: 7, P3: 5, P4: 3 }
 
 function buildInitial(shift: Shift): State {
   const items: Record<string, ItemRuntime> = {};
-  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false }; });
+  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null }; });
   const stock: Record<string, number> = {};
   shift.inventory.forEach((p) => { stock[p.sku] = p.stock; });
   const adStatus: Record<string, string> = {};
@@ -128,9 +128,14 @@ function makeReducer(shift: Shift) {
         let csat = ns.csat;
         const breached: string[] = [];
         shift.items.forEach((i) => {
-          const it = items[i.id];
-          if (it.breached || isTerminal(it.status) || elapsed < i.arriveAfter || !isLive(i, items)) return;
-          if (elapsed >= i.arriveAfter + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
+          let it = items[i.id];
+          if (isTerminal(it.status) || !isLive(i, items) || elapsed < i.arriveAfter) return;
+          // Stamp the moment it actually landed (revealed callbacks land late, so
+          // their SLA must start from here, not from a static arriveAfter of 0).
+          const landedAt = it.landedAt ?? elapsed;
+          if (it.landedAt == null) { it = { ...it, landedAt }; items = { ...items, [i.id]: it }; }
+          if (it.breached) return;
+          if (elapsed >= landedAt + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
             const base = BREACH_PENALTY[i.priority];
             const pen = i.from.vip ? Math.round(base * 1.5) : base;
             items = { ...items, [i.id]: { ...it, breached: true } };
@@ -500,7 +505,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
-            const remaining = i.arriveAfter + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1) - elapsed;
+            const remaining = (st.landedAt ?? i.arriveAfter) + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1) - elapsed;
             return (
               <li key={i.id}>
                 <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
@@ -648,7 +653,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
   const it = state.items[item.id];
   const [showHint, setShowHint] = useState(false);
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const slaRemaining = item.arriveAfter + SLA_BUDGET[item.priority] * (shift.slaScale ?? 1) - elapsed;
+  const slaRemaining = (it.landedAt ?? item.arriveAfter) + SLA_BUDGET[item.priority] * (shift.slaScale ?? 1) - elapsed;
   const kbArticle = item.kbArticleId ? shift.kb.find((a) => a.id === item.kbArticleId) ?? null : null;
   const part = item.part ? shift.inventory.find((p) => p.sku === item.part!.sku) ?? null : null;
   const stepDone = (k: string) => (k === "kb" ? state.kbRead.includes(item.kbArticleId ?? "") : it.steps.includes(k));
