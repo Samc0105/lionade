@@ -293,6 +293,64 @@ export const EXTRA_TICKETS: { item: ShiftItem; track: Track }[] = [
       ],
     },
   },
+
+  // ── Inbox: phishing discernment. Not everything is an attack, and not
+  // everything is safe. The skill is telling them apart from the headers.
+  {
+    track: "helpdesk",
+    item: {
+      id: "email-bec-giftcard",
+      channel: "email",
+      priority: "P2",
+      from: { name: "Marcus Webb (CEO)", role: "spoofed display name" },
+      subject: "Quick favor, are you at your desk?",
+      slaMinutes: 25,
+      arriveAfter: 0,
+      reward: 44,
+      xp: 36,
+      email: {
+        isPhish: true,
+        body: "Hi, I'm stuck in back-to-back meetings and need a quick favor. Can you grab five $200 gift cards for some client thank-yous? I'll reimburse you today. Keep this between us for now, it's a surprise. Just reply with the codes once you have them.",
+      },
+      evidence: [
+        { label: "Message headers", lines: ["Display name: Marcus Webb (CEO)", "Actual sender: ceo.marcus.webb@gmail.com (not our domain)", "Reply-To: m.webb.exec@proton.me", "SPF: not aligned with company domain", "Pattern: urgency + secrecy + gift cards = classic BEC"] },
+      ],
+      goal: "Decide what this 'CEO' request really is.",
+      hint: "Urgency, secrecy, and gift cards from a personal address. Read the actual sender, not the display name.",
+      actions: [
+        { id: "verify-report-bec", label: "Verify with the CEO through a known channel, then report it as a likely BEC scam", correct: true, csat: 13, outcome: "reported", teach: "Right. Display name says CEO, the real address is a personal Gmail, and the ask is gift cards with secrecy and urgency. That's business email compromise. Confirm out of band and report it. Real executives don't run gift-card errands through secret email." },
+        { id: "buy-cards", label: "Buy the gift cards, it's the CEO and he's in a hurry", csat: -12, ends: true, outcome: "mishandled", teach: "That's exactly the trap. The whole scam runs on you trusting the display name and the urgency. The money is gone the moment you send the codes. Verify through a known channel first, always." },
+        { id: "reply-which-cards", label: "Reply asking which gift cards he wants", csat: -7, teach: "Engaging tells the scammer they found a live target, and you still haven't verified it's really the CEO. Don't reply to the suspicious address. Verify out of band and report." },
+      ],
+    },
+  },
+  {
+    track: "helpdesk",
+    item: {
+      id: "email-legit-maintenance",
+      channel: "email",
+      priority: "P3",
+      from: { name: "IT Operations", role: "internal, verified sender" },
+      subject: "Planned VPN maintenance this Saturday 1am to 3am",
+      slaMinutes: 40,
+      arriveAfter: 0,
+      reward: 34,
+      xp: 28,
+      email: {
+        body: "Heads up: the VPN gateway gets a firmware update Saturday between 1am and 3am. Remote access may drop briefly during the window. No action needed on your part. Questions go to the IT Operations channel.",
+      },
+      evidence: [
+        { label: "Message headers", lines: ["Sender: it-operations@OUR-company-domain (aligned)", "SPF: PASS   DKIM: PASS", "No links, no attachments, no credential request", "Matches the published change calendar entry"] },
+      ],
+      goal: "Decide how to handle this notice.",
+      hint: "Headers pass, the domain is yours, there's no link or ask. Phishing isn't the only possible answer.",
+      actions: [
+        { id: "ack-legit", label: "Acknowledge it as a legitimate internal notice and file it", correct: true, csat: 11, outcome: "archived", teach: "Correct. It passes SPF and DKIM from your own domain, asks for nothing, and matches the change calendar. Treating every email as a threat is its own failure. This one is real and needs no action." },
+        { id: "report-legit-as-phish", label: "Report it to security as phishing", csat: -5, teach: "Over-reporting legitimate, authenticated internal mail floods the security team and trains people to ignore real alerts. Read the headers: this one is genuine." },
+        { id: "panic-reset", label: "Reset your VPN credentials just in case", csat: -4, teach: "There's no compromise here and nothing was asked of you. Reflexive 'just in case' actions waste time. Acknowledge and move on." },
+      ],
+    },
+  },
 ];
 
 // A second incident group (file-server outage) so Doubles has more variety.
