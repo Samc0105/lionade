@@ -1,1 +1,1196 @@
-[]
+[
+  {
+    "id": "soc-shift-2",
+    "track": "soc",
+    "order": 1,
+    "name": "SOC Shift 2: The Long Night",
+    "rank": "SOC Analyst II",
+    "accent": "#2BBE6B",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "kb": [
+      {
+        "id": "kb-soc-exposure",
+        "title": "Exposure vs Intrusion: triage rule for misconfiguration findings",
+        "tags": ["soc", "exposure", "misconfig", "triage", "asm"],
+        "body": [
+          "An exposed asset (an internal service reachable from the public internet, an open bucket, an unauthenticated dashboard) is a MISCONFIGURATION FINDING until you have evidence it was actually used by an unauthorized party. Exposure is the door being unlocked. Intrusion is someone having walked through it.",
+          "Triage step: before deciding severity and process, pull the access/audit logs for the exposed asset over a relevant lookback window. Separate legitimate traffic, scanners, and search-engine crawlers from genuine unauthorized access (anonymous reads of sensitive data, config or datasource edits, token or account creation, alert tampering).",
+          "If the logs show no evidence of exploitation: handle it as a finding. Open a remediation ticket to the asset OWNER (you report and track, you do not make unreviewed production changes on assets you do not own), attach the evidence, and set a fix SLA appropriate to the exposure's severity. Do not invoke the full intrusion incident-response process.",
+          "If the logs show evidence of actual unauthorized access or modification: escalate to incident response. Now it is an intrusion and the IR process applies (scope, contain, eradicate, recover).",
+          "Both overreacting (declaring a major incident for a clean misconfig) and underreacting (deferring a live unauthenticated exposure to a quarterly review) are failures. Let the access-log evidence set the path."
+        ]
+      }
+    ],
+    "adUsers": [],
+    "items": [
+      {
+        "id": "soc-shift-2-edr-periodic-outbound-c2-beacon-from-win-fin-04-high-confidence",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Detection Engineering",
+          "role": "EDR alert pipeline"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "Auto-raised from the EDR correlation rule BEACON-REGULAR-JITTER. Host WIN-FIN-04 (finance VLAN, user m.okafor) is making a callout to 91.213.50.17:443 every ~58s with low jitter. The destination is on two threat feeds. Confirm the beacon, then take the correct first response action. Do not power the host off.",
+        "evidence": [
+          {
+            "label": "EDR network timeline (WIN-FIN-04)",
+            "lines": [
+              "10:02:14  443/tcp -> 91.213.50.17  TLS  bytes_out=812",
+              "10:03:12  443/tcp -> 91.213.50.17  TLS  bytes_out=809",
+              "10:04:11  443/tcp -> 91.213.50.17  TLS  bytes_out=815",
+              "interval mean 58.4s, jitter 1.9s  (machine-regular, not human)"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["ti 91.213.50.17", "lookup ip", "threat intel", "ti", "reputation 91.213.50.17"],
+            "step": "diag",
+            "output": "TI lookup 91.213.50.17\n  feeds: abuse.ch (C2), internal-ioc-2026-0419\n  first_seen 2026-04-19  category: cobalt-strike-team-server\n  ASN AS-OFFSHORE-NET  passive-dns: 14 rotating domains\n  verdict: KNOWN MALICIOUS"
+          },
+          {
+            "aliases": ["proc tree win-fin-04", "process tree", "ps win-fin-04", "parent process"],
+            "step": "diag",
+            "output": "WIN-FIN-04 process tree\n  explorer.exe\n   -> OneDriveSetup.exe (signed: NO, path %TEMP%\\ms-update\\)\n        -> rundll32.exe  (no DLL on disk, injected thread)\n             owns socket -> 91.213.50.17:443\nUnsigned binary in TEMP spawning rundll32 with hollowed thread."
+          }
+        ],
+        "actions": [
+          {
+            "id": "isolate-preserve",
+            "label": "Network-isolate WIN-FIN-04 via EDR and preserve volatile state",
+            "detail": "Push EDR host isolation (keeps the management channel up), capture a memory image and the running process tree before anything is killed, then hand to IR.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Confirmed C2 on a regular beacon: isolate at the network layer so the host stays forensically intact while it can no longer reach the team server. EDR isolation preserves RAM and the live socket for IR.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "power-off",
+            "label": "Have the user shut the machine down immediately to stop the traffic",
+            "csat": -5,
+            "teach": "A hard power-off destroys volatile evidence: injected threads, the in-memory beacon config, and the live socket all vanish. You also tip the operator. Isolate, do not power down.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "block-ip-only",
+            "label": "Just add 91.213.50.17 to the firewall blocklist and close the ticket",
+            "csat": -3,
+            "teach": "Blocking one IP leaves a live, compromised host on the network. Cobalt Strike beacons rotate domains and fall back. You have to contain the host, not one indicator.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "email-user",
+            "label": "Email m.okafor asking if they installed anything unusual",
+            "csat": -2,
+            "teach": "Tipping the user (who may be the unwitting victim) wastes minutes and risks the operator noticing analyst attention. Contain first, interview during IR.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Confirm the beacon is real, then contain the host without destroying evidence.",
+        "hint": "Two things are true at once: stop the callout AND keep the host forensically intact. Only one action does both."
+      },
+      {
+        "id": "soc-shift-2-sso-credential-stuffing-wave-against-the-login-portal-spray-pattern",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "IAM Monitoring",
+          "role": "SSO platform alerts"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "Authentication anomaly on the Okta SSO portal. Roughly 9k failed logins in 6 minutes from a rotating set of residential proxies, low attempts per username, broad username list. A handful of accounts are being hit harder than the rest. Triage, then take the correct containment action. We are mid-quarter, do not break legitimate logins for the whole company if avoidable.",
+        "evidence": [
+          {
+            "label": "SSO auth log summary (last 6 min)",
+            "lines": [
+              "fail 9,142  success 3   unique_src_ip 1,907  unique_user 6,610",
+              "pattern: <=2 attempts per username  (low-and-slow spray)",
+              "outliers: 4 accounts with 40+ attempts each, all SUCCESS=0",
+              "  svc-payroll, a.lindqvist (Finance Dir), ceo-exec, helpdesk-admin"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["check successes", "successful logins", "who got in", "success log", "mfa status"],
+            "step": "diag",
+            "output": "Successful auths during window: 3\n  all 3 = normal users, correct password, MFA SATISFIED, known device\n  0 of the 9,142 failures reached MFA (all failed at password)\n  the 4 high-attempt accounts: 0 success, 0 MFA prompts\nConclusion: no breach yet. Spray has not guessed a valid password."
+          },
+          {
+            "aliases": ["src geo", "ip geo", "where from", "source breakdown"],
+            "step": "diag",
+            "output": "Source breakdown\n  1,907 IPs across 38 ASNs, 90% residential-proxy ranges\n  no single IP > 12 attempts (per-IP rate-limit evades this)\n  classic distributed credential stuffing, not a single-host brute force"
+          }
+        ],
+        "actions": [
+          {
+            "id": "throttle-protect",
+            "label": "Enable SSO rate-limit + progressive lockout, and force step-up MFA on the 4 targeted accounts",
+            "detail": "Turn on adaptive rate-limiting / lockout at the IdP, and require re-auth with MFA step-up on svc-payroll, a.lindqvist, ceo-exec, helpdesk-admin since they are being singled out.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Distributed stuffing defeats per-IP blocking, so you throttle at the identity layer (rate-limit + lockout) and harden the specific high-value targets with step-up MFA. No password was guessed yet, so you protect without a company-wide outage.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "block-all-external",
+            "label": "Block all external logins to the SSO portal until the wave stops",
+            "csat": -3,
+            "teach": "A blanket external block is a self-inflicted outage on a mid-quarter workday when no account has actually been compromised. Throttle and target, do not take the whole portal offline.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "disable-targeted",
+            "label": "Disable the 4 targeted accounts entirely to be safe",
+            "csat": -2,
+            "teach": "Disabling a service account (svc-payroll) and the CEO with zero successful logins causes real business breakage for no security gain. Step-up MFA protects them without locking them out.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "ip-block-top",
+            "label": "Firewall-block the busiest source IPs and close",
+            "csat": -2,
+            "teach": "No single IP exceeds 12 attempts. Blocking the top talkers does nothing against 1,900 rotating residential proxies. This attack must be stopped at the identity layer, not by IP.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "ignore-no-breach",
+            "label": "Note that no account was compromised and close as non-actionable",
+            "csat": -2,
+            "teach": "No breach yet does not mean no action. An unthrottled stuffing wave eventually gets a hit. The 4 targeted high-value accounts need protection now.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Stop the stuffing wave at the identity layer and protect the singled-out accounts without breaking legitimate logins.",
+        "hint": "Per-IP blocking is useless against rotating proxies. Where do you throttle, and which accounts deserve extra hardening?"
+      },
+      {
+        "id": "soc-shift-2-asm-internal-grafana-dashboard-reachable-from-the-public-internet",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "External Attack Surface Scanner",
+          "role": "ASM tooling"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 0,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "The external attack-surface scan flagged grafana-ops.internal-app.example.com resolving to a public IP and answering on 443 with no auth gate. This dashboard is meant to live behind the VPN only. Confirm the exposure, then take the correct remediation-tracking action. Read KB-SOC-EXPOSURE before deciding how to handle a misconfig versus an active intrusion.",
+        "kbArticleId": "kb-soc-exposure",
+        "evidence": [
+          {
+            "label": "ASM finding detail",
+            "lines": [
+              "host: grafana-ops.internal-app.example.com -> 203.0.113.44 (public)",
+              "443/tcp open  Grafana v10.2  HTTP 200  anonymous_org_role=Editor",
+              "intended exposure: VPN/private subnet only (per asset tag: internal)",
+              "no auth challenge: dashboards listable without login"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["access logs grafana", "who accessed", "grafana logs", "check exploitation", "access log"],
+            "step": "diag",
+            "output": "grafana-ops access log review (30 days)\n  external hits: 6 total, all = the ASM scanner + 2 search-engine crawlers\n  no anonymous dashboard reads beyond crawler index pages\n  no config/datasource edits, no API token creation, no alert tampering\nVerdict: exposed by misconfig (recent LB rule change), NOT yet exploited."
+          }
+        ],
+        "actions": [
+          {
+            "id": "report-remediate",
+            "label": "Open a remediation ticket to the platform/cloud team to pull it behind the VPN, file the misconfig with evidence, and set a fix SLA",
+            "detail": "Route to the owning team to remove the public LB rule / restore private-only access and disable anonymous Editor, attach the ASM finding and access-log review, and track to closure.",
+            "correct": true,
+            "requires": ["diag", "kb"],
+            "csat": 5,
+            "teach": "Per the KB, an exposure with no evidence of exploitation is a misconfiguration finding: report it to the asset owner with evidence and a remediation SLA, do not invoke the full intrusion IR process. The access log confirmed no abuse, so this is remediate-and-track.",
+            "outcome": "reported",
+            "ends": true
+          },
+          {
+            "id": "full-ir",
+            "label": "Declare a security incident and spin up the full IR bridge",
+            "csat": -2,
+            "teach": "The access log shows no exploitation. Treating a clean misconfig as an active breach burns the on-call team and cries wolf. The KB draws this line: exposure without evidence of abuse is a finding, not an incident.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "self-fix-firewall",
+            "label": "Change the load balancer rule yourself right now to cut public access",
+            "csat": -3,
+            "teach": "SOC reports and tracks, it does not make unreviewed production network changes on an asset it does not own. An unvetted LB edit can break legitimate access or the service. Route remediation to the owner with an SLA.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "low-and-defer",
+            "label": "Mark P4 informational and leave it for the next quarterly review",
+            "csat": -2,
+            "teach": "An unauthenticated internal ops dashboard on the public internet is live, exploitable exposure. It needs a tracked fix with an SLA now, not a deferral to a quarterly cycle.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Confirm the dashboard is exposed but not yet abused, then report it for remediation with an SLA instead of overreacting.",
+        "hint": "Check whether anyone actually used the exposure. The KB tells you when a misconfig becomes an incident and when it stays a finding."
+      },
+      {
+        "id": "soc-shift-2-siem-possible-lateral-movement-recon-burst-from-jump-02",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "SIEM Correlation",
+          "role": "automated detection"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 30,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "Correlation rule LATERAL-RECON fired on JUMP-02: a burst of SMB enumeration, a credential dump tool signature, and 11 hosts probed in 4 minutes. Looks like hands-on-keyboard activity. Investigate before you escalate. Something about the metadata may explain it.",
+        "evidence": [
+          {
+            "label": "SIEM correlation detail (JUMP-02)",
+            "lines": [
+              "10:41  net view / SMB enum across 11 hosts in 4 min",
+              "10:42  tool signature: known credential-dumping utility on disk",
+              "10:43  Kerberoast-style service ticket requests x6",
+              "source acct: svc-pentest-lab   host: JUMP-02 (lab VLAN 172.31.9.0/24)"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["lookup account svc-pentest-lab", "whois account", "account context", "check svc-pentest-lab", "identity"],
+            "step": "diag",
+            "output": "Identity context: svc-pentest-lab\n  created 2026-03-02  owner: Offensive Security (internal red team)\n  group memberships: RedTeam-LabOnly, sandbox VLAN 172.31.9.0/24\n  NOT a production credential. Confined to the lab subnet by policy.\n  note field: 'authorized adversary-simulation account'"
+          },
+          {
+            "aliases": ["check roe", "rules of engagement", "red team schedule", "authorization", "engagement calendar"],
+            "step": "diag",
+            "output": "Red Team engagement register\n  ACTIVE: ENG-2026-0612 'Q2 internal purple range' window 2026-06-12 to 2026-06-19\n  scope: lab VLAN 172.31.9.0/24 only  (matches JUMP-02 + all 11 targets)\n  blue-team-notified: NO  (this is a no-notice exercise by design)\n  authorized signoff: CISO + Offensive Security lead"
+          }
+        ],
+        "actions": [
+          {
+            "id": "verify-close-benign",
+            "label": "Verify it is the authorized in-scope red-team exercise and close as benign true-negative with notes",
+            "detail": "Confirm the account is the sanctioned red-team identity, all 11 targets are inside the authorized lab VLAN, and an active signed engagement covers the window, then close as a false positive and document the suppression rationale.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "The activity maps exactly to a signed, in-scope red-team engagement confined to the lab VLAN. No-notice exercises are designed to fire the SIEM. The right move is to verify scope and authorization, then close benign with documentation. Do not page IR for a sanctioned test.",
+            "outcome": "archived",
+            "ends": true
+          },
+          {
+            "id": "escalate-ir",
+            "label": "Escalate to IR as a live hands-on-keyboard intrusion",
+            "csat": -3,
+            "teach": "This is a sanctioned, in-scope, signed red-team exercise. Escalating it as a real intrusion is the textbook false-positive overreaction: it wastes IR, and repeated false pages erode trust in the SOC. Verify authorization first.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "isolate-jump02",
+            "label": "Network-isolate JUMP-02 and disable svc-pentest-lab immediately",
+            "csat": -4,
+            "teach": "Containing an authorized red-team box mid-exercise disrupts a CISO-signed engagement and burns goodwill, all over activity that was in-scope and confined to the lab. Confirm the ROE before any containment.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "ignore-no-doc",
+            "label": "Silently close the alert without checking the account or engagement register",
+            "csat": -2,
+            "teach": "Closing benign was right, but closing without verifying the account is red-team and the targets are in-scope is luck, not analysis. Next time the same signature could be a real attacker reusing a lab name. Verify, then document.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Recognize the scary-looking activity as a sanctioned in-scope red-team test and close it benign without paging IR.",
+        "hint": "Before you treat hands-on-keyboard as an attacker, ask who owns the account and whether an authorized engagement covers exactly these targets right now."
+      },
+      {
+        "id": "soc-shift-2-ueba-departing-employee-staging-bulk-sensitive-data-off-hours",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "DLP + UEBA",
+          "role": "insider-risk analytics",
+          "vip": true
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 60,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "UEBA flagged d.varga (Sales, resignation effective Friday) for anomalous bulk access. Overnight, 6,400 customer records and the full pricing model were copied into a local staging folder, then archived. No exfil to USB or web upload has fired yet. This is sensitive and people-related. Handle the evidence correctly and route it to the right place. Do not confront the employee and do not tip them off.",
+        "evidence": [
+          {
+            "label": "UEBA / DLP activity (d.varga, last 18h)",
+            "lines": [
+              "02:14  CRM export: 6,400 customer records -> C:\\Users\\d.varga\\staging\\",
+              "02:31  copied pricing-model-2026.xlsx + deal-desk SharePoint (read-all)",
+              "02:48  7-zip archive created: handoff.7z (encrypted, 41 MB)",
+              "context: resignation effective Fri; access normally Sales-region-3 only",
+              "no USB write, no cloud upload, no email-with-attachment YET"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["baseline d.varga", "normal behavior", "user baseline", "is this normal", "history"],
+            "step": "diag",
+            "output": "Behavior baseline d.varga (90-day)\n  normal: ~30 record views/day in Sales-region-3, business hours only\n  last night: 6,400 records (all regions), 02:00-03:00, + pricing model\n  213x volume, off-hours, out-of-region, encrypted-archived\n  deviation: SEVERE. consistent with pre-departure data staging."
+          },
+          {
+            "aliases": ["exfil check", "did it leave", "egress check", "data egress", "outbound"],
+            "step": "diag",
+            "output": "Egress check (d.varga endpoint + identity)\n  USB mass-storage: none mounted\n  web upload / personal cloud: none observed\n  email w/ attachment: none sent\n  archive handoff.7z still resident on local disk\nStatus: data STAGED, not yet exfiltrated. Window to preserve is open."
+          }
+        ],
+        "actions": [
+          {
+            "id": "escalate-ir-preserve",
+            "label": "Escalate to Insider-Risk IR with HR and Legal looped in, preserve the endpoint and staged archive as evidence, and place a covert egress watch",
+            "detail": "Open an insider case to the IR + HR + Legal channel, snapshot/forensically preserve the staging folder and handoff.7z with chain of custody, and set silent alerting on USB/upload/email egress. Do not interact with the user.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Suspected insider staging is an HR/Legal-sensitive case, not a SOC-solo action. You preserve the evidence with chain of custody while data is still local, escalate to the insider-risk IR process with HR and Legal, and watch egress silently. Confronting or tipping the user destroys both the case and the evidence.",
+            "outcome": "escalated",
+            "ends": true
+          },
+          {
+            "id": "confront-user",
+            "label": "Email d.varga to ask why they exported all those records last night",
+            "csat": -5,
+            "teach": "Tipping a suspected insider is the worst move: they delete the staging folder and any case, and you have created an HR/Legal problem by confronting before preservation. Insider cases run silently through IR + HR + Legal.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "delete-archive",
+            "label": "Remotely delete handoff.7z and the staging folder to stop the leak",
+            "csat": -4,
+            "teach": "Destroying the staged archive destroys the evidence of intent and can taint any disciplinary or legal action. The data has not left yet, so preserve it with chain of custody, do not wipe it.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "disable-now-no-escalate",
+            "label": "Immediately disable the account and close, treating it as handled",
+            "csat": -2,
+            "teach": "Yanking access alone tips the user, skips evidence preservation, and bypasses HR and Legal, who own the insider process. Coordinated disable timing is a decision for the IR/HR/Legal team, not a unilateral SOC close.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "wait-for-exfil",
+            "label": "Wait to act until actual exfil to USB or upload is detected",
+            "csat": -3,
+            "teach": "Waiting passively risks the data leaving while you watch. The staging plus encrypted archive plus departure context is already enough to open a preserved insider case. Escalate now with evidence locked, then watch egress.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Preserve the staged evidence, escalate to insider-risk IR with HR and Legal, and watch egress silently without tipping the employee.",
+        "hint": "The data has not left yet, which is your opportunity. Who owns an insider case, and what happens to your evidence if the employee finds out?"
+      }
+    ]
+  },
+  {
+    "id": "swe-shift-2",
+    "track": "swe",
+    "order": 1,
+    "name": "On-Call 2: Cascading Failure",
+    "rank": "Senior Engineer",
+    "accent": "#FFD700",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "kb": [
+      {
+        "id": "kb-cve-policy",
+        "title": "Dependency CVE Policy: Release Branch Gating",
+        "tags": ["security", "ci", "dependencies", "release"],
+        "body": [
+          "Critical and high severity CVEs that are reachable from a production code path block the release build. The dependency-audit gate exists to catch these before a cut. It is a control, not an obstacle.",
+          "When a finding lands, the remediation order is: (1) upgrade or pin the affected dependency to the patched version named in the advisory, including transitive deps via a resolution/override; (2) if no fix exists, evaluate removing or sandboxing the affected code path; (3) only then, with AppSec sign-off and a tracked exception with an expiry date, consider a scoped suppression.",
+          "Never add a reachable critical to the scanner ignore list to make a build green, and never disable the dependency-audit step. Both ship a known vulnerability and blind the gate. A patched transitive version with no breaking API change is the cheapest and safest fix; force it and let the scanner confirm green."
+        ]
+      }
+    ],
+    "adUsers": [],
+    "items": [
+      {
+        "id": "swe-shift-2-origin-cpu-pegged-p99-5x-after-cache-cluster-restart",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Priya Nandakumar",
+          "role": "SRE, Platform On-Call"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "We restarted the Redis cluster at 02:14 to apply a config change. The cache came back empty. Since then origin DB CPU is pinned at ~98%, p99 on /api/feed jumped from 80ms to 410ms, and we are shedding ~3% of requests. The cache is filling but the box is on fire and clients keep timing out and retrying. Hit rate is climbing slowly. Someone suggested we just double the Redis memory and restart again. I do not think that is the problem. Need eyes now.",
+        "evidence": [
+          {
+            "label": "Grafana annotations (last 12 min)",
+            "lines": [
+              "02:14:00  redis-cluster rolling restart -> all keys evicted (cold start)",
+              "02:14:30  db_origin cpu 31% -> 97%",
+              "02:14:40  /api/feed p99 82ms -> 410ms",
+              "02:15:10  identical query feed:user:* executed 1,940x in 1s window",
+              "02:16:00  cache hit_rate 4% -> 19% (climbing)",
+              "02:18:00  client retry storm: feed endpoint RPS 2.1x baseline"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["redis-cli info stats | grep keyspace", "redis keyspace", "redis info"],
+            "output": "keyspace_hits:21044\nkeyspace_misses:88130\nkeyspace_hit_ratio:0.19\n# misses are dominated by repeated GET on the same cold keys (feed:user:*)",
+            "step": "diag"
+          },
+          {
+            "aliases": ["pg_stat_activity top queries", "db top queries", "pg_stat_activity"],
+            "output": "calls  query\n1940   SELECT * FROM feed_items WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50\n  N concurrent identical executions of the same rebuild query (no coalescing)\n  -> classic cache stampede: every miss triggers its own origin read",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "coalesce",
+            "label": "Enable request coalescing (single-flight) on cache-miss rebuilds + add staggered/jittered TTLs going forward",
+            "detail": "One in-flight rebuild per key; concurrent callers wait on it instead of each hitting origin. Add TTL jitter so keys do not all expire together next time.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Right. This is a cache stampede / thundering herd. After a cold start, every miss on a hot key fires its own origin query, so origin sees N identical reads at once. Single-flight collapses those to one rebuild per key, and TTL jitter prevents synchronized expiry from doing this again. The fix is at the miss path, not the cache size.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "bigger-cache",
+            "label": "Double Redis memory and do another rolling restart to warm it faster",
+            "csat": -4,
+            "teach": "Wrong, and the restart makes it worse. The cache is not full, it is cold. Restarting evicts everything again and re-triggers the stampede from zero. More memory does nothing about N concurrent identical origin reads on a miss.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "scale-db",
+            "label": "Add a read replica and route feed reads to it to spread origin load",
+            "csat": -2,
+            "teach": "Treating a stampede with more origin capacity. A replica can blunt the symptom but the root cause is uncoordinated rebuilds; you are paying for hardware to absorb redundant work that single-flight eliminates for free. Coalesce first.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "raise-timeouts",
+            "label": "Raise client and gateway timeouts so the retries stop failing",
+            "csat": -3,
+            "teach": "This hides the fire and feeds it. Longer timeouts mean requests pile up in-flight against an already saturated origin, deepening the queue. The retry storm is a symptom of slow rebuilds; fix the rebuild path, do not let more callers hang on it.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Recognize a cache stampede after a cold start and collapse redundant rebuilds with single-flight + TTL jitter.",
+        "hint": "The cache is cold, not small. Look at how many identical origin queries one missing key triggers."
+      },
+      {
+        "id": "swe-shift-2-migration-0231-hung-mid-deploy-writes-to-orders-are-timing-out",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Marcus Vogel",
+          "role": "Backend Engineer (deploy owner)"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "I shipped migration 0231 in the 03:40 deploy. It runs ALTER TABLE orders ADD COLUMN ... and a rewrite. It has been running 6 minutes and has not committed. Every checkout write is now timing out because they are queued behind it waiting on a lock. The deploy job is still showing the migration as in-progress. I am not sure whether to wait it out or pull the cord. Orders is our money table. Help.",
+        "evidence": [
+          {
+            "label": "Postgres lock + activity (live)",
+            "lines": [
+              "pid 50122  state active   6m12s  ALTER TABLE orders ...  lock: AccessExclusiveLock on orders (held)",
+              "pid 50140  state waiting 5m48s  INSERT INTO orders ...  lock: waiting on AccessExclusiveLock",
+              "pid 50141  state waiting 5m47s  INSERT INTO orders ...  lock: waiting",
+              "... 213 sessions waiting on relation orders",
+              "migration 0231: full table rewrite, ADD COLUMN ... NOT NULL DEFAULT (volatile) -> rewrites every row, holds AccessExclusive the whole time"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["pg_locks blocking", "show locks", "lock tree"],
+            "output": "blocking_pid  blocked_count  relation  lock_mode\n50122         213            orders    AccessExclusiveLock\n# pid 50122 (migration 0231) is the head of the line. Killing it releases the queue.",
+            "step": "diag"
+          },
+          {
+            "aliases": ["migration 0231 diff", "show migration", "cat 0231"],
+            "output": "-- 0231_add_orders_region.sql\nALTER TABLE orders ADD COLUMN region text NOT NULL DEFAULT (current_setting('app.region'));\n-- volatile default -> full rewrite under AccessExclusiveLock, no lock_timeout set",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "kill-and-redo-online",
+            "label": "Terminate the migration backend (release the lock), then re-run as an online change: add nullable column, backfill in batches, set NOT NULL after",
+            "detail": "pg_terminate_backend on pid 50122 to drop the AccessExclusive lock and drain the 213 waiters, then reland 0231 as add-nullable -> batched backfill -> validate -> set not null, with a lock_timeout.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Correct. The single migration backend is the head of the lock queue, so killing it immediately drains the 213 blocked checkout writes. The migration was unsafe by construction: a volatile NOT NULL DEFAULT forces a full table rewrite under AccessExclusiveLock. The safe pattern is add-nullable column, backfill in batches off the hot path, then add the NOT NULL constraint, all with a lock_timeout so it can never wedge prod again.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "wait-it-out",
+            "label": "Let the migration finish, it is probably almost done",
+            "csat": -4,
+            "teach": "On the money table this is the catastrophic choice. A full row rewrite scales with table size and you have no idea how far in it is; meanwhile every checkout fails. You do not let an AccessExclusive lock ride on orders during a write storm. Kill it and reland online.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "kill-waiters",
+            "label": "Kill the 213 waiting checkout sessions to clear the queue",
+            "csat": -3,
+            "teach": "Backwards. The waiters are the victims, not the cause. Pid 50122 holds the lock; killing waiters just drops live customer checkouts while the migration keeps the table locked and new writes pile up again instantly.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "restart-db",
+            "label": "Restart the database to clear the stuck lock",
+            "csat": -4,
+            "teach": "Disproportionate and dangerous. A full restart drops every connection, forces crash recovery on a half-rewritten table, and risks a long startup on the money table. Terminate the one offending backend, not the whole instance.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Kill the single lock-holding migration to drain blocked writes, then reland the schema change as a safe online migration.",
+        "hint": "Find the head of the lock queue. One backend is blocking 213 writers. What is the minimum thing you can kill?"
+      },
+      {
+        "id": "swe-shift-2-ci-blocked-critical-cve-in-transitive-dep-on-release-branch",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Dana Okoro",
+          "role": "Security Engineer, AppSec"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 0,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "The release/1.9 build is red. Our SCA scanner flagged a critical CVE in a transitive dependency pulled in by our image-processing lib. The release manager is asking to add it to the scanner ignore list so we can ship the 1.9 cut tonight, the marketing date is fixed. I want a real answer before anyone touches the allowlist. The advisory says the fix is available in a patched minor. Can we just pin it?",
+        "kbArticleId": "kb-cve-policy",
+        "evidence": [
+          {
+            "label": "SCA scanner output (CI step: dependency-audit)",
+            "lines": [
+              "CRITICAL  CVE-2026-31188  sharp-resize  4.2.1  (transitive via media-pipeline@2.7.0)",
+              "  vector: remote, no auth, heap overflow on crafted input -> RCE",
+              "  fixed in: sharp-resize >= 4.2.4  (patch, no breaking API change)",
+              "  reachable: yes (used in /api/upload thumbnail path)",
+              "build: FAILED (policy: block critical on release branches)"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "pin-upgrade",
+            "label": "Pin/override sharp-resize to 4.2.4 (the patched version), rebuild, confirm the scanner clears, then ship",
+            "detail": "Add a resolution/override forcing the transitive dep to >=4.2.4, regenerate the lockfile, re-run dependency-audit. The advisory says it is a patch with no API break, so it is the low-risk fix.",
+            "correct": true,
+            "requires": ["kb"],
+            "csat": 5,
+            "teach": "Correct. The advisory gives you a patched version (4.2.4) with no breaking API change, and the vuln is reachable from the upload path, so this is a real exposure. Force the transitive dependency up via a resolution/override, rebuild, and let the scanner confirm green. You fixed the actual vulnerability and kept the gate honest.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "ignore-list",
+            "label": "Add the CVE to the scanner ignore list so the release build goes green tonight",
+            "csat": -5,
+            "teach": "This is the move you were explicitly asked to prevent. The vuln is a reachable, no-auth RCE on the upload path, and a fix exists. Suppressing the finding ships a known critical to production and blinds the gate to it forever. Per policy you do not silence a reachable critical that has an available patch.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "disable-scanner",
+            "label": "Temporarily disable the dependency-audit CI step for the release branch to unblock the cut",
+            "csat": -5,
+            "teach": "Worse than ignoring one CVE. Turning off the scanner removes the gate entirely, so you ship not just this critical but anything else lurking. The control is doing its job; the answer is to fix the dependency, not remove the control.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "remove-feature",
+            "label": "Rip out the thumbnail/upload feature that uses the lib to drop the dependency for 1.9",
+            "csat": -2,
+            "teach": "Overkill that breaks a shipped feature when a one-line version pin fixes it. Removing functionality under deadline pressure introduces its own regression risk. Reach for the patched version first; only consider removal if no fix existed.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "wait-upstream",
+            "label": "Hold the release and file an issue upstream asking the media-pipeline maintainer to bump it",
+            "csat": -2,
+            "teach": "You do not need upstream. The patched transitive version already exists and you can force it locally with a resolution/override today. Waiting on a third party blocks the release for no reason while the vuln sits exposed.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Remediate a reachable critical CVE by pinning to the available patched version, not by silencing the scanner.",
+        "hint": "The advisory already names a fixed version with no API break. The fix is in the dependency graph, not the gate config."
+      },
+      {
+        "id": "swe-shift-2-wallet-balances-drifting-debits-applied-without-matching-ledger-row",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Iris Lindqvist",
+          "role": "Engineer, Payments"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 30,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "Support is seeing user wallet balances that do not reconcile. For a subset of transfers, the balance got debited but no ledger entry was written, or vice versa. It started after we deployed the new transfer handler that splits the debit and the ledger insert into two separate statements. People retried failed transfers and now some accounts are double-debited. I added a retry wrapper this afternoon and it made it worse. What is actually wrong here?",
+        "evidence": [
+          {
+            "label": "Transfer handler (current) + failing trace",
+            "lines": [
+              "// handler.ts (deployed 11:20)",
+              "await db.query('UPDATE wallets SET balance = balance - $1 WHERE id=$2', [amt, from])  // debit",
+              "// ... network blip / process exit can happen HERE ...",
+              "await db.query('INSERT INTO ledger (wallet_id, delta, ref) VALUES ($1,$2,$3)', [from, -amt, ref])  // ledger",
+              "",
+              "trace: debit committed at 14:02:11.318, then connection reset before ledger insert -> balance down, no ledger row",
+              "retry-wrapper re-ran the whole handler -> debited a SECOND time"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["reconcile sum ledger vs balance", "reconcile wallets", "check drift"],
+            "output": "wallets with sum(ledger.delta) != balance: 47\n  pattern: balance reflects a debit that has no ledger row\n  all 47 fall on the new handler path (two separate autocommit statements)",
+            "step": "diag"
+          },
+          {
+            "aliases": ["grep begin commit handler", "is it transactional", "show tx boundary"],
+            "output": "handler.ts: NO begin/commit found. Each db.query runs in its own autocommit.\n  -> debit and ledger insert are two independent atomic units, not one. A crash between them leaves the pair half-applied.",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "wrap-tx",
+            "label": "Wrap the debit + ledger insert in a single DB transaction (BEGIN/COMMIT) so they commit atomically or not at all; add an idempotency key on ref for safe retries",
+            "detail": "One transaction around both statements means a crash rolls both back, so balance and ledger can never diverge. An idempotency/unique key on ref makes a retry a no-op instead of a second debit.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Correct. The bug is a missing transaction boundary: debit and ledger insert run as two autocommit statements, so a crash between them half-applies the pair. Wrapping both in one transaction makes them atomic, and a unique idempotency key on ref turns a retry into a no-op so you never double-debit. This is a correctness fix, not a reliability tuning problem.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "more-retries",
+            "label": "Make the retry wrapper smarter with exponential backoff and more attempts so the ledger insert eventually lands",
+            "csat": -5,
+            "teach": "This is exactly what made it worse. Retrying a non-transactional, non-idempotent debit re-applies the debit every attempt. You cannot retry your way out of a missing atomicity guarantee. Fix the transaction boundary first; retries on top of that must be idempotent.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "reverse-job",
+            "label": "Leave the handler as-is and run a nightly reconciliation job that writes the missing ledger rows after the fact",
+            "csat": -3,
+            "teach": "A reconciler is fine as a safety net but it does not fix the bug; it papers over a money-correctness defect that keeps generating drift every hour and keeps double-debiting on retries. Close the window at the source with a transaction, then reconcile historical drift.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "swap-order",
+            "label": "Swap the order so the ledger insert runs before the debit",
+            "csat": -3,
+            "teach": "You just moved the failure window. Now a crash leaves a ledger row with no balance change, the same divergence in the other direction. Order does not give you atomicity; only a transaction does.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Diagnose a missing transaction boundary causing balance/ledger drift and fix it with one atomic transaction plus idempotent retries.",
+        "hint": "Two writes that must be all-or-nothing are running as two independent commits. Retrying that only doubles the damage."
+      },
+      {
+        "id": "swe-shift-2-email-provider-degraded-our-queue-backing-up-and-we-are-getting-throttled-harder",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Theo Marchetti",
+          "role": "Engineer, Notifications Platform"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 60,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "Our transactional email provider (Postino) went into a degraded state ~20 min ago, latency up and ~40% of sends returning 503. Our sender just retries immediately on every failure, so we are now generating far more requests than normal and Postino started returning 429 rate-limit on top of the 503s. The outbound queue is growing and a couple of our own pods are getting OOM-killed holding retries in memory. Provider status page says partial outage, recovering. What do we do on our side?",
+        "evidence": [
+          {
+            "label": "Outbound sender metrics (last 20 min)",
+            "lines": [
+              "postino upstream: 503 rate 41%, p99 latency 220ms -> 9.4s",
+              "our sender: retries immediate, no backoff, no cap -> outbound RPS 3.6x baseline",
+              "postino now also returning 429 (we tripped their rate limit by hammering)",
+              "queue depth 1.2k -> 58k and climbing; 2 sender pods OOM-killed",
+              "provider status: PARTIAL OUTAGE, recovering"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": ["sender retry config", "show retry policy", "grep backoff sender"],
+            "output": "retry policy: maxAttempts=unbounded, backoff=none, jitter=none\n  on any non-2xx -> immediate re-send on the same connection pool\n  -> every 503 becomes an instant retry; outbound RPS 3.6x baseline\n  this is what tripped Postino's 429 rate limit",
+            "step": "diag"
+          },
+          {
+            "aliases": ["where do retries live", "queue durability", "retry storage"],
+            "output": "in-flight retries held in pod memory (no durable queue handoff)\n  pending retries: ~31k buffered in heap across sender pods\n  -> 2 pods OOM-killed; on restart their buffered sends are lost\n  no circuit breaker between sender and Postino",
+            "step": "diag"
+          }
+        ],
+        "actions": [
+          {
+            "id": "circuit-breaker",
+            "label": "Trip a circuit breaker on Postino, shed/queue non-urgent mail with backpressure, and degrade gracefully (defer non-critical, retry with capped exponential backoff + jitter on recovery)",
+            "detail": "Open the breaker after the failure threshold so we stop hammering a degraded provider, hold sends in the durable queue with backpressure instead of in-memory, and let the half-open probe resume sending as Postino recovers. Non-critical email defers.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Correct. When a downstream is degraded you stop pounding it. A circuit breaker opens on the failure threshold so requests fail fast instead of piling on, which also stops you tripping their 429 rate limit. Backpressure plus a durable queue keeps retries out of pod memory (fixing the OOMs), and a half-open probe with capped backoff + jitter resumes sends gracefully as it recovers. Degrade, do not retry harder.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "hammer-retries",
+            "label": "Raise the retry count and add more sender pods so the backlog drains faster against Postino",
+            "csat": -5,
+            "teach": "This is the failure mode you are already in, scaled up. More retries and more pods against a degraded provider deepen the 503/429 storm, push their outage further, and OOM more of your pods. You cannot brute-force a downstream that is asking you to slow down.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "ignore-failures",
+            "label": "Drop all failed sends on the floor (no retry) to relieve queue pressure",
+            "csat": -3,
+            "teach": "You traded one failure for silent data loss. Transactional email (receipts, password resets) cannot just be discarded. The goal is to hold them durably and replay on recovery, not delete them. Backpressure, not a drop.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "switch-provider-blind",
+            "label": "Hard-cut all traffic to a backup provider immediately with no testing",
+            "csat": -2,
+            "teach": "A failover path is good to have, but a blind hard-cut mid-incident to an unwarmed provider risks duplicate sends, missing templates, and tripping the backup's limits too. Stabilize with the breaker first; fail over deliberately if Postino does not recover, not as a panic reflex.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "wait-passively",
+            "label": "Do nothing on our side and wait for Postino to recover since their status page says recovering",
+            "csat": -3,
+            "teach": "Passive waiting ignores that your own retry behavior is actively worsening their outage and OOM-killing your pods. Recovery on their side does not help if you keep hammering them past their rate limit. You have a job to do on your side: stop the amplification.",
+            "outcome": "mishandled"
+          }
+        ],
+        "goal": "Stop amplifying a degraded downstream by tripping a circuit breaker and degrading gracefully instead of retrying harder.",
+        "hint": "You tripped their rate limit by hammering a provider that is already down. The fix is to back off and fail fast, not push harder."
+      }
+    ]
+  },
+  {
+    "id": "redteam-shift-2",
+    "track": "redteam",
+    "order": 1,
+    "name": "Engagement 2: Web App Assessment",
+    "rank": "Senior Pentester",
+    "accent": "#EF4444",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "kb": [
+      {
+        "id": "kb-secret-in-history",
+        "title": "Handling a secret committed to source control",
+        "tags": ["secrets", "git", "remediation", "redteam"],
+        "body": [
+          "When a credential (API key, token, password, connection string) is found in a repository, treat it as compromised the moment it was committed, regardless of whether the repo is private. Clones, forks, CI caches, and backups may already hold it.",
+          "Remediation order is fixed and the order matters. First, rotate or revoke the exposed credential with the issuing system or vendor. This is the only step that actually stops the exposed value from being usable. Do this before anything else.",
+          "Second, move the new secret out of the repository entirely: into a secrets manager or environment variables injected at deploy time. The replacement must never be committed.",
+          "Third, purge the old secret from history using a history-rewriting tool (git filter-repo or BFG), then coordinate a force-update and have all collaborators re-clone. Remember that purging history does NOT un-expose a value that others already pulled, which is exactly why rotation comes first.",
+          "Fourth, add prevention: pre-commit hooks and CI secret scanning so a future secret is blocked before it ever lands. Deleting the file from the working tree is not remediation; the value remains in history and remains valid until rotated."
+        ]
+      }
+    ],
+    "adUsers": [],
+    "items": [
+      {
+        "id": "redteam-shift-2-redteam-shift-2-case-1-account-api-returns-another-user-s-record-when-id-is-changed",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Engagement Coordinator",
+          "role": "Acme Lab Security (authorized engagement owner)"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 0,
+        "reward": 50,
+        "xp": 40,
+        "ticketBody": "Scope reminder: in-scope target is the acme-lab.internal web app only. This is an authorized engagement. Your job per case is identify, write up, and propose the remediation. No live customer data, no out-of-scope hosts.\n\nDuring authenticated testing on the staging instance you logged in as the test account alice (user_id 1041). The account detail endpoint is GET /api/v1/account/{user_id}. When the trailing id is changed to a different value the response body returns a full record for a different test user (bob, user_id 1042) including email and billing address, even though you are still holding alice's session token.\n\nDecide what this is and how acme-lab should fix it. Write the finding and the remediation.",
+        "evidence": [
+          {
+            "label": "Two requests, same alice session token",
+            "lines": [
+              "GET /api/v1/account/1041  -> 200  {\"user_id\":1041,\"name\":\"alice\",\"email\":\"alice@acme-lab.internal\"...}",
+              "GET /api/v1/account/1042  -> 200  {\"user_id\":1042,\"name\":\"bob\",\"email\":\"bob@acme-lab.internal\"...}",
+              "Authorization header on BOTH requests: Bearer <alice session token>",
+              "No 403, no ownership check. The id in the path is trusted as-is."
+            ]
+          },
+          {
+            "label": "Handler source (from authorized code review)",
+            "lines": [
+              "router.get('/account/:user_id', requireAuth, (req, res) => {",
+              "  const row = db.accounts.findById(req.params.user_id)  // uses path id directly",
+              "  return res.json(row)                                   // never compares to req.session.user_id",
+              "})"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "report-idor-fix-objauth",
+            "label": "Report as IDOR (broken object-level authorization); remediate with an ownership check",
+            "detail": "Finding: any authenticated user can read any other user's record by changing the path id. Fix: enforce object-level authorization in the handler. Compare the requested user_id against the authenticated session identity and return 403 on mismatch, or scope the query to the caller (findById(req.session.user_id)). Add a regression test that asserts cross-user access returns 403.",
+            "correct": true,
+            "csat": 5,
+            "teach": "Correct. The session is alice but the server returns bob's record because it trusts the path id and never checks ownership. That is a classic IDOR or broken object level authorization. The fix is server-side: bind the query to the authenticated identity or 403 on mismatch. Defensive, in scope, exactly what an authorized engagement asks for.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "harvest-all-records",
+            "label": "Iterate the id range and pull every user record to prove impact at scale",
+            "detail": "Loop over the id range and dump every account to a file as evidence of mass exposure.",
+            "csat": -5,
+            "teach": "No. Confirming the flaw needed exactly one extra record (bob's). Mass harvesting records, even on a lab, is unnecessary data exfiltration and goes far beyond proof of concept. You confirm the class of bug, then stop and report. Scope and minimal impact testing are the whole point.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "client-validation",
+            "label": "Recommend hiding the id in the UI and validating it in front-end JavaScript",
+            "detail": "Tell acme-lab to stop exposing the numeric id in the page and add a client-side guard.",
+            "csat": -3,
+            "teach": "That is theater. The attacker calls the API directly, so client-side hiding or validation changes nothing. Authorization must be enforced on the server, per object, against the authenticated identity. Obscuring the id is not a control.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "swap-to-uuid-only",
+            "label": "Recommend only replacing the sequential id with a UUID",
+            "detail": "Switch the primary key to a random UUID so ids cannot be guessed.",
+            "csat": -2,
+            "teach": "Unpredictable ids raise the guessing bar but are not authorization. A leaked or referrer-exposed UUID still returns the record because the server never checks ownership. UUIDs can be a defense in depth layer, but the actual fix is the object-level authorization check.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Recognize broken object-level authorization (IDOR) and remediate with a server-side ownership check, not client-side hiding or id randomization.",
+        "hint": "The session never changed but the returned record did. Where is the ownership check, and does hiding the id actually stop a direct API call?"
+      },
+      {
+        "id": "redteam-shift-2-redteam-shift-2-case-2-url-preview-feature-fetches-arbitrary-internal-addresses",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "App Platform Lead",
+          "role": "Acme Lab Engineering (authorized engagement contact)"
+        },
+        "slaMinutes": 25,
+        "arriveAfter": 0,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "In scope: acme-lab.internal web app. Authorized engagement, defensive write-up and remediation only.\n\nThe app has a Link Preview feature: POST /api/v1/preview with a JSON body { \"url\": \"...\" }. The server fetches the supplied URL and returns title and a thumbnail. You tested it against benign external URLs and it worked. You then pointed it at internal-only addresses to test reachability. The server fetched them and reflected back content and headers it should never be able to see from a user-supplied URL, including a request to the cloud metadata address.\n\nNo credentials were extracted and nothing out of the lab was touched. Classify this and propose the remediation.",
+        "commands": [
+          {
+            "aliases": ["diag", "run preview probe", "test url preview", "probe"],
+            "step": "diag",
+            "output": "[scripted lab harness] POST /api/v1/preview\n  url=https://example.com            -> 200  title=\"Example Domain\"  (expected, external)\n  url=http://127.0.0.1:8500/admin    -> 200  fetched internal admin panel HTML (SHOULD be unreachable)\n  url=http://10.0.0.5:6379/          -> 200  service banner reflected (internal range)\n  url=http://169.254.169.254/...     -> 200  cloud metadata service responded (link-local)\n  Conclusion: server-side fetcher has no allowlist and no internal-range block."
+          },
+          {
+            "aliases": ["fetcher source", "show code", "read handler"],
+            "step": "diag",
+            "output": "[authorized code review] preview handler:\n  const r = await fetch(req.body.url)   // raw user input, no validation\n  return res.json({ title: parseTitle(r), ... })\n  No scheme check, no host allowlist, no DNS-resolved-IP check, no redirect cap."
+          }
+        ],
+        "actions": [
+          {
+            "id": "report-ssrf-fix-allowlist",
+            "label": "Report as SSRF; remediate with scheme plus host allowlist, block private and link-local ranges, and pin the resolved IP",
+            "detail": "Finding: the preview fetcher follows user-supplied URLs into the internal network and the cloud metadata endpoint (Server Side Request Forgery). Fix: restrict scheme to http and https, resolve the hostname and reject if the resolved IP is in private (10/8, 172.16/12, 192.168/16), loopback (127/8), or link-local (169.254/16) ranges including the 169.254.169.254 metadata address, enforce an allowlist where feasible, cap redirects and re-validate each hop, and run the fetcher with no ambient cloud credentials.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Correct. The server fetching attacker-chosen internal URLs, especially the link-local metadata address, is textbook SSRF. The durable fix is validating the resolved destination IP against deny ranges (not just the string), restricting schemes, capping and re-checking redirects, and removing ambient cloud credentials so a hit on the metadata endpoint yields nothing useful. Defensive and in scope.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "pivot-metadata-creds",
+            "label": "Pull credentials from the metadata endpoint to demonstrate full compromise",
+            "detail": "Now that the metadata service responds, retrieve the instance role credentials as proof.",
+            "csat": -5,
+            "teach": "Stop. Reaching the metadata endpoint already proves SSRF. Actually retrieving instance credentials is weaponizing the finding and a likely scope and legal violation even on a lab unless explicitly authorized. The deliverable is the confirmed finding plus the fix, not stolen credentials.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "regex-block-localhost",
+            "label": "Remediate by string-matching the URL to block 'localhost' and '127.0.0.1'",
+            "detail": "Add a deny regex for those two strings in the URL.",
+            "csat": -3,
+            "teach": "Insufficient. String blocklists are trivially bypassed (alternate IP encodings, DNS names that resolve to internal IPs, redirects, 169.254.x). You must validate the actual resolved IP against private and link-local ranges, not pattern-match the raw URL string.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "outbound-firewall-only",
+            "label": "Punt it to network: just ask infra to block outbound traffic from the app server",
+            "detail": "Mark the app as fixed once a firewall rule is requested.",
+            "csat": -2,
+            "teach": "Egress filtering is good defense in depth, but it does not fix the application flaw and often still allows same-VPC and metadata access. The finding is an app-level SSRF and must be remediated in the fetcher with destination validation. Treating a firewall request as the fix leaves the vulnerability open.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Identify SSRF in a URL-fetch feature and remediate by validating the resolved destination IP (allowlist, block private, link-local, and metadata), not by string blocklists or punting to the firewall.",
+        "hint": "It followed your URL to 169.254.169.254. Run the probe first. Does blocking the strings 'localhost' and '127.0.0.1' actually stop that?"
+      },
+      {
+        "id": "redteam-shift-2-redteam-shift-2-case-3-live-api-key-found-committed-in-git-history",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Repo Owner",
+          "role": "Acme Lab DevOps (authorized engagement contact)",
+          "vip": true
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 30,
+        "reward": 75,
+        "xp": 60,
+        "ticketBody": "In scope: the acme-lab.internal application repository was provided for authorized source review. Defensive write-up and remediation only.\n\nWhile grepping the repo history you found a third-party API key committed in an old config file. The file was later deleted from the working tree, but the secret is still reachable in history. Read the KB on secret handling before you write the remediation, then tell acme-lab exactly what to do.",
+        "kbArticleId": "kb-secret-in-history",
+        "evidence": [
+          {
+            "label": "git history grep (authorized review)",
+            "lines": [
+              "commit a91f3c2  config/payments.yml  +api_key: \"sk_live_REDACTED_BY_TESTER_xxxxxxxx\"",
+              "commit 7de40b1  config/payments.yml  (file deleted from working tree)",
+              "Key still present in history: `git log -p` shows it at commit a91f3c2",
+              "Vendor confirms format matches a LIVE (not test) key prefix."
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "rotate-purge-scan",
+            "label": "Report exposed live secret; remediate by rotating the key first, then purging history and adding secret scanning",
+            "detail": "Finding: a live third-party API key is committed in git history and remains retrievable even though the file was deleted. Remediation order matters: (1) rotate or revoke the exposed key with the vendor immediately since deletion does not un-expose it, (2) move the new secret to a secrets manager or env var, never the repo, (3) purge the secret from history (filter-repo or BFG) and force-update, coordinating with all clones, (4) add pre-commit and CI secret scanning to prevent recurrence. Treat the old key as compromised regardless of repo visibility.",
+            "correct": true,
+            "requires": ["kb"],
+            "csat": 5,
+            "teach": "Correct, and the order is the point. Rotation comes first because the secret is already exposed and may already be copied; purging history without rotating leaves a live valid key in every existing clone and backup. Then purge, move to a secrets manager, and add scanning so it cannot happen again. That is the full defensive remediation.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "delete-file-only",
+            "label": "Just confirm the file is already deleted from the working tree and close it",
+            "detail": "The file no longer exists in HEAD, so the secret is handled.",
+            "csat": -4,
+            "teach": "Wrong. Deleting the file from HEAD does nothing. The secret is still retrievable from history and the key itself is still valid at the vendor. Until it is rotated, anyone with the repo (or any old clone) holds a working live key. Deletion is not remediation.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "purge-before-rotate",
+            "label": "Purge git history first and skip rotation since the key will be gone",
+            "detail": "Run a history rewrite to remove the secret; assume rotation is unnecessary afterward.",
+            "csat": -4,
+            "teach": "Backwards. A history rewrite cannot recall the secret from clones, forks, CI caches, or anyone who already pulled. The key must be assumed compromised and rotated. Purging is a cleanup step, not a substitute for revoking a key that is already out.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "use-the-key",
+            "label": "Validate the key against the live vendor API to confirm it still works",
+            "detail": "Make a real call with the live key to prove it is active before reporting.",
+            "csat": -5,
+            "teach": "Do not. Using a live third-party production key is acting outside the in-scope acme-lab target and against a third party, which is unauthorized. The vendor already confirmed it is a live-format key. You report it as compromised and have it rotated. You do not exercise it.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Handle a secret committed to git history by rotating first, then purging history and adding scanning, never by deleting the file alone or exercising the live key.",
+        "hint": "Read the KB. Deleting the file does not un-expose the secret. What is the very first action that actually reduces risk?"
+      },
+      {
+        "id": "redteam-shift-2-redteam-shift-2-case-4-password-reset-tokens-look-predictable",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Auth Service Owner",
+          "role": "Acme Lab Identity Team (authorized engagement contact)"
+        },
+        "slaMinutes": 15,
+        "arriveAfter": 60,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "In scope: acme-lab.internal web app, authorized engagement, defensive remediation only.\n\nYou triggered password resets for three test accounts you control and captured the reset links. The token portion does not look random. Across your three test tokens it appears to be a short, time-derived value with an obvious increasing pattern, and old tokens still work hours later. Run the analysis harness, classify the weakness, and write the remediation. Use only the test accounts you were given.",
+        "commands": [
+          {
+            "aliases": ["diag", "analyze tokens", "run token harness", "inspect reset tokens"],
+            "step": "diag",
+            "output": "[scripted lab harness] reset tokens from YOUR 3 test accounts:\n  t1 = 1718000123-0001\n  t2 = 1718000125-0002\n  t3 = 1718000131-0003\n  Structure: <unix_seconds>-<zero_padded_counter>\n  Entropy estimate: ~very low; counter is sequential, timestamp is observable.\n  Expiry: token t1 still ACCEPTED 6h after issue (no expiry).\n  Reuse: token t1 ACCEPTED twice (not single-use).\n  Conclusion: tokens are predictable AND long-lived AND reusable."
+          }
+        ],
+        "actions": [
+          {
+            "id": "report-fix-csprng-expiry-singleuse",
+            "label": "Report predictable reset tokens; remediate with CSPRNG tokens plus short expiry plus single-use invalidation",
+            "detail": "Finding: reset tokens are a unix timestamp plus a sequential counter, so they are guessable, and they never expire and can be reused. Fix: generate tokens from a cryptographically secure RNG with at least 128 bits of entropy, store only a hash of the token, enforce a short expiry (for example 15 to 60 minutes), make them strictly single-use by invalidating on first successful use, and invalidate outstanding tokens when a new reset is requested. Add rate limiting on the reset endpoint.",
+            "correct": true,
+            "requires": ["diag"],
+            "csat": 5,
+            "teach": "Correct. The harness shows all three weaknesses: the token is timestamp plus sequential counter (predictable), it has no expiry, and it is reusable. A secure reset token must be high-entropy CSPRNG output, short-lived, single-use, hashed at rest, and invalidated on reissue. That is the complete remediation.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "brute-real-account",
+            "label": "Use the predictable pattern to generate and try tokens against a real (non-test) account",
+            "detail": "Extrapolate the counter and timestamp to take over an account you were not assigned.",
+            "csat": -5,
+            "teach": "Absolutely not. Predicting a token to access an account you were not given is unauthorized account takeover, even on a lab, and outside the test accounts you were scoped to. You already proved predictability with your own three tokens. That is sufficient. You report and remediate; you do not hijack accounts.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "longer-token-same-scheme",
+            "label": "Remediate by just making the counter longer and zero-padding more digits",
+            "detail": "Keep the timestamp-plus-counter scheme but widen it.",
+            "csat": -3,
+            "teach": "No. A longer sequential counter is still sequential and still derived from observable inputs. Length is not entropy. The scheme itself is the problem. You need cryptographically random tokens, not a wider version of a predictable structure.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "add-captcha-only",
+            "label": "Remediate by adding a CAPTCHA on the reset request form",
+            "detail": "Assume a CAPTCHA on the request page stops the attack.",
+            "csat": -3,
+            "teach": "Misplaced. A CAPTCHA on the request form does nothing about guessing the token on the confirmation step, the absent expiry, or the reuse problem. The defect is in the token itself and its lifecycle. CAPTCHA is at best a minor rate-limiting aid, not the fix.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Identify a predictable, non-expiring, reusable password-reset token and remediate with CSPRNG tokens plus short expiry plus single-use, not a wider counter or a CAPTCHA.",
+        "hint": "Run the harness. The token is timestamp plus counter, never expires, and works twice. Which property does 'a longer counter' actually fix?"
+      },
+      {
+        "id": "redteam-shift-2-redteam-shift-2-case-5-error-pages-leak-stack-traces-versions-and-an-out-of-scope-host",
+        "channel": "ticket",
+        "priority": "P3",
+        "from": {
+          "name": "Engagement Coordinator",
+          "role": "Acme Lab Security (authorized engagement owner)"
+        },
+        "slaMinutes": 40,
+        "arriveAfter": 90,
+        "reward": 100,
+        "xp": 80,
+        "ticketBody": "In scope: acme-lab.internal web app only. Authorized engagement, defensive remediation.\n\nForcing an error (malformed input to /api/v1/search) returns a full debug error page: a stack trace with absolute file paths, the framework and library versions, a database driver version, and a fragment of a connection string. Two things to handle. First, classify and remediate the information leak. Second, note carefully: the leaked stack trace references a database host named billing-prod.acme-corp.example, which is a production corporate host and is NOT in your engagement scope. Decide what to do about both.",
+        "evidence": [
+          {
+            "label": "Debug error page returned to unauthenticated request",
+            "lines": [
+              "HTTP/1.1 500 Internal Server Error",
+              "Traceback (most recent call last):",
+              "  File \"/srv/acme-lab/app/api/search.py\", line 88, in handler",
+              "  ...",
+              "WebFramework 3.2.1  |  ORM 5.0.4  |  pg-driver 2.9.0",
+              "OperationalError: could not connect to host \"billing-prod.acme-corp.example:5432\"",
+              "DSN fragment: postgresql://app_user@billing-prod.acme-corp.example/...",
+              "DEBUG = True"
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "fix-generic-errors-and-report-oos",
+            "label": "Remediate the leak (generic errors, DEBUG off, server-side logging) AND report the out-of-scope host without touching it",
+            "detail": "Finding: verbose debug error pages leak stack traces, absolute paths, framework and driver versions, and a connection-string fragment to anonymous users. Fix: disable debug mode in production, return generic error responses with a correlation id, log full details server-side only to a protected store, and review for other verbose-error endpoints. Separately: the trace references billing-prod.acme-corp.example, a production corporate host outside engagement scope. Document it in the report and escalate to the engagement owner. Do not connect to it, scan it, or use the leaked DSN.",
+            "correct": true,
+            "csat": 5,
+            "teach": "Correct on both counts. Verbose errors are an information disclosure finding fixed by turning off debug, returning generic errors with a correlation id, and keeping detail in server-side logs only. The out-of-scope production host is a reportable discovery, not an invitation. You note it, escalate to the engagement owner, and leave it untouched. Staying in scope under temptation is the whole test here.",
+            "outcome": "resolved",
+            "ends": true
+          },
+          {
+            "id": "connect-billing-host",
+            "label": "Use the leaked DSN to connect to billing-prod.acme-corp.example and see what is there",
+            "detail": "The connection string is right there; verify the database is reachable.",
+            "csat": -5,
+            "teach": "Hard stop. billing-prod.acme-corp.example is a production corporate host and explicitly out of scope. Connecting to it, even read-only, even because the DSN leaked, is unauthorized access against a system you were not engaged to touch. Out-of-scope discoveries get reported and escalated, never accessed. This is the trap, and touching it is a serious violation.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "scan-the-host",
+            "label": "Port-scan billing-prod.acme-corp.example to characterize it for the report",
+            "detail": "Just a quick scan to document services, no login.",
+            "csat": -5,
+            "teach": "No. A port scan is still active interaction with an out-of-scope production system and exceeds your authorization. 'Just looking' against a host you were not engaged to test is the same scope violation. You report the host's name from the leak and escalate. You do not scan it.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "fix-leak-ignore-host",
+            "label": "Fix the error leak but leave the out-of-scope host out of the report entirely",
+            "detail": "Remediate the verbose errors and say nothing about the billing host.",
+            "csat": -3,
+            "teach": "Incomplete. You correctly remediated the disclosure, but silently dropping a discovered production host is a reporting failure. The client needs to know their corporate database host name leaked through a lab app. The right move is report and escalate it (without touching it), not omit it.",
+            "outcome": "mishandled",
+            "ends": true
+          },
+          {
+            "id": "client-side-error-hide",
+            "label": "Remediate by hiding the stack trace with front-end JavaScript",
+            "detail": "Catch the 500 in the browser and show a friendly message.",
+            "csat": -3,
+            "teach": "Surface-level only. The full debug body is still sent over the wire and visible to anyone reading the raw response or calling the API directly. The fix is server-side: disable debug, return generic errors, and keep detail in protected logs. Hiding it in the browser does not stop disclosure.",
+            "outcome": "mishandled",
+            "ends": true
+          }
+        ],
+        "goal": "Remediate verbose-error information disclosure server-side while correctly reporting the out-of-scope production host instead of touching it.",
+        "hint": "Two jobs. The error fix is server-side, not browser-side. And that billing-prod host in the trace is out of scope. Report it or use it?"
+      }
+    ]
+  }
+]

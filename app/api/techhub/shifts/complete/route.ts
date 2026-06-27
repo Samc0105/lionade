@@ -15,8 +15,11 @@ const SHIFT_REWARDS: Record<string, { maxFangs: number }> = {
   "helpdesk-shift-4": { maxFangs: 280 },
   "helpdesk-shift-5": { maxFangs: 320 },
   "soc-shift-1": { maxFangs: 240 },
+  "soc-shift-2": { maxFangs: 300 },
   "swe-shift-1": { maxFangs: 240 },
+  "swe-shift-2": { maxFangs: 300 },
   "redteam-shift-1": { maxFangs: 240 },
+  "redteam-shift-2": { maxFangs: 300 },
 };
 
 const PASS_SCORE = 50;
