@@ -44,6 +44,9 @@ function isLive(i: ShiftItem, m: Record<string, ItemRuntime>): boolean {
   return i.revealedBy.on === "resolve" ? GOOD_FOR_REVEAL.includes(st) : st === "mishandled";
 }
 
+/** A part on the way: deducted from budget at order time, lands in stock at its ETA. */
+interface PendingOrder { seq: number; sku: string; arrivesAt: number }
+
 interface State {
   secondsLeft: number;
   ended: boolean;
@@ -52,6 +55,8 @@ interface State {
   xp: number;
   budget: number;
   stock: Record<string, number>;
+  pendingOrders: PendingOrder[];
+  orderSeq: number;
   adStatus: Record<string, string>;
   kbRead: string[];
   activeApp: AppId;
@@ -83,6 +88,16 @@ const clamp = (n: number) => Math.max(0, Math.min(100, n));
 // rarely breaches, but ignoring a P1 to chase a P4 stings.
 const SLA_BUDGET: Record<Priority, number> = { P1: 120, P2: 200, P3: 300, P4: 420 };
 const BREACH_PENALTY: Record<Priority, number> = { P1: 10, P2: 7, P3: 5, P4: 3 };
+// Stockroom orders are not instant. A part takes this long (shift-seconds) to
+// arrive. This is the "teeth": you have to order the part before the SLA clock
+// runs out, not when you get around to it. Resolution order: the item's own
+// leadSeconds, then a per-vendor default, then DEFAULT_LEAD. Faster vendors are
+// the express lane; CDW-grade hardware vendors are slower.
+const DEFAULT_LEAD = 30;
+const VENDOR_LEAD: Record<string, number> = { "Amazon Biz": 18, Newegg: 28, CDW: 42, Dell: 45, Apple: 38 };
+function leadFor(p: { leadSeconds?: number; vendor: string }): number {
+  return p.leadSeconds ?? VENDOR_LEAD[p.vendor] ?? DEFAULT_LEAD;
+}
 
 function buildInitial(shift: Shift): State {
   const items: Record<string, ItemRuntime> = {};
@@ -99,6 +114,8 @@ function buildInitial(shift: Shift): State {
     xp: 0,
     budget: shift.startingBudget,
     stock,
+    pendingOrders: [],
+    orderSeq: 0,
     adStatus,
     kbRead: [],
     activeApp: "tickets",
@@ -149,6 +166,21 @@ function makeReducer(shift: Shift) {
           ns = { ...ns, items, csat };
           breached.forEach((b) => { ns = pushFeed(ns, b.vip ? `Escalated to your manager: ${b.subject}` : `SLA breach: ${b.subject}`, "bad"); });
         }
+
+        // Stockroom deliveries: any ordered part that has reached its ETA lands now.
+        if (ns.pendingOrders.length) {
+          const arrived = ns.pendingOrders.filter((o) => elapsed >= o.arrivesAt);
+          if (arrived.length) {
+            let stock = ns.stock;
+            arrived.forEach((o) => { stock = { ...stock, [o.sku]: (stock[o.sku] ?? 0) + 1 }; });
+            ns = { ...ns, stock, pendingOrders: ns.pendingOrders.filter((o) => elapsed < o.arrivesAt) };
+            arrived.forEach((o) => {
+              const part = shift.inventory.find((p) => p.sku === o.sku);
+              ns = pushFeed(ns, `Delivered: ${part?.name ?? o.sku} is in the stockroom.`, "good");
+            });
+          }
+        }
+
         if (nextLeft === 0) ns = { ...ns, ended: true };
         return ns;
       }
@@ -186,10 +218,16 @@ function makeReducer(shift: Shift) {
       case "ORDER": {
         const part = shift.inventory.find((p) => p.sku === a.sku)!;
         if (state.budget < part.unitCost) return pushFeed(state, "Order denied: not enough budget.", "bad");
-        return pushFeed(
-          { ...state, budget: state.budget - part.unitCost, stock: { ...state.stock, [a.sku]: (state.stock[a.sku] ?? 0) + 1 } },
-          `Ordered 1x ${part.name} from ${part.vendor} for $${part.unitCost}.`, "info",
-        );
+        const elapsed = shift.durationSeconds - state.secondsLeft;
+        const lead = leadFor(part);
+        const seq = state.orderSeq + 1;
+        const ns: State = {
+          ...state,
+          budget: state.budget - part.unitCost,
+          orderSeq: seq,
+          pendingOrders: [...state.pendingOrders, { seq, sku: a.sku, arrivesAt: elapsed + lead }],
+        };
+        return pushFeed(ns, `Ordered 1x ${part.name} from ${part.vendor} for $${part.unitCost}. ETA ${lead}s.`, "info");
       }
       case "SHIP": {
         if ((state.stock[a.sku] ?? 0) <= 0) return pushFeed(state, "Out of stock. Order one first.", "bad");
@@ -558,6 +596,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
 }
 
 function InventoryApp({ shift, state, dispatch }: { shift: Shift; state: State; dispatch: Dispatch<Action> }) {
+  const elapsed = shift.durationSeconds - state.secondsLeft;
   return (
     <div className="p-4 max-h-[560px] overflow-y-auto">
       <div className="flex items-center justify-between mb-3">
@@ -573,21 +612,31 @@ function InventoryApp({ shift, state, dispatch }: { shift: Shift; state: State; 
         <tbody>
           {shift.inventory.map((p) => {
             const stock = state.stock[p.sku] ?? 0;
+            const enroute = state.pendingOrders.filter((o) => o.sku === p.sku);
+            const lead = leadFor(p);
+            const tooBroke = state.budget < p.unitCost;
             return (
               <tr key={p.sku} className="border-t border-white/[0.05]">
-                <td className="py-2.5 text-cream">{p.name}</td>
-                <td className="py-2.5 text-cream/55 text-xs">{p.vendor}</td>
+                <td className="py-2.5 text-cream">
+                  {p.name}
+                  {enroute.length > 0 && (
+                    <span className="ml-2 font-mono text-[9px] text-electric/80">
+                      +{enroute.length} en route · {Math.max(0, Math.min(...enroute.map((o) => o.arrivesAt - elapsed)))}s
+                    </span>
+                  )}
+                </td>
+                <td className="py-2.5 text-cream/55 text-xs">{p.vendor} <span className="text-cream/35">· {lead}s</span></td>
                 <td className="py-2.5 text-right tabular-nums" style={{ color: stock === 0 ? "#EF4444" : "#9FB2CC" }}>{stock}</td>
                 <td className="py-2.5 text-right text-cream/60 tabular-nums">${p.unitCost}</td>
                 <td className="py-2.5 text-right">
-                  <button onClick={() => dispatch({ t: "ORDER", sku: p.sku })} className="px-2.5 py-1 rounded-md border border-electric/40 text-electric text-[11px] hover:bg-electric/10 transition-colors">Order</button>
+                  <button disabled={tooBroke} onClick={() => dispatch({ t: "ORDER", sku: p.sku })} className="px-2.5 py-1 rounded-md border border-electric/40 text-electric text-[11px] hover:bg-electric/10 transition-colors disabled:opacity-35 disabled:cursor-not-allowed">Order</button>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-      <p className="font-mono text-[10px] text-cream/35 mt-3">Order parts to restock. To send a part to a user, open their ticket and ship it from there.</p>
+      <p className="font-mono text-[10px] text-cream/35 mt-3">Parts take time to arrive, so order early. To send a part to a user, open their ticket and ship it from there.</p>
     </div>
   );
 }
@@ -716,17 +765,26 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
       <div className="mt-4 space-y-3">
         {item.commands && <MiniTerminal item={item} onStep={(s) => dispatch({ t: "STEP", id: item.id, step: s })} />}
 
-        {part && (
-          <ToolBox label="Stockroom" done={stepDone("part")}>
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="text-cream/75">{part.name} · in stock: <span style={{ color: (state.stock[part.sku] ?? 0) > 0 ? "#2BBE6B" : "#EF4444" }}>{state.stock[part.sku] ?? 0}</span></span>
-              <span className="flex gap-2">
-                {(state.stock[part.sku] ?? 0) <= 0 && <button onClick={() => dispatch({ t: "ORDER", sku: part.sku })} className="px-2.5 py-1 rounded-md border border-electric/40 text-electric hover:bg-electric/10">Order (${part.unitCost})</button>}
-                <button disabled={(state.stock[part.sku] ?? 0) <= 0} onClick={() => dispatch({ t: "SHIP", sku: part.sku })} className="px-2.5 py-1 rounded-md border border-white/15 text-cream/70 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed">Ship to user</button>
-              </span>
-            </div>
-          </ToolBox>
-        )}
+        {part && (() => {
+          const inStock = state.stock[part.sku] ?? 0;
+          const enroute = state.pendingOrders.filter((o) => o.sku === part.sku);
+          const eta = enroute.length ? Math.max(0, Math.min(...enroute.map((o) => o.arrivesAt - elapsed))) : null;
+          return (
+            <ToolBox label="Stockroom" done={stepDone("part")}>
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-cream/75">
+                  {part.name} · in stock: <span style={{ color: inStock > 0 ? "#2BBE6B" : "#EF4444" }}>{inStock}</span>
+                  {eta !== null && <span className="ml-2 text-electric/80 font-mono text-[11px]">arriving in {eta}s</span>}
+                </span>
+                <span className="flex gap-2">
+                  {inStock <= 0 && <button onClick={() => dispatch({ t: "ORDER", sku: part.sku })} className="px-2.5 py-1 rounded-md border border-electric/40 text-electric hover:bg-electric/10">Order (${part.unitCost})</button>}
+                  <button disabled={inStock <= 0} onClick={() => dispatch({ t: "SHIP", sku: part.sku })} className="px-2.5 py-1 rounded-md border border-white/15 text-cream/70 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed">Ship to user</button>
+                </span>
+              </div>
+              {inStock <= 0 && eta === null && <p className="font-mono text-[10px] text-cream/40 mt-1.5">Not in stock. Order it now so it lands before the SLA runs out.</p>}
+            </ToolBox>
+          );
+        })()}
 
         {item.ad && (
           <ToolBox label="Admin console" done={stepDone("ad")}>

@@ -33,6 +33,8 @@ export interface InventoryItem {
   stock: number;
   vendor: string;
   unitCost: number;
+  /** Shift-seconds between ordering and delivery. Default 30. Order early. */
+  leadSeconds?: number;
 }
 
 export interface KbArticle {
