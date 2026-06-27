@@ -172,6 +172,127 @@ export const EXTRA_TICKETS: { item: ShiftItem; track: Track }[] = [
       },
     },
   },
+
+  // ── Phone calls. The followups ARE the diagnostic: ask the right question to
+  // pin the issue (which stops the patience drain), then the fix unlocks. The
+  // correct fix requires ["phone"], so you cannot resolve a call you never
+  // actually listened to.
+  {
+    track: "helpdesk",
+    item: {
+      id: "call-vpn-home",
+      channel: "phone",
+      priority: "P2",
+      from: { name: "Diego Salas", role: "Sales" },
+      subject: "VPN won't connect from home",
+      slaMinutes: 20,
+      arriveAfter: 0,
+      reward: 42,
+      xp: 34,
+      phone: {
+        opener: "Hey, I'm working from home and the VPN just spins forever and never connects. I've got a deadline, can you help?",
+        followups: [
+          { label: "Did you get the multi-factor prompt on your phone when it tried to connect?", reply: "Now that you mention it, no, no prompt ever showed up.", correct: true },
+          { label: "Have you tried restarting your computer?", reply: "Yeah, twice already. Same thing." },
+          { label: "Is your home wifi working otherwise?", reply: "Yes, everything else loads fine." },
+        ],
+      },
+      goal: "Find out why the VPN hangs, then fix it.",
+      hint: "A VPN that spins forever often isn't the network. What step has to complete that the user might not be seeing?",
+      actions: [
+        { id: "reenroll-mfa", label: "Re-enroll their MFA device so the second factor can complete", correct: true, requires: ["phone"], csat: 12, teach: "Right. No MFA prompt means the second factor never fired, so the tunnel never finishes. Re-enrolling their authenticator fixes it. The spinning was the client waiting on a factor that never came." },
+        { id: "reset-vpn-config", label: "Reset their VPN client config", requires: ["phone"], csat: -5, teach: "The client is fine; the second factor never prompted. Resetting the config wastes their deadline and doesn't touch the cause." },
+        { id: "hotspot", label: "Tell them to switch to a mobile hotspot", csat: -6, teach: "Their home network is fine and you never pinned the issue. Ask the right question before you send them chasing their router." },
+      ],
+    },
+  },
+  {
+    track: "helpdesk",
+    item: {
+      id: "call-locked-vip",
+      channel: "phone",
+      priority: "P1",
+      from: { name: "Karen Pruitt", role: "VP Finance", vip: true },
+      subject: "Locked out minutes before a board meeting",
+      slaMinutes: 15,
+      arriveAfter: 0,
+      reward: 50,
+      xp: 42,
+      phone: {
+        opener: "This is Karen, I present to the board in ten minutes and I am completely locked out of my laptop. Please hurry.",
+        followups: [
+          { label: "Did you recently change your password, or is it prompting you for a new one?", reply: "Yes. It forced a change on Friday and I think I forgot the new one.", correct: true },
+          { label: "Is caps lock maybe on?", reply: "No, I already checked that." },
+          { label: "Is your wifi connected?", reply: "I cannot even log in, so I have no idea." },
+        ],
+      },
+      goal: "Get her back in, the right way, under pressure.",
+      hint: "She is important and she is rushing you. That is exactly when the verification step matters most.",
+      actions: [
+        { id: "verify-then-reset", label: "Verify her identity, then trigger a secure password reset and walk her through a new one", correct: true, requires: ["phone"], csat: 14, teach: "Correct, even under pressure. A forgotten post-change password is a reset, but you verify identity first. Doing it calmly gets the VP back in and keeps the door shut to anyone impersonating her." },
+        { id: "reset-no-verify", label: "Just reset it immediately without verifying, she's clearly the VP", csat: -8, ends: true, outcome: "mishandled", teach: "A panicked caller claiming to be an executive is the classic social-engineering setup. Resetting credentials without verifying identity is how attackers walk in. Verify first, every time, no matter who they say they are." },
+        { id: "tell-her-wait", label: "Tell her to file a ticket and wait in the queue", requires: ["phone"], csat: -6, teach: "You pinned the issue and then stranded her before the board. A verified reset takes a minute. Make the right call quickly." },
+      ],
+    },
+  },
+  {
+    track: "helpdesk",
+    item: {
+      id: "call-dead-laptop",
+      channel: "phone",
+      priority: "P3",
+      from: { name: "Priya Anand", role: "Design" },
+      subject: "Laptop is totally dead, demo this afternoon",
+      slaMinutes: 30,
+      arriveAfter: 0,
+      reward: 38,
+      xp: 30,
+      phone: {
+        opener: "My laptop is completely dead, no lights, nothing at all. I have to give a demo this afternoon and I'm panicking.",
+        followups: [
+          { label: "Is the charger plugged in, and do you see any light on the charger or laptop?", reply: "Huh, the charger light is off. The cable looks loose where it meets the wall.", correct: true },
+          { label: "Have you tried holding the power button down?", reply: "Yes, held it for ten seconds, nothing." },
+          { label: "Is the screen brightness turned all the way up?", reply: "It's totally black, there's no backlight at all." },
+        ],
+      },
+      goal: "Figure out why it's dead before you escalate to hardware.",
+      hint: "Dead means no power. Before you send a tech or order hardware, confirm power is actually reaching it.",
+      actions: [
+        { id: "reseat-charger", label: "Have them reseat the charger at the wall and the laptop, then confirm it charges", correct: true, requires: ["phone"], csat: 11, teach: "That's it. A loose charger at the wall meant zero power, which looks identical to a dead machine. Reseating it lights the charger and it boots. Cheapest fix there is, and you asked the question that found it." },
+        { id: "order-replacement", label: "Order them a replacement laptop", requires: ["phone"], csat: -6, teach: "You confirmed the charger light was off. That's a power-delivery issue, not a dead laptop. Don't burn budget on hardware you don't need." },
+        { id: "book-repair", label: "Book a hardware repair appointment", csat: -5, teach: "Booking a repair before checking power sends a working laptop to the bench. Ask about power first." },
+      ],
+    },
+  },
+  {
+    track: "helpdesk",
+    item: {
+      id: "call-phish-report",
+      channel: "phone",
+      priority: "P2",
+      from: { name: "Tom Reilly", role: "Operations" },
+      subject: "Caller asking if a 'mailbox full' email is real",
+      slaMinutes: 25,
+      arriveAfter: 0,
+      reward: 40,
+      xp: 32,
+      phone: {
+        opener: "I got an email saying my mailbox is full and I have to verify my password at a link or lose my email. It looks official. Is it real? I almost clicked.",
+        followups: [
+          { label: "Can you read me the sender's address and the link domain exactly?", reply: "Sender is it-support@mail-secure-verify.com and the link goes to mail-secure-verify dot com.", correct: true },
+          { label: "Did you click the link?", reply: "No, I called you first." },
+          { label: "Can you tell me your password so I can check the account?", reply: "Wait, why would you need my password?" },
+        ],
+      },
+      goal: "Decide what this is and handle it without making it worse.",
+      hint: "The pin is in the sender and the link. And note: you never need their password to help them.",
+      actions: [
+        { id: "confirm-phish-report", label: "Confirm it's phishing, tell them not to click, report it, and check who else received it", correct: true, requires: ["phone"], csat: 12, outcome: "reported", teach: "Right call. A lookalike domain asking for password verification is textbook phishing. Praise them for asking, report it, and pull it from other mailboxes since it likely hit more than one person." },
+        { id: "just-delete", label: "Tell them to just delete it and move on", requires: ["phone"], csat: -5, teach: "Deleting protects one person. If it landed in their inbox it landed in others. Report it so it can be pulled org-wide." },
+        { id: "reset-their-pw", label: "Reset their password just to be safe", csat: -4, teach: "They told you they didn't click. Resetting is noise, and you skipped the real job: report it and protect everyone else who got the same message." },
+      ],
+    },
+  },
 ];
 
 // A second incident group (file-server outage) so Doubles has more variety.
