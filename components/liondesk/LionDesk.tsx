@@ -126,7 +126,7 @@ function makeReducer(shift: Shift) {
         // its deadline breaches now (one-time CSAT hit, heavier for VIPs).
         let items = ns.items;
         let csat = ns.csat;
-        const breached: string[] = [];
+        const breached: { subject: string; vip: boolean }[] = [];
         shift.items.forEach((i) => {
           let it = items[i.id];
           if (isTerminal(it.status) || !isLive(i, items) || elapsed < i.arriveAfter) return;
@@ -137,15 +137,16 @@ function makeReducer(shift: Shift) {
           if (it.breached) return;
           if (elapsed >= landedAt + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
             const base = BREACH_PENALTY[i.priority];
-            const pen = i.from.vip ? Math.round(base * 1.5) : base;
+            // A breached VIP escalates to your manager: it hurts more.
+            const pen = i.from.vip ? base * 2 : base;
             items = { ...items, [i.id]: { ...it, breached: true } };
             csat = clamp(csat - pen);
-            breached.push(i.subject);
+            breached.push({ subject: i.subject, vip: !!i.from.vip });
           }
         });
         if (breached.length) {
           ns = { ...ns, items, csat };
-          breached.forEach((s) => { ns = pushFeed(ns, `SLA breach: ${s}`, "bad"); });
+          breached.forEach((b) => { ns = pushFeed(ns, b.vip ? `Escalated to your manager: ${b.subject}` : `SLA breach: ${b.subject}`, "bad"); });
         }
         if (nextLeft === 0) ns = { ...ns, ended: true };
         return ns;

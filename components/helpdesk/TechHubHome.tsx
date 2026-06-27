@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -32,6 +32,16 @@ export default function TechHubHome() {
 
   return (
     <div className="space-y-6">
+      {/* Tutorial entry for newcomers. */}
+      <Link href="/learn/techhub/tutorial" className="group flex items-center gap-3 rounded-2xl border border-[#2BBE6B]/25 bg-[#2BBE6B]/[0.05] p-3 hover:bg-[#2BBE6B]/[0.09] transition-colors">
+        <GraduationCap size={20} weight="fill" color="#2BBE6B" aria-hidden="true" />
+        <div className="flex-1 min-w-0">
+          <p className="font-syne font-semibold text-sm text-cream">New here? Start the tutorial</p>
+          <p className="text-cream/55 text-[11px]">Three easy tickets to learn the desk. No clock pressure.</p>
+        </div>
+        <ArrowRight size={14} weight="bold" color="#2BBE6B" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
+      </Link>
+
       {/* Combination modes — a different mix of tickets + mutators every session. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Link href="/learn/techhub/surprise?daily=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.14) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.3)" }}>

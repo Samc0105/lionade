@@ -18,13 +18,14 @@ export interface TechhubStats {
   auditWins: number;
   tracksPlayed: string[];
   mutatorsSeen: string[];
+  careerXp: number;
 }
 
 const STATS_KEY = "lionade.techhub.stats.v1";
 const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
 
 function emptyStats(): TechhubStats {
-  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [] };
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0 };
 }
 
 export function getStats(): TechhubStats {
@@ -126,7 +127,7 @@ function syncUnlocked(): string[] {
 export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   const cleared = r.score >= PASS;
   const s = getStats();
-  if (cleared) s.shiftsCleared++;
+  if (cleared) { s.shiftsCleared++; s.careerXp += r.xp; }
   if (r.csat >= 100 && cleared) s.perfectShifts++;
   const modIds = (shift.modifiers ?? []).map((m) => m.id);
   for (const id of modIds) if (!s.mutatorsSeen.includes(id)) s.mutatorsSeen.push(id);
@@ -144,4 +145,43 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
 /** Called after a night ends so night-based achievements unlock promptly. */
 export function refreshAchievements(): string[] {
   return syncUnlocked();
+}
+
+// ── Career level ──
+// Everything you play feeds one XP pool with a rising title ladder.
+const CAREER_TITLES = [
+  "Intern", "Help Desk Tech", "Support Specialist", "Sysadmin", "Network Admin",
+  "Security Analyst", "Senior Engineer", "Team Lead", "IT Manager", "Director of IT", "TechHub CTO",
+];
+const STEP = 150;
+function cumulativeFor(level: number): number {
+  return (STEP * ((level - 1) * level)) / 2;
+}
+
+export interface CareerLevel { level: number; title: string; xp: number; intoLevel: number; forNext: number; pct: number }
+
+export function getCareerLevel(): CareerLevel {
+  const xp = getStats().careerXp;
+  let level = 1;
+  while (cumulativeFor(level + 1) <= xp) level++;
+  const base = cumulativeFor(level);
+  const next = cumulativeFor(level + 1);
+  const intoLevel = xp - base;
+  const forNext = next - base;
+  return {
+    level,
+    title: CAREER_TITLES[Math.min(level - 1, CAREER_TITLES.length - 1)],
+    xp,
+    intoLevel,
+    forNext,
+    pct: forNext > 0 ? Math.round((intoLevel / forNext) * 100) : 100,
+  };
+}
+
+/** Add career XP directly (Night Shift has no ShiftResult to derive it from). */
+export function addCareerXp(amount: number): void {
+  if (amount <= 0) return;
+  const s = getStats();
+  s.careerXp += Math.round(amount);
+  saveStats(s);
 }

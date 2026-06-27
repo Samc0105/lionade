@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Trophy, LockSimple, CheckCircle } from "@phosphor-icons/react";
-import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, type TechhubStats, type HistoryEntry } from "@/lib/liondesk/stats";
+import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, getCareerLevel, type TechhubStats, type HistoryEntry, type CareerLevel } from "@/lib/liondesk/stats";
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
 import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked } from "@/lib/liondesk/themes";
+import { isMuted, setMuted } from "@/lib/liondesk/sound";
 
 export default function AchievementsPanel() {
   const [mounted, setMounted] = useState(false);
@@ -13,6 +14,8 @@ export default function AchievementsPanel() {
   const [night, setNight] = useState({ max: 0, endless: 0 });
   const [equipped, setEquipped] = useState("standard");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [career, setCareer] = useState<CareerLevel | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -21,11 +24,18 @@ export default function AchievementsPanel() {
     setNight({ max: getMaxNightSurvived(), endless: getEndlessBest() });
     setEquipped(getEquippedThemeId());
     setHistory(getHistory());
+    setCareer(getCareerLevel());
+    setSoundOn(!isMuted());
   }, []);
 
   function equip(id: string) {
     setEquippedTheme(id);
     setEquipped(id);
+  }
+  function toggleSound() {
+    const next = !soundOn;
+    setMuted(!next);
+    setSoundOn(next);
   }
 
   const total = ACHIEVEMENTS.length;
@@ -44,6 +54,23 @@ export default function AchievementsPanel() {
 
   return (
     <div className="space-y-6">
+      {/* career level */}
+      {mounted && career && (
+        <div className="rounded-2xl border border-electric/25 bg-electric/[0.05] p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bebas text-2xl text-cream flex-shrink-0" style={{ background: "rgba(74,144,217,0.18)", border: "1px solid rgba(74,144,217,0.4)" }}>{career.level}</div>
+            <div className="flex-1 min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-electric/90">level {career.level}</p>
+              <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{career.title}</p>
+              <div className="h-1.5 rounded-full overflow-hidden bg-white/10 mt-2">
+                <div className="h-full" style={{ width: `${career.pct}%`, background: "linear-gradient(90deg,#4A90D9,#FFD700)" }} />
+              </div>
+              <p className="font-mono text-[9px] text-cream/45 mt-1">{career.intoLevel} / {career.forNext} XP to level {career.level + 1}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* progress header */}
       <div className="rounded-2xl border border-gold/20 bg-gold/[0.04] p-5">
         <div className="flex items-center gap-3">
@@ -65,6 +92,15 @@ export default function AchievementsPanel() {
             <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">{t.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* settings */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">settings</p>
+        <div className="flex items-center justify-between rounded-lg border border-white/[0.07] px-3 py-2.5">
+          <span className="text-cream text-sm">Sound</span>
+          <button onClick={toggleSound} className={`px-3 py-1 rounded-md font-mono text-[11px] border transition-colors ${soundOn ? "border-[#2BBE6B]/50 bg-[#2BBE6B]/10 text-[#2BBE6B]" : "border-white/15 text-cream/55"}`}>{soundOn ? "On" : "Off"}</button>
+        </div>
       </div>
 
       {/* desk themes */}
