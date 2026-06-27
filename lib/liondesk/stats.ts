@@ -6,7 +6,7 @@
 import type { Shift } from "./types";
 import type { ShiftResult } from "@/components/liondesk/LionDesk";
 import { getMaxNightSurvived, getEndlessBest } from "./nightshift";
-import { recordShiftReputation } from "./reputation";
+import { recordShiftReputation, getReputation, REP_DEPTS } from "./reputation";
 
 const PASS = 50;
 
@@ -21,13 +21,14 @@ export interface TechhubStats {
   mutatorsSeen: string[];
   careerXp: number;
   bestShiftScore: number;
+  weeklyCleared: boolean;
 }
 
 const STATS_KEY = "lionade.techhub.stats.v1";
 const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
 
 function emptyStats(): TechhubStats {
-  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0 };
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0, weeklyCleared: false };
 }
 
 export function getStats(): TechhubStats {
@@ -70,7 +71,7 @@ export function recordHistoryEntry(e: HistoryEntry): void {
 }
 
 export interface Achievement { id: string; name: string; desc: string }
-interface CheckCtx { stats: TechhubStats; maxNight: number; endlessBest: number }
+interface CheckCtx { stats: TechhubStats; maxNight: number; endlessBest: number; careerLevel: number; reputation: Record<string, number> }
 
 const DEFS: (Achievement & { check: (c: CheckCtx) => boolean })[] = [
   { id: "first-day", name: "First Day", desc: "Clear your first shift.", check: (c) => c.stats.shiftsCleared >= 1 },
@@ -85,6 +86,11 @@ const DEFS: (Achievement & { check: (c: CheckCtx) => boolean })[] = [
   { id: "night-owl", name: "Night Owl", desc: "Survive a night.", check: (c) => c.maxNight >= 1 },
   { id: "dawn", name: "Dawn", desc: "Survive Night 6.", check: (c) => c.maxNight >= 6 },
   { id: "unkillable", name: "Unkillable", desc: "Last 3 minutes in Endless.", check: (c) => c.endlessBest >= 180 },
+  { id: "promoted", name: "Promoted", desc: "Reach career level 5.", check: (c) => c.careerLevel >= 5 },
+  { id: "score-hunter", name: "Score Hunter", desc: "Finish a shift with a 90+ score.", check: (c) => c.stats.bestShiftScore >= 90 },
+  { id: "weekly-warrior", name: "Weekly Warrior", desc: "Clear a Weekly Challenge.", check: (c) => c.stats.weeklyCleared },
+  { id: "trusted", name: "Trusted", desc: "Get a department to 90 reputation.", check: (c) => Object.values(c.reputation).some((v) => v >= 90) },
+  { id: "beloved", name: "Beloved", desc: "Every department at 70 or above.", check: (c) => REP_DEPTS.every((d) => (c.reputation[d] ?? 50) >= 70) },
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -93,7 +99,7 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 function ctx(): CheckCtx {
-  return { stats: getStats(), maxNight: getMaxNightSurvived(), endlessBest: getEndlessBest() };
+  return { stats: getStats(), maxNight: getMaxNightSurvived(), endlessBest: getEndlessBest(), careerLevel: getCareerLevel().level, reputation: getReputation() };
 }
 
 /** All achievement ids currently satisfied. */
@@ -129,7 +135,15 @@ function syncUnlocked(): string[] {
 export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   const cleared = r.score >= PASS;
   const s = getStats();
-  if (cleared) { s.shiftsCleared++; s.careerXp += r.xp; }
+  let leveledTo = 0;
+  if (cleared) {
+    const before = levelForXp(s.careerXp);
+    s.shiftsCleared++;
+    s.careerXp += r.xp;
+    if (shift.name === "Weekly Challenge") s.weeklyCleared = true;
+    const after = levelForXp(s.careerXp);
+    if (after > before) leveledTo = after;
+  }
   s.bestShiftScore = Math.max(s.bestShiftScore, r.score);
   if (r.csat >= 100 && cleared) s.perfectShifts++;
   const modIds = (shift.modifiers ?? []).map((m) => m.id);
@@ -143,7 +157,9 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   recordShiftReputation(shift, r.csat);
   const mods = (shift.modifiers ?? []).map((m) => m.label);
   recordHistoryEntry({ kind: "shift", label: shift.name, detail: `${r.grade} · ${r.csat}% CSAT${mods.length ? " · " + mods.join(", ") : ""}`, at: Date.now() });
-  return syncUnlocked();
+  const fresh = syncUnlocked();
+  if (leveledTo) fresh.push(`levelup:${leveledTo}:${titleForLevel(leveledTo)}`);
+  return fresh;
 }
 
 /** Called after a night ends so night-based achievements unlock promptly. */
@@ -164,22 +180,23 @@ function cumulativeFor(level: number): number {
 
 export interface CareerLevel { level: number; title: string; xp: number; intoLevel: number; forNext: number; pct: number }
 
-export function getCareerLevel(): CareerLevel {
-  const xp = getStats().careerXp;
+function levelForXp(xp: number): number {
   let level = 1;
   while (cumulativeFor(level + 1) <= xp) level++;
+  return level;
+}
+function titleForLevel(level: number): string {
+  return CAREER_TITLES[Math.min(level - 1, CAREER_TITLES.length - 1)];
+}
+
+export function getCareerLevel(): CareerLevel {
+  const xp = getStats().careerXp;
+  const level = levelForXp(xp);
   const base = cumulativeFor(level);
   const next = cumulativeFor(level + 1);
   const intoLevel = xp - base;
   const forNext = next - base;
-  return {
-    level,
-    title: CAREER_TITLES[Math.min(level - 1, CAREER_TITLES.length - 1)],
-    xp,
-    intoLevel,
-    forNext,
-    pct: forNext > 0 ? Math.round((intoLevel / forNext) * 100) : 100,
-  };
+  return { level, title: titleForLevel(level), xp, intoLevel, forNext, pct: forNext > 0 ? Math.round((intoLevel / forNext) * 100) : 100 };
 }
 
 /** Add career XP directly (Night Shift has no ShiftResult to derive it from). */
