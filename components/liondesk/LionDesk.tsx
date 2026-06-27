@@ -64,6 +64,10 @@ interface State {
   items: Record<string, ItemRuntime>;
   feed: FeedEntry[];
   feedSeq: number;
+  // Session-local lifelines (no economy). Coffee resets a call's patience;
+  // a senior reveals the right move on the open item. Spend them wisely.
+  lifelines: { coffee: number; senior: number };
+  revealed: string[];
 }
 
 type Action =
@@ -78,6 +82,8 @@ type Action =
   | { t: "SHIP"; sku: string }
   | { t: "PHONE"; id: string; index: number; correct: boolean }
   | { t: "RESOLVE"; id: string; actionId: string }
+  | { t: "COFFEE" }
+  | { t: "SENIOR"; id: string }
   | { t: "END" };
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
@@ -129,6 +135,8 @@ function buildInitial(shift: Shift): State {
     items,
     feed: [],
     feedSeq: 0,
+    lifelines: { coffee: 1, senior: 2 },
+    revealed: [],
   };
 }
 
@@ -338,6 +346,26 @@ function makeReducer(shift: Shift) {
         const allDone = shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items));
         if (allDone) ns = { ...ns, ended: true };
         return ns;
+      }
+      case "COFFEE": {
+        if (state.lifelines.coffee <= 0) return state;
+        const ai = state.activeItemId ? shift.items.find((i) => i.id === state.activeItemId) : null;
+        if (!ai || ai.channel !== "phone") return pushFeed(state, "Coffee steadies you on a live call. Open the call first.", "info");
+        const rt = state.items[ai.id];
+        if (isTerminal(rt.status) || rt.steps.includes("phone")) return state;
+        return pushFeed(
+          { ...state, lifelines: { ...state.lifelines, coffee: state.lifelines.coffee - 1 }, items: { ...state.items, [ai.id]: { ...rt, patience: 100 } } },
+          "You took a breath and a sip. The caller's patience is reset.", "good",
+        );
+      }
+      case "SENIOR": {
+        if (state.lifelines.senior <= 0 || state.revealed.includes(a.id)) return state;
+        const item = shift.items.find((i) => i.id === a.id);
+        if (!item || isTerminal(state.items[a.id].status)) return state;
+        return pushFeed(
+          { ...state, lifelines: { ...state.lifelines, senior: state.lifelines.senior - 1 }, revealed: [...state.revealed, a.id] },
+          "A senior leans over: go with the highlighted move.", "info",
+        );
       }
       case "END":
         return { ...state, ended: true };
@@ -850,17 +878,42 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
         </div>
       )}
 
+      {/* lifelines */}
+      {!isTerminal(it.status) && (
+        <div className="flex items-center gap-2 mt-4">
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40">Lifelines</span>
+          <button
+            onClick={() => dispatch({ t: "COFFEE" })}
+            disabled={state.lifelines.coffee <= 0 || item.channel !== "phone" || it.steps.includes("phone")}
+            title="Reset the active call's patience"
+            className="font-mono text-[11px] px-2 py-1 rounded-md border border-white/15 text-cream/75 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"
+          >☕ Coffee ({state.lifelines.coffee})</button>
+          <button
+            onClick={() => dispatch({ t: "SENIOR", id: item.id })}
+            disabled={state.lifelines.senior <= 0 || state.revealed.includes(item.id)}
+            title="A senior reveals the right move on this item"
+            className="font-mono text-[11px] px-2 py-1 rounded-md border border-white/15 text-cream/75 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"
+          >🎓 Ask a senior ({state.lifelines.senior})</button>
+        </div>
+      )}
+
       {/* actions */}
       {!isTerminal(it.status) ? (
-        <div className="mt-4">
+        <div className="mt-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">Choose your move · {item.goal}</p>
           <div className="grid gap-2">
-            {item.actions.map((act) => (
-              <button key={act.id} onClick={() => dispatch({ t: "RESOLVE", id: item.id, actionId: act.id })} className="text-left rounded-xl border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/25 transition-colors p-3">
-                <span className="text-cream text-sm">{act.label}</span>
-                {act.detail && <span className="block font-mono text-[11px] text-cream/50 mt-0.5">{act.detail}</span>}
-              </button>
-            ))}
+            {item.actions.map((act) => {
+              const recommended = state.revealed.includes(item.id) && act.correct;
+              return (
+                <button key={act.id} onClick={() => dispatch({ t: "RESOLVE", id: item.id, actionId: act.id })} className="text-left rounded-xl border bg-white/[0.02] hover:bg-white/[0.05] transition-colors p-3" style={recommended ? { borderColor: "rgba(255,215,0,0.55)", background: "rgba(255,215,0,0.06)" } : { borderColor: "rgba(255,255,255,0.1)" }}>
+                  <span className="flex items-center gap-2">
+                    <span className="text-cream text-sm">{act.label}</span>
+                    {recommended && <span className="ml-auto shrink-0 font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">senior's pick</span>}
+                  </span>
+                  {act.detail && <span className="block font-mono text-[11px] text-cream/50 mt-0.5">{act.detail}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (
