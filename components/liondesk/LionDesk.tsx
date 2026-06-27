@@ -86,6 +86,7 @@ type Action =
   | { t: "RESOLVE"; id: string; actionId: string }
   | { t: "COFFEE" }
   | { t: "SENIOR"; id: string }
+  | { t: "PING"; text: string }
   | { t: "END" };
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
@@ -370,6 +371,8 @@ function makeReducer(shift: Shift) {
           "A senior leans over: go with the highlighted move.", "info",
         );
       }
+      case "PING":
+        return pushFeed(state, a.text, "info");
       case "START":
         return state.started ? state : { ...state, started: true };
       case "END":
@@ -511,6 +514,30 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
     setMutedState(next);
     if (!next) resumeAudio();
   }
+
+  // Coworker chatter: teammates react to how the shift is going. Each line fires
+  // once (deduped via the ref) so the office feels alive without spamming.
+  const coworkerFired = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!state.started || state.ended) return;
+    const fire = (key: string, text: string) => {
+      if (coworkerFired.current.has(key)) return;
+      coworkerFired.current.add(key);
+      dispatch({ t: "PING", text });
+    };
+    const el = shift.durationSeconds - state.secondsLeft;
+    const mish = shift.items.filter((i) => state.items[i.id].status === "mishandled").length;
+    const breached = shift.items.filter((i) => state.items[i.id].breached).length;
+    const resolvedN = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
+    if (el >= 6) fire("hello", "Nadia (next desk): morning. Queue's been busy, yell if you need a hand.");
+    if (resolvedN >= 3) fire("rolling", "Dev (teammate): you're carrying the board today. Nice pace.");
+    if (state.csat < 60) fire("low-csat", "Nadia: rough patch, shake it off. One ticket at a time.");
+    if (breached >= 1) fire("breach", "Dev: don't sweat the SLA. Triage the top of the queue and keep moving.");
+    if (mish >= 1) fire("mish", "Nadia: one got away. Happens to all of us. Next one.");
+    if (el >= shift.durationSeconds / 2) fire("halfway", "Dev: halfway in and holding. Strong work.");
+    if (state.secondsLeft <= 30 && state.secondsLeft > 0) fire("almost", "Nadia: end of shift coming up. Strong finish.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const elapsed = shift.durationSeconds - state.secondsLeft;
   const landed = (i: ShiftItem) => elapsed >= i.arriveAfter && isLive(i, state.items);
