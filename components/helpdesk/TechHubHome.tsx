@@ -42,6 +42,23 @@ export default function TechHubHome() {
         <ArrowRight size={14} weight="bold" color="#2BBE6B" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
       </Link>
 
+      {/* Weekly Challenge — a shared gauntlet, fixed for the week. */}
+      <Link href="/learn/techhub/surprise?weekly=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(239,68,68,0.08) 55%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.35)" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.45)" }}>
+            <Trophy size={22} weight="fill" color="#FFD700" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-xl text-cream tracking-wider leading-none">WEEKLY CHALLENGE</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/30">this week</span>
+            </div>
+            <p className="text-cream/65 text-xs mt-1.5">One brutal stacked-mutator gauntlet, the same for everyone all week. How high can you grade?</p>
+          </div>
+          <ArrowRight size={18} weight="bold" color="#FFD700" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
       {/* Combination modes — a different mix of tickets + mutators every session. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Link href="/learn/techhub/surprise?daily=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.14) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.3)" }}>

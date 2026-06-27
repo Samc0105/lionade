@@ -11,8 +11,12 @@ import { SHIFT_5 } from "./shift5";
 import { SOC_SHIFT_1 } from "./soc-shift1";
 import { SWE_SHIFT_1 } from "./swe-shift1";
 import { REDTEAM_SHIFT_1 } from "./redteam-shift1";
+import extraShifts from "./extra-shifts.generated.json";
 
-export const SHIFTS: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1];
+// Authored campaign shifts + the workflow-authored second shifts (SOC/SWE/Red
+// Team), which auto-register once extra-shifts.generated.json is populated.
+const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1];
+export const SHIFTS: Shift[] = [...AUTHORED, ...(extraShifts as unknown as Shift[])];
 
 export function shiftsForTrack(track: Track): Shift[] {
   return SHIFTS.filter((s) => s.track === track).sort((a, b) => a.order - b.order);

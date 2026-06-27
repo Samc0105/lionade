@@ -12,11 +12,14 @@ export default function SurprisePage() {
   const sp = useSearchParams();
   const daily = sp?.get("daily") === "1";
   const chaos = sp?.get("chaos") === "1";
+  const weekly = sp?.get("weekly") === "1";
   const combo = sp?.get("combo") ?? undefined;
 
-  const title = combo ? "SHARED COMBO" : chaos && daily ? "DAILY CHAOS" : chaos ? "CHAOS SHIFT" : daily ? "DAILY COMBO" : "SURPRISE SHIFT";
+  const title = combo ? "SHARED COMBO" : weekly ? "WEEKLY CHALLENGE" : chaos && daily ? "DAILY CHAOS" : chaos ? "CHAOS SHIFT" : daily ? "DAILY COMBO" : "SURPRISE SHIFT";
   const sub = combo
     ? "Someone's hand-built combo. Run it back for a fresh draw of the same recipe."
+    : weekly
+    ? "This week's gauntlet. The same brutal combo for everyone, all week."
     : chaos && daily
     ? "Today's brutal gauntlet. Three or four mutators stacked, same for everyone."
     : daily
@@ -37,7 +40,7 @@ export default function SurprisePage() {
         </div>
 
         <div className="animate-slide-up" style={{ animationDelay: "0.06s" }}>
-          <PlayGeneratedShift daily={daily} chaos={chaos} comboCode={combo} />
+          <PlayGeneratedShift daily={daily} chaos={chaos} weekly={weekly} comboCode={combo} />
         </div>
       </div>
     </ProtectedRoute>

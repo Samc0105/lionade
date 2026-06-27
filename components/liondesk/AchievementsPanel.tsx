@@ -6,6 +6,7 @@ import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, getCareerLevel, ty
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
 import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked } from "@/lib/liondesk/themes";
 import { isMuted, setMuted } from "@/lib/liondesk/sound";
+import { getReputation, REP_DEPTS } from "@/lib/liondesk/reputation";
 
 export default function AchievementsPanel() {
   const [mounted, setMounted] = useState(false);
@@ -16,6 +17,7 @@ export default function AchievementsPanel() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [career, setCareer] = useState<CareerLevel | null>(null);
   const [soundOn, setSoundOn] = useState(true);
+  const [reputation, setReputation] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -26,6 +28,7 @@ export default function AchievementsPanel() {
     setHistory(getHistory());
     setCareer(getCareerLevel());
     setSoundOn(!isMuted());
+    setReputation(getReputation());
   }, []);
 
   function equip(id: string) {
@@ -50,6 +53,7 @@ export default function AchievementsPanel() {
     { label: "endless best", value: night.endless ? fmt(night.endless) : "—" },
     { label: "mutators seen", value: stats?.mutatorsSeen.length ?? 0 },
     { label: "tracks played", value: stats?.tracksPlayed.length ?? 0 },
+    { label: "best score", value: stats?.bestShiftScore ?? 0 },
   ];
 
   return (
@@ -85,13 +89,31 @@ export default function AchievementsPanel() {
       </div>
 
       {/* lifetime stats */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {tiles.map((t) => (
           <div key={t.label} className="rounded-lg border border-white/[0.07] p-2.5 text-center">
             <p className="font-bebas text-xl tabular-nums text-cream leading-none">{mounted ? t.value : "—"}</p>
             <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">{t.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* department reputation */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">department reputation</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {REP_DEPTS.map((d) => {
+            const v = mounted ? (reputation[d] ?? 50) : 50;
+            const color = v >= 70 ? "#2BBE6B" : v >= 40 ? "#F59E0B" : "#EF4444";
+            return (
+              <div key={d} className="flex items-center gap-2 rounded-lg border border-white/[0.06] px-3 py-2">
+                <span className="text-cream text-sm w-24 truncate">{d}</span>
+                <span className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/10"><span className="block h-full" style={{ width: `${v}%`, background: color }} /></span>
+                <span className="font-mono text-[10px] tabular-nums" style={{ color }}>{v}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* settings */}

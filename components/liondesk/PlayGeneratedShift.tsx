@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LionDesk from "@/components/liondesk/LionDesk";
-import { generateShift, dateSeed } from "@/lib/liondesk/generate";
+import { generateShift, dateSeed, weekSeed } from "@/lib/liondesk/generate";
 import { decodeCombo } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
@@ -11,6 +11,7 @@ import type { Shift } from "@/lib/liondesk/types";
 interface Props {
   daily?: boolean;
   chaos?: boolean;
+  weekly?: boolean;
   comboCode?: string;
 }
 
@@ -21,7 +22,7 @@ interface Props {
 // - chaos: 3-4 stacked modifiers, rerolls.
 // - default: a random Surprise Shift, rerolls.
 // Generated after mount so the RNG / date never run during SSR.
-export default function PlayGeneratedShift({ daily = false, chaos = false, comboCode }: Props) {
+export default function PlayGeneratedShift({ daily = false, chaos = false, weekly = false, comboCode }: Props) {
   const [shift, setShift] = useState<Shift | null>(null);
   const [runKey, setRunKey] = useState(0);
   const [newAch, setNewAch] = useState<string[]>([]);
@@ -31,19 +32,20 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, combo
       const c = decodeCombo(comboCode);
       if (c) return generateShift({ track: c.track, count: c.count, modifierIds: c.modifierIds, name: "Shared Combo" });
     }
+    if (weekly) return generateShift({ seed: weekSeed(), chaos: true, name: "Weekly Challenge" });
     if (chaos && daily) return generateShift({ seed: dateSeed(), chaos: true, name: "Daily Chaos" });
     if (chaos) return generateShift({ chaos: true, name: "Chaos Shift" });
     if (daily) return generateShift({ seed: dateSeed(), name: "Daily Combo" });
     return generateShift({ name: "Surprise Shift" });
   }
 
-  // daily and daily-chaos are the fixed shared challenges; everything else rerolls.
-  const rerollable = !daily;
+  // daily, daily-chaos, and weekly are the fixed shared challenges; else rerolls.
+  const rerollable = !daily && !weekly;
 
   useEffect(() => {
     setShift(makeShift());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [daily, chaos, comboCode]);
+  }, [daily, chaos, weekly, comboCode]);
 
   function reroll() {
     setShift(makeShift());

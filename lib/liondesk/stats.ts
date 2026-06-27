@@ -6,6 +6,7 @@
 import type { Shift } from "./types";
 import type { ShiftResult } from "@/components/liondesk/LionDesk";
 import { getMaxNightSurvived, getEndlessBest } from "./nightshift";
+import { recordShiftReputation } from "./reputation";
 
 const PASS = 50;
 
@@ -19,13 +20,14 @@ export interface TechhubStats {
   tracksPlayed: string[];
   mutatorsSeen: string[];
   careerXp: number;
+  bestShiftScore: number;
 }
 
 const STATS_KEY = "lionade.techhub.stats.v1";
 const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
 
 function emptyStats(): TechhubStats {
-  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0 };
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0 };
 }
 
 export function getStats(): TechhubStats {
@@ -128,6 +130,7 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   const cleared = r.score >= PASS;
   const s = getStats();
   if (cleared) { s.shiftsCleared++; s.careerXp += r.xp; }
+  s.bestShiftScore = Math.max(s.bestShiftScore, r.score);
   if (r.csat >= 100 && cleared) s.perfectShifts++;
   const modIds = (shift.modifiers ?? []).map((m) => m.id);
   for (const id of modIds) if (!s.mutatorsSeen.includes(id)) s.mutatorsSeen.push(id);
@@ -137,6 +140,7 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   if (cleared && modIds.includes("skeleton")) s.skeletonWins++;
   if (cleared && modIds.includes("audit")) s.auditWins++;
   saveStats(s);
+  recordShiftReputation(shift, r.csat);
   const mods = (shift.modifiers ?? []).map((m) => m.label);
   recordHistoryEntry({ kind: "shift", label: shift.name, detail: `${r.grade} · ${r.csat}% CSAT${mods.length ? " · " + mods.join(", ") : ""}`, at: Date.now() });
   return syncUnlocked();

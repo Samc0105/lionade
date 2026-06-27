@@ -58,6 +58,13 @@ export function dateSeed(d: Date = new Date()): number {
   return h || 1;
 }
 
+/** Deterministic seed for "this week" so the Weekly Challenge is shared. */
+export function weekSeed(d: Date = new Date()): number {
+  const onejan = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+  return ((d.getFullYear() * 53 + week) >>> 0) || 1;
+}
+
 function rollModifiers(rnd: () => number): string[] {
   const ids = shuffle(MODIFIERS.map((m) => m.id), rnd);
   return ids.slice(0, rnd() < 0.5 ? 1 : 2);
