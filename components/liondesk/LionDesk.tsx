@@ -50,6 +50,7 @@ interface PendingOrder { seq: number; sku: string; arrivesAt: number }
 interface State {
   secondsLeft: number;
   started: boolean;
+  difficulty: Difficulty;
   ended: boolean;
   csat: number;
   fangs: number;
@@ -73,7 +74,7 @@ interface State {
 
 type Action =
   | { t: "TICK" }
-  | { t: "START" }
+  | { t: "START"; difficulty: Difficulty }
   | { t: "APP"; app: AppId }
   | { t: "OPEN"; id: string }
   | { t: "CLOSE" }
@@ -110,6 +111,19 @@ const VENDOR_LEAD: Record<string, number> = { "Amazon Biz": 18, Newegg: 28, CDW:
 const PATIENCE_DECAY = 2;
 const PATIENCE_WRONG = 18;
 const PATIENCE_HANGUP_PENALTY = 12;
+
+// Difficulty scales the whole desk: how much SLA budget you get, how hard wrong
+// moves and breaches hit, how fast callers lose patience, and how many lifelines
+// you start with. Picked at clock-in.
+type Difficulty = "easy" | "normal" | "hard";
+const DIFF: Record<Difficulty, { sla: number; pen: number; patience: number; csat: number; coffee: number; senior: number; label: string; desc: string }> = {
+  easy: { sla: 1.4, pen: 0.6, patience: 0.6, csat: 0.7, coffee: 2, senior: 3, label: "Easy", desc: "Generous clock, softer penalties, extra lifelines." },
+  normal: { sla: 1.0, pen: 1.0, patience: 1.0, csat: 1.0, coffee: 1, senior: 2, label: "Normal", desc: "The standard desk." },
+  hard: { sla: 0.75, pen: 1.4, patience: 1.5, csat: 1.3, coffee: 0, senior: 1, label: "Hard", desc: "Tight SLAs, harsh penalties, one lifeline." },
+};
+function slaBudget(shift: Shift, p: Priority, diff: Difficulty): number {
+  return SLA_BUDGET[p] * (shift.slaScale ?? 1) * DIFF[diff].sla;
+}
 function leadFor(p: { leadSeconds?: number; vendor: string }): number {
   return p.leadSeconds ?? VENDOR_LEAD[p.vendor] ?? DEFAULT_LEAD;
 }
@@ -124,6 +138,7 @@ function buildInitial(shift: Shift): State {
   return {
     secondsLeft: shift.durationSeconds,
     started: false,
+    difficulty: "normal",
     ended: false,
     csat: 100,
     fangs: 0,
@@ -171,10 +186,10 @@ function makeReducer(shift: Shift) {
           const landedAt = it.landedAt ?? elapsed;
           if (it.landedAt == null) { it = { ...it, landedAt }; items = { ...items, [i.id]: it }; }
           if (it.breached) return;
-          if (elapsed >= landedAt + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1)) {
-            const base = BREACH_PENALTY[i.priority];
+          if (elapsed >= landedAt + slaBudget(shift, i.priority, ns.difficulty)) {
+            const base = BREACH_PENALTY[i.priority] * DIFF[ns.difficulty].pen;
             // A breached VIP escalates to your manager: it hurts more.
-            const pen = i.from.vip ? base * 2 : base;
+            const pen = Math.round(i.from.vip ? base * 2 : base);
             items = { ...items, [i.id]: { ...it, breached: true } };
             csat = clamp(csat - pen);
             breached.push({ subject: i.subject, vip: !!i.from.vip });
@@ -205,7 +220,7 @@ function makeReducer(shift: Shift) {
           const ai = shift.items.find((i) => i.id === ns.activeItemId);
           const rt = ai ? ns.items[ai.id] : null;
           if (ai && rt && ai.channel === "phone" && !isTerminal(rt.status) && rt.patience != null && !rt.steps.includes("phone") && elapsed >= ai.arriveAfter) {
-            const np = rt.patience - PATIENCE_DECAY;
+            const np = rt.patience - PATIENCE_DECAY * DIFF[ns.difficulty].patience;
             if (np <= 0) {
               ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null };
               ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up faster and ask the right question first.`, "bad");
@@ -317,8 +332,12 @@ function makeReducer(shift: Shift) {
           if (correct) csatDelta += 2;
           else if (action.ends) csatDelta -= 3;
         }
-        // Audit / Graveyard: wrong moves cost more.
-        if (csatDelta < 0 && shift.penaltyScale) csatDelta = Math.round(csatDelta * shift.penaltyScale);
+        // Difficulty + Audit/Graveyard: wrong moves cost more (or less, on Easy).
+        if (csatDelta < 0) {
+          let scaled = csatDelta * DIFF[state.difficulty].csat;
+          if (shift.penaltyScale) scaled *= shift.penaltyScale;
+          csatDelta = Math.round(scaled);
+        }
         const csat = clamp(state.csat + csatDelta);
         let ns: State = {
           ...state,
@@ -374,7 +393,7 @@ function makeReducer(shift: Shift) {
       case "PING":
         return pushFeed(state, a.text, "info");
       case "START":
-        return state.started ? state : { ...state, started: true };
+        return state.started ? state : { ...state, started: true, difficulty: a.difficulty, lifelines: { coffee: DIFF[a.difficulty].coffee, senior: DIFF[a.difficulty].senior } };
       case "END":
         return { ...state, ended: true };
       default:
@@ -592,7 +611,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
         </div>
       </div>
 
-      {!state.started && <ClockIn shift={shift} usedApps={usedApps} onStart={() => dispatch({ t: "START" })} />}
+      {!state.started && <ClockIn shift={shift} usedApps={usedApps} onStart={(d) => dispatch({ t: "START", difficulty: d })} />}
       {state.ended && <ShiftReport shift={shift} state={state} onReplay={onReplay} onExit={onExit} />}
     </div>
   );
@@ -600,8 +619,9 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
 
 /* ───────────────────────── clock-in briefing ───────────────────────── */
 
-function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<AppId>; onStart: () => void }) {
+function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<AppId>; onStart: (d: Difficulty) => void }) {
   const accent = shift.accent ?? "#4A90D9";
+  const [diff, setDiff] = useState<Difficulty>("normal");
   const surfaces = [
     usedApps.has("tickets") && "Tickets",
     usedApps.has("inbox") && "Inbox",
@@ -650,8 +670,21 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
           {tips.map((t, i) => <li key={i} className="text-cream/65 text-xs leading-relaxed flex gap-2"><span style={{ color: accent }}>›</span>{t}</li>)}
         </ul>
 
-        <button onClick={onStart} className="mt-5 w-full min-h-[46px] rounded-xl font-bold text-sm text-[#04080F] flex items-center justify-center gap-2" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}aa)` }}>
-          <Clock size={16} weight="bold" /> Clock in
+        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40 mt-4 mb-1.5">Difficulty</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(Object.keys(DIFF) as Difficulty[]).map((d) => {
+            const on = diff === d;
+            return (
+              <button key={d} onClick={() => setDiff(d)} className="rounded-lg border p-2 text-center transition-colors" style={on ? { borderColor: `${accent}aa`, background: `${accent}1f` } : { borderColor: "rgba(255,255,255,0.1)" }}>
+                <span className="block text-cream text-sm font-semibold" style={on ? { color: accent } : undefined}>{DIFF[d].label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-cream/55 text-[11px] leading-relaxed mt-2 min-h-[2.4em]">{DIFF[diff].desc}</p>
+
+        <button onClick={() => onStart(diff)} className="mt-3 w-full min-h-[46px] rounded-xl font-bold text-sm text-[#04080F] flex items-center justify-center gap-2" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}aa)` }}>
+          <Clock size={16} weight="bold" /> Clock in · {DIFF[diff].label}
         </button>
       </div>
     </div>
@@ -669,6 +702,9 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
         <Lightning size={16} weight="fill" color="#FFD700" aria-hidden="true" />
         <span className="font-bebas text-sm text-cream tracking-wide truncate">{shift.name}</span>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 hidden sm:inline">· {shift.rank}</span>
+        {state.started && state.difficulty !== "normal" && (
+          <span className="font-mono text-[8px] uppercase tracking-wider px-1 py-0.5 rounded border" style={{ color: state.difficulty === "hard" ? "#EF4444" : "#2BBE6B", borderColor: state.difficulty === "hard" ? "#EF444455" : "#2BBE6B55" }}>{DIFF[state.difficulty].label}</span>
+        )}
       </div>
       <div className="ml-auto flex items-center gap-4 font-mono text-[11px]">
         <span className="flex items-center gap-1.5" style={{ color: low ? "#EF4444" : "#9FB2CC" }}>
@@ -720,7 +756,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
-            const remaining = (st.landedAt ?? i.arriveAfter) + SLA_BUDGET[i.priority] * (shift.slaScale ?? 1) - elapsed;
+            const remaining = (st.landedAt ?? i.arriveAfter) + slaBudget(shift, i.priority, state.difficulty) - elapsed;
             return (
               <li key={i.id}>
                 <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
@@ -879,7 +915,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
   const it = state.items[item.id];
   const [showHint, setShowHint] = useState(false);
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const slaRemaining = (it.landedAt ?? item.arriveAfter) + SLA_BUDGET[item.priority] * (shift.slaScale ?? 1) - elapsed;
+  const slaRemaining = (it.landedAt ?? item.arriveAfter) + slaBudget(shift, item.priority, state.difficulty) - elapsed;
   const kbArticle = item.kbArticleId ? shift.kb.find((a) => a.id === item.kbArticleId) ?? null : null;
   const part = item.part ? shift.inventory.find((p) => p.sku === item.part!.sku) ?? null : null;
   const stepDone = (k: string) => (k === "kb" ? state.kbRead.includes(item.kbArticleId ?? "") : it.steps.includes(k));
@@ -1059,7 +1095,7 @@ function PhoneThread({ item, runtime, dispatch }: { item: ShiftItem; runtime: It
           <span className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/10">
             <span className="block h-full transition-[width] duration-500" style={{ width: `${patience}%`, background: pColor }} />
           </span>
-          <span className="font-mono text-[10px] tabular-nums" style={{ color: pColor }}>{patience}%</span>
+          <span className="font-mono text-[10px] tabular-nums" style={{ color: pColor }}>{Math.round(patience)}%</span>
         </div>
       )}
       <div className="space-y-2">
