@@ -23,6 +23,7 @@ export interface ShiftResult {
   total: number;
   difficulty: "easy" | "normal" | "hard";
   usedLifeline: boolean;
+  bestStreak: number;
 }
 
 /* ───────────────────────── state ───────────────────────── */
@@ -444,7 +445,7 @@ function computeResult(shift: Shift, state: State): ShiftResult {
   const score = Math.round(state.csat * 0.6 + (resolved / total) * 40);
   const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
   const usedLifeline = (DIFF[state.difficulty].coffee - state.lifelines.coffee) > 0 || (DIFF[state.difficulty].senior - state.lifelines.senior) > 0;
-  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline };
+  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline, bestStreak: state.bestStreak };
 }
 
 /* ───────────────────────── component ───────────────────────── */
@@ -1272,6 +1273,10 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
 
         {breaches > 0 && (
           <p className="font-mono text-[10px] text-red-400/80 mb-3">{breaches} ticket{breaches === 1 ? "" : "s"} breached SLA. Triage the high-priority queue faster next shift.</p>
+        )}
+
+        {state.bestStreak >= 3 && (
+          <p className="font-mono text-[10px] text-gold/80 mb-3">Best streak this shift: x{state.bestStreak}{state.difficulty !== "normal" ? ` · ${DIFF[state.difficulty].label}` : ""}{!computeResult(shift, state).usedLifeline ? " · no lifelines" : ""}</p>
         )}
 
         {(() => {

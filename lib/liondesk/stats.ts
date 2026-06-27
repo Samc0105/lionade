@@ -24,13 +24,14 @@ export interface TechhubStats {
   weeklyCleared: boolean;
   hardCleared: boolean;
   selfMade: boolean;
+  bestStreak: number;
 }
 
 const STATS_KEY = "lionade.techhub.stats.v1";
 const UNLOCKED_KEY = "lionade.techhub.achievements.v1";
 
 function emptyStats(): TechhubStats {
-  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0, weeklyCleared: false, hardCleared: false, selfMade: false };
+  return { shiftsCleared: 0, perfectShifts: 0, doublesCleared: 0, chaosCleared: 0, skeletonWins: 0, auditWins: 0, tracksPlayed: [], mutatorsSeen: [], careerXp: 0, bestShiftScore: 0, weeklyCleared: false, hardCleared: false, selfMade: false, bestStreak: 0 };
 }
 
 export function getStats(): TechhubStats {
@@ -95,6 +96,7 @@ const DEFS: (Achievement & { check: (c: CheckCtx) => boolean })[] = [
   { id: "beloved", name: "Beloved", desc: "Every department at 70 or above.", check: (c) => REP_DEPTS.every((d) => (c.reputation[d] ?? 50) >= 70) },
   { id: "iron-desk", name: "Iron Desk", desc: "Clear a shift on Hard.", check: (c) => c.stats.hardCleared },
   { id: "self-made", name: "Self-Made", desc: "Clear a Normal or Hard shift using no lifelines.", check: (c) => c.stats.selfMade },
+  { id: "hot-streak", name: "Hot Streak", desc: "Hit a 6-resolve streak in one shift.", check: (c) => c.stats.bestStreak >= 6 },
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -152,6 +154,7 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   if (r.csat >= 100 && cleared) s.perfectShifts++;
   if (cleared && r.difficulty === "hard") s.hardCleared = true;
   if (cleared && r.difficulty !== "easy" && !r.usedLifeline) s.selfMade = true;
+  s.bestStreak = Math.max(s.bestStreak, r.bestStreak);
   const modIds = (shift.modifiers ?? []).map((m) => m.id);
   for (const id of modIds) if (!s.mutatorsSeen.includes(id)) s.mutatorsSeen.push(id);
   if (!s.tracksPlayed.includes(shift.track)) s.tracksPlayed.push(shift.track);
