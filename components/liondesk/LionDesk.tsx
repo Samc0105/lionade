@@ -49,6 +49,7 @@ interface PendingOrder { seq: number; sku: string; arrivesAt: number }
 
 interface State {
   secondsLeft: number;
+  started: boolean;
   ended: boolean;
   csat: number;
   fangs: number;
@@ -72,6 +73,7 @@ interface State {
 
 type Action =
   | { t: "TICK" }
+  | { t: "START" }
   | { t: "APP"; app: AppId }
   | { t: "OPEN"; id: string }
   | { t: "CLOSE" }
@@ -120,6 +122,7 @@ function buildInitial(shift: Shift): State {
   shift.adUsers.forEach((u) => { adStatus[u.username] = u.status; });
   return {
     secondsLeft: shift.durationSeconds,
+    started: false,
     ended: false,
     csat: 100,
     fangs: 0,
@@ -367,6 +370,8 @@ function makeReducer(shift: Shift) {
           "A senior leans over: go with the highlighted move.", "info",
         );
       }
+      case "START":
+        return state.started ? state : { ...state, started: true };
       case "END":
         return { ...state, ended: true };
       default:
@@ -433,12 +438,12 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
     return s;
   }, [shift]);
 
-  // Shift clock.
+  // Shift clock. Held until you clock in, so the briefing isn't a ticking clock.
   useEffect(() => {
-    if (state.ended) return;
+    if (!state.started || state.ended) return;
     const id = setInterval(() => dispatch({ t: "TICK" }), 1000);
     return () => clearInterval(id);
-  }, [state.ended]);
+  }, [state.started, state.ended]);
 
   // Fire the completion callback exactly once when the shift ends.
   useEffect(() => {
@@ -522,7 +527,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   };
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
+    <div className="relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
 
@@ -560,7 +565,68 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
         </div>
       </div>
 
+      {!state.started && <ClockIn shift={shift} usedApps={usedApps} onStart={() => dispatch({ t: "START" })} />}
       {state.ended && <ShiftReport shift={shift} state={state} onReplay={onReplay} onExit={onExit} />}
+    </div>
+  );
+}
+
+/* ───────────────────────── clock-in briefing ───────────────────────── */
+
+function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<AppId>; onStart: () => void }) {
+  const accent = shift.accent ?? "#4A90D9";
+  const surfaces = [
+    usedApps.has("tickets") && "Tickets",
+    usedApps.has("inbox") && "Inbox",
+    usedApps.has("phone") && "Phone calls",
+    usedApps.has("inventory") && "Stockroom",
+    usedApps.has("kb") && "Knowledge base",
+    usedApps.has("ad") && "Admin console",
+  ].filter(Boolean) as string[];
+  const tips = [
+    "Highest priority first. P1 tickets breach fast and a breached VIP escalates to your manager.",
+    usedApps.has("phone") && "On a call, ask the right question to pin the issue before patience runs out, or they hang up.",
+    usedApps.has("inventory") && "Parts take time to arrive. Order early or the SLA beats the delivery.",
+    "Stuck? Spend a lifeline: Coffee resets a call, Ask a senior reveals the right move.",
+  ].filter(Boolean) as string[];
+  return (
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-2xl border bg-[#0a0f1c] p-6 max-h-[92%] overflow-y-auto" style={{ borderColor: `${accent}55` }}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: accent }}>{shift.rank} · clocking in</p>
+        <h3 className="font-bebas text-3xl text-cream tracking-wide leading-none mt-1">{shift.name}</h3>
+
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <div className="rounded-lg border border-white/[0.08] p-2.5 text-center">
+            <p className="font-bebas text-xl text-cream tabular-nums leading-none">{fmt(shift.durationSeconds)}</p>
+            <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">on the clock</p>
+          </div>
+          <div className="rounded-lg border border-white/[0.08] p-2.5 text-center">
+            <p className="font-bebas text-xl text-cream tabular-nums leading-none">{shift.items.length}</p>
+            <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">items inbound</p>
+          </div>
+        </div>
+
+        {shift.modifiers && shift.modifiers.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {shift.modifiers.map((m) => (
+              <span key={m.id} title={m.desc} className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-purple-400/40 text-purple-300 bg-purple-400/10">{m.label}</span>
+            ))}
+          </div>
+        )}
+
+        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40 mt-4 mb-1.5">On this desk</p>
+        <div className="flex flex-wrap gap-1.5">
+          {surfaces.map((s) => <span key={s} className="text-[11px] px-2 py-0.5 rounded-md border border-white/10 text-cream/70">{s}</span>)}
+        </div>
+
+        <ul className="mt-4 space-y-1.5">
+          {tips.map((t, i) => <li key={i} className="text-cream/65 text-xs leading-relaxed flex gap-2"><span style={{ color: accent }}>›</span>{t}</li>)}
+        </ul>
+
+        <button onClick={onStart} className="mt-5 w-full min-h-[46px] rounded-xl font-bold text-sm text-[#04080F] flex items-center justify-center gap-2" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}aa)` }}>
+          <Clock size={16} weight="bold" /> Clock in
+        </button>
+      </div>
     </div>
   );
 }
