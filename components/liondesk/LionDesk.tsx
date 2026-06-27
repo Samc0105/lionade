@@ -1309,6 +1309,21 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
           );
         })()}
 
+        <details className="mb-4 rounded-xl border border-white/[0.07] bg-white/[0.015]">
+          <summary className="cursor-pointer select-none px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cream/55 hover:text-cream">Full recap ({live.length} item{live.length === 1 ? "" : "s"})</summary>
+          <ul className="px-3 pb-3 space-y-1.5">
+            {live.map((i) => {
+              const st = state.items[i.id].status;
+              return (
+                <li key={i.id} className="flex items-center gap-2 text-xs">
+                  <span className="font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0" style={{ color: STATUS_COLOR[st], background: `${STATUS_COLOR[st]}1f` }}>{STATUS_LABEL[st]}</span>
+                  <span className="text-cream/70 truncate">{i.subject}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+
         <p className="font-mono text-[10px] text-cream/35 leading-relaxed mb-4">
           Fangs and XP are a preview. They are granted for real once a shift is validated server-side, so the economy stays tamper-proof.
         </p>
