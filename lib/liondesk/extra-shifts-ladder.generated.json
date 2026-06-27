@@ -460,3 +460,933 @@
       }
     ]
   },
+  {
+    "id": "soc-shift-4",
+    "track": "soc",
+    "order": 3,
+    "name": "SOC Shift 4: Tuning the Board",
+    "rank": "Detection Engineer",
+    "accent": "#2BBE6B",
+    "durationSeconds": 600,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-detection-tuning",
+        "title": "Detection Tuning Policy",
+        "tags": [
+          "detection",
+          "tuning",
+          "false-positive"
+        ],
+        "body": [
+          "A rule firing high volume with no true positives is noise, not coverage. Noise hides real alerts and trains analysts to ignore the board.",
+          "Tune before you disable. Add scoped exclusions for the known-benign cause and keep the rule firing on everything else.",
+          "Disabling a rule outright removes the detection entirely. Only disable when the rule has no defensible true-positive case and a better detection covers the same technique.",
+          "Never ignore a noisy rule and leave it firing. Unhandled noise is how a real alert gets buried."
+        ]
+      },
+      {
+        "id": "kb-suppression-scope",
+        "title": "Suppression Scope Policy",
+        "tags": [
+          "suppression",
+          "scope",
+          "vendor-rule"
+        ],
+        "body": [
+          "Suppress by the narrowest context that removes the false positive: specific host, signed binary hash, account, and command pattern.",
+          "Globally disabling a vendor rule blinds you everywhere, including on hosts where the same behavior would be a real attack.",
+          "Document every suppression with the reason and an owner so it can be reviewed. An undocumented suppression is a silent coverage gap.",
+          "Leaving a known false positive screaming on the board burns analyst time and erodes trust in the alert queue."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "soc-shift-4-noisy-rule",
+        "channel": "ticket",
+        "priority": "P3",
+        "from": {
+          "name": "SIEM rule health",
+          "role": "Detection Platform"
+        },
+        "subject": "Rule SIG-1182 fires 400 times a day, zero true positives in 30 days",
+        "slaMinutes": 30,
+        "arriveAfter": 0,
+        "reward": 46,
+        "xp": 44,
+        "ticketBody": "SIG-1182 (PowerShell with encoded command) fires roughly 400 times a day. Every hit traced back to the patch-management agent running scheduled encoded jobs. No analyst has confirmed a true positive in 30 days. The volume is pushing real alerts off the first page.",
+        "evidence": [
+          {
+            "label": "SIG-1182 disposition, last 30 days",
+            "lines": [
+              "Total alerts: 11,840",
+              "Confirmed true positives: 0",
+              "Top source: svc-patchmgmt -> encoded scheduled task (97% of hits)",
+              "Remaining 3%: mixed admin scripts, all benign on review"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-detection-tuning",
+        "commands": [
+          {
+            "aliases": [
+              "disposition",
+              "rule stats",
+              "siem stats"
+            ],
+            "output": "SIG-1182: 11,840 alerts / 30d. 0 true positives. 97% from svc-patchmgmt encoded jobs. Encoded PowerShell still a valid attacker technique outside that service account.",
+            "step": "diag"
+          }
+        ],
+        "goal": "Kill the noise without killing the detection. Encoded PowerShell is still a technique attackers use.",
+        "hint": "The noise has one named cause. What if you carved out only that cause and left the rest firing?",
+        "actions": [
+          {
+            "id": "tune-exclude-svc",
+            "label": "Tune the rule: exclude svc-patchmgmt encoded jobs, keep SIG-1182 firing on everything else",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "The noise has one benign source. A scoped exclusion for that service account removes 97% of the volume while the rule still catches encoded PowerShell from any other account.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "disable-rule",
+            "label": "Disable SIG-1182 entirely to stop the noise",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "teach": "Disabling removes the detection for everyone. Encoded PowerShell is a live attacker technique. Tune out the benign source, do not delete the coverage.",
+            "ends": true
+          },
+          {
+            "id": "raise-threshold",
+            "label": "Raise the alert threshold so SIG-1182 only fires above 50 hits per hour",
+            "correct": false,
+            "csat": -7,
+            "teach": "A volume threshold hides single, deliberate attacker runs, which are exactly one or two events. You would silence the real case and keep the noise.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "ignore-noise",
+            "label": "Mark SIG-1182 as known noise and leave it firing as is",
+            "correct": false,
+            "csat": -8,
+            "teach": "Leaving 400 daily false positives on the board is how a real alert gets buried. Known noise gets tuned, not tolerated.",
+            "outcome": "mishandled"
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-4-coverage-gap",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Threat intel",
+          "role": "CTI Analyst"
+        },
+        "subject": "No detection for credential dumping via LSASS access on our endpoints",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 50,
+        "xp": 46,
+        "ticketBody": "A coverage review shows we have no analytic for LSASS process-access used in credential dumping. The EDR has a default signature, but a gap test last week showed the default missed two of three tradecraft variants. Leadership wants a targeted detection authored for this technique.",
+        "evidence": [
+          {
+            "label": "Coverage gap test results",
+            "lines": [
+              "Technique: credential access via LSASS handle open",
+              "EDR default signature: caught 1 of 3 variants",
+              "Missed: handle via duplicated token, missed: indirect API call",
+              "Our analytic library: no rule maps to this technique"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "coverage",
+              "atomic test",
+              "gap test"
+            ],
+            "output": "EDR default caught 1/3 LSASS-access variants. Two evasions slipped through. A behavioral analytic on suspicious handle opens to lsass.exe by non-system processes closes the gap.",
+            "step": "diag"
+          }
+        ],
+        "goal": "Close the LSASS-access gap. The EDR default already proved it misses variants.",
+        "hint": "The gap test already told you the default is not enough. What does that rule out?",
+        "actions": [
+          {
+            "id": "write-targeted",
+            "label": "Write a targeted behavioral analytic on suspicious handle opens to lsass.exe by non-system processes",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "teach": "The gap test proved the default misses real variants. A behavioral analytic keyed on the technique, not one signature, covers the evasions the vendor rule let through.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "rely-edr-default",
+            "label": "Rely on the EDR default signature and close the gap as already covered",
+            "correct": false,
+            "csat": -9,
+            "outcome": "mishandled",
+            "teach": "The gap test showed the default caught only 1 of 3 variants. Calling a known-leaky signature full coverage leaves the technique exploitable.",
+            "ends": true
+          },
+          {
+            "id": "block-all-lsass",
+            "label": "Configure the EDR to block every process that opens a handle to lsass.exe",
+            "correct": false,
+            "csat": -8,
+            "teach": "Legitimate security and system tools open handles to lsass. A blanket block breaks production. Detect the suspicious pattern, do not block the entire behavior.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "accept-risk",
+            "label": "Document the gap as accepted risk and move on",
+            "correct": false,
+            "csat": -7,
+            "teach": "Accepting risk on a high-impact credential-access technique with no compensating control is not a detection-engineering decision to make alone. Author the analytic.",
+            "outcome": "mishandled"
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-4-buried-tp",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Tier 2 analyst",
+          "role": "Incident Responder"
+        },
+        "subject": "Confirmed true positive buried under broken-rule noise on FIN-DB-03",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 56,
+        "xp": 48,
+        "ticketBody": "While reviewing the queue I found one real alert: a service account on FIN-DB-03 ran a database export to an external IP at 02:14. It was sitting on page 4, buried under 600 hits from a broken rule that flags every backup job as exfiltration. The export is a confirmed true positive. I need the signal fixed without dropping the catch we already have.",
+        "evidence": [
+          {
+            "label": "Queue state, FIN-DB-03",
+            "lines": [
+              "Real alert: svc-report -> 4.2 GB export to external IP 02:14 (CONFIRMED TP)",
+              "Buried under: 600 hits from RULE-EXFIL-09 flagging nightly backup jobs",
+              "RULE-EXFIL-09 cause: no exclusion for the backup target subnet",
+              "Risk: tuning the rule must not retract the confirmed FIN-DB-03 alert"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "queue",
+              "rule cause",
+              "exfil-09"
+            ],
+            "output": "RULE-EXFIL-09 fires on backup jobs because the backup subnet is not excluded. The FIN-DB-03 export goes to an external IP, not the backup subnet, so a scoped exclusion clears the noise and keeps the real catch.",
+            "step": "diag"
+          }
+        ],
+        "goal": "A real export is buried under broken-rule noise. Clear the noise but keep the confirmed catch.",
+        "hint": "The broken rule has a precise benign cause. The real alert goes somewhere else. Separate them.",
+        "actions": [
+          {
+            "id": "escalate-then-tune",
+            "label": "Escalate the confirmed FIN-DB-03 export to IR now, then scope RULE-EXFIL-09 to exclude only the backup subnet",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "Preserve the catch first: the real export goes to IR before you touch anything. The broken rule fires on the backup subnet, so a subnet-scoped exclusion clears the noise without affecting the external-IP alert.",
+            "outcome": "escalated"
+          },
+          {
+            "id": "disable-exfil-rule",
+            "label": "Disable RULE-EXFIL-09 to clear the page, sort out the real alert afterward",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "teach": "Disabling the rule to clear the page can retract the confirmed export and blinds you to real exfiltration. Escalate the catch first, then tune narrowly.",
+            "ends": true
+          },
+          {
+            "id": "bulk-close",
+            "label": "Bulk-close all 601 alerts on FIN-DB-03 and re-run the rule clean",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "teach": "A bulk close swallows the confirmed true positive along with the noise. Never mass-close a queue that contains a known real alert.",
+            "ends": true
+          },
+          {
+            "id": "tune-only",
+            "label": "Just add the subnet exclusion to RULE-EXFIL-09 and consider it handled",
+            "correct": false,
+            "csat": -6,
+            "teach": "Tuning is half the job. The confirmed export to an external IP is an active incident and has to reach IR before you close anything.",
+            "outcome": "mishandled"
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-4-vendor-fp",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Platform engineering",
+          "role": "Infra Lead"
+        },
+        "subject": "Vendor rule flags our internal admin tool LionDeploy as malicious",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 50,
+        "xp": 46,
+        "ticketBody": "The vendor ruleset rule VND-RMM-22 flags LionDeploy, our signed internal deployment tool, as a malicious remote-management binary. It fires every time platform runs a deploy from the two jump hosts. Same tool, same behavior, would be a real alert on a random user workstation. Engineering wants the noise gone today.",
+        "evidence": [
+          {
+            "label": "VND-RMM-22 hits, LionDeploy",
+            "lines": [
+              "Binary: LionDeploy.exe, signed by Lionade Internal CA, stable hash",
+              "Source hosts: JUMP-01, JUMP-02 only (platform jump hosts)",
+              "Command pattern: deploy --target with our internal flags",
+              "Same binary on a user endpoint would be unexpected and worth an alert"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-suppression-scope",
+        "commands": [
+          {
+            "aliases": [
+              "suppression",
+              "rmm-22",
+              "context"
+            ],
+            "output": "VND-RMM-22 false positive isolated to LionDeploy signed hash on JUMP-01 and JUMP-02 with the deploy command pattern. A context-scoped suppression on hash plus host plus command removes the FP and keeps the rule live everywhere else.",
+            "step": "diag"
+          }
+        ],
+        "goal": "The vendor rule is right in general and wrong for this one tool on these two hosts. Suppress the false positive without going blind.",
+        "hint": "The benign case has a narrow fingerprint: one signed hash, two hosts, one command pattern. How tight can you scope it?",
+        "actions": [
+          {
+            "id": "suppress-by-context",
+            "label": "Suppress VND-RMM-22 by context: LionDeploy signed hash on JUMP-01 and JUMP-02 with the deploy command pattern, documented with an owner",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "Scope the suppression to the narrowest fingerprint that removes the FP: signed hash, the two jump hosts, and the deploy command. The rule still fires if that same tool shows up anywhere unexpected.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "global-disable-vendor",
+            "label": "Globally disable VND-RMM-22 since it is a noisy vendor rule",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "teach": "A global disable blinds you to real remote-management abuse on every other host. The rule is correct in general. Suppress the one benign context, do not turn it off everywhere.",
+            "ends": true
+          },
+          {
+            "id": "suppress-by-name",
+            "label": "Suppress by file name LionDeploy.exe across the whole fleet",
+            "correct": false,
+            "csat": -8,
+            "teach": "A name-only suppression is trivially abused. An attacker renames their tool to LionDeploy.exe and walks right through. Scope on the signed hash and host context, not the name.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "leave-screaming",
+            "label": "Leave VND-RMM-22 firing and tell engineering to ignore the alerts",
+            "correct": false,
+            "csat": -6,
+            "teach": "Asking analysts and engineers to ignore a known false positive burns time and trains people to dismiss the alert, including the day it is real. Suppress it properly.",
+            "outcome": "mishandled"
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-4-validate-detection",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Detection review",
+          "role": "Lead Detection Engineer"
+        },
+        "subject": "Validate new analytic DET-2207 against historical data before it ships",
+        "slaMinutes": 20,
+        "arriveAfter": 42,
+        "reward": 52,
+        "xp": 44,
+        "ticketBody": "You wrote DET-2207, a new analytic for suspicious scheduled-task creation. Before it goes live to the whole fleet, the review gate requires a backtest against 90 days of historical telemetry so we do not ship a new false-positive flood. The logic looks clean in isolation, but it has never run against real production data.",
+        "evidence": [
+          {
+            "label": "DET-2207 backtest, 90 days historical",
+            "lines": [
+              "Hypothetical hits if rule had been live: 3,100",
+              "Benign cluster: 2,950 from sccm-scheduler installing maintenance tasks",
+              "Likely true positives on review: 4",
+              "Without a backtest, this rule would have flooded the board day one"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "backtest",
+              "historical",
+              "replay"
+            ],
+            "output": "DET-2207 backtest: 3,100 hits over 90d, 2,950 from sccm-scheduler maintenance tasks, ~4 likely real. Add an sccm-scheduler exclusion before go-live and the rule ships clean instead of flooding.",
+            "step": "diag"
+          }
+        ],
+        "goal": "Do not ship a detection blind. Validate DET-2207 against history and tune before go-live.",
+        "hint": "The review gate exists for a reason. What does the backtest tell you to fix first?",
+        "actions": [
+          {
+            "id": "backtest-then-tune",
+            "label": "Run the 90-day backtest, add the sccm-scheduler exclusion the data exposes, then ship DET-2207",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 14,
+            "teach": "Backtesting against history surfaces the benign cluster before users feel it. You tune out the sccm-scheduler noise and ship a clean rule that keeps the four likely true positives.",
+            "outcome": "resolved"
+          },
+          {
+            "id": "ship-untested",
+            "label": "Ship DET-2207 to the full fleet now since the logic reads correct",
+            "correct": false,
+            "csat": -10,
+            "outcome": "mishandled",
+            "teach": "Clean-reading logic still floods the board. The backtest shows 2,950 benign hits in 90 days. Shipping blind is exactly the new-false-positive flood the gate exists to stop.",
+            "ends": true
+          },
+          {
+            "id": "ship-then-watch",
+            "label": "Ship to production and watch the alert volume live, roll back if it floods",
+            "correct": false,
+            "csat": -8,
+            "teach": "Watch-and-rollback burns analyst attention on noise and can bury real alerts during the test window. Validate against history first, where it costs nothing.",
+            "outcome": "mishandled"
+          },
+          {
+            "id": "skip-validation",
+            "label": "Skip the backtest to hit the ship deadline and validate later",
+            "correct": false,
+            "csat": -7,
+            "teach": "Validate-later means flood-now. The whole point of the review gate is that validation happens before go-live, not after the queue is on fire.",
+            "outcome": "mishandled"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "soc-shift-5",
+    "track": "soc",
+    "order": 4,
+    "name": "SOC Shift 5: Incident Command",
+    "rank": "SOC Lead",
+    "accent": "#2BBE6B",
+    "durationSeconds": 660,
+    "startingBudget": 0,
+    "inventory": [],
+    "adUsers": [],
+    "kb": [
+      {
+        "id": "kb-ir-isolation",
+        "title": "Mass isolation versus targeted watch during ransomware precursors",
+        "tags": [
+          "incident-response",
+          "containment",
+          "ransomware"
+        ],
+        "body": [
+          "When multiple endpoints show ransomware-precursor behavior within minutes, treat it as active lateral movement, not isolated infections.",
+          "Containment goal: stop spread fast while keeping hosts powered so memory and volatile evidence survive. EDR network isolation does both.",
+          "Do not power off or wipe hosts during precursor activity. Powering off destroys memory artifacts. Wiping destroys the whole investigation.",
+          "Watch-and-wait is only appropriate for a single low-confidence host with no spread signal. Multiple hosts in minutes is a spread signal."
+        ]
+      },
+      {
+        "id": "kb-ir-comms",
+        "title": "Incident communication to stakeholders",
+        "tags": [
+          "incident-response",
+          "communication"
+        ],
+        "body": [
+          "Stakeholder updates state confirmed facts, current scope, and the next checkpoint time. They do not speculate on cause, attribution, or blast radius beyond evidence.",
+          "Silence during an active incident erodes trust and invites people to act on rumor. Give a holding update with a committed next-update time.",
+          "Route external and legal-sensitive messaging through the incident commander and legal. Analysts do not message executives or customers directly mid-incident."
+        ]
+      },
+      {
+        "id": "kb-ir-identity",
+        "title": "Containing compromised privileged identity without breaking response",
+        "tags": [
+          "identity",
+          "containment",
+          "domain-admin"
+        ],
+        "body": [
+          "A domain admin account used from an unusual host mid-incident is treated as compromised until proven otherwise.",
+          "Reset the credential and revoke active sessions and tokens for that account. Do not disable the account silently in a way that strands the legitimate owner with no path back.",
+          "Coordinate with the real owner out of band and issue a clean break-glass account so legitimate response work continues. Never let the suspect credential keep its privileges just because it is convenient."
+        ]
+      },
+      {
+        "id": "kb-ir-legal-hr",
+        "title": "Insider angle, legal and HR engagement through IR",
+        "tags": [
+          "legal",
+          "hr",
+          "insider",
+          "escalation"
+        ],
+        "body": [
+          "A possible insider angle is engaged through the incident commander, who brings in legal and HR under the established IR process and privilege.",
+          "Analysts do not investigate a named employee informally, confront them, or read their messages on their own initiative. That can destroy admissibility and create liability.",
+          "Preserve evidence, document chain of custody, and let legal and HR direct the people side. The SOC keeps doing technical containment."
+        ]
+      },
+      {
+        "id": "kb-ir-forensics",
+        "title": "Preserve patient-zero for forensics before remediation",
+        "tags": [
+          "forensics",
+          "evidence",
+          "chain-of-custody"
+        ],
+        "body": [
+          "The first infected host is the best source of root-cause and entry-vector evidence. Preserve it before any cleanup.",
+          "Capture a memory image and a disk image, document hashes and chain of custody, then remediate from a known-good rebuild.",
+          "Wiping or reimaging patient-zero before imaging destroys the only record of how the attacker got in. You cannot close root cause without it."
+        ]
+      },
+      {
+        "id": "kb-ir-contained",
+        "title": "Criteria to declare contained and hand to recovery",
+        "tags": [
+          "incident-response",
+          "containment",
+          "recovery"
+        ],
+        "body": [
+          "Declare contained only when spread has stopped, the entry vector is identified and closed, compromised credentials are reset, and monitoring shows no new malicious activity over a defined quiet window.",
+          "Closing on a calm period alone is premature. Attackers go quiet to outlast responders. Confirm the door is shut, not just that nobody is knocking.",
+          "Handoff to recovery includes documented scope, IOCs, root cause, and the residual-risk items recovery must watch."
+        ]
+      }
+    ],
+    "items": [
+      {
+        "id": "soc-shift-5-mass-isolate",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "EDR fleet alert",
+          "role": "Endpoint"
+        },
+        "subject": "Six endpoints show ransomware-precursor behavior in four minutes",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 66,
+        "xp": 56,
+        "ticketBody": "Within a four-minute window, six hosts across two subnets fire shadow-copy deletion attempts, mass file enumeration, and SMB connections to peers. This pattern is a ransomware staging precursor and it is spreading. You are incident commander. Decide the containment posture while preserving evidence.",
+        "evidence": [
+          {
+            "label": "EDR correlation, last 4 minutes",
+            "lines": [
+              "06 hosts flagged: WKS-1102, WKS-1140, SRV-FILE-02, WKS-2207, WKS-2210, WKS-3001",
+              "Behavior: shadow-copy deletion attempt -> mass file read -> outbound SMB to internal peers",
+              "Spread rate: 0 hosts -> 6 hosts in 4 minutes, still climbing",
+              "No encryption observed yet, this is the staging window"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-ir-isolation",
+        "goal": "Stop the spread without destroying the evidence you will need for root cause.",
+        "hint": "Six hosts in four minutes is active lateral movement. What keeps hosts off the network but still powered?",
+        "actions": [
+          {
+            "id": "mass-isolate-edr",
+            "label": "Mass-isolate all flagged hosts via EDR network isolation, keep them powered",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 16,
+            "teach": "EDR isolation cuts these hosts off the network so the spread and any staging stops, while they stay powered so memory and volatile evidence survive for forensics."
+          },
+          {
+            "id": "watch-and-wait",
+            "label": "Keep watching, do not isolate yet, gather more telemetry first",
+            "correct": false,
+            "csat": -10,
+            "teach": "Watch-and-wait is only for a single low-confidence host. Six hosts in four minutes is active spread. Waiting lets it reach encryption. Isolate now."
+          },
+          {
+            "id": "power-off-hosts",
+            "label": "Pull power on all six hosts immediately to halt them",
+            "correct": false,
+            "csat": -9,
+            "teach": "Powering off destroys memory artifacts you need for root cause, and it is slower than EDR isolation. Isolate over the network instead, keep them on."
+          },
+          {
+            "id": "isolate-only-worst",
+            "label": "Isolate only the file server and leave the workstations to watch",
+            "correct": false,
+            "csat": -8,
+            "teach": "Partial isolation leaves active spreaders on the network. Every flagged host is a live propagation source. Contain all of them."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-5-stakeholder-comms",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Priya Anand",
+          "role": "VP Operations",
+          "vip": true
+        },
+        "subject": "Execs are asking what is going on, need a status now",
+        "slaMinutes": 20,
+        "arriveAfter": 0,
+        "reward": 56,
+        "xp": 47,
+        "ticketBody": "Leadership noticed isolated machines and is asking for a status. You have confirmed spread contained to six hosts, no encryption, root cause still under investigation. Draft the stakeholder posture.",
+        "evidence": [
+          {
+            "label": "Confirmed facts at this moment",
+            "lines": [
+              "Confirmed: 6 hosts isolated, spread stopped",
+              "Confirmed: no file encryption observed",
+              "Unknown: entry vector, attacker identity, full scope",
+              "Next checkpoint: forensics in progress"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-ir-comms",
+        "goal": "Give stakeholders an accurate status that does not speculate and does not go silent.",
+        "hint": "State confirmed facts, current scope, and a committed next-update time. Nothing beyond evidence.",
+        "actions": [
+          {
+            "id": "factual-holding-update",
+            "label": "Send a holding update: confirmed scope, contained, no encryption, next update in 30 minutes",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "teach": "A good update states confirmed facts and current scope, avoids speculation on cause, and commits a next-update time so leadership knows when to expect more."
+          },
+          {
+            "id": "speculate-ransomware-gang",
+            "label": "Tell execs it is likely a known ransomware gang and customer data is probably affected",
+            "correct": false,
+            "csat": -11,
+            "teach": "You have no evidence of attribution or data exposure. Speculation drives bad executive decisions and may become a false public statement. Report confirmed facts only."
+          },
+          {
+            "id": "stay-silent",
+            "label": "Say nothing until the investigation is complete so you do not misinform",
+            "correct": false,
+            "csat": -8,
+            "teach": "Silence during an active incident erodes trust and lets rumor fill the gap. Give a holding update with a committed next-update time."
+          },
+          {
+            "id": "analyst-emails-board",
+            "label": "Have an analyst email the full board directly with raw log dumps",
+            "correct": false,
+            "csat": -9,
+            "teach": "Mid-incident messaging routes through the incident commander, not raw logs from an analyst to the board. That creates confusion and bypasses legal review."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-5-domain-admin",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Identity alert",
+          "role": "IAM"
+        },
+        "subject": "Domain admin account used from an unusual host during the incident",
+        "slaMinutes": 15,
+        "arriveAfter": 0,
+        "reward": 64,
+        "xp": 54,
+        "ticketBody": "The svc-domadmin account, normally used only from the admin jump host, just authenticated from WKS-2207, one of the isolated infected hosts, and enumerated the directory. Your IR team also needs domain admin to keep working. Contain the identity without breaking legitimate response access.",
+        "evidence": [
+          {
+            "label": "Auth and directory log, svc-domadmin",
+            "lines": [
+              "svc-domadmin normal source: JUMP-ADMIN-01",
+              "Anomalous: svc-domadmin -> auth from WKS-2207 (isolated, infected) at 14:22",
+              "Action seen: directory enumeration of privileged groups",
+              "Owner of WKS-2207 confirms they did not run admin tasks"
+            ]
+          }
+        ],
+        "commands": [
+          {
+            "aliases": [
+              "whoami",
+              "session",
+              "identity check",
+              "diag"
+            ],
+            "output": "svc-domadmin active from WKS-2207, not JUMP-ADMIN-01. Sessions and tokens issued in last 20 min are suspect. Break-glass admin account available for IR.",
+            "step": "diag"
+          }
+        ],
+        "goal": "Treat the privileged credential as compromised, but do not strand legitimate response.",
+        "hint": "Reset and revoke the suspect credential, then give responders a clean path to keep working.",
+        "actions": [
+          {
+            "id": "reset-revoke-breakglass",
+            "label": "Reset svc-domadmin, revoke its active sessions and tokens, issue a clean break-glass admin to IR",
+            "correct": true,
+            "requires": [
+              "diag"
+            ],
+            "csat": 16,
+            "teach": "A privileged account used from an infected host is compromised. Reset it and kill its live sessions and tokens, then hand IR a fresh break-glass account so response continues without the suspect credential."
+          },
+          {
+            "id": "leave-it-convenient",
+            "label": "Leave svc-domadmin active because IR is using it and a reset is disruptive",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Letting a compromised domain admin keep its privileges hands the attacker the keys to the domain. Convenience never outranks containing privileged compromise. This is how a contained incident becomes a full domain breach."
+          },
+          {
+            "id": "disable-no-replacement",
+            "label": "Disable svc-domadmin instantly and tell IR to figure out access later",
+            "correct": false,
+            "csat": -7,
+            "teach": "Disabling with no replacement strands legitimate response and slows containment. Reset and revoke, but issue a break-glass account so responders keep moving."
+          },
+          {
+            "id": "just-change-password-later",
+            "label": "Schedule a password change for the next maintenance window",
+            "correct": false,
+            "csat": -10,
+            "teach": "Deferring the reset leaves the suspect credential and its live tokens active for hours. Active sessions survive a future password change. Reset and revoke now."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-5-legal-hr",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Forensics lead",
+          "role": "DFIR"
+        },
+        "subject": "Patient-zero artifacts point at a possible insider angle",
+        "slaMinutes": 20,
+        "arriveAfter": 20,
+        "reward": 58,
+        "xp": 49,
+        "ticketBody": "Early forensics on patient-zero show the initial tooling was staged from an internal account with no phishing or external entry found yet. The account belongs to a named employee. This now has insider, legal, and HR implications. Decide how to proceed.",
+        "evidence": [
+          {
+            "label": "Patient-zero staging trail",
+            "lines": [
+              "Initial dropper staged by internal account jdoe at 13:58",
+              "No phishing email, no external exploit found so far",
+              "jdoe accessed staging share outside normal pattern",
+              "Possible insider involvement, not yet confirmed"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-ir-legal-hr",
+        "goal": "Bring the right people in through IR without compromising admissibility.",
+        "hint": "An insider angle is engaged through the incident commander, who pulls in legal and HR under process and privilege.",
+        "actions": [
+          {
+            "id": "escalate-through-ir",
+            "label": "Escalate the insider angle to the incident commander to engage legal and HR under IR process",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 13,
+            "outcome": "escalated",
+            "teach": "A possible insider goes through the incident commander, who brings legal and HR in under the IR process and privilege. The SOC keeps doing technical containment and preserves evidence with chain of custody."
+          },
+          {
+            "id": "confront-employee",
+            "label": "Pull the employee aside and ask them what they did",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Confronting a suspect informally tips them off, lets them destroy evidence, and can destroy admissibility and create liability. Never investigate a named employee on your own. Escalate through IR to legal and HR."
+          },
+          {
+            "id": "read-their-mailbox",
+            "label": "Quietly read the employee mailbox and chats to build a case yourself",
+            "correct": false,
+            "csat": -10,
+            "teach": "Analysts do not surveil a named employee on their own initiative. That oversteps authority and can taint the case. Legal and HR direct the people side through IR."
+          },
+          {
+            "id": "keep-it-in-soc",
+            "label": "Handle it quietly inside the SOC and avoid involving legal or HR",
+            "correct": false,
+            "csat": -8,
+            "teach": "An insider angle has legal and HR implications the SOC is not authorized to own. Keeping it quiet exposes the company. Engage the right stakeholders through IR."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-5-preserve-patient-zero",
+        "channel": "ticket",
+        "priority": "P2",
+        "from": {
+          "name": "Alex Reyes",
+          "role": "Junior analyst"
+        },
+        "subject": "Proposal: just wipe patient-zero to clean it and move on",
+        "slaMinutes": 20,
+        "arriveAfter": 42,
+        "reward": 57,
+        "xp": 48,
+        "ticketBody": "A junior analyst wants to reimage WKS-1102, the first infected host, right now to clean it and free the machine. Root cause and entry vector are still unconfirmed. Decide the right move.",
+        "evidence": [
+          {
+            "label": "Patient-zero status, WKS-1102",
+            "lines": [
+              "WKS-1102 is the first infected host, isolated and still powered",
+              "Holds the only record of entry vector and dropper origin",
+              "Memory image: not yet captured",
+              "Disk image: not yet captured",
+              "Root cause: still open"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-ir-forensics",
+        "goal": "Get root cause before you remediate the most important host.",
+        "hint": "Patient-zero is your best evidence of how they got in. Image first, rebuild after.",
+        "actions": [
+          {
+            "id": "image-then-rebuild",
+            "label": "Capture memory and disk images with chain of custody first, then rebuild from known-good",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 14,
+            "teach": "Patient-zero holds the only record of the entry vector. Capture a memory image and a disk image with documented hashes and chain of custody, then remediate from a clean rebuild. You cannot close root cause if you wipe it first."
+          },
+          {
+            "id": "wipe-now",
+            "label": "Approve the wipe, cleaning the host is the priority",
+            "correct": false,
+            "csat": -12,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Wiping patient-zero destroys the only evidence of how the attacker got in. Without it you cannot close root cause or prove the vector is shut, so the attacker can walk right back in. Always image before you remediate."
+          },
+          {
+            "id": "delete-malware-files",
+            "label": "Just delete the malware files and keep the host running",
+            "correct": false,
+            "csat": -9,
+            "teach": "Deleting files leaves persistence and other artifacts, and it alters evidence before imaging. Preserve a full image first, then rebuild from known-good rather than cleaning in place."
+          },
+          {
+            "id": "leave-untouched-forever",
+            "label": "Leave the host isolated and untouched indefinitely, do nothing",
+            "correct": false,
+            "csat": -6,
+            "teach": "Preservation is the first step, not the only one. Image it, then rebuild so the host returns to service. Indefinite limbo helps no one."
+          }
+        ]
+      },
+      {
+        "id": "soc-shift-5-declare-contained",
+        "channel": "ticket",
+        "priority": "P1",
+        "from": {
+          "name": "Incident bridge",
+          "role": "IR"
+        },
+        "subject": "Containment is holding, do we declare contained and hand to recovery",
+        "slaMinutes": 15,
+        "arriveAfter": 62,
+        "reward": 62,
+        "xp": 52,
+        "ticketBody": "It has been quiet for a while. Spread stopped, infected hosts isolated, and svc-domadmin was reset. The team wants to declare the incident contained and hand to recovery. Decide the right criteria before you make that call.",
+        "evidence": [
+          {
+            "label": "Containment checklist status",
+            "lines": [
+              "Spread stopped: yes, no new hosts in last interval",
+              "Entry vector identified and closed: NOT yet confirmed",
+              "Compromised credentials reset: svc-domadmin done, full sweep pending",
+              "Quiet monitoring window: only 15 minutes so far",
+              "IOCs documented for recovery: in progress"
+            ]
+          }
+        ],
+        "kbArticleId": "kb-ir-contained",
+        "goal": "Declare contained only when the criteria are actually met, not just because it is quiet.",
+        "hint": "Contained means the door is shut and confirmed, not just that nobody is knocking right now.",
+        "actions": [
+          {
+            "id": "verify-criteria-first",
+            "label": "Hold the call until entry vector is closed, credential sweep is complete, and a defined quiet window passes, then hand off with documented IOCs and root cause",
+            "correct": true,
+            "requires": [
+              "kb"
+            ],
+            "csat": 15,
+            "teach": "Declare contained only when spread has stopped, the entry vector is identified and closed, compromised credentials are reset, and monitoring shows a clean defined quiet window. Then hand recovery a documented scope, IOCs, and residual risk."
+          },
+          {
+            "id": "close-on-quiet",
+            "label": "Declare contained now because it has been quiet for 15 minutes",
+            "correct": false,
+            "csat": -11,
+            "outcome": "mishandled",
+            "ends": true,
+            "teach": "Closing on a calm period alone is premature. Attackers go quiet to outlast responders, and the entry vector is still open. A 15-minute lull is not a closed door. Confirm the criteria first."
+          },
+          {
+            "id": "skip-vector-handoff",
+            "label": "Hand to recovery now and let them chase the entry vector later",
+            "correct": false,
+            "csat": -9,
+            "teach": "Handing off with an open, unidentified entry vector means recovery rebuilds into the same hole and reinfects. Close and document the vector before the handoff."
+          },
+          {
+            "id": "keep-open-no-criteria",
+            "label": "Keep the incident open indefinitely with no defined exit criteria",
+            "correct": false,
+            "csat": -6,
+            "teach": "An incident with no exit criteria never closes and burns out the team. Define the contained criteria, meet them, then hand to recovery cleanly."
+          }
+        ]
+      }
+    ]
+  },

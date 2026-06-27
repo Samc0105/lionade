@@ -8,7 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
-import { playArrival, playResolve, playBreach, playFail, playWin, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
+import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
 
@@ -536,13 +536,14 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
       window.removeEventListener("keydown", resume);
     };
   }, []);
-  const soundPrev = useRef<{ landed: number; resolved: number; breached: number; mishandled: number; ended: boolean } | null>(null);
+  const soundPrev = useRef<{ landed: number; resolved: number; breached: number; mishandled: number; ended: boolean; stockSum: number; streak: number; started: boolean } | null>(null);
   useEffect(() => {
     const el = shift.durationSeconds - state.secondsLeft;
     const landedN = shift.items.filter((i) => el >= i.arriveAfter && isLive(i, state.items)).length;
     const resolvedN = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
     const breachedN = shift.items.filter((i) => state.items[i.id].breached).length;
     const mishandledN = shift.items.filter((i) => state.items[i.id].status === "mishandled").length;
+    const stockSum = Object.values(state.stock).reduce((a, b) => a + b, 0);
     const p = soundPrev.current;
     if (p) {
       // Independent checks: a single tick can both land a ticket and breach
@@ -551,9 +552,12 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
       if (mishandledN > p.mishandled) playFail();
       if (resolvedN > p.resolved) playResolve();
       if (landedN > p.landed) playArrival();
+      if (stockSum > p.stockSum) playDelivery(); // stock only ever rises on a delivery
+      if (state.streak > p.streak && [3, 5, 8, 12].includes(state.streak)) playStreak();
+      if (state.started && !p.started) playClockIn();
       if (state.ended && !p.ended) playWin();
     }
-    soundPrev.current = { landed: landedN, resolved: resolvedN, breached: breachedN, mishandled: mishandledN, ended: state.ended };
+    soundPrev.current = { landed: landedN, resolved: resolvedN, breached: breachedN, mishandled: mishandledN, ended: state.ended, stockSum, streak: state.streak, started: state.started };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
   function toggleMute() {

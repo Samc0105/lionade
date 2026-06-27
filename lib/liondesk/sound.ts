@@ -82,6 +82,23 @@ export function playFail(): void {
   beep(120, 240, "sawtooth", 0.05, 0.1);
 }
 
+/** Clocking in: a short rising "ready" chime. */
+export function playClockIn(): void {
+  beep(440, 90, "sine", 0.05);
+  beep(660, 150, "sine", 0.05, 0.09);
+}
+
+/** A stockroom part arrived: a soft two-note doorbell. */
+export function playDelivery(): void {
+  beep(720, 70, "triangle", 0.045);
+  beep(960, 120, "triangle", 0.045, 0.07);
+}
+
+/** A resolve-streak milestone: a bright ascending triad. */
+export function playStreak(): void {
+  [784, 988, 1319].forEach((f, i) => beep(f, 110, "sine", 0.045, i * 0.07));
+}
+
 // ── Night Shift atmosphere ──────────────────────────────────────────────────
 
 let drone: { osc: OscillatorNode; sub: OscillatorNode; gain: GainNode } | null = null;
