@@ -9,6 +9,8 @@ import { getAllRecords, recordShift, gradeFor, PASS_SCORE, type ShiftRecord } fr
 import { apiPost } from "@/lib/api-client";
 import { recordShiftResult } from "@/lib/liondesk/stats";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
+import { useAuth } from "@/lib/auth";
+import { mutateUserStats } from "@/lib/hooks";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import LionDesk, { type ShiftResult } from "@/components/liondesk/LionDesk";
 
@@ -26,6 +28,12 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
   );
   const [runKey, setRunKey] = useState(0);
   const [newAch, setNewAch] = useState<string[]>([]);
+  // Server-validated Fang grant for the just-finished shift: the real amount
+  // banked (or "pending" while the held migration is unapplied). Shown in the
+  // shift report so the player sees what actually banked, not just the preview.
+  const [banked, setBanked] = useState<number | null>(null);
+  const [bankPending, setBankPending] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -43,17 +51,37 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
 
   const selected = selectedId ? shifts.find((s) => s.id === selectedId) ?? null : null;
 
-  function handleComplete(r: ShiftResult) {
+  async function handleComplete(r: ShiftResult) {
     recordShift(r.shiftId, r.score, r.csat);
     setRecords(getAllRecords());
     const played = shifts.find((s) => s.id === r.shiftId);
     if (played) setNewAch(recordShiftResult(played, r));
     recordPlayDay();
-    // Best-effort server sync: records the completion and grants Fangs ONCE,
-    // server-side (the route owns the reward ceiling). Safe no-op if the
-    // migration isn't applied yet (route returns { pending: true }). Local
-    // progress stays the display source of truth either way.
-    apiPost("/api/techhub/shifts/complete", { shiftId: r.shiftId, score: r.score, csat: r.csat }).catch(() => {});
+    setBanked(null);
+    setBankPending(false);
+    // Server sync: records the completion and grants Fangs server-side (the route
+    // owns the reward ceiling and pays only the best-score top-up, so it can never
+    // be self-granted or double-paid). Safe no-op while the held migration is
+    // unapplied (route returns { pending: true }). Local progress stays the
+    // display source of truth either way.
+    try {
+      const res = await apiPost<{ ok?: boolean; granted?: number; pending?: boolean }>(
+        "/api/techhub/shifts/complete",
+        { shiftId: r.shiftId, score: r.score, csat: r.csat },
+      );
+      if (res.ok && res.data) {
+        if (res.data.pending) {
+          setBankPending(true);
+        } else if ((res.data.granted ?? 0) > 0) {
+          setBanked(res.data.granted ?? 0);
+          // Refresh the navbar balance immediately (the realtime profile
+          // subscription also catches this, but the explicit mutate is instant).
+          if (user?.id) void mutateUserStats(user.id);
+        }
+      }
+    } catch {
+      // Best-effort: local progress is already saved; the next clear retries.
+    }
   }
 
   /* ── playing a shift ── */
@@ -70,6 +98,8 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
           onComplete={handleComplete}
           onExit={() => setSelectedId(null)}
           onReplay={() => setRunKey((k) => k + 1)}
+          bankedFangs={banked}
+          bankPending={bankPending}
         />
       </div>
     );

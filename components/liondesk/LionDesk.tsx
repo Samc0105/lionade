@@ -12,425 +12,22 @@ import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, p
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
 
-export interface ShiftResult {
-  shiftId: string;
-  score: number;
-  grade: string;
-  csat: number;
-  fangs: number;
-  xp: number;
-  resolved: number;
-  total: number;
-  difficulty: "easy" | "normal" | "hard";
-  usedLifeline: boolean;
-  bestStreak: number;
-}
+import {
+  type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
+  type Difficulty, type FeedEntry, type FeedTone,
+  DIFF, GOOD_STATUSES,
+  isTerminal, isLive, slaBudget, leadFor, buildInitial, makeReducer, computeResult,
+} from "@/lib/liondesk/engine";
 
-/* ───────────────────────── state ───────────────────────── */
+// The game logic (reducer, SLA/patience/streak math, scoring, all the state
+// types and tuning constants) now lives in @/lib/liondesk/engine — a pure,
+// framework-free module that can be unit-tested without React. This file keeps
+// only the React components + effects. ShiftResult is re-exported so existing
+// importers (components/liondesk/Campaign.tsx, lib/liondesk/stats.ts) keep
+// importing it from here unchanged.
+export type { ShiftResult };
 
-type ItemStatus = "queued" | "resolved" | "escalated" | "archived" | "reported" | "mishandled";
-const TERMINAL_STATUSES: ItemStatus[] = ["resolved", "escalated", "archived", "reported", "mishandled"];
-const isTerminal = (s: ItemStatus) => TERMINAL_STATUSES.includes(s);
-
-type FeedTone = "good" | "bad" | "info";
-interface FeedEntry { seq: number; text: string; tone: FeedTone }
-
-interface ItemRuntime { status: ItemStatus; steps: string[]; attempts: number; phoneChoice: number | null; breached: boolean; landedAt: number | null; patience: number | null; opened: boolean }
-
-const GOOD_FOR_REVEAL: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
-/** A chained follow-up (revealedBy) is "live" only once its trigger matched. A
- *  non-follow-up item is always live. */
-function isLive(i: ShiftItem, m: Record<string, ItemRuntime>): boolean {
-  if (!i.revealedBy) return true;
-  const st = m[i.revealedBy.itemId]?.status;
-  if (!st) return false;
-  return i.revealedBy.on === "resolve" ? GOOD_FOR_REVEAL.includes(st) : st === "mishandled";
-}
-
-/** A part on the way: deducted from budget at order time, lands in stock at its ETA. */
-interface PendingOrder { seq: number; sku: string; arrivesAt: number }
-
-interface State {
-  secondsLeft: number;
-  started: boolean;
-  difficulty: Difficulty;
-  ended: boolean;
-  csat: number;
-  fangs: number;
-  xp: number;
-  budget: number;
-  stock: Record<string, number>;
-  pendingOrders: PendingOrder[];
-  orderSeq: number;
-  adStatus: Record<string, string>;
-  kbRead: string[];
-  activeApp: AppId;
-  activeItemId: string | null;
-  items: Record<string, ItemRuntime>;
-  feed: FeedEntry[];
-  feedSeq: number;
-  // Session-local lifelines (no economy). Coffee resets a call's patience;
-  // a senior reveals the right move on the open item. Spend them wisely.
-  lifelines: { coffee: number; senior: number };
-  revealed: string[];
-  // Consecutive correct resolves. Builds a Fangs/XP preview multiplier; a wrong
-  // move resets it. Preview-only; the server still clamps the real grant.
-  streak: number;
-  bestStreak: number;
-}
-
-type Action =
-  | { t: "TICK" }
-  | { t: "START"; difficulty: Difficulty }
-  | { t: "APP"; app: AppId }
-  | { t: "OPEN"; id: string }
-  | { t: "CLOSE" }
-  | { t: "STEP"; id: string; step: string }
-  | { t: "KB"; articleId: string }
-  | { t: "AD"; username: string; action: string }
-  | { t: "ORDER"; sku: string }
-  | { t: "SHIP"; sku: string }
-  | { t: "PHONE"; id: string; index: number; correct: boolean }
-  | { t: "RESOLVE"; id: string; actionId: string }
-  | { t: "COFFEE" }
-  | { t: "SENIOR"; id: string }
-  | { t: "PING"; text: string }
-  | { t: "END" };
-
-const clamp = (n: number) => Math.max(0, Math.min(100, n));
-
-// Live SLA: a ticket must be resolved within this many shift-seconds of landing
-// (by priority) or it breaches, costing CSAT. The fictional "SLA 15m" label is
-// flavor; this is the real clock. Budgets are generous so a focused player
-// rarely breaches, but ignoring a P1 to chase a P4 stings.
-const SLA_BUDGET: Record<Priority, number> = { P1: 120, P2: 200, P3: 300, P4: 420 };
-const BREACH_PENALTY: Record<Priority, number> = { P1: 10, P2: 7, P3: 5, P4: 3 };
-// Stockroom orders are not instant. A part takes this long (shift-seconds) to
-// arrive. This is the "teeth": you have to order the part before the SLA clock
-// runs out, not when you get around to it. Resolution order: the item's own
-// leadSeconds, then a per-vendor default, then DEFAULT_LEAD. Faster vendors are
-// the express lane; CDW-grade hardware vendors are slower.
-const DEFAULT_LEAD = 30;
-const VENDOR_LEAD: Record<string, number> = { "Amazon Biz": 18, Newegg: 28, CDW: 42, Dell: 45, Apple: 38 };
-// Phone-call patience: a caller you've picked up loses patience every second you
-// stay on the line without pinning the issue. A wrong diagnostic question costs a
-// chunk. Hit zero and they hang up, which is a mishandled call plus a CSAT hit.
-const PATIENCE_DECAY = 2;
-const PATIENCE_WRONG = 18;
-const PATIENCE_HANGUP_PENALTY = 12;
-
-// Difficulty scales the whole desk: how much SLA budget you get, how hard wrong
-// moves and breaches hit, how fast callers lose patience, and how many lifelines
-// you start with. Picked at clock-in.
-type Difficulty = "easy" | "normal" | "hard";
-const DIFF: Record<Difficulty, { sla: number; pen: number; patience: number; csat: number; coffee: number; senior: number; label: string; desc: string }> = {
-  easy: { sla: 1.4, pen: 0.6, patience: 0.6, csat: 0.7, coffee: 2, senior: 3, label: "Easy", desc: "Generous clock, softer penalties, extra lifelines." },
-  normal: { sla: 1.0, pen: 1.0, patience: 1.0, csat: 1.0, coffee: 1, senior: 2, label: "Normal", desc: "The standard desk." },
-  hard: { sla: 0.75, pen: 1.4, patience: 1.5, csat: 1.3, coffee: 0, senior: 1, label: "Hard", desc: "Tight SLAs, harsh penalties, one lifeline." },
-};
-function slaBudget(shift: Shift, p: Priority, diff: Difficulty): number {
-  return SLA_BUDGET[p] * (shift.slaScale ?? 1) * DIFF[diff].sla;
-}
-function leadFor(p: { leadSeconds?: number; vendor: string }): number {
-  return p.leadSeconds ?? VENDOR_LEAD[p.vendor] ?? DEFAULT_LEAD;
-}
-
-function buildInitial(shift: Shift): State {
-  const items: Record<string, ItemRuntime> = {};
-  shift.items.forEach((i) => { items[i.id] = { status: "queued", steps: [], attempts: 0, phoneChoice: null, breached: false, landedAt: null, patience: i.channel === "phone" ? 100 : null, opened: false }; });
-  const stock: Record<string, number> = {};
-  shift.inventory.forEach((p) => { stock[p.sku] = p.stock; });
-  const adStatus: Record<string, string> = {};
-  shift.adUsers.forEach((u) => { adStatus[u.username] = u.status; });
-  return {
-    secondsLeft: shift.durationSeconds,
-    started: false,
-    difficulty: "normal",
-    ended: false,
-    csat: 100,
-    fangs: 0,
-    xp: 0,
-    budget: shift.startingBudget,
-    stock,
-    pendingOrders: [],
-    orderSeq: 0,
-    adStatus,
-    kbRead: [],
-    activeApp: "tickets",
-    activeItemId: null,
-    items,
-    feed: [],
-    feedSeq: 0,
-    // START sets the real lifeline counts from the chosen difficulty; the desk
-    // is unreachable until then, so these baselines stay zero.
-    lifelines: { coffee: 0, senior: 0 },
-    revealed: [],
-    streak: 0,
-    bestStreak: 0,
-  };
-}
-
-function pushFeed(s: State, text: string, tone: FeedTone): State {
-  const seq = s.feedSeq + 1;
-  return { ...s, feedSeq: seq, feed: [...s.feed, { seq, text, tone }].slice(-4) };
-}
-
-function makeReducer(shift: Shift) {
-  return function reducer(state: State, a: Action): State {
-    if (state.ended && a.t !== "END") return state;
-    switch (a.t) {
-      case "TICK": {
-        const nextLeft = state.secondsLeft <= 1 ? 0 : state.secondsLeft - 1;
-        const elapsed = shift.durationSeconds - nextLeft;
-        let ns: State = { ...state, secondsLeft: nextLeft };
-
-        // SLA breach sweep: any landed, unresolved, not-yet-breached ticket past
-        // its deadline breaches now (one-time CSAT hit, heavier for VIPs).
-        let items = ns.items;
-        let csat = ns.csat;
-        const breached: { subject: string; vip: boolean }[] = [];
-        shift.items.forEach((i) => {
-          let it = items[i.id];
-          if (isTerminal(it.status) || !isLive(i, items) || elapsed < i.arriveAfter) return;
-          // Stamp the moment it actually landed (revealed callbacks land late, so
-          // their SLA must start from here, not from a static arriveAfter of 0).
-          const landedAt = it.landedAt ?? elapsed;
-          if (it.landedAt == null) { it = { ...it, landedAt }; items = { ...items, [i.id]: it }; }
-          if (it.breached) return;
-          if (elapsed >= landedAt + slaBudget(shift, i.priority, ns.difficulty)) {
-            const base = BREACH_PENALTY[i.priority] * DIFF[ns.difficulty].pen;
-            // A breached VIP escalates to your manager: it hurts more.
-            const pen = Math.round(i.from.vip ? base * 2 : base);
-            items = { ...items, [i.id]: { ...it, breached: true } };
-            csat = clamp(csat - pen);
-            breached.push({ subject: i.subject, vip: !!i.from.vip });
-          }
-        });
-        if (breached.length) {
-          ns = { ...ns, items, csat };
-          breached.forEach((b) => { ns = pushFeed(ns, b.vip ? `Escalated to your manager: ${b.subject}` : `SLA breach: ${b.subject}`, "bad"); });
-        }
-
-        // Stockroom deliveries: any ordered part that has reached its ETA lands now.
-        if (ns.pendingOrders.length) {
-          const arrived = ns.pendingOrders.filter((o) => elapsed >= o.arrivesAt);
-          if (arrived.length) {
-            let stock = ns.stock;
-            arrived.forEach((o) => { stock = { ...stock, [o.sku]: (stock[o.sku] ?? 0) + 1 }; });
-            ns = { ...ns, stock, pendingOrders: ns.pendingOrders.filter((o) => elapsed < o.arrivesAt) };
-            arrived.forEach((o) => {
-              const part = shift.inventory.find((p) => p.sku === o.sku);
-              ns = pushFeed(ns, `Delivered: ${part?.name ?? o.sku} is in the stockroom.`, "good");
-            });
-          }
-        }
-
-        // Phone patience: once a call is picked up (opened), the caller drains
-        // until you pin the issue, whether or not the call is the open tab. Hit
-        // zero and they hang up (a mishandled call).
-        let hungUp = false;
-        for (const ai of shift.items) {
-          if (ai.channel !== "phone") continue;
-          const rt = ns.items[ai.id];
-          if (!rt.opened || isTerminal(rt.status) || rt.patience == null || rt.steps.includes("phone") || elapsed < ai.arriveAfter) continue;
-          const np = rt.patience - PATIENCE_DECAY * DIFF[ns.difficulty].patience;
-          if (np <= 0) {
-            ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: 0, status: "mishandled", attempts: rt.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), streak: 0 };
-            if (ns.activeItemId === ai.id) ns = { ...ns, activeItemId: null };
-            ns = pushFeed(ns, `The caller hung up: ${ai.subject}. Pick up and ask the right question sooner.`, "bad");
-            hungUp = true;
-          } else {
-            ns = { ...ns, items: { ...ns.items, [ai.id]: { ...rt, patience: np } } };
-          }
-        }
-        if (hungUp && shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
-
-        if (nextLeft === 0) ns = { ...ns, ended: true };
-        return ns;
-      }
-      case "APP":
-        return { ...state, activeApp: a.app, activeItemId: null };
-      case "OPEN": {
-        // Opening a call is picking it up. From then on the caller's patience
-        // keeps draining even if you navigate away (they are on hold), so you
-        // cannot peek at a call and close it to dodge the clock.
-        const it = state.items[a.id];
-        const items = it && !it.opened ? { ...state.items, [a.id]: { ...it, opened: true } } : state.items;
-        return { ...state, activeItemId: a.id, items };
-      }
-      case "CLOSE":
-        return { ...state, activeItemId: null };
-      case "STEP": {
-        const it = state.items[a.id];
-        if (it.steps.includes(a.step)) return state;
-        return { ...state, items: { ...state.items, [a.id]: { ...it, steps: [...it.steps, a.step] } } };
-      }
-      case "KB": {
-        if (state.kbRead.includes(a.articleId)) return state;
-        return { ...state, kbRead: [...state.kbRead, a.articleId] };
-      }
-      case "AD": {
-        // Mark the matching item's "ad" step + flip the directory status for display.
-        let items = state.items;
-        shift.items.forEach((i) => {
-          if (i.ad && i.ad.username === a.username && i.ad.action === a.action) {
-            const it = items[i.id];
-            if (!it.steps.includes("ad")) items = { ...items, [i.id]: { ...it, steps: [...it.steps, "ad"] } };
-          }
-        });
-        const adStatus = { ...state.adStatus };
-        if (a.action === "unlock") adStatus[a.username] = "active";
-        if (a.action === "reset_pw") adStatus[a.username] = "active";
-        let ns = { ...state, items, adStatus };
-        ns = pushFeed(ns, `Admin: ran ${a.action.replace("_", " ")} on ${a.username}.`, "info");
-        return ns;
-      }
-      case "ORDER": {
-        const part = shift.inventory.find((p) => p.sku === a.sku)!;
-        if (state.budget < part.unitCost) return pushFeed(state, "Order denied: not enough budget.", "bad");
-        const elapsed = shift.durationSeconds - state.secondsLeft;
-        const lead = leadFor(part);
-        const seq = state.orderSeq + 1;
-        const ns: State = {
-          ...state,
-          budget: state.budget - part.unitCost,
-          orderSeq: seq,
-          pendingOrders: [...state.pendingOrders, { seq, sku: a.sku, arrivesAt: elapsed + lead }],
-        };
-        return pushFeed(ns, `Ordered 1x ${part.name} from ${part.vendor} for $${part.unitCost}. ETA ${lead}s.`, "info");
-      }
-      case "SHIP": {
-        if ((state.stock[a.sku] ?? 0) <= 0) return pushFeed(state, "Out of stock. Order one first.", "bad");
-        let items = state.items;
-        shift.items.forEach((i) => {
-          if (i.part && i.part.sku === a.sku) {
-            const it = items[i.id];
-            if (!it.steps.includes("part")) items = { ...items, [i.id]: { ...it, steps: [...it.steps, "part"] } };
-          }
-        });
-        const part = shift.inventory.find((p) => p.sku === a.sku)!;
-        return pushFeed({ ...state, items, stock: { ...state.stock, [a.sku]: state.stock[a.sku] - 1 } }, `Shipped ${part.name} to the user.`, "info");
-      }
-      case "PHONE": {
-        const it = state.items[a.id];
-        let steps = it.steps;
-        let patience = it.patience;
-        if (a.correct) {
-          if (!steps.includes("phone")) steps = [...steps, "phone"];
-        } else if (patience != null) {
-          patience = Math.max(0, patience - PATIENCE_WRONG);
-        }
-        let ns: State = { ...state, items: { ...state.items, [a.id]: { ...it, steps, phoneChoice: a.index, patience } } };
-        if (!a.correct) {
-          if (patience === 0) {
-            ns = { ...ns, items: { ...ns.items, [a.id]: { ...ns.items[a.id], status: "mishandled", attempts: it.attempts + 1 } }, csat: clamp(ns.csat - PATIENCE_HANGUP_PENALTY), activeItemId: null, streak: 0 };
-            ns = pushFeed(ns, "The caller hung up. Too many wrong questions.", "bad");
-          } else {
-            ns = pushFeed(ns, "That wasn't what they needed. They're getting impatient.", "bad");
-          }
-        }
-        return ns;
-      }
-      case "RESOLVE": {
-        const item = shift.items.find((i) => i.id === a.id)!;
-        const it = state.items[item.id];
-        if (isTerminal(it.status)) return state;
-        const action = item.actions.find((x) => x.id === a.actionId)!;
-        const missing = (action.requires ?? []).filter((r) =>
-          r === "kb" ? !state.kbRead.includes(item.kbArticleId ?? "") : !it.steps.includes(r),
-        );
-        if (missing.length) {
-          return pushFeed(state, "Hold on. You haven't confirmed the cause yet. Use your tools first.", "info");
-        }
-        const correct = !!action.correct;
-        let newStatus: ItemStatus = it.status;
-        if (correct) newStatus = (action.outcome as ItemStatus) ?? "resolved";
-        else if (action.ends) newStatus = (action.outcome as ItemStatus) ?? "mishandled";
-        // VIP weighting: they notice great service and remember a botched call.
-        let csatDelta = action.csat;
-        if (item.from.vip) {
-          if (correct) csatDelta += 2;
-          else if (action.ends) csatDelta -= 3;
-        }
-        // Difficulty + Audit/Graveyard: wrong moves cost more (or less, on Easy).
-        if (csatDelta < 0) {
-          let scaled = csatDelta * DIFF[state.difficulty].csat;
-          if (shift.penaltyScale) scaled *= shift.penaltyScale;
-          csatDelta = Math.round(scaled);
-        }
-        const csat = clamp(state.csat + csatDelta);
-        // Resolve streak: consecutive correct fixes build a preview multiplier.
-        const streak = correct ? state.streak + 1 : 0;
-        const mult = correct ? (streak >= 8 ? 1.75 : streak >= 5 ? 1.5 : streak >= 3 ? 1.25 : 1) : 1;
-        let ns: State = {
-          ...state,
-          csat,
-          fangs: state.fangs + (correct ? Math.round(item.reward * mult) : 0),
-          xp: state.xp + (correct ? Math.round(item.xp * mult) : 0),
-          streak,
-          bestStreak: Math.max(state.bestStreak, streak),
-          items: { ...state.items, [item.id]: { ...it, status: newStatus, attempts: it.attempts + 1 } },
-        };
-        ns = pushFeed(ns, action.teach, correct ? "good" : "bad");
-        if (correct && (streak === 3 || streak === 5 || streak === 8 || streak === 12)) {
-          ns = pushFeed(ns, `On a roll: ${streak} in a row. Fangs x${mult}.`, "good");
-        }
-
-        // Incident storm: correctly fixing the root cause mass-resolves the
-        // flood of duplicate tickets behind it. One root cause, one fix.
-        if (correct && item.incident?.root) {
-          let dupItems = ns.items;
-          let n = 0;
-          shift.items.forEach((d) => {
-            if (d.incident && d.incident.group === item.incident!.group && d.id !== item.id && !isTerminal(dupItems[d.id].status)) {
-              dupItems = { ...dupItems, [d.id]: { ...dupItems[d.id], status: "resolved" } };
-              n++;
-            }
-          });
-          if (n > 0) {
-            ns = { ...ns, items: dupItems };
-            ns = pushFeed(ns, `Mass-resolved ${n} duplicate ticket${n === 1 ? "" : "s"} from the same incident.`, "good");
-          }
-        }
-
-        if (isTerminal(newStatus)) ns = { ...ns, activeItemId: null };
-        const allDone = shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items));
-        if (allDone) ns = { ...ns, ended: true };
-        return ns;
-      }
-      case "COFFEE": {
-        if (state.lifelines.coffee <= 0) return state;
-        const ai = state.activeItemId ? shift.items.find((i) => i.id === state.activeItemId) : null;
-        if (!ai || ai.channel !== "phone") return pushFeed(state, "Coffee steadies you on a live call. Open the call first.", "info");
-        const rt = state.items[ai.id];
-        if (isTerminal(rt.status) || rt.steps.includes("phone")) return state;
-        return pushFeed(
-          { ...state, lifelines: { ...state.lifelines, coffee: state.lifelines.coffee - 1 }, items: { ...state.items, [ai.id]: { ...rt, patience: 100 } } },
-          "You took a breath and a sip. The caller's patience is reset.", "good",
-        );
-      }
-      case "SENIOR": {
-        if (state.lifelines.senior <= 0 || state.revealed.includes(a.id)) return state;
-        const item = shift.items.find((i) => i.id === a.id);
-        if (!item || isTerminal(state.items[a.id].status)) return state;
-        return pushFeed(
-          { ...state, lifelines: { ...state.lifelines, senior: state.lifelines.senior - 1 }, revealed: [...state.revealed, a.id] },
-          "A senior leans over: go with the highlighted move.", "info",
-        );
-      }
-      case "PING":
-        return pushFeed(state, a.text, "info");
-      case "START":
-        return state.started ? state : { ...state, started: true, difficulty: a.difficulty, lifelines: { coffee: DIFF[a.difficulty].coffee, senior: DIFF[a.difficulty].senior } };
-      case "END":
-        return { ...state, ended: true };
-      default:
-        return state;
-    }
-  };
-}
-
-/* ───────────────────────── helpers ───────────────────────── */
+/* ───────────────────────── view helpers ───────────────────────── */
 
 const PRIORITY_COLOR: Record<Priority, string> = { P1: "#EF4444", P2: "#F59E0B", P3: "#4A90D9", P4: "#6B7280" };
 
@@ -447,18 +44,6 @@ const STATUS_COLOR: Record<ItemStatus, string> = {
   queued: "#6B7280", resolved: "#2BBE6B", escalated: "#4A90D9", archived: "#6B7280", reported: "#2BBE6B", mishandled: "#EF4444",
 };
 
-const GOOD_STATUSES: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
-
-function computeResult(shift: Shift, state: State): ShiftResult {
-  const live = shift.items.filter((i) => isLive(i, state.items));
-  const resolved = live.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
-  const total = Math.max(1, live.length);
-  const score = Math.round(state.csat * 0.6 + (resolved / total) * 40);
-  const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
-  const usedLifeline = (DIFF[state.difficulty].coffee - state.lifelines.coffee) > 0 || (DIFF[state.difficulty].senior - state.lifelines.senior) > 0;
-  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline, bestStreak: state.bestStreak };
-}
-
 /* ───────────────────────── component ───────────────────────── */
 
 const APPS: { id: AppId; label: string; Icon: typeof Ticket }[] = [
@@ -470,7 +55,7 @@ const APPS: { id: AppId; label: string; Icon: typeof Ticket }[] = [
   { id: "ad", label: "Admin", Icon: IdentificationBadge },
 ];
 
-export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shift: Shift; onComplete?: (r: ShiftResult) => void; onExit?: () => void; onReplay?: () => void }) {
+export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFangs, bankPending }: { shift: Shift; onComplete?: (r: ShiftResult) => void; onExit?: () => void; onReplay?: () => void; bankedFangs?: number | null; bankPending?: boolean }) {
   const reducer = useMemo(() => makeReducer(shift), [shift]);
   const [state, dispatch] = useReducer(reducer, shift, buildInitial);
   const accent = shift.accent ?? "#4A90D9";
@@ -606,7 +191,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
+    <div className="ld-motion-scope relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
 
@@ -645,7 +230,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay }: { shif
       </div>
 
       {!state.started && <ClockIn shift={shift} usedApps={usedApps} onStart={(d) => dispatch({ t: "START", difficulty: d })} />}
-      {state.ended && <ShiftReport shift={shift} state={state} onReplay={onReplay} onExit={onExit} />}
+      {state.ended && <ShiftReport shift={shift} state={state} onReplay={onReplay} onExit={onExit} bankedFangs={bankedFangs} bankPending={bankPending} />}
     </div>
   );
 }
@@ -665,6 +250,7 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
   ].filter(Boolean) as string[];
   const tips = [
     "Highest priority first. P1 tickets breach fast and a breached VIP escalates to your manager.",
+    `You get ${DIFF[diff].attempts} tr${DIFF[diff].attempts === 1 ? "y" : "ies"} per item. Run out and it is marked mishandled, so read the evidence before you commit.`,
     usedApps.has("phone") && "On a call, ask the right question to pin the issue before patience runs out, or they hang up.",
     usedApps.has("inventory") && "Parts take time to arrive. Order early or the SLA beats the delivery.",
     "Stuck? Spend a lifeline: Coffee resets a call, Ask a senior reveals the right move.",
@@ -814,8 +400,8 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
                   </div>
                   <p className="text-cream/55 text-[11px] mt-1 truncate">
                     {i.from.name} · {i.from.role}
-                    {channel === "phone" && i.phone ? ` — "${i.phone.opener.slice(0, 60)}..."` : ""}
-                    {channel === "email" && i.email ? ` — ${i.email.body.slice(0, 60)}...` : ""}
+                    {channel === "phone" && i.phone ? ` · "${i.phone.opener.slice(0, 60)}..."` : ""}
+                    {channel === "email" && i.email ? ` · ${i.email.body.slice(0, 60)}...` : ""}
                   </p>
                 </button>
               </li>
@@ -1067,7 +653,18 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
       {/* actions */}
       {!isTerminal(it.status) ? (
         <div className="mt-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">Choose your move · {item.goal}</p>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">Choose your move · {item.goal}</p>
+            {(() => {
+              const triesLeft = Math.max(0, DIFF[state.difficulty].attempts - it.attempts);
+              const tColor = triesLeft <= 1 ? "#EF4444" : triesLeft === 2 ? "#F59E0B" : "#2BBE6B";
+              return (
+                <span className="ml-auto font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded tabular-nums" style={{ color: tColor, background: `${tColor}1f`, border: `1px solid ${tColor}40` }} title="Wrong moves are limited. Run out and the item locks.">
+                  {triesLeft} tr{triesLeft === 1 ? "y" : "ies"} left
+                </span>
+              );
+            })()}
+          </div>
           <div className="grid gap-2">
             {item.actions.map((act) => {
               const recommended = state.revealed.includes(item.id) && act.correct;
@@ -1238,7 +835,7 @@ function Toasts({ feed }: { feed: FeedEntry[] }) {
 
 /* ───────────────────────── shift report ───────────────────────── */
 
-function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: State; onReplay?: () => void; onExit?: () => void }) {
+function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending }: { shift: Shift; state: State; onReplay?: () => void; onExit?: () => void; bankedFangs?: number | null; bankPending?: boolean }) {
   const live = shift.items.filter((i) => isLive(i, state.items));
   const resolved = live.filter((i) => ["resolved", "escalated", "archived", "reported"].includes(state.items[i.id].status));
   const fumbled = live.filter((i) => state.items[i.id].status === "mishandled");
@@ -1246,6 +843,16 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
   const breaches = live.filter((i) => state.items[i.id].breached).length;
   const { score, grade } = computeResult(shift, state);
   const gradeColor = grade === "S" || grade === "A" ? "#2BBE6B" : grade === "B" ? "#4A90D9" : grade === "C" ? "#F59E0B" : "#EF4444";
+
+  // The teaching content lives in each action's `teach`. During a shift it only
+  // flashes in a 4.2s toast, so the report is where the lesson actually lands:
+  // every item shows the correct move and why, and a fumble shows the contrast
+  // between what the player picked and what they should have.
+  const correctActionOf = (i: ShiftItem) => i.actions.find((act) => act.correct) ?? null;
+  const chosenActionOf = (i: ShiftItem) => {
+    const cid = state.items[i.id].chosenActionId;
+    return cid ? i.actions.find((act) => act.id === cid) ?? null : null;
+  };
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -1274,9 +881,27 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
         </div>
 
         {fumbled.length > 0 && (
-          <div className="mb-3">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-red-400 mb-1.5">Mishandled</p>
-            <ul className="space-y-1">{fumbled.map((i) => <li key={i.id} className="text-cream/70 text-xs">✕ {i.subject}</li>)}</ul>
+          <div className="mb-4">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-red-400 mb-2">What went wrong · learn the fix</p>
+            <ul className="space-y-2">
+              {fumbled.map((i) => {
+                const chosen = chosenActionOf(i);
+                const right = correctActionOf(i);
+                return (
+                  <li key={i.id} className="rounded-lg border border-red-500/20 bg-red-500/[0.04] p-2.5">
+                    <p className="text-cream/90 text-xs font-semibold">{i.subject}</p>
+                    {chosen ? (
+                      <p className="text-cream/65 text-[11px] leading-relaxed mt-1.5"><span className="text-red-400 font-semibold">You picked:</span> {chosen.label}.{chosen.teach ? ` ${chosen.teach}` : ""}</p>
+                    ) : (
+                      <p className="text-cream/55 text-[11px] leading-relaxed mt-1.5">No fix was committed before the caller hung up.</p>
+                    )}
+                    {right && (
+                      <p className="text-cream/75 text-[11px] leading-relaxed mt-1"><span className="text-[#2BBE6B] font-semibold">Right move:</span> {right.label}. {right.teach}</p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
         {open.length > 0 && (
@@ -1325,23 +950,37 @@ function ShiftReport({ shift, state, onReplay, onExit }: { shift: Shift; state: 
         })()}
 
         <details className="mb-4 rounded-xl border border-white/[0.07] bg-white/[0.015]">
-          <summary className="cursor-pointer select-none px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cream/55 hover:text-cream">Full recap ({live.length} item{live.length === 1 ? "" : "s"})</summary>
-          <ul className="px-3 pb-3 space-y-1.5">
+          <summary className="cursor-pointer select-none px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cream/55 hover:text-cream">Full recap · the right move on every item ({live.length})</summary>
+          <ul className="px-3 pb-3 space-y-2.5">
             {live.map((i) => {
               const st = state.items[i.id].status;
+              const right = correctActionOf(i);
               return (
-                <li key={i.id} className="flex items-center gap-2 text-xs">
-                  <span className="font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0" style={{ color: STATUS_COLOR[st], background: `${STATUS_COLOR[st]}1f` }}>{STATUS_LABEL[st]}</span>
-                  <span className="text-cream/70 truncate">{i.subject}</span>
+                <li key={i.id}>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0" style={{ color: STATUS_COLOR[st], background: `${STATUS_COLOR[st]}1f` }}>{STATUS_LABEL[st]}</span>
+                    <span className="text-cream/80 truncate">{i.subject}</span>
+                  </div>
+                  {right && <p className="text-cream/55 text-[11px] leading-relaxed mt-1"><span className="text-[#2BBE6B]/90">Right move:</span> {right.label}. {right.teach}</p>}
                 </li>
               );
             })}
           </ul>
         </details>
 
-        <p className="font-mono text-[10px] text-cream/35 leading-relaxed mb-4">
-          Fangs and XP are a preview. They are granted for real once a shift is validated server-side, so the economy stays tamper-proof.
-        </p>
+        {typeof bankedFangs === "number" && bankedFangs > 0 ? (
+          <p className="font-mono text-[10px] text-[#2BBE6B] leading-relaxed mb-4">
+            ✓ {bankedFangs} Fangs banked to your balance, validated server-side. XP is preview-only for now.
+          </p>
+        ) : bankPending ? (
+          <p className="font-mono text-[10px] text-cream/35 leading-relaxed mb-4">
+            Fangs and XP are a preview. They bank for real once the server economy goes live, so the economy stays tamper-proof.
+          </p>
+        ) : (
+          <p className="font-mono text-[10px] text-cream/35 leading-relaxed mb-4">
+            Fangs and XP are a preview. They are granted for real once a shift is validated server-side, so the economy stays tamper-proof.
+          </p>
+        )}
 
         <div className="flex gap-2">
           <button onClick={() => (onReplay ? onReplay() : window.location.reload())} className="flex-1 min-h-[44px] rounded-xl font-bold text-sm text-[#04080F] flex items-center justify-center gap-2" style={{ background: "linear-gradient(135deg,#FFD700,#FFA500)" }}>

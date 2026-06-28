@@ -266,10 +266,11 @@ export default function NightShift() {
   const survived = state.hour * def.secondsPerHour + state.secInHour;
 
   return (
-    <div className="relative rounded-2xl border border-white/[0.08] overflow-hidden bg-[#04060c] select-none" style={{ boxShadow: `inset 0 0 120px rgba(239,68,68,${tension * 0.28})` }}>
+    <div className="ld-motion-scope relative rounded-2xl border border-white/[0.08] overflow-hidden bg-[#04060c] select-none" style={{ boxShadow: `inset 0 0 120px rgba(239,68,68,${tension * 0.28})` }}>
       <style>{`
         @keyframes ns-flash { 0%{opacity:0.5} 100%{opacity:0} }
         @keyframes ns-blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        @keyframes ns-flash-in { 0%{opacity:0} 100%{opacity:1} }
         @keyframes ns-static { 0%{opacity:0.85} 100%{opacity:0} }
         @keyframes ns-shake { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-4px,2px)} 40%{transform:translate(4px,-2px)} 60%{transform:translate(-3px,-2px)} 80%{transform:translate(3px,2px)} }
         .ns-scan { background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px); }
@@ -391,12 +392,15 @@ export default function NightShift() {
         <ResultCard won={state.status === "won"} state={state} survived={survived} endlessBest={endlessBest} nextNightIdx={state.status === "won" ? nextNightIdx : null} dispatch={dispatch} onNext={(i) => { resumeAudio(); dispatch({ t: "START", def: NIGHTS[i], nightIdx: i }); }} onRetry={() => { resumeAudio(); dispatch({ t: "START", def: state.def, nightIdx: state.nightIdx }); }} />
       )}
 
-      {/* jump-scare flash on breach */}
+      {/* Breach scare on loss. A single red flash-in held for the scare window,
+          NOT a strobe: rapid full-screen flashing (the old 0.1s/0.12s infinite
+          blink ran ~8 to 10 flashes/sec) can trigger photosensitive seizures,
+          over the WCAG 2.3.1 three-per-second limit. Nothing here repeats. */}
       {showScare && (
-        <div className="absolute inset-0 z-40 overflow-hidden flex items-center justify-center" style={{ background: "#000", animation: "ns-shake 90ms infinite" }}>
-          <div className="ns-noise absolute inset-0" style={{ opacity: 0.55 }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(239,68,68,0.55), #000 70%)", animation: "ns-blink 0.12s infinite" }} />
-          <ShieldWarning size={130} weight="fill" color="#EF4444" aria-hidden="true" style={{ animation: "ns-blink 0.1s infinite" }} />
+        <div className="absolute inset-0 z-40 overflow-hidden flex items-center justify-center" style={{ background: "#000", animation: "ns-shake 360ms ease-in-out" }}>
+          <div className="ns-noise absolute inset-0" style={{ opacity: 0.4 }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(239,68,68,0.6), #000 70%)", animation: "ns-flash-in 220ms ease-out forwards" }} />
+          <ShieldWarning size={130} weight="fill" color="#EF4444" aria-hidden="true" style={{ animation: "ns-flash-in 220ms ease-out forwards" }} />
         </div>
       )}
 
@@ -490,6 +494,7 @@ function NightMenu({ maxSurvived, endlessBest, onChoose, onCustom, onEndless, on
         </div>
         {endlessBest > 0 && <p className="font-mono text-[10px] text-cream/45 mt-2">Endless best: {fmtSec(endlessBest)}</p>}
         <p className="font-mono text-[10px] text-cream/35 mt-2">Survive a night to unlock the next. It gets worse.</p>
+        <p className="font-mono text-[9px] text-cream/30 mt-3 leading-relaxed">Heads up: sudden loud audio and a brief screen flash on a breach. Turn on Reduce Motion in your system settings to soften the visuals.</p>
       </div>
     </div>
   );

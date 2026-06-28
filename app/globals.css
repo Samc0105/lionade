@@ -26,6 +26,19 @@ html {
   .animate-spin {
     animation: none !important;
   }
+
+  /* TechHub LionDesk + Night Shift drive their game feedback (the breach scare,
+     scanline flicker, blink indicators, toast slide, the advance flash) through
+     inline `style={{ animation }}`, which a normal stylesheet rule cannot reach.
+     Scoped to the .ld-motion-scope wrappers on each game root, this freezes
+     every one of those looping/flashing animations for motion-sensitive players
+     while leaving the rest of the app untouched. The elements still render at
+     their resting state, and game logic (timers, the scare window) is unaffected.
+     Note: the breach scare is ALSO de-strobed for everyone in NightShift.tsx
+     (single flash-in, not a >3/sec blink) for photosensitive-seizure safety. */
+  .ld-motion-scope [style*="animation"] {
+    animation: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

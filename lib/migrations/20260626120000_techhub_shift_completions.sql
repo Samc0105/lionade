@@ -3,9 +3,18 @@
 -- TechHub / LionDesk shift completions + idempotent Fang grant ledger.
 --
 -- Purpose: persist a player's best score per shift across devices, and let the
--- server grant Fangs exactly ONCE per shift (first qualifying clear). The API
--- route (app/api/techhub/shifts/complete) owns the reward ceiling per shift, so
--- a crafted client can never self-grant. The economy stays server-authoritative.
+-- server grant Fangs idempotently per shift. The API route
+-- (app/api/techhub/shifts/complete) owns the reward ceiling per shift, so a
+-- crafted client can never self-grant. The economy stays server-authoritative.
+--
+-- `granted_fangs` records the running TOTAL already paid for this shift (not a
+-- boolean flag). The route grants only the positive difference between what the
+-- player's BEST score has now earned and what was already paid, so:
+--   * a first qualifying clear pays the full earned amount,
+--   * a replay with a HIGHER score tops up the difference,
+--   * a replay with the same or a lower score grants nothing.
+-- This is naturally idempotent on the amount and removes the need for a later
+-- boolean -> int migration once top-ups are wanted.
 -- ════════════════════════════════════════════════════════════════════════
 
 create table if not exists public.techhub_shift_completions (
@@ -15,7 +24,7 @@ create table if not exists public.techhub_shift_completions (
   best_score   int  not null default 0 check (best_score between 0 and 100),
   last_csat    int  not null default 0 check (last_csat between 0 and 100),
   plays        int  not null default 0,
-  fangs_granted boolean not null default false,
+  granted_fangs int not null default 0 check (granted_fangs >= 0),
   completed_at timestamptz not null default now(),
   created_at   timestamptz not null default now(),
   unique (user_id, shift_id)

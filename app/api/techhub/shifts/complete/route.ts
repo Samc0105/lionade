@@ -40,19 +40,19 @@ export async function POST(req: NextRequest) {
 
   const body = (await req.json().catch(() => null)) as { shiftId?: string; score?: number; csat?: number } | null;
   const shiftId = String(body?.shiftId ?? "");
-  const score = Math.max(0, Math.min(100, Math.round(Number(body?.score ?? 0))));
-  const csat = Math.max(0, Math.min(100, Math.round(Number(body?.csat ?? 0))));
+  // Coerce defensively: Number("x") is NaN, which survives Math.round/min/max and
+  // would violate the NOT NULL int columns. A non-finite value is treated as 0.
+  const toScore = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0; };
+  const score = toScore(body?.score);
+  const csat = toScore(body?.csat);
 
   const cap = SHIFT_REWARDS[shiftId];
   if (!cap) return NextResponse.json({ error: "Unknown shift." }, { status: 400 });
 
-  // Reward scales with score and is capped server-side. A failed shift earns nothing.
-  const earnedFangs = score >= PASS_SCORE ? Math.round(cap.maxFangs * (score / 100)) : 0;
-
-  // Load any prior completion to keep the best score + guard the one-time grant.
+  // Load any prior completion to keep the best score + the running grant total.
   const { data: existing, error: readErr } = await supabaseAdmin
     .from("techhub_shift_completions")
-    .select("best_score, plays, fangs_granted")
+    .select("best_score, plays, granted_fangs")
     .eq("user_id", userId)
     .eq("shift_id", shiftId)
     .maybeSingle();
@@ -65,45 +65,71 @@ export async function POST(req: NextRequest) {
   }
 
   const bestScore = Math.max(score, existing?.best_score ?? 0);
-  const alreadyGranted = existing?.fangs_granted ?? false;
-  const shouldGrant = !alreadyGranted && earnedFangs > 0;
+  const alreadyGranted = existing?.granted_fangs ?? 0;
+  // The reward is owed against the player's BEST score, capped server-side. We
+  // pay only the positive difference vs. what was already granted: full amount
+  // on a first qualifying clear, the top-up on a higher-scoring replay, and
+  // nothing on a same/lower replay. Idempotent on the amount.
+  const owedForBest = bestScore >= PASS_SCORE ? Math.round(cap.maxFangs * (bestScore / 100)) : 0;
+  const delta = Math.max(0, owedForBest - alreadyGranted);
+  const newGrantedTotal = alreadyGranted + delta;
+  const completedAt = new Date().toISOString();
 
-  const { error: upsertErr } = await supabaseAdmin
-    .from("techhub_shift_completions")
-    .upsert(
-      {
-        user_id: userId,
-        shift_id: shiftId,
-        best_score: bestScore,
-        last_csat: csat,
-        plays: (existing?.plays ?? 0) + 1,
-        fangs_granted: alreadyGranted || shouldGrant,
-        completed_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,shift_id" },
-    );
-  if (upsertErr) {
-    return NextResponse.json({ error: "Couldn't save completion." }, { status: 500 });
+  // Persist the completion under OPTIMISTIC CONCURRENCY so two simultaneous
+  // submits of the same shift can never both credit `delta` (a double-pay). Only
+  // the write that actually advances granted_fangs from the value we read earns
+  // the right to credit; a racing loser sees 0 rows affected and credits nothing.
+  let committed = false;
+  if (!existing) {
+    // First completion for this shift: insert. A concurrent first insert loses on
+    // the unique (user_id, shift_id) constraint (23505); that loser does not
+    // credit (the winner already did). A higher score it missed self-heals on the
+    // player's next replay, since the grant is idempotent on best score.
+    const { error: insErr } = await supabaseAdmin
+      .from("techhub_shift_completions")
+      .insert({ user_id: userId, shift_id: shiftId, best_score: bestScore, last_csat: csat, plays: 1, granted_fangs: newGrantedTotal, completed_at: completedAt });
+    if (insErr) {
+      if (insErr.code === "23505") return NextResponse.json({ ok: true, bestScore, granted: 0 });
+      return NextResponse.json({ error: "Couldn't save completion." }, { status: 500 });
+    }
+    committed = true;
+  } else {
+    // Existing row: a conditional UPDATE gated on the granted_fangs we read. If a
+    // concurrent request already advanced it, our WHERE matches 0 rows and we do
+    // not credit. .select() returns the rows we actually changed.
+    const { data: updated, error: updErr } = await supabaseAdmin
+      .from("techhub_shift_completions")
+      .update({ best_score: bestScore, last_csat: csat, plays: (existing.plays ?? 0) + 1, granted_fangs: newGrantedTotal, completed_at: completedAt })
+      .eq("user_id", userId)
+      .eq("shift_id", shiftId)
+      .eq("granted_fangs", alreadyGranted)
+      .select("id");
+    if (updErr) return NextResponse.json({ error: "Couldn't save completion." }, { status: 500 });
+    committed = (updated?.length ?? 0) === 1;
   }
 
-  if (shouldGrant) {
-    // Atomic, server-authoritative Fang credit (same RPC as quiz rewards).
+  if (committed && delta > 0) {
+    // Server-authoritative Fang credit (same RPC as quiz rewards). We advanced
+    // granted_fangs above and credit exactly once; on failure we roll the total
+    // back to alreadyGranted (guarded so we only undo our own advance) so the
+    // next submit retries, and log if even the rollback fails.
     const { error: coinErr } = await supabaseAdmin.rpc("update_user_coins", {
       p_user_id: userId,
-      p_delta: earnedFangs,
+      p_delta: delta,
       p_min_balance: 0,
       p_source: "cashable",
     });
     if (coinErr) {
-      // Roll the grant flag back so a transient failure can be retried, not lost.
-      await supabaseAdmin
+      const { error: rbErr } = await supabaseAdmin
         .from("techhub_shift_completions")
-        .update({ fangs_granted: false })
+        .update({ granted_fangs: alreadyGranted })
         .eq("user_id", userId)
-        .eq("shift_id", shiftId);
+        .eq("shift_id", shiftId)
+        .eq("granted_fangs", newGrantedTotal);
+      if (rbErr) console.error("techhub grant rollback failed", { userId, shiftId, rbErr });
       return NextResponse.json({ error: "Grant failed." }, { status: 500 });
     }
   }
 
-  return NextResponse.json({ ok: true, bestScore, granted: shouldGrant ? earnedFangs : 0 });
+  return NextResponse.json({ ok: true, bestScore, granted: committed ? delta : 0 });
 }

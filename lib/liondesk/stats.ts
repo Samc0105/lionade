@@ -4,7 +4,7 @@
 // so the UI can celebrate them.
 
 import type { Shift } from "./types";
-import type { ShiftResult } from "@/components/liondesk/LionDesk";
+import type { ShiftResult } from "@/lib/liondesk/engine";
 import { getMaxNightSurvived, getEndlessBest } from "./nightshift";
 import { recordShiftReputation, getReputation, REP_DEPTS } from "./reputation";
 
