@@ -217,6 +217,7 @@ For deep context, read:
 - `~/Desktop/lionade/IOS_PARITY.md` — web↔iOS drift state
 - `~/Desktop/lionade-vault/lionade/Home.md` — the vault MOC linking everything
 - `~/Desktop/lionade/.claude/agents/README.md` — the org map (this org's README)
+- `~/Desktop/lionade/WORKLOG.md` — the cross-machine session handoff log. **When Sam asks "what was the last thing I did" (especially right after a fresh `git pull` on another computer), read this first**, then confirm against `git log --oneline -10`.
 
 ---
 
