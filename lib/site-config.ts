@@ -29,6 +29,13 @@ export const SITE_HOST: string = SITE_URL_OBJ.host;
 /** Default sender/support email — derived from the host. */
 export const SUPPORT_EMAIL = `support@${SITE_HOST}`;
 
+/**
+ * Security-report inbox for the vulnerability disclosure policy. Preferred
+ * contact in /.well-known/security.txt; falls back to SUPPORT_EMAIL for
+ * reporters if the dedicated alias is not yet provisioned.
+ */
+export const SECURITY_EMAIL = `security@${SITE_HOST}`;
+
 /** Join a relative path to the site URL. `absoluteUrl("/about") → "https://…/about"`. */
 export function absoluteUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;

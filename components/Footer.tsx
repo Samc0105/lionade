@@ -26,6 +26,7 @@ const COMPANY: FooterLink[] = [
 const LEGAL: FooterLink[] = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "/security", label: "Security" },
 ];
 
 const CONNECT: FooterLink[] = [
