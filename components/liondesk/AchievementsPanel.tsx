@@ -9,8 +9,12 @@ import { QUEST_BADGES, getEarnedQuestBadgeIds } from "@/lib/liondesk/quests";
 import { getPlayStreak, STREAK_MILESTONES, type PlayStreak } from "@/lib/liondesk/playstreak";
 import { isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getReputation, REP_DEPTS } from "@/lib/liondesk/reputation";
+import { getAllTrackMastery, trackMasterySkeleton, completedTrackCount, type TrackMastery } from "@/lib/liondesk/trackMastery";
 import { CareerSagaCard } from "@/components/liondesk/PromotionMoment";
 import { chapterForLevel, nextPromotion } from "@/lib/liondesk/saga";
+
+// Zeroed placeholders so the track completion grid has shape before mount.
+const MASTERY_SKELETON: TrackMastery[] = trackMasterySkeleton();
 
 export default function AchievementsPanel() {
   const [mounted, setMounted] = useState(false);
@@ -24,6 +28,7 @@ export default function AchievementsPanel() {
   const [reputation, setReputation] = useState<Record<string, number>>({});
   const [streak, setStreak] = useState<PlayStreak>({ current: 0, best: 0, lastDay: "" });
   const [questBadges, setQuestBadges] = useState<string[]>([]);
+  const [trackMastery, setTrackMastery] = useState<TrackMastery[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -37,6 +42,7 @@ export default function AchievementsPanel() {
     setReputation(getReputation());
     setStreak(getPlayStreak());
     setQuestBadges(getEarnedQuestBadgeIds());
+    setTrackMastery(getAllTrackMastery());
   }, []);
 
   function equip(id: string) {
@@ -157,6 +163,47 @@ export default function AchievementsPanel() {
             })}
           </div>
         </div>
+      </div>
+
+      {/* track completion (Idea 37). A meta goal across each career track: clear
+          every shift at passing to "complete" the track and earn its cosmetic
+          top of ladder title. Display and preview only; like every TechHub
+          reward it grants no Fangs (the economy stays server authoritative).
+          Inserted alongside, not over, the streak and quest UI. Static styling,
+          so it is reduced motion safe, and mount guarded against a zero flash. */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">track completion</p>
+          <span className="font-mono text-[10px] tabular-nums text-cream/45">{mounted ? `${completedTrackCount(trackMastery)} / ${trackMastery.length}` : "…"}</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {(mounted ? trackMastery : MASTERY_SKELETON).map((m, i) => {
+            const skeleton = !mounted;
+            const done = !skeleton && m.complete;
+            const clearedPct = skeleton ? 0 : m.total ? Math.round((m.cleared / m.total) * 100) : 0;
+            return (
+              <div key={skeleton ? i : m.id} className="rounded-xl border p-3" style={{ borderColor: done ? `${m.color}59` : "rgba(255,255,255,0.07)", background: done ? `${m.color}10` : "rgba(255,255,255,0.015)" }}>
+                <div className="flex items-center gap-2">
+                  {mounted && (done ? <CheckCircle size={16} weight="fill" color={m.color} aria-hidden="true" /> : <LockSimple size={13} weight="fill" color="#6B7280" aria-hidden="true" />)}
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: skeleton ? "rgba(255,255,255,0.12)" : m.color }} />
+                  <span className="text-cream text-sm font-semibold truncate">{skeleton ? "…" : m.name}</span>
+                  <span className="ml-auto font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: skeleton ? "rgba(255,255,255,0.4)" : m.tier.color, background: skeleton ? "rgba(255,255,255,0.06)" : `${m.tier.color}1f` }}>{skeleton ? "…" : m.tier.name}</span>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-white/10" role="img" aria-label={skeleton ? "loading" : `${m.name}: ${m.cleared} of ${m.total} shifts cleared`}>
+                  <div className="h-full rounded-full" style={{ width: `${clearedPct}%`, background: skeleton ? "rgba(255,255,255,0.12)" : m.color }} />
+                </div>
+                <p className="font-mono text-[9px] text-cream/45 mt-1.5">
+                  {skeleton
+                    ? "…"
+                    : done
+                      ? `Complete. Cosmetic: ${m.cosmetic.title} title.`
+                      : `${m.cleared} of ${m.total} cleared. Complete to earn the ${m.cosmetic.title} title.`}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        <p className="font-mono text-[9px] text-cream/40 mt-2 leading-relaxed">Track titles are cosmetic. Like every TechHub reward they grant no Fangs (the economy stays server authoritative).</p>
       </div>
 
       {/* department reputation */}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChartBar, Trophy, Lightning, Target, CalendarBlank, ArrowRight } from "@phosphor-icons/react";
+import { ChartBar, Trophy, Lightning, Target, CalendarBlank, ArrowRight, Medal } from "@phosphor-icons/react";
 import { getStats, getCareerLevel, type TechhubStats, type CareerLevel } from "@/lib/liondesk/stats";
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
 import { getPlayStreak, type PlayStreak } from "@/lib/liondesk/playstreak";
@@ -14,6 +14,7 @@ import {
   type MasteryLevel,
 } from "@/lib/liondesk/conceptMastery";
 import { getAllRecords, gradeFor, PASS_SCORE, type ShiftRecord } from "@/lib/liondesk/campaignProgress";
+import { getAllTrackMastery, trackMasterySkeleton, type TrackMastery } from "@/lib/liondesk/trackMastery";
 import { shiftsForTrack, getShift } from "@/lib/liondesk/shifts";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { getRecentDays, type CalendarCell } from "@/lib/liondesk/dailyLog";
@@ -108,6 +109,7 @@ export default function PerformanceDashboard() {
   const [streak, setStreak] = useState<PlayStreak>({ current: 0, best: 0, lastDay: "" });
   const [night, setNight] = useState({ max: 0, endless: 0 });
   const [trackPerf, setTrackPerf] = useState<TrackPerf[]>([]);
+  const [mastery, setMastery] = useState<TrackMastery[]>([]);
   const [topShifts, setTopShifts] = useState<TopShift[]>([]);
   const [weakRows, setWeakRows] = useState<ConceptMasteryRow[]>([]);
   const [weakIds, setWeakIds] = useState<string[]>([]);
@@ -123,6 +125,7 @@ export default function PerformanceDashboard() {
     setStreak(getPlayStreak());
     setNight({ max: getMaxNightSurvived(), endless: getEndlessBest() });
     setTrackPerf(computeTrackPerf(records));
+    setMastery(getAllTrackMastery());
     setTopShifts(computeTopShifts(records));
     setWeakRows(computeWeakConcepts());
     setWeakIds(getWeakestConcepts(3));
@@ -210,6 +213,46 @@ export default function PerformanceDashboard() {
                     {t.played === 0
                       ? "Not started yet. Clear a shift to begin tracking this track."
                       : `Best score ${t.bestScore}, average ${t.avgScore} over ${t.played} shift${t.played === 1 ? "" : "s"} played.`}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* per track mastery rank (Idea 37). Blends cleared shifts, average grade,
+          and concept mastery into one rank per track. A fully cleared track also
+          earns a cosmetic top of ladder title (preview only, never any Fangs).
+          Mount guarded with a skeleton so it never flashes a row of zeros. */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <Medal size={14} weight="fill" color="#C9A2F2" aria-hidden="true" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">track mastery</p>
+        </div>
+        <ul className="space-y-2.5">
+          {(mounted ? mastery : MASTERY_SKELETON).map((m, i) => {
+            const skeleton = !mounted;
+            const width = skeleton ? 0 : m.pct;
+            const tierColor = skeleton ? "rgba(255,255,255,0.12)" : m.tier.color;
+            return (
+              <li key={skeleton ? i : m.id} className="rounded-xl border bg-white/[0.02] p-3" style={{ borderColor: !skeleton && m.complete ? `${m.color}59` : "rgba(255,255,255,0.08)" }}>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: skeleton ? "rgba(255,255,255,0.12)" : m.color }} />
+                  <span className="text-cream/90 text-[13px] font-semibold">{skeleton ? "…" : m.name}</span>
+                  <span className="font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: tierColor, background: skeleton ? "rgba(255,255,255,0.06)" : `${m.tier.color}1f` }}>{skeleton ? "…" : m.tier.name}</span>
+                  <span className="ml-auto font-mono text-[11px] tabular-nums" style={{ color: tierColor }}>{skeleton ? "…" : `${m.pct}%`}</span>
+                </div>
+                <div className="mt-2 h-2 w-full rounded-full overflow-hidden bg-white/[0.06]" role="img" aria-label={skeleton ? "loading" : `${m.name}: ${m.tier.name} rank, ${m.pct}% mastery`}>
+                  <div className="h-full rounded-full motion-safe:transition-[width] motion-safe:duration-700 ease-out" style={{ width: `${width}%`, background: tierColor }} />
+                </div>
+                {!skeleton && (
+                  <p className="mt-1.5 font-mono text-[10px] text-cream/40">
+                    {m.complete
+                      ? `Track complete. Average grade ${m.avgGrade}. Cosmetic earned: ${m.cosmetic.title} title.`
+                      : m.played === 0
+                        ? "Not started yet. Clear shifts to climb this track's mastery rank."
+                        : `${m.cleared} of ${m.total} cleared, average grade ${m.avgGrade}${m.conceptPct !== null ? `, concepts ${m.conceptPct}%` : ""}.`}
                   </p>
                 )}
               </li>
@@ -361,5 +404,6 @@ export default function PerformanceDashboard() {
 
 // Placeholders so each section has shape before mount, never a row of zeros.
 const TRACK_SKELETON: TrackPerf[] = TRACKS.map((t) => ({ id: t.id, name: t.name, color: t.color, total: 0, cleared: 0, played: 0, bestScore: 0, avgScore: 0 }));
+const MASTERY_SKELETON: TrackMastery[] = trackMasterySkeleton();
 const CONCEPT_SKELETON: ConceptMasteryRow[] = Array.from({ length: 4 }).map(() => ({ concept: "", label: "", correct: 0, total: 0, pct: null, confident: false, level: "none" }));
 const TREND_SKELETON: CalendarCell[] = Array.from({ length: 14 }).map(() => ({ day: "", cleared: 0, modes: [], isToday: false }));
