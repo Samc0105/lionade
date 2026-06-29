@@ -6,6 +6,7 @@ import { generateShift, dateSeed, weekSeed } from "@/lib/liondesk/generate";
 import { decodeCombo } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
+import { recordDailyClear, type DailyMode } from "@/lib/liondesk/dailyLog";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
 
@@ -43,6 +44,20 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
   // daily, daily-chaos, and weekly are the fixed shared challenges; else rerolls.
   const rerollable = !daily && !weekly;
 
+  // Which of the three shared, deterministic modes (if any) this shift is, using
+  // the SAME query-flag precedence as makeShift above (comboCode, then weekly,
+  // then chaos+daily, then daily). Returns null for the non-shared variants
+  // (Shared Combo, Chaos Shift, Surprise Shift) so the Today's Board only tracks
+  // the three shared modes the player can actually clear off the checklist.
+  function dailyModeFor(): DailyMode | null {
+    if (comboCode) return null;
+    if (weekly) return "weekly";
+    if (chaos && daily) return "chaos";
+    if (chaos) return null;
+    if (daily) return "combo";
+    return null;
+  }
+
   useEffect(() => {
     setShift(makeShift());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,7 +83,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
           ))}
         </div>
       )}
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => { recordPlayDay(); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => { recordPlayDay(); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {daily
           ? "Today's challenge is the same for everyone and rerolls at midnight."

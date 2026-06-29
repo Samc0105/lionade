@@ -2,13 +2,29 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
 import { computeUnlocked, ACHIEVEMENTS } from "@/lib/liondesk/stats";
 import { getPlayStreak } from "@/lib/liondesk/playstreak";
+import { getTodayStatus, getRecentDays, type DailyMode } from "@/lib/liondesk/dailyLog";
 import { trackIconFor } from "@/components/helpdesk/icons";
+
+// The three deterministic shared modes shown on Today's Board, each matched to
+// its hub card's accent and entry route. Order: the two dailies, then weekly.
+const BOARD: { mode: DailyMode; label: string; hint: string; color: string; href: string; icon: typeof CalendarBlank }[] = [
+  { mode: "combo", label: "Daily Combo", hint: "Today's mix of tickets and mutators.", color: "#FFD700", href: "/learn/techhub/surprise?daily=1", icon: CalendarBlank },
+  { mode: "chaos", label: "Daily Chaos", hint: "Today's brutal stacked gauntlet.", color: "#F87171", href: "/learn/techhub/surprise?daily=1&chaos=1", icon: Lightning },
+  { mode: "weekly", label: "Weekly Challenge", hint: "This week's shared challenge.", color: "#C9A2F2", href: "/learn/techhub/surprise?weekly=1", icon: Trophy },
+];
+
+// Render a UTC day-key (YYYY-MM-DD from lib/liondesk/dailyLog) as a short,
+// dash-free label like "Jun 28" for the calendar tooltips.
+function formatDay(key: string): string {
+  const d = new Date(`${key}T00:00:00Z`);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+}
 
 export default function TechHubHome() {
   // localStorage progress only exists on the client. Read after mount to avoid
@@ -32,6 +48,14 @@ export default function TechHubHome() {
   const achPct = Math.round((achGot / achTotal) * 100);
   const streak = useMemo(() => (mounted ? getPlayStreak() : { current: 0, best: 0, lastDay: "" }), [mounted, version]);
 
+  // Today's Board: which shared modes are cleared today + the last 14 days for
+  // the clock-in calendar. Read only after mount (localStorage), so before mount
+  // we render skeleton placeholders instead of a misleading empty/zero board.
+  const todayStatus = useMemo(() => (mounted ? getTodayStatus() : []), [mounted, version]);
+  const recentDays = useMemo(() => (mounted ? getRecentDays(14) : []), [mounted, version]);
+  const todayCleared = todayStatus.filter((s) => s.cleared).length;
+  const daysActive = recentDays.filter((d) => d.cleared > 0).length;
+
   return (
     <div className="space-y-6">
       {/* Tutorial entry for newcomers. */}
@@ -43,6 +67,97 @@ export default function TechHubHome() {
         </div>
         <ArrowRight size={14} weight="bold" color="#2BBE6B" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
       </Link>
+
+      {/* Today's Board: a daily-return checklist of the three shared modes plus a
+          compact 14-day clock-in calendar. A pure completion tracker, it grants
+          nothing (the economy stays server-authoritative). */}
+      <div
+        className="rounded-2xl p-4 sm:p-5"
+        style={{ background: "linear-gradient(135deg, rgba(255,215,0,0.10) 0%, rgba(168,85,247,0.06) 55%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.22)" }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <ListChecks size={18} weight="fill" color="#FFD700" aria-hidden="true" />
+            <h2 className="font-bebas text-xl text-cream tracking-wider leading-none">TODAY'S BOARD</h2>
+          </div>
+          <span className="font-mono text-[10px] tabular-nums text-cream/55">{mounted ? `${todayCleared}/3 cleared` : "…/3 cleared"}</span>
+        </div>
+        <p className="text-cream/55 text-[11px] mt-1.5">Clear today's three shared modes to fill the board. Same for everyone.</p>
+
+        {/* Mode checklist */}
+        <div className="mt-3 space-y-2">
+          {BOARD.map((m) => {
+            const st = todayStatus.find((s) => s.mode === m.mode);
+            const done = !!st?.cleared;
+            const Icon = m.icon;
+            return (
+              <Link
+                key={m.mode}
+                href={m.href}
+                className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors"
+                style={{
+                  background: mounted && done ? `${m.color}12` : "rgba(255,255,255,0.025)",
+                  border: `1px solid ${mounted && done ? `${m.color}3a` : "rgba(255,255,255,0.07)"}`,
+                }}
+              >
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${m.color}16`, border: `1px solid ${m.color}3a` }}>
+                  <Icon size={18} weight="fill" color={m.color} aria-hidden="true" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bebas text-base text-cream tracking-wide leading-none">{m.label}</p>
+                  <p className="text-cream/55 text-[11px] mt-1">{m.hint}</p>
+                </div>
+                {!mounted ? (
+                  <span className="font-mono text-[11px] text-cream/40" aria-hidden="true">…</span>
+                ) : done ? (
+                  <span className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="font-mono text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded" style={{ background: `${m.color}1f`, color: m.color, border: `1px solid ${m.color}44` }}>{st?.grade}</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: m.color }}>
+                      <CheckCircle size={15} weight="fill" aria-hidden="true" /> Cleared
+                    </span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-cream/45 flex-shrink-0">
+                    <Circle size={15} weight="bold" aria-hidden="true" /> Not yet
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* 14-day clock-in calendar */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">last 14 days</span>
+            <span className="font-mono text-[10px] tabular-nums text-cream/45">{mounted ? `${daysActive} active` : "…"}</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {mounted
+              ? recentDays.map((cell) => {
+                  const fill = cell.cleared === 0 ? "rgba(255,255,255,0.05)" : `rgba(255,215,0,${(0.18 + cell.cleared * 0.22).toFixed(2)})`;
+                  const label = `${formatDay(cell.day)}, ${cell.cleared} of 3 cleared`;
+                  return (
+                    <div
+                      key={cell.day}
+                      role="img"
+                      aria-label={label}
+                      title={label}
+                      className="w-5 h-5 rounded-md"
+                      style={{
+                        background: fill,
+                        border: cell.isToday ? "1px solid rgba(255,215,0,0.7)" : "1px solid rgba(255,255,255,0.06)",
+                        boxShadow: cell.isToday ? "0 0 0 2px rgba(255,215,0,0.18)" : undefined,
+                      }}
+                    />
+                  );
+                })
+              : Array.from({ length: 14 }).map((_, i) => (
+                  <div key={i} className="w-5 h-5 rounded-md bg-white/[0.05] motion-safe:animate-pulse" aria-hidden="true" />
+                ))}
+          </div>
+        </div>
+      </div>
 
       {/* Weekly Challenge — a shared gauntlet, fixed for the week. */}
       <Link href="/learn/techhub/surprise?weekly=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(239,68,68,0.08) 55%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.35)" }}>
