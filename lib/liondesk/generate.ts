@@ -7,6 +7,7 @@ import type { Shift, ShiftItem, ShiftModifier } from "./types";
 import type { Track } from "@/lib/helpdesk/types";
 import { POOL, MASTER_KB, MASTER_INVENTORY, MASTER_AD, INCIDENT_GROUPS, type PoolEntry } from "./pool";
 import { getReputation, departmentOf } from "./reputation";
+import { conceptForItem } from "./concepts";
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -152,5 +153,65 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     penaltyScale: penScales.length ? Math.max(...penScales) : undefined,
     graveyard: has("graveyard") ? true : undefined,
     modifiers: mods.map((id) => MODIFIERS.find((m) => m.id === id)).filter(Boolean) as ShiftModifier[],
+  };
+}
+
+export interface WeakSpotsOpts {
+  /** Concept ids to bias toward, weakest first. Empty means a varied review. */
+  weakConcepts?: string[];
+  seed?: number;
+  track?: Track;
+  count?: number;
+  name?: string;
+}
+
+/**
+ * Build a focused "Weak Spots" shift biased toward the concepts the player
+ * handles worst (see lib/liondesk/conceptMastery.ts for the source of the
+ * weakest list). Reuses the shared ticket POOL and the same item assembly plus
+ * chain expansion as generateShift, but skips the random mutator roll so the
+ * review stays calm and on topic. No economy: the Fangs and XP a shift previews
+ * are still granted server side only, never from the client.
+ */
+export function generateWeakSpotsShift(opts: WeakSpotsOpts = {}): Shift {
+  const seed = (opts.seed ?? Math.floor(Math.random() * 1e9)) >>> 0;
+  const rnd = mulberry32(seed);
+  const count = opts.count ?? 6;
+  const weak = new Set(opts.weakConcepts ?? []);
+
+  const pool: PoolEntry[] = POOL.filter((p) => !opts.track || p.track === opts.track);
+  const shuffled = shuffle(pool, rnd);
+
+  // Partition once into tickets that exercise a weak concept and the rest.
+  const onWeak: PoolEntry[] = [];
+  const rest: PoolEntry[] = [];
+  for (const p of shuffled) (weak.has(conceptForItem(p.item)) ? onWeak : rest).push(p);
+
+  // Aim about 70% of the board at weak concepts, then top up from the rest so
+  // the queue is always full even when weak-concept tickets are scarce.
+  const target = weak.size ? Math.max(1, Math.ceil(count * 0.7)) : 0;
+  const picked: PoolEntry[] = [];
+  for (const p of onWeak) { if (picked.length >= target) break; picked.push(p); }
+  for (const p of rest) { if (picked.length >= count) break; picked.push(p); }
+  for (const p of onWeak) { if (picked.length >= count) break; if (!picked.includes(p)) picked.push(p); }
+  const chosen = picked.slice(0, count);
+
+  const items: ShiftItem[] = chosen.map((p, i) => ({ ...p.item, arriveAfter: i < 3 ? 0 : (i - 2) * 18 }));
+  const expanded = expandChains(items);
+
+  return {
+    id: `weakspots-${seed}`,
+    track: opts.track ?? "helpdesk",
+    order: -1,
+    name: opts.name ?? "Weak Spots",
+    rank: "Targeted Review",
+    accent: "#A855F7",
+    durationSeconds: 600,
+    startingBudget: 3000,
+    inventory: MASTER_INVENTORY,
+    kb: MASTER_KB,
+    adUsers: MASTER_AD,
+    items: expanded,
+    modifiers: [],
   };
 }

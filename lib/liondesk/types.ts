@@ -90,6 +90,13 @@ export interface ShiftItem {
   reward: number;
   xp: number;
 
+  /**
+   * Optional concept tag for mastery tracking (see lib/liondesk/concepts.ts).
+   * New content may set this explicitly; existing content is inferred by
+   * conceptForItem, so the authored tickets need no edits.
+   */
+  concept?: string;
+
   // ── channel content ──
   email?: { body: string; isPhish?: boolean };
   ticketBody?: string;
