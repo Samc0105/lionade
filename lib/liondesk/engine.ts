@@ -1,10 +1,10 @@
-// LionDesk game engine — the pure, framework-free core of the shift simulator.
+// LionDesk game engine. The pure, framework-free core of the shift simulator.
 //
 // Everything here is plain TypeScript with NO React / DOM / Audio imports, so it
 // can be unit-tested in isolation and imported on the server. It was extracted
 // out of components/liondesk/LionDesk.tsx (which kept only the React components
-// and effects) so the highest-value, most regression-prone logic — the reducer,
-// the SLA/patience/streak math, scoring — is reachable without rendering React.
+// and effects) so the highest-value, most regression-prone logic (the reducer,
+// the SLA/patience/streak math, scoring) is reachable without rendering React.
 //
 // The economy stays server-authoritative: the Fangs/XP a shift reports here are
 // a PREVIEW. Real granting is validated + clamped in app/api/techhub/shifts/
@@ -168,11 +168,23 @@ export const BRIDGE_LINES: string[] = [
 // moves and breaches hit, how fast callers lose patience, how many lifelines you
 // start with, and how many tries you get on each item before it locks. Picked at
 // clock-in.
+//
+// Balance pass (Idea 24): now that the SLA breach sweep actually fires (the TICK
+// case commits the landedAt stamp every tick), the per-difficulty `pen` factor
+// scales a real, live penalty. `pen` is the SLA breach penalty multiplier and its
+// only consumer; before the sweep fix it was effectively dead. Easy was softened
+// to 0.5 and Hard sharpened to 1.5 so the SLA breach hit differs meaningfully
+// across tiers (Easy 0.5x, Normal 1x, Hard 1.5x of the base BREACH_PENALTY). The
+// SLA budget multipliers (1.4 / 1.0 / 0.75) and patience multipliers (0.6 / 1.0 /
+// 1.5) already gave a clear spread and were reviewed and held. Lifeline
+// allotments (Easy 5, Normal 3, Hard 1) and tries per item (3 / 2 / 1) were
+// reviewed and held too: they already form a fair ladder, and the clean clear
+// payout bonus rewards not leaning on them. Normal stays the 1.0 baseline.
 export type Difficulty = "easy" | "normal" | "hard";
 export const DIFF: Record<Difficulty, { sla: number; pen: number; patience: number; csat: number; coffee: number; senior: number; attempts: number; label: string; desc: string }> = {
-  easy: { sla: 1.4, pen: 0.6, patience: 0.6, csat: 0.7, coffee: 2, senior: 3, attempts: 3, label: "Easy", desc: "Generous clock, softer penalties, extra lifelines, 3 tries per item." },
+  easy: { sla: 1.4, pen: 0.5, patience: 0.6, csat: 0.7, coffee: 2, senior: 3, attempts: 3, label: "Easy", desc: "Generous clock, softer penalties, extra lifelines, 3 tries per item." },
   normal: { sla: 1.0, pen: 1.0, patience: 1.0, csat: 1.0, coffee: 1, senior: 2, attempts: 2, label: "Normal", desc: "The standard desk. 2 tries per item." },
-  hard: { sla: 0.75, pen: 1.4, patience: 1.5, csat: 1.3, coffee: 0, senior: 1, attempts: 1, label: "Hard", desc: "Tight SLAs, harsh penalties, one lifeline, one try per item." },
+  hard: { sla: 0.75, pen: 1.5, patience: 1.5, csat: 1.3, coffee: 0, senior: 1, attempts: 1, label: "Hard", desc: "Tight SLAs, harsh penalties, one lifeline, one try per item." },
 };
 export function slaBudget(shift: Shift, p: Priority, diff: Difficulty): number {
   return SLA_BUDGET[p] * (shift.slaScale ?? 1) * DIFF[diff].sla;
@@ -254,8 +266,17 @@ export function makeReducer(shift: Shift) {
             breached.push({ subject: i.subject, vip: !!i.from.vip });
           }
         });
+        // Commit the SLA sweep UNCONDITIONALLY. The landedAt stamp (plus any breach
+        // flag and CSAT hit) must persist on EVERY tick, not only when a breach was
+        // recorded. The old code committed `items`/`csat` to ns only inside
+        // `if (breached.length)`, so a freshly landed item computed its landedAt into
+        // the local copy and then threw it away; the next tick re-stamped landedAt to
+        // the new elapsed, the deadline never actually arrived, and SLA breaches never
+        // fired (the whole SLA-pressure mechanic was dead). When nothing landed or
+        // breached this is a no op (items and csat are unchanged), so committing every
+        // tick is safe and behavior preserving for the no-breach path.
+        ns = { ...ns, items, csat };
         if (breached.length) {
-          ns = { ...ns, items, csat };
           breached.forEach((b) => { ns = pushFeed(ns, b.vip ? `Escalated to your manager: ${b.subject}` : `SLA breach: ${b.subject}`, "bad"); });
         }
 
@@ -529,13 +550,36 @@ export const GOOD_STATUSES: ItemStatus[] = ["resolved", "escalated", "archived",
 // this to the authoritative, clamped, idempotent grant; the engine preview
 // applies the same weight for display only and grants nothing.
 
-/** Each difficulty's share of the HARD Fang ceiling. Easy and Normal scale down. */
-export const PAYOUT_DIFFICULTY_FACTOR: Record<Difficulty, number> = { easy: 0.7, normal: 0.85, hard: 1 };
-/** Bonus share for clearing a shift without spending a lifeline. */
+/**
+ * Each difficulty's share of the HARD Fang ceiling. Hard pays the full ceiling;
+ * Normal and Easy scale down by a flat step of 0.2 per tier (Easy 0.6, Normal
+ * 0.8, Hard 1.0). Balance pass (Idea 24): the old spread (0.7 / 0.85 / 1.0) made
+ * a Hard clear worth only about 1.4x an Easy clear at equal score, so the tier
+ * you picked barely moved the reward. A flat 0.2 step makes Hard worth about
+ * 1.67x an Easy clear, so choosing the harder desk is a real, fair economic
+ * decision, while every tier still clears and pays. Preview only; the server
+ * owns the clamped grant, so the economy stays server authoritative.
+ */
+export const PAYOUT_DIFFICULTY_FACTOR: Record<Difficulty, number> = { easy: 0.6, normal: 0.8, hard: 1 };
+/**
+ * Bonus share for clearing a shift without spending a lifeline. Held at 0.05 in
+ * the balance pass: a clean clear is a modest, bounded nudge to play without
+ * help, not a payout lever. Even stacked with the full streak bonus it leaves
+ * Normal at 0.93 and Easy at 0.73, both below the Hard ceiling factor of 1.0, so
+ * no amount of bonus on a lower tier can ever match a Hard clear. Fair by design.
+ */
 export const PAYOUT_CLEAN_CLEAR_BONUS = 0.05;
-/** Bonus share per best-streak point, and the cap on the total streak bonus. */
+/**
+ * Bonus share per best-streak point, and the cap on the total streak bonus. The
+ * cap (0.08) is reached at a best streak of 8, the same streak where the in-shift
+ * Fang multiplier ladder tops out at x1.75. Balance pass: aligning the two "max
+ * streak" points (the cap was 0.1, reached at 10) means a player who maxes the
+ * live multiplier ladder also maxes the payout streak bonus, with no reason to
+ * chase streak past the ladder's top. The step stays 0.01 for a gentle, linear
+ * ramp.
+ */
 export const PAYOUT_STREAK_STEP = 0.01;
-export const PAYOUT_STREAK_MAX = 0.1;
+export const PAYOUT_STREAK_MAX = 0.08;
 
 /**
  * The 0..1 weight applied to a shift's HARD Fang ceiling for how it was played.

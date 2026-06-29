@@ -19,12 +19,24 @@ import type { ShiftItem } from "./types";
  * the next one and the server pays out its (clamped) Fang reward; below it grants
  * nothing. The economy stays server-authoritative: this constant only gates the
  * server-side payout math and the client-side display. It never grants on its own.
+ *
+ * Balance pass (Idea 24): the clear gate was reviewed and held at 50 (a C). It is
+ * the single contract that the engine, the server payout route, the campaign
+ * unlock, and the stats dashboard all read, so its stability is worth more than a
+ * small retune. The difficulty and payout shaping lives in engine.ts (the DIFF
+ * multipliers and the PAYOUT_* factors) instead, where it can move without
+ * redefining what "passing" means everywhere at once.
  */
 export const PASS_SCORE = 50;
 
 /**
  * The letter-grade ladder, highest threshold first. A score earns the grade of
  * the first row whose `min` it meets or beats; anything under the last row is "D".
+ *
+ * Reviewed in the balance pass and held: the S/A/B/C bands (90 / 80 / 65 / 50)
+ * are the shared grade contract across the shift report, the manager review, and
+ * the stats dashboard, so they stay put while the economy tuning happens in the
+ * difficulty and payout factors.
  */
 export const GRADE_LADDER: ReadonlyArray<{ min: number; grade: string }> = [
   { min: 90, grade: "S" },

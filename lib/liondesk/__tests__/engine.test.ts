@@ -171,11 +171,11 @@ describe("engine: full shift golden master", () => {
     expect(result.csat).toBe(87);
     expect(result.fangs).toBe(490);
     expect(result.usedLifeline).toBe(false);
-    // payoutWeight(normal, clean clear, streak 3) = 0.85 + 0.05 + 0.03 = 0.93.
-    expect(result.payoutFactor).toBeCloseTo(0.93, 5);
+    // payoutWeight(normal, clean clear, streak 3) = 0.8 + 0.05 + 0.03 = 0.88.
+    expect(result.payoutFactor).toBeCloseTo(0.88, 5);
     // Server-authoritative ceiling is illustrative here (360). The shared payout
-    // formula weights it by how the shift was played: round(360 * 0.84 * 0.93).
-    expect(shiftPayout(360, result.score, result.difficulty, result.usedLifeline, result.bestStreak)).toBe(281);
+    // formula weights it by how the shift was played: round(360 * 0.84 * 0.88).
+    expect(shiftPayout(360, result.score, result.difficulty, result.usedLifeline, result.bestStreak)).toBe(266);
   });
 });
 
@@ -320,12 +320,13 @@ describe("scoring: SLA budget and remaining clock", () => {
     expect(slaRemaining({ arriveAfter: 0 }, { landedAt: 1 }, 50, 6)).toBeLessThan(0);
   });
 
-  it("locks the current SLA breach-sweep behavior", () => {
-    // Snapshot of the live engine: an unresolved ticket left well past its SLA
-    // budget keeps its landedAt unset and does not dock CSAT here. The sweep only
-    // persists its landedAt stamp on a tick that also records a breach, so as
-    // written no breach fires. This golden assertion pins that observed behavior:
-    // if the sweep ever changes, this flags it for a deliberate update.
+  it("breaches an unresolved ticket once it passes its SLA budget", () => {
+    // The SLA sweep now commits the landedAt stamp on every tick (see the TICK
+    // case), so the deadline is real and a breach actually fires. With slaScale
+    // 0.05 a P1 budget on normal is 120 * 0.05 * 1.0 = 6 shift-seconds. The item
+    // lands on tick 1 (elapsed 1, arriveAfter 0), so its deadline is elapsed 7;
+    // by 30 ticks it has breached exactly once. The one-time CSAT hit is
+    // BREACH_PENALTY.P1 (10) scaled by DIFF.normal.pen (1.0), so CSAT lands at 90.
     const shift = makeShift({
       id: "gm-sla-sweep",
       slaScale: 0.05, // ~6s budget on a P1, far inside the ticks below
@@ -333,9 +334,9 @@ describe("scoring: SLA budget and remaining clock", () => {
     });
     const { start, tick } = harness(shift, "normal");
     const after = tick(start, 30);
-    expect(after.items["p1"].breached).toBe(false);
-    expect(after.items["p1"].landedAt).toBeNull();
-    expect(after.csat).toBe(100);
+    expect(after.items["p1"].breached).toBe(true);
+    expect(after.items["p1"].landedAt).toBe(1);
+    expect(after.csat).toBe(90);
   });
 });
 
@@ -394,9 +395,9 @@ describe("scoring: grade ladder and pass score", () => {
 
 describe("engine: payout weighting (preview mirror of the server grant)", () => {
   it("weights by difficulty, clean clear, and best streak, clamped to 1", () => {
-    expect(payoutWeight("easy", true, 0)).toBeCloseTo(0.7, 5); // lifeline spent: no clean bonus
-    expect(payoutWeight("easy", false, 0)).toBeCloseTo(0.75, 5); // 0.7 + 0.05
-    expect(payoutWeight("normal", false, 3)).toBeCloseTo(0.93, 5); // 0.85 + 0.05 + 0.03
+    expect(payoutWeight("easy", true, 0)).toBeCloseTo(0.6, 5); // lifeline spent: no clean bonus
+    expect(payoutWeight("easy", false, 0)).toBeCloseTo(0.65, 5); // 0.6 + 0.05
+    expect(payoutWeight("normal", false, 3)).toBeCloseTo(0.88, 5); // 0.8 + 0.05 + 0.03
     expect(payoutWeight("hard", false, 0)).toBe(1); // 1 + 0.05 clamped to 1
     expect(payoutWeight("hard", false, 100)).toBe(1); // every bonus still clamps to 1
   });
