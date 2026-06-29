@@ -20,6 +20,7 @@ import { apiPost, apiGet, swrFetcher } from "@/lib/api-client";
 import useSWR from "swr";
 import CountUp from "@/components/CountUp";
 import FluidReveal from "@/components/FluidReveal";
+import WidgetErrorBoundary from "@/components/WidgetErrorBoundary";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
@@ -758,6 +759,7 @@ function DashboardContent() {
           </FeatureGate>
 
           {/* ═══ 5) Daily Bet ═══ */}
+          <WidgetErrorBoundary label="daily-bet">
           <FeatureGate feature="dashboard.daily_bet" compact>
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
             <div className="flex items-baseline justify-between mb-3">
@@ -1039,6 +1041,7 @@ function DashboardContent() {
             })()}
           </div>
           </FeatureGate>
+          </WidgetErrorBoundary>
 
           {/* ═══ 5c) Bounty Board ═══ */}
           <FeatureGate feature="dashboard.bounties" compact>
@@ -1256,6 +1259,7 @@ function DashboardContent() {
               </FeatureGate>
 
               {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
+              <WidgetErrorBoundary label="weekly-activity">
               <FluidReveal className="mt-6">
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-xl text-cream tracking-wider">WEEKLY ACTIVITY</h2>
@@ -1421,6 +1425,7 @@ function DashboardContent() {
                   })()}
                 </div>
               </FluidReveal>
+              </WidgetErrorBoundary>
 
             </div>
 
