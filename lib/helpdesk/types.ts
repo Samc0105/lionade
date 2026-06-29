@@ -10,7 +10,7 @@
 
 export type Tone = "info" | "warn" | "success";
 
-export type Track = "helpdesk" | "soc" | "swe" | "redteam";
+export type Track = "helpdesk" | "soc" | "swe" | "redteam" | "netops";
 
 export type Difficulty = "Entry" | "Intermediate" | "Advanced" | "Expert";
 

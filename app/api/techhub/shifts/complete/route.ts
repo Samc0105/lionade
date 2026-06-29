@@ -36,6 +36,7 @@ const SHIFT_REWARDS: Record<string, { maxFangs: number }> = {
   "redteam-shift-3": { maxFangs: 320 },
   "redteam-shift-4": { maxFangs: 340 },
   "redteam-shift-5": { maxFangs: 380 },
+  "netops-shift-1": { maxFangs: 240 },
 };
 
 export async function POST(req: NextRequest) {

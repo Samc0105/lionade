@@ -89,6 +89,25 @@ export const TRACKS: TrackDef[] = [
       "CISO",
     ]),
   },
+  {
+    id: "netops",
+    name: "Cloud & Network Ops",
+    tagline: "Keep the pipes open",
+    blurb:
+      "Run the network and the cloud behind it. Size subnets, chase down a DNS failure, let a load balancer fail over on its own, lock roles to least privilege, and triage the 2am page that is only a warning.",
+    color: "#22D3EE",
+    icon: "Cloud",
+    ranks: ladder([
+      "Cloud Ops Intern",
+      "Junior Network Engineer",
+      "Cloud Operations Engineer",
+      "Site Reliability Engineer",
+      "Senior SRE",
+      "Network Architect",
+      "Infrastructure Lead",
+      "VP Infrastructure",
+    ]),
+  },
 ];
 
 export const TRACK_IDS: Track[] = TRACKS.map((t) => t.id);

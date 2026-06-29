@@ -11,6 +11,7 @@ import { SHIFT_5 } from "./shift5";
 import { SOC_SHIFT_1 } from "./soc-shift1";
 import { SWE_SHIFT_1 } from "./swe-shift1";
 import { REDTEAM_SHIFT_1 } from "./redteam-shift1";
+import { NETOPS_SHIFT_1 } from "./netops-shift1";
 import { EXTRA_INCIDENT_GROUPS } from "./extra-tickets";
 import extraShifts from "./extra-shifts.generated.json";
 import ladderShifts from "./extra-shifts-ladder.generated.json";
@@ -94,7 +95,7 @@ export const HELPDESK_MAJOR_INCIDENT: Shift = {
 // Authored campaign shifts + the workflow-authored second shifts (SOC/SWE/Red
 // Team) + the shift 3-5 ladder that fills out every track's Intern->senior climb.
 // All auto-register from their generated JSON files.
-const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1, HELPDESK_MAJOR_INCIDENT];
+const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1, NETOPS_SHIFT_1, HELPDESK_MAJOR_INCIDENT];
 export const SHIFTS: Shift[] = [
   ...AUTHORED,
   ...(extraShifts as unknown as Shift[]),
