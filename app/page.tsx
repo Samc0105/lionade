@@ -7,25 +7,25 @@ import { SITE_HOST } from "@/lib/site-config";
 import RedirectIfSignedIn from "@/components/RedirectIfSignedIn";
 
 const STEPS = [
-  { num: "01", icon: "\uD83C\uDFAF", title: "Clock In Daily", desc: 'Open Lionade and start your <strong class="text-electric">Daily Grind</strong> \u2014 AI-generated quizzes in your subject. Every correct answer adds to your streak and your bag.' },
-  { num: "02", icon: "\u2694\uFE0F", title: "Duel & Compete", desc: 'Challenge anyone to a <strong class="text-electric">1v1 match</strong> or enter weekly team tournaments. The more you win, the higher you climb \u2014 and the more you earn.' },
-  { num: "03", icon: "\uD83D\uDCB0", title: "Stack Rewards", desc: 'Top performers earn <strong class="text-electric">real rewards</strong>. Coins, badges, and eventually real cash payouts \u2014 because your study time is worth something.' },
-  { num: "04", icon: "\uD83C\uDFC6", title: "Get Promoted", desc: 'Rank up high enough and <strong class="text-electric">unlock tutoring</strong> \u2014 set your rate, help others, and earn a second income stream from your knowledge.' },
+  { num: "01", icon: "\uD83C\uDFAF", title: "Clock In Daily", desc: 'Open Lionade and start your <strong class="text-electric">Daily Grind</strong>, AI-generated quizzes in your subject. Every correct answer adds to your streak and your bag.' },
+  { num: "02", icon: "\u2694\uFE0F", title: "Duel & Compete", desc: 'Challenge anyone to a <strong class="text-electric">1v1 match</strong> or enter weekly team tournaments. The more you win, the higher you climb, and the more you earn.' },
+  { num: "03", icon: "\uD83D\uDCB0", title: "Stack Rewards", desc: 'Top performers earn <strong class="text-electric">real rewards</strong>. Fangs, badges, and eventually real cash payouts, because your study time is worth something.' },
+  { num: "04", icon: "\uD83C\uDFC6", title: "Get Promoted", desc: 'Rank up high enough and <strong class="text-electric">unlock tutoring</strong>, set your rate, help others, and earn a second income stream from your knowledge.' },
 ];
 
 const FEATURES = [
-  { icon: "\uD83E\uDD16", title: "AI-Powered Questions", desc: "Every quiz adapts to your level in real time. The harder you grind, the harder it gets \u2014 and the more you earn." },
+  { icon: "\uD83E\uDD16", title: "AI-Powered Questions", desc: "Every quiz adapts to your level in real time. The harder you grind, the harder it gets, and the more you earn." },
   { icon: "\uD83D\uDCDA", title: "Every Subject Covered", desc: "Math, Science, Languages, SAT/ACT, Coding, Finance, AWS, CompTIA and more. If it can be tested, it\u2019s in Lionade." },
   { icon: "\uD83D\uDD25", title: "Streak Culture", desc: "Your streak is your attendance record. Maintain it, flex it, and watch your rewards multiply the longer you stay consistent." },
   { icon: "\uD83D\uDC65", title: "Team Leagues", desc: "Form a squad with your friends and go head-to-head against other teams in weekly tournaments with prize pools on the line." },
-  { icon: "\uD83C\uDF0D", title: "For Everyone", desc: "Whether you\u2019re 16 prepping for the SAT or 35 chasing a cloud cert \u2014 Lionade works for every learner at every stage." },
+  { icon: "\uD83C\uDF0D", title: "For Everyone", desc: "Whether you\u2019re 16 prepping for the SAT or 35 chasing a cloud cert, Lionade works for every learner at every stage." },
   { icon: "\uD83D\uDCF1", title: "Web First", desc: "No app download needed. Open your browser, clock in, and start grinding. Available anywhere, anytime." },
 ];
 
 const SNEAK_PEEKS = [
-  { tag: "// Dashboard", title: "YOUR COMMAND CENTER", desc: "See your coins, streak, XP, level, and daily progress all in one place. The dashboard tracks everything so you know exactly where you stand.", items: [{ icon: "\uD83E\uDE99", label: "Coin balance + transaction history" }, { icon: "\uD83D\uDD25", label: "Current streak & best streak" }, { icon: "\uD83D\uDCC8", label: "XP progress bar to next level" }, { icon: "\uD83C\uDFAF", label: "Daily missions & bonus challenges" }] },
-  { tag: "// Quiz Engine", title: "SMART QUIZZES THAT ADAPT", desc: "No two sessions are the same. Questions adjust to your skill level in real time \u2014 answer correctly and the difficulty ramps up, increasing your coin rewards.", items: [{ icon: "\u23F1\uFE0F", label: "Timed questions with countdown" }, { icon: "\uD83E\uDDE0", label: "Difficulty scales with your level" }, { icon: "\uD83D\uDCA1", label: "Instant explanations after each answer" }, { icon: "\uD83D\uDCB0", label: "Harder questions = bigger coin drops" }] },
-  { tag: "// 1v1 Duels", title: "HEAD-TO-HEAD BATTLES", desc: "Challenge anyone to a real-time knowledge duel. Pick the subject, wager your coins, and go head-to-head. Winner takes the pot.", items: [{ icon: "\u2694\uFE0F", label: "Real-time 1v1 matchmaking" }, { icon: "\uD83E\uDE99", label: "Coin wager system" }, { icon: "\uD83C\uDFC6", label: "Win streaks & duel rankings" }, { icon: "\uD83D\uDCAC", label: "Challenge friends by username" }] },
+  { tag: "// Dashboard", title: "YOUR COMMAND CENTER", desc: "See your Fangs, streak, XP, level, and daily progress all in one place. The dashboard tracks everything so you know exactly where you stand.", items: [{ icon: "\uD83E\uDE99", label: "Fang balance + transaction history" }, { icon: "\uD83D\uDD25", label: "Current streak & best streak" }, { icon: "\uD83D\uDCC8", label: "XP progress bar to next level" }, { icon: "\uD83C\uDFAF", label: "Daily missions & bonus challenges" }] },
+  { tag: "// Quiz Engine", title: "SMART QUIZZES THAT ADAPT", desc: "No two sessions are the same. Questions adjust to your skill level in real time, answer correctly and the difficulty ramps up, increasing your Fang rewards.", items: [{ icon: "\u23F1\uFE0F", label: "Timed questions with countdown" }, { icon: "\uD83E\uDDE0", label: "Difficulty scales with your level" }, { icon: "\uD83D\uDCA1", label: "Instant explanations after each answer" }, { icon: "\uD83D\uDCB0", label: "Harder questions = bigger Fang drops" }] },
+  { tag: "// 1v1 Duels", title: "HEAD-TO-HEAD BATTLES", desc: "Challenge anyone to a real-time knowledge duel. Pick the subject, wager your Fangs, and go head-to-head. Winner takes the pot.", items: [{ icon: "\u2694\uFE0F", label: "Real-time 1v1 matchmaking" }, { icon: "\uD83E\uDE99", label: "Fang wager system" }, { icon: "\uD83C\uDFC6", label: "Win streaks & duel rankings" }, { icon: "\uD83D\uDCAC", label: "Challenge friends by username" }] },
 ];
 
 const SUBJECTS = [
@@ -40,21 +40,21 @@ const SUBJECTS = [
 ];
 
 const ROADMAP = [
-  { phase: "Live Now", title: "V1 \u2014 Public Launch", desc: "Lionade is live. Daily quizzes, 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind. Sign up and start stacking coins.", status: "active" },
-  { phase: "December 2026", title: "V2 \u2014 Lionade Pro", desc: "Paid subscriptions arrive. Pro tiers with advanced analytics, bonus coin multipliers, exclusive tournaments, and priority matchmaking. Plus \u2014 real cash payouts go live. Start converting your earned coins into real money.", status: "upcoming" },
-  { phase: "March 2027", title: "V3 \u2014 The Full Vision", desc: "Meet Ninny \u2014 your AI-powered study companion. Team leagues, tutoring marketplace, and the complete Lionade ecosystem. Cash payouts get a 10% boost across the board \u2014 the longer you\u2019ve been grinding, the more you earn.", status: "upcoming" },
+  { phase: "Live Now", title: "V1: Public Launch", desc: "Lionade is live. Daily quizzes, 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind. Sign up and start stacking Fangs.", status: "active" },
+  { phase: "December 2026", title: "V2: Lionade Pro", desc: "Paid subscriptions arrive. Pro tiers with advanced analytics, bonus Fang multipliers, exclusive tournaments, and priority matchmaking. Plus, real cash payouts go live. Start converting your earned Fangs into real money.", status: "upcoming" },
+  { phase: "March 2027", title: "V3: The Full Vision", desc: "Meet Ninny, your AI-powered study companion. Team leagues, tutoring marketplace, and the complete Lionade ecosystem. Cash payouts get a 10% boost across the board, the longer you\u2019ve been grinding, the more you earn.", status: "upcoming" },
 ];
 
 const FAQ = [
-  { q: "Is Lionade actually free?", a: "100%. Free to join, free to play, free forever. We\u2019ll never charge you to study. Revenue comes from optional premium features \u2014 not your wallet." },
-  { q: "How do I earn coins?", a: "Every correct answer earns coins. Harder questions pay more. Daily streaks give bonus multipliers, and winning 1v1 Duels pays out the wagered coins." },
+  { q: "Is Lionade actually free?", a: "100%. Free to join, free to play, free forever. We\u2019ll never charge you to study. Revenue comes from optional premium features, not your wallet." },
+  { q: "How do I earn Fangs?", a: "Every correct answer earns Fangs. Harder questions pay more. Daily streaks give bonus multipliers, and winning 1v1 Duels pays out the wagered Fangs." },
   { q: "What subjects are available?", a: "Math, Science, Languages, SAT/ACT prep, Coding, Finance, and IT Certifications like CompTIA and AWS. More subjects are added based on community requests." },
-  { q: "Can I actually cash out?", a: "That\u2019s the plan. Our roadmap targets V2 for real cash conversions. Early users who stack coins now will be first in line when payouts go live." },
+  { q: "Can I actually cash out?", a: "That\u2019s the plan. Our roadmap targets V2 for real cash conversions. Early users who stack Fangs now will be first in line when payouts go live." },
   { q: "How are questions generated?", a: "We use a mix of expert-curated question banks and AI-generated content that adapts to your skill level. Every session is unique to you." },
-  { q: "What are 1v1 Duels?", a: "Challenge any other user to a head-to-head quiz match. Both players wager coins, answer the same questions, and the winner takes the pot." },
-  { q: "Do I need to download an app?", a: "Nope. Lionade is web-first \u2014 just open your browser, log in, and start grinding. Works on any device, anywhere, anytime. No app store needed." },
-  { q: "What\u2019s a streak and why does it matter?", a: "Your streak tracks how many consecutive days you\u2019ve studied. The longer your streak, the higher your coin multiplier. Break it and you start over." },
-  { q: "Is Lionade live yet?", a: "Yes \u2014 V1 is live. Sign up free and start grinding right now. No waitlist, no invite codes. V2 with real cash payouts ships December 2026; V3 with team leagues and tutoring marketplace ships March 2027." },
+  { q: "What are 1v1 Duels?", a: "Challenge any other user to a head-to-head quiz match. Both players wager Fangs, answer the same questions, and the winner takes the pot." },
+  { q: "Do I need to download an app?", a: "Nope. Lionade is web-first, just open your browser, log in, and start grinding. Works on any device, anywhere, anytime. No app store needed." },
+  { q: "What\u2019s a streak and why does it matter?", a: "Your streak tracks how many consecutive days you\u2019ve studied. The longer your streak, the higher your Fang multiplier. Break it and you start over." },
+  { q: "Is Lionade live yet?", a: "Yes, V1 is live. Sign up free and start grinding right now. No waitlist, no invite codes. V2 with real cash payouts ships December 2026; V3 with team leagues and tutoring marketplace ships March 2027." },
 ];
 
 const TICKER_ITEMS = [
