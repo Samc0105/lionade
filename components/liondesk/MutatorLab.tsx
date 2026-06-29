@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask, ShareNetwork } from "@phosphor-icons/react";
+import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask, ShareNetwork, DeviceMobile, LinkSimple, WarningOctagon, type Icon } from "@phosphor-icons/react";
 import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/generate";
 import { getCombos, saveCombo, deleteCombo, type SavedCombo } from "@/lib/liondesk/savedCombos";
@@ -19,6 +19,18 @@ const TRACK_OPTS: { id: TrackSel; label: string }[] = [
   { id: "soc", label: "SOC" },
   { id: "swe", label: "SWE" },
   { id: "redteam", label: "Red Team" },
+];
+
+// The behavior mutators (Idea 13). Each reshapes how the shift plays: a phone
+// heavy switchboard, a cascade of chained tickets, or a time compressed crisis.
+// They also appear as regular checkboxes in the grid below; this row is a one tap
+// launch that builds a shift around a single behavior, at the current track and
+// ticket count. The label and description are read straight from MODIFIERS so the
+// copy lives in exactly one place.
+const BEHAVIOR_PRESETS: { id: string; Icon: Icon; tint: string }[] = [
+  { id: "callerstorm", Icon: DeviceMobile, tint: "#4A90D9" },
+  { id: "chainreaction", Icon: LinkSimple, tint: "#A855F7" },
+  { id: "codered", Icon: WarningOctagon, tint: "#EF4444" },
 ];
 
 export default function MutatorLab() {
@@ -121,6 +133,25 @@ export default function MutatorLab() {
                 <button key={m.id} onClick={() => toggle(m.id)} className={`text-left rounded-lg border p-2.5 transition-colors ${on ? "border-[#A855F7]/60 bg-[#A855F7]/10" : "border-white/[0.08] hover:bg-white/[0.04]"}`}>
                   <div className="flex items-center gap-2">
                     <span className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${on ? "bg-[#A855F7] border-[#A855F7]" : "border-white/25"}`}>{on && <span className="text-[#04060c] text-[9px] font-bold leading-none">✓</span>}</span>
+                    <span className="text-cream text-sm font-semibold">{m.label}</span>
+                  </div>
+                  <p className="text-cream/50 text-[11px] mt-1 leading-snug">{m.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-1.5">behavior shifts</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {BEHAVIOR_PRESETS.map(({ id, Icon, tint }) => {
+              const m = MODIFIERS.find((x) => x.id === id);
+              if (!m) return null;
+              return (
+                <button key={id} onClick={() => play({ track: trackOpt(), count, modifierIds: [id], name: m.label })} className="text-left rounded-lg border p-2.5 transition-colors hover:bg-white/[0.04]" style={{ borderColor: `${tint}55` }}>
+                  <div className="flex items-center gap-2">
+                    <Icon size={16} weight="fill" color={tint} aria-hidden="true" />
                     <span className="text-cream text-sm font-semibold">{m.label}</span>
                   </div>
                   <p className="text-cream/50 text-[11px] mt-1 leading-snug">{m.desc}</p>

@@ -50,6 +50,9 @@ export const MODIFIERS: ShiftModifier[] = [
   { id: "audit", label: "Audit", desc: "A reviewer is watching. Wrong moves cost double." },
   { id: "graveyard", label: "Graveyard", desc: "Lights down, clock tight. The night-desk vibe." },
   { id: "doubles", label: "Doubles", desc: "An incident storm hits mid-shift. Find the root." },
+  { id: "callerstorm", label: "Caller Storm", desc: "The switchboard lights up. Phone calls flood the queue and the clock runs short." },
+  { id: "chainreaction", label: "Chain Reaction", desc: "Every fix spawns the next. Chained tickets and incident groups cascade across the shift." },
+  { id: "codered", label: "Code Red", desc: "A time compressed crisis. More tickets land, the clock runs shorter, and the SLA bites." },
 ];
 
 /** Deterministic seed for "today" so a Daily Combo is the same for everyone. */
@@ -94,6 +97,9 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
 
   let count = opts.count ?? 6;
   if (has("overload")) count += 2;
+  // Code Red is a time compressed crisis: more tickets land and the clock is
+  // shorter (see durationSeconds below) on top of the strictest SLA.
+  if (has("codered")) count += 3;
 
   let pool: PoolEntry[] = POOL.filter((p) => !opts.track || p.track === opts.track);
   if (has("budget")) pool = pool.filter((p) => !p.item.part);
@@ -104,6 +110,26 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     for (const p of shuffled) {
       if (picked.length >= 2) break;
       if (p.item.email?.isPhish) picked.push(p);
+    }
+  }
+  // Caller Storm: the switchboard lights up. Pull phone calls to the front of the
+  // draw so most of the queue is live calls, paired with a tighter SLA window
+  // below so a phone heavy board really does play like a switchboard under pressure.
+  if (has("callerstorm")) {
+    const phoneTarget = Math.max(1, Math.ceil(count * 0.7));
+    for (const p of shuffled) {
+      if (picked.length >= phoneTarget) break;
+      if (p.item.channel === "phone" && !picked.includes(p)) picked.push(p);
+    }
+  }
+  // Chain Reaction: pull tickets that spawn a follow-up to the front, so resolving
+  // one thing reveals the next. Incident groups are also forced in below, so one
+  // root cause keeps cascading into more work.
+  if (has("chainreaction")) {
+    const chainTarget = Math.max(1, Math.ceil(count * 0.6));
+    for (const p of shuffled) {
+      if (picked.length >= chainTarget) break;
+      if ((p.item.chainOnResolve || p.item.chainOnFail) && !picked.includes(p)) picked.push(p);
     }
   }
   for (const p of shuffled) {
@@ -120,8 +146,9 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     return it;
   });
 
-  // Doubles: drop a full incident storm (root + duplicates) into the queue.
-  if (has("doubles") && INCIDENT_GROUPS.length > 0) {
+  // Doubles / Chain Reaction: drop a full incident storm (root + duplicates) into
+  // the queue so one root cause cascades into a flood of related tickets.
+  if ((has("doubles") || has("chainreaction")) && INCIDENT_GROUPS.length > 0) {
     const g = INCIDENT_GROUPS[Math.floor(rnd() * INCIDENT_GROUPS.length)];
     g.items.forEach((it, k) => items.push({ ...it, arriveAfter: 30 + k * 6 }));
   }
@@ -129,6 +156,10 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
   const slaScales: number[] = [];
   if (has("rush")) slaScales.push(0.6);
   if (has("graveyard")) slaScales.push(0.75);
+  // Caller Storm tightens the window so callers breach sooner; Code Red is the
+  // strictest clock of all. Math.min below keeps the tightest active scale.
+  if (has("callerstorm")) slaScales.push(0.7);
+  if (has("codered")) slaScales.push(0.5);
   const penScales: number[] = [];
   if (has("audit")) penScales.push(2);
   if (has("graveyard")) penScales.push(1.5);
@@ -141,8 +172,8 @@ export function generateShift(opts: GenerateOpts = {}): Shift {
     order: -1,
     name: opts.name ?? "Surprise Shift",
     rank: "Mixed Queue",
-    accent: has("graveyard") ? "#6E8BC0" : "#A855F7",
-    durationSeconds: 600,
+    accent: has("codered") ? "#EF4444" : has("graveyard") ? "#6E8BC0" : "#A855F7",
+    durationSeconds: has("codered") ? 450 : 600,
     startingBudget: has("budget") ? 0 : 3000,
     inventory: has("budget") ? [] : MASTER_INVENTORY,
     kb: MASTER_KB,
