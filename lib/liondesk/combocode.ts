@@ -14,6 +14,14 @@
 // share into a challenge, so a plain seed or recipe code (no vs) round-trips byte
 // for byte exactly as before. When a challenge code is opened the recipient plays
 // the same exact shift and, on completion, sees a you versus them comparison.
+//
+// A code can also belong to a classroom challenge (Idea 33). A teacher embeds an
+// optional class label under `l`, and the same seeded config the rest of the code
+// already carries reproduces one exact shift for every student. When a student
+// finishes, their paste back result code adds their name under `n` next to the
+// existing `vs` score and grade, so a teacher can collect results by pasting them
+// back, with no server. Both fields are written only when set, so a plain seed,
+// recipe, or beat my desk code round trips byte for byte exactly as before.
 
 import type { Track } from "@/lib/helpdesk/types";
 
@@ -46,6 +54,18 @@ export interface ComboData {
    * identical to before. The recipient plays the same exact shift and compares.
    */
   vs?: ChallengeVs;
+  /**
+   * Classroom challenge label (Idea 33), e.g. "Period 3 Networking". A teacher
+   * sets it so every student sees the same class name on the shared shift. Written
+   * only when set, so plain seed, recipe, and challenge codes round trip unchanged.
+   */
+  label?: string;
+  /**
+   * Classroom challenge student name (Idea 33), carried on a student's paste back
+   * result code next to vs, so a teacher can attribute each result when collecting
+   * them. Written only when set, so every code without it round trips unchanged.
+   */
+  student?: string;
 }
 
 function toUrlB64(s: string): string {
@@ -61,8 +81,9 @@ export function encodeCombo(c: ComboData): string {
   try {
     // t/c/m are always written (recipe codes stay identical to the old format).
     // s/x/r are appended only for a seeded, exact shift code; v only for a
-    // beat my desk challenge code (Idea 29).
-    const o: { t: string; c: number; m: string[]; s?: number; x?: 1; r?: 1; v?: { s: number; g: string } } = {
+    // beat my desk challenge code (Idea 29); l/n only for a classroom challenge
+    // (Idea 33).
+    const o: { t: string; c: number; m: string[]; s?: number; x?: 1; r?: 1; v?: { s: number; g: string }; l?: string; n?: string } = {
       t: c.track ?? "",
       c: c.count,
       m: c.modifierIds,
@@ -73,6 +94,8 @@ export function encodeCombo(c: ComboData): string {
     if (c.vs && Number.isFinite(c.vs.score)) {
       o.v = { s: Math.max(0, Math.min(100, Math.round(c.vs.score))), g: String(c.vs.grade ?? "") };
     }
+    if (c.label && c.label.trim()) o.l = c.label.trim().slice(0, 48);
+    if (c.student && c.student.trim()) o.n = c.student.trim().slice(0, 32);
     return toUrlB64(JSON.stringify(o));
   } catch {
     return "";
@@ -93,6 +116,10 @@ export function decodeCombo(code: string): ComboData | null {
         grade: typeof o.v.g === "string" ? o.v.g : "",
       };
     }
+    // Classroom challenge fields (Idea 33). Absent on every plain seed, recipe, or
+    // beat my desk code, so they decode exactly as before.
+    const label = typeof o.l === "string" && o.l.trim() ? o.l.trim().slice(0, 48) : undefined;
+    const student = typeof o.n === "string" && o.n.trim() ? o.n.trim().slice(0, 32) : undefined;
     return {
       track: o.t ? (o.t as Track) : undefined,
       count: typeof o.c === "number" ? Math.max(1, Math.min(12, o.c)) : 6,
@@ -101,6 +128,8 @@ export function decodeCombo(code: string): ComboData | null {
       chaos: o.x === 1 || o.x === true ? true : undefined,
       rolled: o.r === 1 || o.r === true ? true : undefined,
       vs,
+      label,
+      student,
     };
   } catch {
     return null;

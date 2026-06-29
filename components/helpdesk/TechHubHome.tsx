@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal, Scroll, UsersThree, BookOpen } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -499,6 +499,78 @@ export default function TechHubHome() {
             <p className="text-cream/60 text-xs mt-1.5">Alone in the SOC. Flip the feeds, catch the intruder before it reaches the core, survive til 6 AM.</p>
           </div>
           <ArrowRight size={16} weight="bold" color="#9DB4E0" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
+      {/* Certification Exam: a timed, fixed length, mixed concept exam across every
+          track. Clearing the pass bar issues a shareable cosmetic certificate. The
+          form is the same for everyone today (date seeded) and grants nothing, so
+          the economy stays server-authoritative. */}
+      <Link
+        href="/learn/techhub/exam"
+        className="group block rounded-2xl p-4 transition-colors"
+        style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(168,85,247,0.07) 60%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.32)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.14)", border: "1px solid rgba(255,215,0,0.4)" }}>
+            <Scroll size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">CERTIFICATION EXAM</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">certify</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">One timed exam across every track. Pass it to earn a shareable certificate. Same for everyone today.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#FFD700" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
+      {/* Class Challenge (Idea 33): a link based classroom mode. A teacher fixes
+          one exact shift for the whole class behind a shared seed, students play
+          the identical queue, and results come back by paste, with no server. It
+          grants nothing, so the economy stays server-authoritative. */}
+      <Link
+        href="/learn/techhub/class"
+        className="group block rounded-2xl p-4 transition-colors"
+        style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(74,144,217,0.07) 60%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.32)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.14)", border: "1px solid rgba(255,215,0,0.4)" }}>
+            <UsersThree size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">CLASS CHALLENGE</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">teams</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">Set one shift for your whole class or crew, share the link, and collect everyone's results. No server, no sign up.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#FFD700" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
+      {/* Knowledge Base (Idea 34): a searchable, filterable browser of every KB
+          article players meet on the desk, grouped by the support concept it
+          relates to. A pure study reference, it reads the existing KB content
+          only and grants nothing (the economy stays server authoritative). */}
+      <Link
+        href="/learn/techhub/kb"
+        className="group block rounded-2xl p-4 transition-colors"
+        style={{ background: "linear-gradient(110deg, rgba(74,144,217,0.16) 0%, rgba(168,85,247,0.07) 60%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(74,144,217,0.32)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(74,144,217,0.16)", border: "1px solid rgba(74,144,217,0.45)" }}>
+            <BookOpen size={20} weight="fill" color="#4A90D9" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">KNOWLEDGE BASE</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-[#4A90D9]/15 text-[#9DB4E0] border border-[#4A90D9]/30">study</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">Search every KB article you meet on the desk, grouped by concept. Study between shifts. No clock, no pressure.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#4A90D9" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
         </div>
       </Link>
 
