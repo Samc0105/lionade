@@ -36,6 +36,16 @@ export const SUPPORT_EMAIL = `support@${SITE_HOST}`;
  */
 export const SECURITY_EMAIL = `security@${SITE_HOST}`;
 
+/**
+ * Onboarding-funnel enforcement cutoff. Accounts created BEFORE this are
+ * grandfathered and skip the funnel (they predate it being enforced, so the
+ * fix must not trap them); accounts created on or after must complete
+ * onboarding (`profiles.onboarding_completed = true`). Used by ProtectedRoute
+ * and the onboarding page so the two gates cannot drift. profiles.created_at is
+ * NOT NULL DEFAULT NOW(), so this comparison is reliable.
+ */
+export const ONBOARDING_ENFORCED_FROM = "2026-06-29T00:00:00Z";
+
 /** Join a relative path to the site URL. `absoluteUrl("/about") → "https://…/about"`. */
 export function absoluteUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;

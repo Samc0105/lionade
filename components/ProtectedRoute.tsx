@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { ONBOARDING_ENFORCED_FROM } from "@/lib/site-config";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 
@@ -86,7 +87,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       try {
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("onboarding_completed, username")
+          .select("onboarding_completed, username, created_at")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -105,7 +106,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
           });
           const { data: freshProfile } = await supabase
             .from("profiles")
-            .select("onboarding_completed, username")
+            .select("onboarding_completed, username, created_at")
             .eq("id", user.id)
             .maybeSingle();
           currentProfile = freshProfile;
@@ -113,8 +114,15 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
         hasChecked.current = true;
 
-        // User is onboarded if flag is set OR they already have a username (pre-flag users)
-        const isOnboarded = currentProfile?.onboarding_completed || (currentProfile?.username && currentProfile.username.trim().length > 0);
+        // Onboarded if the flag is set, OR the account predates funnel
+        // enforcement (grandfathered so existing users are never trapped). The
+        // old check treated "has a username" as onboarded, but the signup
+        // trigger ALWAYS sets a username, so that short-circuited to true for
+        // every user and the funnel never ran. created_at is NOT NULL on
+        // profiles; treat a missing value as legacy to bias against trapping.
+        const createdAt = (currentProfile as { created_at?: string | null } | null)?.created_at;
+        const isLegacy = createdAt == null || createdAt < ONBOARDING_ENFORCED_FROM;
+        const isOnboarded = currentProfile?.onboarding_completed === true || isLegacy;
 
         if (!currentProfile || !isOnboarded) {
           console.log("[ProtectedRoute] onboarding NOT complete — redirecting to /onboarding");
