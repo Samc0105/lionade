@@ -139,7 +139,7 @@ interface CurationResult {
 
 /**
  * Run the auto-curation pipeline:
- * 1. Promote pending questions with 10+ attempts and 30-80% success rate
+ * 1. Promote pending questions with 3+ attempts and 25-90% success rate
  * 2. Reject questions with <10% success rate (likely wrong answer)
  * 3. Adjust difficulty based on real performance
  */
@@ -149,14 +149,19 @@ export async function runCurationPipeline(): Promise<CurationResult> {
   let difficultyAdjusted = 0;
 
   try {
-    // 1. Auto-promote: pending + approved subject + 10+ shown + 30-80% success
+    // 1. Auto-promote: pending + approved subject + 3+ shown + 25-90% success.
+    // Loosened from (10 shown, 30-80%) so the flywheel actually turns on a young
+    // app: most questions never reached 10 distinct shows, so almost nothing
+    // qualified. 3 shows inside a 25-90% band is enough signal that a question
+    // is answerable and not broken; the auto-reject below still catches the
+    // clearly-wrong ones (10+ shown and under 10% success).
     const { data: promotable } = await supabaseAdmin
       .from("question_bank")
       .select("id, subject, success_rate, times_shown")
       .eq("status", "pending")
-      .gte("times_shown", 10)
-      .gte("success_rate", 0.3)
-      .lte("success_rate", 0.8);
+      .gte("times_shown", 3)
+      .gte("success_rate", 0.25)
+      .lte("success_rate", 0.9);
 
     for (const q of promotable ?? []) {
       if (APPROVED_SUBJECTS.has(q.subject)) {
