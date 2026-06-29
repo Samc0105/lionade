@@ -167,7 +167,7 @@ export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
   const mods = (shift.modifiers ?? []).map((m) => m.label);
   recordHistoryEntry({ kind: "shift", label: shift.name, detail: `${r.grade} · ${r.csat}% CSAT${mods.length ? " · " + mods.join(", ") : ""}`, at: Date.now() });
   const fresh = syncUnlocked();
-  if (leveledTo) fresh.push(`levelup:${leveledTo}:${titleForLevel(leveledTo)}`);
+  if (leveledTo) fresh.push(`${LEVELUP_BANNER_PREFIX}${leveledTo}:${titleForLevel(leveledTo)}`);
   return fresh;
 }
 
@@ -177,11 +177,21 @@ export function refreshAchievements(): string[] {
 }
 
 // ── Career level ──
-// Everything you play feeds one XP pool with a rising title ladder.
-const CAREER_TITLES = [
+// Everything you play feeds one XP pool with a rising title ladder. The titles
+// and the level->title mapping are exported so the TechHub Saga (lib/liondesk/
+// saga.ts) can hang a narrative chapter off each rung without redefining the
+// ladder. The saga is cosmetic only and grants nothing.
+export const CAREER_TITLES = [
   "Intern", "Help Desk Tech", "Support Specialist", "Sysadmin", "Network Admin",
   "Security Analyst", "Senior Engineer", "Team Lead", "IT Manager", "Director of IT", "TechHub CTO",
 ];
+
+// Prefix for the level-up celebration id pushed onto the AchievementBanner ids
+// (see recordShiftResult below). The full form is
+// "levelup:<level>:<title>". saga.ts and AchievementBanner read it back through
+// this shared constant so the producer and consumers stay in agreement.
+export const LEVELUP_BANNER_PREFIX = "levelup:";
+
 const STEP = 150;
 function cumulativeFor(level: number): number {
   return (STEP * ((level - 1) * level)) / 2;
@@ -194,7 +204,7 @@ function levelForXp(xp: number): number {
   while (cumulativeFor(level + 1) <= xp) level++;
   return level;
 }
-function titleForLevel(level: number): string {
+export function titleForLevel(level: number): string {
   return CAREER_TITLES[Math.min(level - 1, CAREER_TITLES.length - 1)];
 }
 
