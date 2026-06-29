@@ -4,6 +4,31 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-06-29 - TechHub/LionDesk 40-feature sprint SHIPPED TO MAIN (live)
+
+**Branch:** `feat/techhub-liondesk`, also pushed to `main` (= live getlionade.com). Main tip `4033bb7` (features), then this docs commit on top. 78+ commits ahead of the pre-sprint base `889e82a`.
+
+**What shipped this session: 40 TechHub features in 8 batches**, each built then adversarially reviewed then auto-fixed via the Workflow tool, in small per-feature commits:
+1. Today's Board, quick-recall, SOC/SWE/RedTeam content, content validator, streak milestones.
+2. Concept mastery + Weak Spots, career saga + promotions, scoring single-source-of-truth, difficulty-weighted payouts, Major Incident boss-shift + Bridge Pressure meter.
+3. Vitest harness + golden engine tests, accessibility pass, behavior mutators, shareable seeds, real-world skill mapping.
+4. Gated leaderboard, NetOps track, stats dashboard, quests, ambient sound.
+5. Wiring pass (plus the SLA-breach engine fix), onboarding coach marks, manager 1:1s, economy balance, in-desk settings popover.
+6. Share-result card, seasonal shifts, adaptive difficulty, beat-my-desk links, desk ambiance.
+7. Leaderboard scoring + season archive, certification exam, classroom challenge, KB browser.
+8. Replay scrubber, per-track mastery, route code-split, track shift-2s, placement test, command palette.
+Plus compliance: removed user-facing em-dashes, and `downlevelIteration: true` in tsconfig (the prod typecheck rejects Set spreads at the default low target).
+
+**VERIFY FIRST:** Node is absent in the Claude sandbox, so NONE of this was locally typechecked/built. The Vercel build is the only gate. Confirm the latest `main` Vercel build is GREEN before trusting it; if red, the error names the file and we fix-forward (a failed build keeps the last good prod deploy live).
+
+**Held migrations (NOT applied, features degrade to preview):** `20260626120000` shift-completions, `20260628120000` techhub_leaderboard. Fangs stay preview-only and the leaderboard shows "goes live soon" until applied.
+
+**Cadence going forward:** build TechHub in batches of ~3 (down from 5).
+
+**On the bench (designed, not built):** Ninny AI tutor (needs go, real API cost), cosmetic Fang-sink shop, daily-recap email via Resend, deeper screen-reader audit, NetOps shift 3-5.
+
+---
+
 ## 2026-06-28 - Security projects track (after the TechHub/LionDesk sprint)
 
 **Branch:** `feat/techhub-liondesk` (42+ commits ahead of `main`, NOT merged, NOT deployed).

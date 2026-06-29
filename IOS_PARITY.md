@@ -7,6 +7,14 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-29: TechHub / LionDesk 40-feature sprint: WEB-ONLY by design (deliberate no-row)
+
+**Status:** Shipped to `main` (live getlionade.com), main tip `4033bb7`. The entire TechHub/LionDesk shift simulator at `/learn/techhub` is **web-only by design with no iOS parity obligation**, recorded here as a deliberate no-row decision. It is a desktop-OS/terminal simulator built for the web app; there is no planned iOS port, so there is no drift to track.
+
+The 40 features shipped this session: the IT/SOC/SWE/RedTeam/NetOps career tracks (with shift 2 ladders), the generated/daily/weekly/surprise/nightshift/lab modes, behavior mutators, Major Incident boss-shifts plus a Bridge Pressure meter, concept mastery plus a Weak Spots drill, a certification exam, a classroom challenge, a KB browser, a gated Daily/Weekly leaderboard, cosmetic quests, play streaks, a career saga plus promotion moments, manager 1:1s, a stats dashboard, shareable seeds plus beat-my-desk challenge links, a result share-card, an accessibility pass, ambient sound, an in-desk settings popover, onboarding coach marks, real-world skill mapping, adaptive difficulty, seasonal shifts, a replay scrubber, per-track mastery ranks, a placement test, and a Cmd/Ctrl+K command palette. None has an iOS counterpart and none is planned.
+
+---
+
 ## 2026-06-28: VULNERABILITY DISCLOSURE POLICY (VDP) — web/repo artifacts, but the POLICY SCOPE covers iOS (no parity gap)
 
 **Status:** Shipped to the web working tree on branch `feat/techhub-liondesk` (commit `2d9ebe4`; zero-API, no migration, no economy change). A real coordinated Vulnerability Disclosure Policy: an RFC 9116 `security.txt`, a human-readable `/security` page (eight sections, mirrors `/terms`), a repo-root `SECURITY.md` for GitHub's Security tab, and `SECURITY_EMAIL` in `lib/site-config.ts`. **This is NOT a parity gap.** The discoverable artifacts are web- and repo-level by nature, but the policy's stated *scope* deliberately includes the iOS app, so there is nothing for iOS to "port" — the iOS app is already covered by the same policy and the same report-here contact. Recorded so a future audit reads this as a deliberate web/repo surface with iOS-inclusive scope, not a missed port.
