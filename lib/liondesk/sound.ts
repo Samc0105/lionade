@@ -4,6 +4,10 @@
 // resumeAudio() on the first interaction.
 
 let ctx: AudioContext | null = null;
+// Single master gain that every voice (cues, ambient drone, desk hum) routes
+// through, so the in desk settings volume slider can scale the whole kit at once.
+// Created lazily with the saved volume, so loudness is unchanged out of the box.
+let masterGain: GainNode | null = null;
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -16,8 +20,19 @@ function getCtx(): AudioContext | null {
       return null;
     }
   }
+  if (!masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.gain.value = getVolume();
+    masterGain.connect(ctx.destination);
+  }
   if (ctx.state === "suspended") ctx.resume().catch(() => {});
   return ctx;
+}
+
+// Where voices connect instead of straight to the speakers, so master volume
+// applies uniformly. Falls back to the raw destination if the gain is absent.
+function outNode(c: AudioContext): AudioNode {
+  return masterGain ?? c.destination;
 }
 
 const MUTE_KEY = "lionade.liondesk.muted";
@@ -31,6 +46,53 @@ export function setMuted(m: boolean): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(MUTE_KEY, m ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+}
+
+const VOLUME_KEY = "lionade.liondesk.volume";
+
+/** Master volume as a 0..1 factor (defaults to 1, full volume). Read by the in
+ *  desk settings popover and applied to the master gain every voice routes through. */
+export function getVolume(): number {
+  if (typeof window === "undefined") return 1;
+  const raw = window.localStorage.getItem(VOLUME_KEY);
+  if (raw === null) return 1;
+  const v = Number.parseFloat(raw);
+  return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 1;
+}
+
+/** Set the master volume (0..1). Persists the preference and, when the audio
+ *  context is live, ramps the master gain so the change is heard right away. */
+export function setVolume(v: number): void {
+  const clamped = Math.min(1, Math.max(0, v));
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(VOLUME_KEY, String(clamped));
+    } catch {
+      /* ignore */
+    }
+  }
+  if (masterGain && ctx) {
+    // Short ramp so dragging the slider never clicks or zippers.
+    masterGain.gain.setTargetAtTime(clamped, ctx.currentTime, 0.02);
+  }
+}
+
+const AMBIENT_KEY = "lionade.liondesk.ambient";
+
+/** Whether the calm office hum is allowed to play (defaults to on). Independent
+ *  of mute: a player can silence just the ambient bed while keeping event cues. */
+export function isAmbientEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.localStorage.getItem(AMBIENT_KEY) !== "0";
+}
+
+export function setAmbientEnabled(on: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(AMBIENT_KEY, on ? "1" : "0");
   } catch {
     /* ignore */
   }
@@ -54,7 +116,7 @@ function beep(freq: number, durMs: number, type: OscillatorType = "sine", gain =
   g.gain.linearRampToValueAtTime(gain, t + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, t + durMs / 1000);
   o.connect(g);
-  g.connect(c.destination);
+  g.connect(outNode(c));
   o.start(t);
   o.stop(t + durMs / 1000 + 0.02);
 }
@@ -118,7 +180,7 @@ export function startAmbient(): void {
   gain.gain.linearRampToValueAtTime(0.02, c.currentTime + 1.2);
   osc.connect(gain);
   sub.connect(gain);
-  gain.connect(c.destination);
+  gain.connect(outNode(c));
   osc.start();
   sub.start();
   drone = { osc, sub, gain };
@@ -179,7 +241,7 @@ let deskHum: { low: OscillatorNode; air: OscillatorNode; gain: GainNode } | null
 /** Start the calm help desk office hum (idempotent). */
 export function startDeskHum(): void {
   const c = getCtx();
-  if (!c || isMuted() || deskHum) return;
+  if (!c || isMuted() || !isAmbientEnabled() || deskHum) return;
   const low = c.createOscillator();
   const air = c.createOscillator();
   const gain = c.createGain();
@@ -194,7 +256,7 @@ export function startDeskHum(): void {
   low.connect(gain);
   air.connect(airGain);
   airGain.connect(gain);
-  gain.connect(c.destination);
+  gain.connect(outNode(c));
   low.start();
   air.start();
   deskHum = { low, air, gain };

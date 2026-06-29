@@ -8,11 +8,13 @@ import { shiftsForTrack } from "@/lib/liondesk/shifts";
 import { getAllRecords, recordShift, gradeFor, PASS_SCORE, type ShiftRecord } from "@/lib/liondesk/campaignProgress";
 import { apiPost } from "@/lib/api-client";
 import { recordShiftResult } from "@/lib/liondesk/stats";
+import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import LionDesk, { type ShiftResult } from "@/components/liondesk/LionDesk";
+import type { State } from "@/lib/liondesk/engine";
 
 const gradeColor = (g: string) => (g === "S" || g === "A" ? "#2BBE6B" : g === "B" ? "#4A90D9" : g === "C" ? "#F59E0B" : "#EF4444");
 
@@ -51,11 +53,17 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
 
   const selected = selectedId ? shifts.find((s) => s.id === selectedId) ?? null : null;
 
-  async function handleComplete(r: ShiftResult) {
+  async function handleComplete(r: ShiftResult, state: State) {
     recordShift(r.shiftId, r.score, r.csat);
     setRecords(getAllRecords());
     const played = shifts.find((s) => s.id === r.shiftId);
-    if (played) setNewAch(recordShiftResult(played, r));
+    if (played) {
+      // Fold the exact per-item outcomes into concept mastery (accurate recorder,
+      // not the result-based estimate), so campaign play feeds the Weak Spots
+      // review too. Display only, it grants nothing.
+      recordShiftConcepts(played, state);
+      setNewAch(recordShiftResult(played, r));
+    }
     recordPlayDay();
     setBanked(null);
     setBankPending(false);

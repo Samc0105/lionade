@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type Dispatch, type ReactNode, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type Dispatch, type ReactNode, type RefObject, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
-  SpeakerHigh, SpeakerSlash, X, WarningOctagon,
+  SpeakerHigh, SpeakerSlash, X, WarningOctagon, Compass, Gear,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
-import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, playEscalate, playBridgeSpike, startDeskHum, stopDeskHum, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
+import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, playEscalate, playBridgeSpike, startDeskHum, stopDeskHum, resumeAudio, isMuted, setMuted, isAmbientEnabled, setAmbientEnabled, getVolume, setVolume } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
 import { slaRemaining } from "@/lib/liondesk/scoring";
 import { CONCEPTS, conceptForItem } from "@/lib/liondesk/concepts";
+import { takeNextCoachMark, type CoachMarkDef } from "@/lib/liondesk/coachmarks";
 
 import {
   type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
@@ -133,7 +134,7 @@ const APPS: { id: AppId; label: string; Icon: typeof Ticket }[] = [
   { id: "ad", label: "Admin", Icon: IdentificationBadge },
 ];
 
-export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFangs, bankPending }: { shift: Shift; onComplete?: (r: ShiftResult) => void; onExit?: () => void; onReplay?: () => void; bankedFangs?: number | null; bankPending?: boolean }) {
+export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFangs, bankPending }: { shift: Shift; onComplete?: (r: ShiftResult, state: State) => void; onExit?: () => void; onReplay?: () => void; bankedFangs?: number | null; bankPending?: boolean }) {
   const reducer = useMemo(() => makeReducer(shift), [shift]);
   const [state, dispatch] = useReducer(reducer, shift, buildInitial);
   const accent = shift.accent ?? "#4A90D9";
@@ -159,11 +160,15 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
     return () => clearInterval(id);
   }, [state.started, state.ended]);
 
-  // Fire the completion callback exactly once when the shift ends.
+  // Fire the completion callback exactly once when the shift ends. The final
+  // per-item State is handed alongside the result so a play screen can fold the
+  // exact per-item outcomes into concept mastery (recordShiftConcepts) rather
+  // than estimating from the result. Callers that only need the result can
+  // ignore the second argument.
   useEffect(() => {
     if (state.ended && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.(computeResult(shift, state));
+      onComplete?.(computeResult(shift, state), state);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ended]);
@@ -185,10 +190,22 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
     return () => window.removeEventListener("keydown", onKey);
   }, [state.activeItemId, usedApps]);
 
-  // ── Sound + theme ──
+  // ── Sound + theme + settings ──
   const [muted, setMutedState] = useState(false);
+  const [ambient, setAmbientState] = useState(true);
+  const [volume, setVolumeState] = useState(1);
+  const [settingsReady, setSettingsReady] = useState(false);
   const [theme, setTheme] = useState<DeskTheme | null>(null);
-  useEffect(() => { setMutedState(isMuted()); setTheme(getEquippedTheme()); }, []);
+  // Read the persisted prefs once on the client. settingsReady gates the settings
+  // popover so it never paints a localStorage value before it is known (no flash of
+  // a wrong number); the volume readout shows a placeholder until then.
+  useEffect(() => {
+    setMutedState(isMuted());
+    setAmbientState(isAmbientEnabled());
+    setVolumeState(getVolume());
+    setTheme(getEquippedTheme());
+    setSettingsReady(true);
+  }, []);
   // The browser needs a gesture before audio can play; resume on first input.
   useEffect(() => {
     const resume = () => resumeAudio();
@@ -252,6 +269,31 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
     }
   }
 
+  // The settings popover writes the ambient hum preference (sound.ts owns the
+  // single source of truth and its persistence) and mirrors the live hum to it:
+  // turning it off stops the bed now, turning it on restarts it only while a shift
+  // is live and not muted. No new state is duplicated, this reflects the same
+  // `ambient` value the popover reads.
+  function toggleAmbient() {
+    const next = !ambient;
+    setAmbientEnabled(next);
+    setAmbientState(next);
+    if (next) {
+      if (!muted && state.started && !state.ended) { resumeAudio(); startDeskHum(); }
+    } else {
+      stopDeskHum();
+    }
+  }
+
+  // Master volume (0..1). sound.ts persists it and ramps the live master gain so
+  // the change is audible immediately; this only mirrors it for the slider.
+  function changeVolume(v: number) {
+    const clamped = Math.max(0, Math.min(1, v));
+    resumeAudio();
+    setVolume(clamped);
+    setVolumeState(clamped);
+  }
+
   // Coworker chatter: teammates react to how the shift is going. Each line fires
   // once (deduped via the ref) so the office feels alive without spamming.
   const coworkerFired = useRef<Set<string>>(new Set());
@@ -293,7 +335,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
   return (
     <div className="ld-motion-scope relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}@keyframes ld-bridge-pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:inset 0 0 26px 0 rgba(239,68,68,0.28)}}.ld-bridge-pulse{animation:ld-bridge-pulse 1.8s ease-in-out infinite}.ld-bridge-fill{transition:width 600ms ease-out}@media (prefers-reduced-motion: reduce){.ld-bridge-fill{transition:none}.ld-bridge-pulse{animation:none}}`}</style>
-      <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
+      <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} ambient={ambient} onToggleAmbient={toggleAmbient} volume={volume} onVolume={changeVolume} settingsReady={settingsReady} />
       <BridgePressureBar state={state} />
 
       <div className="grid grid-cols-[64px_1fr] min-h-[560px]">
@@ -416,7 +458,7 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
 
 /* ───────────────────────── status bar ───────────────────────── */
 
-function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }: { shift: Shift; state: State; resolved: number; total: number; onEnd: () => void; muted: boolean; onToggleMute: () => void }) {
+function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute, ambient, onToggleAmbient, volume, onVolume, settingsReady }: { shift: Shift; state: State; resolved: number; total: number; onEnd: () => void; muted: boolean; onToggleMute: () => void; ambient: boolean; onToggleAmbient: () => void; volume: number; onVolume: (v: number) => void; settingsReady: boolean }) {
   const csatColor = state.csat >= 80 ? "#2BBE6B" : state.csat >= 55 ? "#F59E0B" : "#EF4444";
   const low = state.secondsLeft <= 60;
   return (
@@ -450,6 +492,7 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
         <button onClick={onToggleMute} title={muted ? "Unmute" : "Mute"} aria-label={muted ? "Unmute sounds" : "Mute sounds"} className="w-7 h-7 rounded-md border border-white/15 text-cream/60 hover:bg-white/[0.06] hover:text-cream transition-colors flex items-center justify-center">
           {muted ? <SpeakerSlash size={13} weight="fill" aria-hidden="true" /> : <SpeakerHigh size={13} weight="fill" aria-hidden="true" />}
         </button>
+        <SettingsControl state={state} muted={muted} onToggleMute={onToggleMute} ambient={ambient} onToggleAmbient={onToggleAmbient} volume={volume} onVolume={onVolume} settingsReady={settingsReady} />
         <button onClick={onEnd} className="px-2.5 py-1 rounded-md border border-white/15 text-cream/70 hover:bg-white/[0.06] hover:text-cream transition-colors uppercase tracking-wider text-[10px]">
           End shift
         </button>
@@ -458,6 +501,212 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
           spoken once when time runs low and never repeats on every tick. */}
       <span className="sr-only" aria-live="assertive">{state.started && !state.ended && low ? "Under one minute left in the shift." : ""}</span>
     </div>
+  );
+}
+
+/* ───────────────────────── in-desk settings ───────────────────────── */
+
+// A small glassmorphism settings popover, opened from a gear in the desk chrome.
+// It surfaces (and writes) the existing sound preferences, master volume, mute,
+// and the batch 4 ambient office hum, plus two read only reminders: whether the OS
+// reduced motion setting is on, and which difficulty this shift is running. It owns
+// no sound state of its own, it reads and writes the same prefs the desk already
+// holds (sound.ts is the single source of truth), so nothing can drift. The panel
+// is a focus trapped dialog (consistent with the clock in and report dialogs) and
+// is dismissible by the close button, Escape, or a click outside.
+function SettingsControl({ state, muted, onToggleMute, ambient, onToggleAmbient, volume, onVolume, settingsReady }: { state: State; muted: boolean; onToggleMute: () => void; ambient: boolean; onToggleAmbient: () => void; volume: number; onVolume: (v: number) => void; settingsReady: boolean }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        title="Desk settings"
+        aria-label="Desk settings"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className="w-7 h-7 rounded-md border border-white/15 text-cream/60 hover:bg-white/[0.06] hover:text-cream transition-colors flex items-center justify-center"
+      >
+        <Gear size={13} weight="fill" aria-hidden="true" />
+      </button>
+      {open && (
+        <SettingsPanel
+          state={state}
+          muted={muted}
+          onToggleMute={onToggleMute}
+          ambient={ambient}
+          onToggleAmbient={onToggleAmbient}
+          volume={volume}
+          onVolume={onVolume}
+          settingsReady={settingsReady}
+          wrapRef={wrapRef}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SettingsPanel({ state, muted, onToggleMute, ambient, onToggleAmbient, volume, onVolume, settingsReady, wrapRef, onClose }: { state: State; muted: boolean; onToggleMute: () => void; ambient: boolean; onToggleAmbient: () => void; volume: number; onVolume: (v: number) => void; settingsReady: boolean; wrapRef: RefObject<HTMLDivElement>; onClose: () => void }) {
+  const dialogRef = useDialogFocus();
+  // Initialize from matchMedia so the very first painted frame already knows the
+  // preference. A flag that started false would render one frame of ld-toast-in
+  // before the effect below corrected it, briefly animating the panel in for a
+  // reduced-motion user; reading the media query up front snaps it from frame
+  // zero instead. SSR safe via the typeof window guard.
+  const [reduced, setReduced] = useState(
+    () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  // Track the OS reduced motion setting so the reminder is accurate and live. The
+  // panel only mounts while open, so this runs on open (mirrors CoachMarkTip).
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Dismiss on Escape, and swallow the desk number shortcuts while open. Capture
+  // phase, so this runs before the desk wide keydown handler on the window (which
+  // would otherwise also close an open ticket on Escape, or switch apps on a digit).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      } else if (/^[1-9]$/.test(e.key)) {
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [onClose]);
+
+  // Dismiss on a click outside the gear plus panel.
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onClose();
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [onClose, wrapRef]);
+
+  const pct = Math.round(volume * 100);
+  const diff = DIFF[state.difficulty];
+
+  return (
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Desk settings"
+      tabIndex={-1}
+      className="absolute right-0 top-full mt-2 z-40 w-72 rounded-xl border border-white/15 p-3.5 shadow-2xl backdrop-blur-xl focus:outline-none font-syne text-left"
+      style={{
+        background: "linear-gradient(160deg, rgba(16,21,36,0.86) 0%, rgba(10,14,28,0.9) 100%)",
+        animation: reduced ? undefined : "ld-toast-in 200ms ease-out both",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Gear size={15} weight="fill" color="#FFD700" aria-hidden="true" />
+        <span className="font-bebas text-base text-cream tracking-wide leading-none">Desk settings</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close settings"
+          className="ml-auto grid h-5 w-5 place-items-center rounded text-cream/40 hover:text-cream/80 hover:bg-white/[0.06] transition-colors"
+        >
+          <X size={12} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
+
+      {/* volume */}
+      <div className="mb-3">
+        <div className="flex items-center gap-2 mb-1.5">
+          {muted ? <SpeakerSlash size={13} weight="fill" color="#9FB2CC" aria-hidden="true" /> : <SpeakerHigh size={13} weight="fill" color="#9FB2CC" aria-hidden="true" />}
+          <label htmlFor="ld-volume" className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55">Volume</label>
+          <span className="ml-auto font-mono text-[10px] tabular-nums text-cream/60">{settingsReady ? `${pct}%` : "..."}</span>
+        </div>
+        <input
+          id="ld-volume"
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={settingsReady ? pct : 100}
+          onChange={(e) => onVolume(Number(e.target.value) / 100)}
+          aria-label="Master volume"
+          className="w-full cursor-pointer"
+          style={{ accentColor: "#FFD700" }}
+        />
+      </div>
+
+      {/* mute plus ambient toggles */}
+      <div className="space-y-2 mb-3">
+        <button
+          type="button"
+          onClick={onToggleMute}
+          role="switch"
+          aria-checked={!muted}
+          aria-label="All sound"
+          className="w-full flex items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.02] px-2.5 py-2 hover:bg-white/[0.05] transition-colors"
+        >
+          <span className="text-cream/85 text-xs">All sound</span>
+          <SettingsPill on={!muted} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggleAmbient}
+          role="switch"
+          aria-checked={ambient}
+          aria-label="Ambient office hum"
+          className="w-full flex items-center gap-2 rounded-lg border border-white/[0.1] bg-white/[0.02] px-2.5 py-2 hover:bg-white/[0.05] transition-colors"
+        >
+          <span className="text-cream/85 text-xs text-left">Ambient office hum</span>
+          <SettingsPill on={ambient} />
+        </button>
+        <p className="font-mono text-[9px] text-cream/35 leading-relaxed">The hum plays while a shift is live. Mute silences everything at once.</p>
+      </div>
+
+      {/* reduced motion reminder */}
+      <div className="rounded-lg border border-white/[0.08] bg-white/[0.015] px-2.5 py-2 mb-2.5">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55">Reduced motion</span>
+          <span className="ml-auto font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={reduced ? { color: "#2BBE6B", background: "rgba(43,190,107,0.12)" } : { color: "#9FB2CC", background: "rgba(255,255,255,0.05)" }}>{reduced ? "On" : "Off"}</span>
+        </div>
+        <p className="text-cream/55 text-[11px] leading-relaxed mt-1">
+          {reduced
+            ? "Animations snap to their final frame, following your system setting."
+            : "Follows your system setting. Turn on Reduce Motion in your OS to snap animations to their final frame."}
+        </p>
+      </div>
+
+      {/* difficulty reminder */}
+      <div className="rounded-lg border px-2.5 py-2" style={{ borderColor: "rgba(168,85,247,0.25)", background: "rgba(168,85,247,0.06)" }}>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55">Difficulty</span>
+          <span className="ml-auto font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded text-purple-200" style={{ background: "rgba(168,85,247,0.15)" }}>{state.started ? diff.label : "Set at clock in"}</span>
+        </div>
+        <p className="text-cream/55 text-[11px] leading-relaxed mt-1">{state.started ? diff.desc : "You pick the difficulty when you clock in to this shift."}</p>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPill({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="ml-auto inline-flex items-center shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider border"
+      style={on ? { color: "#2BBE6B", borderColor: "rgba(43,190,107,0.45)", background: "rgba(43,190,107,0.12)" } : { color: "#9FB2CC", borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.04)" }}
+    >
+      {on ? "On" : "Off"}
+    </span>
   );
 }
 
@@ -705,6 +954,8 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
     <div className="p-4 max-h-[560px] overflow-y-auto">
       <button onClick={() => dispatch({ t: "CLOSE" })} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-cream/55 hover:text-electric mb-3"><ArrowLeft size={13} /> back to queue</button>
 
+      <CoachMarkTip item={item} />
+
       {/* header */}
       <div className="flex items-center gap-2 mb-1">
         {item.channel === "ticket" && <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: PRIORITY_COLOR[item.priority], background: `${PRIORITY_COLOR[item.priority]}1f`, border: `1px solid ${PRIORITY_COLOR[item.priority]}40` }}>{item.priority}</span>}
@@ -843,6 +1094,84 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
           <p className="text-cream/70 text-xs mt-1">Pick the next item from the dock.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ───────────────────── coach marks (guided first shift) ───────────────────── */
+
+// A calm, one time tip shown the first time the player opens each kind of ticket
+// (a terminal ticket, a phone call, a phishing email, a stockroom order, a major
+// incident). The seen state lives in localStorage (see lib/liondesk/coachmarks),
+// so each tip fires at most once ever. It never blocks play: it is an inline,
+// dismissible status banner, not a modal, and it grants nothing. The entrance
+// animation snaps to its final state under prefers-reduced-motion.
+function CoachMarkTip({ item }: { item: ShiftItem }) {
+  const [mounted, setMounted] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  const [mark, setMark] = useState<CoachMarkDef | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    // Track the OS setting live so toggling it mid session is picked up, not just
+    // on the next ticket open. Behavior preserving: the initial value still comes
+    // from mq.matches on mount.
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // When this item is opened, surface the first coach mark for its surface that
+  // the player has not seen and persist it as seen in one pass, so it never fires
+  // again. Reading the seen state touches localStorage, so it is gated behind
+  // `mounted`: nothing renders before the client knows the seen state, so there
+  // is no flash.
+  useEffect(() => {
+    if (!mounted) return;
+    const next = takeNextCoachMark(item);
+    if (next) {
+      setMark(next);
+      setDismissed(false);
+    } else {
+      setMark(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, item.id]);
+
+  if (!mounted || !mark || dismissed) return null;
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="mt-3 mb-1 rounded-xl border p-3"
+      style={{
+        borderColor: "rgba(74,144,217,0.4)",
+        background: "linear-gradient(135deg, rgba(74,144,217,0.10) 0%, rgba(168,85,247,0.06) 100%)",
+        animation: reduced ? undefined : "ld-toast-in 260ms ease-out both",
+      }}
+    >
+      <div className="flex items-start gap-2.5">
+        <Compass size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="mt-0.5 shrink-0" />
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-electric/80">First time tip</span>
+            <span className="font-bebas text-base text-cream tracking-wide leading-none">{mark.title}</span>
+          </div>
+          <p className="text-cream/75 text-xs leading-relaxed mt-1">{mark.body}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          aria-label="Dismiss tip"
+          className="ml-auto shrink-0 grid h-5 w-5 place-items-center rounded text-cream/40 hover:text-cream/80 hover:bg-white/[0.06] transition-colors"
+        >
+          <X size={12} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -1002,7 +1331,7 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
   const fumbled = live.filter((i) => state.items[i.id].status === "mishandled");
   const open = live.filter((i) => state.items[i.id].status === "queued");
   const breaches = live.filter((i) => state.items[i.id].breached).length;
-  const { score, grade } = computeResult(shift, state);
+  const { score, grade, payoutFactor, usedLifeline } = computeResult(shift, state);
   const gradeColor = grade === "S" || grade === "A" ? "#2BBE6B" : grade === "B" ? "#4A90D9" : grade === "C" ? "#F59E0B" : "#EF4444";
   // The report is the actionable surface at shift end, so focus moves into it and
   // is trapped until the player chooses Run it back or Back. Focus returns to
@@ -1065,6 +1394,23 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
               <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">{s.label}</p>
             </div>
           ))}
+        </div>
+
+        {/* Payout weight: a preview-only mirror of how the server weights this
+            shift's Fang ceiling for how it was played (difficulty, a clean clear
+            with no lifelines, and the best streak), as a percent of the ceiling.
+            Display only, it grants nothing (the economy stays
+            server-authoritative). Derived from pure engine state, so it never
+            flashes a zero. */}
+        <div className="mb-4 rounded-lg border border-gold/15 bg-gold/[0.04] px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Lightning size={13} weight="fill" color="#FFD700" aria-hidden="true" />
+            <span className="font-mono text-[10px] uppercase tracking-wider text-cream/55">payout weight</span>
+            <span className="ml-auto font-mono text-[11px] tabular-nums text-gold">{Math.round(payoutFactor * 100)}%</span>
+          </div>
+          <p className="font-mono text-[9px] text-cream/40 leading-relaxed mt-1">
+            How {DIFF[state.difficulty].label} difficulty{usedLifeline ? "" : ", a clean clear,"} and your best streak weight the Fangs you can earn. A preview only (the server owns the real, clamped grant).
+          </p>
         </div>
 
         {fumbled.length > 0 && (

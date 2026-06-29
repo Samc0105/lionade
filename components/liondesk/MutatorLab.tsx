@@ -7,9 +7,11 @@ import { generateShift, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/gene
 import { getCombos, saveCombo, deleteCombo, type SavedCombo } from "@/lib/liondesk/savedCombos";
 import { encodeCombo, decodeCombo } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
+import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
+import type { State } from "@/lib/liondesk/engine";
 import type { Track } from "@/lib/helpdesk/types";
 
 type TrackSel = Track | "any";
@@ -99,7 +101,7 @@ export default function MutatorLab() {
             ))}
           </div>
         )}
-        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => { recordPlayDay(); setNewAch(recordShiftResult(shift, r)); }} onReplay={() => play(lastOpts)} onExit={() => setShift(null)} />
+        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); setNewAch(recordShiftResult(shift, r)); }} onReplay={() => play(lastOpts)} onExit={() => setShift(null)} />
       </div>
     );
   }

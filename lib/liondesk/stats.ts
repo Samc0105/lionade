@@ -7,8 +7,7 @@ import type { Shift } from "./types";
 import type { ShiftResult } from "@/lib/liondesk/engine";
 import { getMaxNightSurvived, getEndlessBest } from "./nightshift";
 import { recordShiftReputation, getReputation, REP_DEPTS } from "./reputation";
-
-const PASS = 50;
+import { PASS_SCORE } from "./scoring";
 
 export interface TechhubStats {
   shiftsCleared: number;
@@ -139,7 +138,7 @@ function syncUnlocked(): string[] {
 
 /** Record a finished shift. Returns newly-unlocked achievement ids. */
 export function recordShiftResult(shift: Shift, r: ShiftResult): string[] {
-  const cleared = r.score >= PASS;
+  const cleared = r.score >= PASS_SCORE;
   const s = getStats();
   let leveledTo = 0;
   if (cleared) {

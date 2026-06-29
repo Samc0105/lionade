@@ -349,6 +349,26 @@ export default function TechHubHome() {
         </Link>
       </div>
 
+      {/* Weak Spots: a personal practice mode that loads more tickets from the
+          concepts the player misses most. Routes to the review screen, which
+          tracks mastery locally and grants nothing (the economy stays
+          server-authoritative). */}
+      <Link href="/learn/techhub/review" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(168,85,247,0.16) 0%, rgba(239,68,68,0.07) 60%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(168,85,247,0.32)" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.16)", border: "1px solid rgba(168,85,247,0.45)" }}>
+            <Target size={20} weight="fill" color="#C9A2F2" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">WEAK SPOTS</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-[#A855F7]/15 text-[#C9A2F2] border border-[#A855F7]/30">practice</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">Target the concepts you miss most. Every review loads more tickets from your weak spots.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#C9A2F2" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
       {/* Daily play streak */}
       {mounted && streak.current >= 1 && (
         <div className="flex items-center gap-3 rounded-2xl border border-orange-400/25 bg-orange-400/[0.05] p-3">

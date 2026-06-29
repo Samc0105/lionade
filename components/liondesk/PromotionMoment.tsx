@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Crown, Sparkle, X } from "@phosphor-icons/react";
 import { SAGA_LENGTH, type Promotion, type SagaChapter } from "@/lib/liondesk/saga";
+import { playPromotion } from "@/lib/liondesk/sound";
 
 // TechHub Saga promotion moment. When the player crosses a career title,
 // AchievementBanner detects the levelup id, reads the chapter out of saga.ts,
@@ -141,6 +142,14 @@ export default function PromotionMoment({
   function close() {
     setVisible(false);
   }
+
+  // Play the gold promotion fanfare once when the moment mounts. The mute
+  // preference and the audio gesture gate are both handled inside playPromotion,
+  // so it stays silent when muted and never fights the browser autoplay policy.
+  // Only the full screen overlay calls this; the at rest CareerSagaCard does not.
+  useEffect(() => {
+    playPromotion();
+  }, []);
 
   useEffect(() => {
     if (visible) return;

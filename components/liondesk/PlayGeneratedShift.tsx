@@ -6,10 +6,12 @@ import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, dateSeed, weekSeed } from "@/lib/liondesk/generate";
 import { decodeCombo, encodeCombo, type ComboData } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
+import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import { recordDailyClear, type DailyMode } from "@/lib/liondesk/dailyLog";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
+import type { State } from "@/lib/liondesk/engine";
 
 interface Props {
   daily?: boolean;
@@ -169,7 +171,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
         </p>
       </div>
 
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r) => { recordPlayDay(); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {sharedCode
           ? "A shared shift. The same queue every time you open this link."

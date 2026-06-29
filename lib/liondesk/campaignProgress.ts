@@ -5,18 +5,19 @@
 
 import type { Track } from "@/lib/helpdesk/types";
 import { shiftsForTrack } from "./shifts";
+import { gradeFor, PASS_SCORE } from "./scoring";
 
 const KEY = "lionade.techhub.campaign.v1";
 
 export interface ShiftRecord { bestScore: number; plays: number; lastCsat: number }
 type CampaignMap = Record<string, ShiftRecord>;
 
-/** Score thresholds shared with the end-of-shift report. */
-export function gradeFor(score: number): string {
-  return score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
-}
-/** A shift counts as "cleared" (and unlocks the next) at a passing grade. */
-export const PASS_SCORE = 50;
+// The letter grade ladder and the pass threshold now live in the scoring single
+// source of truth (./scoring). They are re-exported here so existing importers
+// (components/liondesk/Campaign.tsx) keep importing them from this module
+// unchanged, while the actual values stay in one place across the engine, the
+// UI, and the server payout route.
+export { gradeFor, PASS_SCORE };
 
 function read(): CampaignMap {
   if (typeof window === "undefined") return {};

@@ -9,6 +9,8 @@ import { QUEST_BADGES, getEarnedQuestBadgeIds } from "@/lib/liondesk/quests";
 import { getPlayStreak, STREAK_MILESTONES, type PlayStreak } from "@/lib/liondesk/playstreak";
 import { isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getReputation, REP_DEPTS } from "@/lib/liondesk/reputation";
+import { CareerSagaCard } from "@/components/liondesk/PromotionMoment";
+import { chapterForLevel, nextPromotion } from "@/lib/liondesk/saga";
 
 export default function AchievementsPanel() {
   const [mounted, setMounted] = useState(false);
@@ -82,21 +84,27 @@ export default function AchievementsPanel() {
 
   return (
     <div className="space-y-6">
-      {/* career level */}
+      {/* career level + saga chapter. Both sit inside the mount + career guard so
+          the localStorage-derived level never flashes a zero. CareerSagaCard is
+          presentational; the already-mounted career.level feeds it the resting
+          chapter and the next promotion to tease. Cosmetic, it grants nothing. */}
       {mounted && career && (
-        <div className="rounded-2xl border border-electric/25 bg-electric/[0.05] p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bebas text-2xl text-cream flex-shrink-0" style={{ background: "rgba(74,144,217,0.18)", border: "1px solid rgba(74,144,217,0.4)" }}>{career.level}</div>
-            <div className="flex-1 min-w-0">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-electric/90">level {career.level}</p>
-              <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{career.title}</p>
-              <div className="h-1.5 rounded-full overflow-hidden bg-white/10 mt-2">
-                <div className="h-full" style={{ width: `${career.pct}%`, background: "linear-gradient(90deg,#4A90D9,#FFD700)" }} />
+        <>
+          <div className="rounded-2xl border border-electric/25 bg-electric/[0.05] p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bebas text-2xl text-cream flex-shrink-0" style={{ background: "rgba(74,144,217,0.18)", border: "1px solid rgba(74,144,217,0.4)" }}>{career.level}</div>
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-electric/90">level {career.level}</p>
+                <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{career.title}</p>
+                <div className="h-1.5 rounded-full overflow-hidden bg-white/10 mt-2">
+                  <div className="h-full" style={{ width: `${career.pct}%`, background: "linear-gradient(90deg,#4A90D9,#FFD700)" }} />
+                </div>
+                <p className="font-mono text-[9px] text-cream/45 mt-1">{career.intoLevel} / {career.forNext} XP to level {career.level + 1}</p>
               </div>
-              <p className="font-mono text-[9px] text-cream/45 mt-1">{career.intoLevel} / {career.forNext} XP to level {career.level + 1}</p>
             </div>
           </div>
-        </div>
+          <CareerSagaCard chapter={chapterForLevel(career.level)} next={nextPromotion(career.level)} />
+        </>
       )}
 
       {/* progress header */}
