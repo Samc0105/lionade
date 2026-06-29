@@ -4,7 +4,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type 
 import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
-  SpeakerHigh, SpeakerSlash,
+  SpeakerHigh, SpeakerSlash, X,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
@@ -949,6 +949,8 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
           );
         })()}
 
+        <QuickRecall fumbled={fumbled} resolved={resolved} />
+
         <details className="mb-4 rounded-xl border border-white/[0.07] bg-white/[0.015]">
           <summary className="cursor-pointer select-none px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cream/55 hover:text-cream">Full recap · the right move on every item ({live.length})</summary>
           <ul className="px-3 pb-3 space-y-2.5">
@@ -993,6 +995,116 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ───────────────────── quick recall (retrieval check) ───────────────────── */
+
+// One optional retrieval check on the shift report, shown above the Full recap.
+// It re-asks a single item the player just fumbled this shift (fallback: a
+// random item they resolved), using ONLY the item's already-authored ActionCard
+// labels + teach strings: the item's correct action paired with one wrong
+// distractor that already exists on the item. No content is invented, nothing is
+// granted (display-only). Items without both a correct and a wrong action are
+// skipped, so there is always a real distractor to choose between.
+type Recall = { item: ShiftItem; choices: ShiftItem["actions"]; correctId: string };
+
+function recallEligible(i: ShiftItem): boolean {
+  return i.actions.length >= 2 && i.actions.some((a) => a.correct) && i.actions.some((a) => !a.correct);
+}
+
+function buildRecall(fumbled: ShiftItem[], resolved: ShiftItem[]): Recall | null {
+  const src = fumbled.filter(recallEligible);
+  const pool = src.length ? src : resolved.filter(recallEligible);
+  if (!pool.length) return null;
+  const item = pool[Math.floor(Math.random() * pool.length)];
+  const correct = item.actions.find((a) => a.correct)!;
+  const wrongs = item.actions.filter((a) => !a.correct);
+  const distractor = wrongs[Math.floor(Math.random() * wrongs.length)];
+  // Two choices only, order randomized so the right answer is not always first.
+  const choices = Math.random() < 0.5 ? [correct, distractor] : [distractor, correct];
+  return { item, choices, correctId: correct.id };
+}
+
+function QuickRecall({ fumbled, resolved }: { fumbled: ShiftItem[]; resolved: ShiftItem[] }) {
+  // Pick the item + shuffle exactly once. Frozen for the life of the report so it
+  // never reshuffles on a re-render (e.g. when the server-banked Fangs prop lands).
+  const [recall] = useState(() => buildRecall(fumbled, resolved));
+  const [answered, setAnswered] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!recall || dismissed) return null;
+  const { item, choices, correctId } = recall;
+  const chosen = answered ? item.actions.find((a) => a.id === answered) ?? null : null;
+  const right = item.actions.find((a) => a.id === correctId) ?? null;
+  const ok = answered !== null && answered === correctId;
+  const verdict = ok ? "#2BBE6B" : "#EF4444";
+  // Re-present the incoming scenario (the spec's "scenario one-liner"): the phone
+  // opener, email body, or ticket body, mirroring the ChannelList preview slice
+  // and collapsed to a single line. Falls back to the goal if an item carries no
+  // body text.
+  const scenarioRaw = (
+    item.channel === "phone" ? item.phone?.opener :
+    item.channel === "email" ? item.email?.body :
+    item.ticketBody
+  )?.replace(/\s+/g, " ").trim();
+  const scenario = scenarioRaw && scenarioRaw.length > 120 ? `${scenarioRaw.slice(0, 120).trimEnd()}...` : (scenarioRaw || item.goal);
+
+  return (
+    <div className="mb-4 rounded-xl border border-purple-400/25 bg-purple-400/[0.05] p-3.5">
+      <div className="flex items-center gap-2 mb-2">
+        <Lightning size={13} weight="fill" color="#A855F7" aria-hidden="true" />
+        <p className="font-mono text-[10px] uppercase tracking-wider text-purple-300">Quick recall</p>
+        <button onClick={() => setDismissed(true)} aria-label="Dismiss quick recall" className="ml-auto grid h-5 w-5 place-items-center rounded text-cream/40 hover:text-cream/80 hover:bg-white/[0.06] transition-colors">
+          <X size={12} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
+
+      <p className="text-cream/90 text-xs font-semibold">{item.subject}</p>
+      <p className="text-cream/65 text-[11px] leading-relaxed mt-0.5">{scenario}</p>
+
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-3 mb-1.5">Choose your move</p>
+      <div className="grid gap-2">
+        {choices.map((act) => {
+          const revealed = answered !== null;
+          const isRight = act.id === correctId;
+          const isChosen = answered === act.id;
+          return (
+            <button
+              key={act.id}
+              disabled={revealed}
+              onClick={() => setAnswered(act.id)}
+              className={`text-left rounded-xl border bg-white/[0.02] transition-colors p-2.5 ${revealed ? "cursor-default" : "hover:bg-white/[0.05]"}`}
+              style={
+                !revealed
+                  ? { borderColor: "rgba(255,255,255,0.1)" }
+                  : isRight
+                  ? { borderColor: "rgba(43,190,107,0.55)", background: "rgba(43,190,107,0.08)" }
+                  : isChosen
+                  ? { borderColor: "rgba(239,68,68,0.5)", background: "rgba(239,68,68,0.07)" }
+                  : { borderColor: "rgba(255,255,255,0.07)", opacity: 0.5 }
+              }
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-cream text-sm">{act.label}</span>
+                {revealed && isRight && <CheckCircle size={14} weight="fill" color="#2BBE6B" className="ml-auto shrink-0" aria-hidden="true" />}
+                {revealed && isChosen && !isRight && <span className="ml-auto shrink-0 font-bold text-sm" style={{ color: "#EF4444" }} aria-hidden="true">✕</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {answered !== null && chosen && (
+        <div className="mt-2.5 rounded-lg border p-2.5" style={{ borderColor: `${verdict}55`, background: `${verdict}12`, animation: "ld-toast-in 240ms ease-out" }}>
+          <p className="font-bebas text-base tracking-wide leading-none" style={{ color: verdict }}>{ok ? "CORRECT" : "NOT QUITE"}</p>
+          <p className="text-cream/75 text-[11px] leading-relaxed mt-1.5">{chosen.teach}</p>
+          {!ok && right && (
+            <p className="text-cream/75 text-[11px] leading-relaxed mt-1"><span className="text-[#2BBE6B] font-semibold">Right move:</span> {right.label}. {right.teach}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
