@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { apiPost } from "@/lib/api-client";
-import { ONBOARDING_ENFORCED_FROM } from "@/lib/site-config";
+import { isProfileOnboarded } from "@/lib/site-config";
 import { getQuizQuestions, checkAnswer } from "@/lib/db";
 import type { Subject } from "@/types";
 import {
@@ -160,13 +160,11 @@ export default function OnboardingPage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      // Mirror ProtectedRoute exactly: only bounce out of the funnel if the
-      // flag is set OR the account predates funnel enforcement (grandfathered).
-      // The old "username present" check bounced every new user straight to the
-      // dashboard, which is why the funnel never ran.
-      const createdAt = (profile as { created_at?: string | null } | null)?.created_at;
-      const isLegacy = createdAt == null || createdAt < ONBOARDING_ENFORCED_FROM;
-      if (profile?.onboarding_completed === true || isLegacy) {
+      // Mirror ProtectedRoute exactly via the shared helper: only bounce out of
+      // the funnel if the flag is set OR the account predates enforcement
+      // (grandfathered). The old "username present" check bounced every new user
+      // straight to the dashboard, which is why the funnel never ran.
+      if (isProfileOnboarded(profile as { onboarding_completed?: boolean | null; created_at?: string | null } | null)) {
         router.replace("/dashboard");
         return;
       }

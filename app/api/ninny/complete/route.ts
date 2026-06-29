@@ -114,7 +114,8 @@ export async function POST(req: NextRequest) {
   // short-circuit if the same user already completed this material+mode in the
   // last 30 seconds. Best-effort (a hard unique index would need a held
   // migration); this covers the common sequential-retry case.
-  const dupSince = new Date(Date.now() - 30_000).toISOString();
+  const IDEMPOTENCY_WINDOW_MS = 30_000;
+  const dupSince = new Date(Date.now() - IDEMPOTENCY_WINDOW_MS).toISOString();
   const { data: recentSession } = await supabaseAdmin
     .from("ninny_sessions")
     .select("id")

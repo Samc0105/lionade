@@ -46,6 +46,24 @@ export const SECURITY_EMAIL = `security@${SITE_HOST}`;
  */
 export const ONBOARDING_ENFORCED_FROM = "2026-06-29T00:00:00Z";
 
+/**
+ * Single source of truth for the onboarding gate, shared by ProtectedRoute and
+ * the onboarding page so they cannot drift. A profile is past the funnel if the
+ * flag is set, OR the account predates enforcement (grandfathered, so existing
+ * users are never trapped). created_at is compared as an INSTANT, not
+ * lexicographically: Postgres serializes timestamptz in `+00:00` offset form,
+ * which would sort wrong against the `Z`-suffixed cutoff and misclassify a
+ * midnight-UTC signup. A missing created_at is treated as legacy.
+ */
+export function isProfileOnboarded(
+  profile: { onboarding_completed?: boolean | null; created_at?: string | null } | null | undefined,
+): boolean {
+  if (!profile) return false;
+  if (profile.onboarding_completed === true) return true;
+  if (profile.created_at == null) return true;
+  return new Date(profile.created_at).getTime() < new Date(ONBOARDING_ENFORCED_FROM).getTime();
+}
+
 /** Join a relative path to the site URL. `absoluteUrl("/about") → "https://…/about"`. */
 export function absoluteUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
