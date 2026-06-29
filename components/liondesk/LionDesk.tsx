@@ -5,6 +5,7 @@ import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
   SpeakerHigh, SpeakerSlash, X, WarningOctagon, Compass, Gear, ImageSquare, DownloadSimple, LinkSimple,
+  CaretLeft, CaretRight,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
@@ -17,6 +18,7 @@ import { takeNextCoachMark, type CoachMarkDef } from "@/lib/liondesk/coachmarks"
 import { getTrack } from "@/lib/helpdesk/tracks";
 import { encodeCombo } from "@/lib/liondesk/combocode";
 import { renderShareCardDataUrl, renderShareCardBlob, shareCardFilename, type ShareCardData } from "@/lib/liondesk/shareCard";
+import { buildReplayTimeline, type ReplayDecision } from "@/lib/liondesk/replay";
 
 import {
   type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
@@ -1621,6 +1623,8 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
 
         <QuickRecall fumbled={fumbled} resolved={resolved} />
 
+        <ShiftReplay shift={shift} state={state} />
+
         <details className="mb-4 rounded-xl border border-white/[0.07] bg-white/[0.015]">
           <summary className="cursor-pointer select-none px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cream/55 hover:text-cream">Full recap · the right move on every item ({live.length})</summary>
           <ul className="px-3 pb-3 space-y-2.5">
@@ -1808,6 +1812,122 @@ function QuickRecall({ fumbled, resolved }: { fumbled: ShiftItem[]; resolved: Sh
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ───────────────────── shift replay scrubber ───────────────────── */
+
+// A dismissible "walk the shift back" scrubber on the shift report. It steps
+// through buildReplayTimeline (the resolved and mishandled items in the order
+// the shift unfolded) one decision at a time, re-showing each move and its
+// teach note so the lesson lands a second time. Pure engine state: it grants
+// nothing and reads no localStorage or server value, so there is no flash of a
+// zero to guard. Keyboard operable (prev and next buttons plus a native range
+// slider, all reached through the report's focus trap) and reduced motion safe
+// (the per step crossfade is dropped when the OS asks for reduced motion). It
+// sits inline in the report scroll flow above the action buttons, so it never
+// blocks Run it back or Back.
+function ShiftReplay({ shift, state }: { shift: Shift; state: State }) {
+  // Built once from the final state. shift and state are frozen at shift end, so
+  // this never recomputes mid review.
+  const timeline = useMemo(() => buildReplayTimeline(shift, state), [shift, state]);
+  const [idx, setIdx] = useState(0);
+  const [dismissed, setDismissed] = useState(false);
+  // Initialize from matchMedia so the very first painted frame already respects
+  // the setting (mirrors SettingsPanel). SSR safe via the typeof window guard.
+  const [reduced, setReduced] = useState(
+    () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  if (dismissed || timeline.length === 0) return null;
+  const total = timeline.length;
+  const safeIdx = Math.max(0, Math.min(idx, total - 1));
+  const d: ReplayDecision = timeline[safeIdx];
+  const go = (n: number) => setIdx(Math.max(0, Math.min(total - 1, n)));
+  const verdict = d.correct ? "#2BBE6B" : "#EF4444";
+
+  return (
+    <div className="mb-4 rounded-xl border border-electric/25 bg-electric/[0.05] p-3.5">
+      <div className="flex items-center gap-2 mb-2">
+        <Compass size={13} weight="fill" color="#4A90D9" aria-hidden="true" />
+        <p className="font-mono text-[10px] uppercase tracking-wider text-electric">Shift replay</p>
+        <span className="font-mono text-[10px] tabular-nums text-cream/45 ml-1">{safeIdx + 1} / {total}</span>
+        <button onClick={() => setDismissed(true)} aria-label="Dismiss shift replay" className="ml-auto grid h-5 w-5 place-items-center rounded text-cream/40 hover:text-cream/80 hover:bg-white/[0.06] transition-colors">
+          <X size={12} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
+
+      <p className="text-cream/55 text-[11px] leading-relaxed mb-2.5">Walk your shift back, decision by decision. Step through with the arrows or the slider.</p>
+
+      {/* The decision card, re-keyed so the crossfade plays per step. The fade is
+          dropped under reduced motion (the content still swaps instantly). */}
+      <div key={safeIdx} style={{ animation: reduced ? undefined : "ld-toast-in 200ms ease-out both" }}>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0" style={{ color: STATUS_COLOR[d.status], background: `${STATUS_COLOR[d.status]}1f` }}>{STATUS_LABEL[d.status]}</span>
+          <span className="text-cream/90 text-xs font-semibold truncate">{d.subject}</span>
+          {d.correct
+            ? <CheckCircle size={14} weight="fill" color="#2BBE6B" className="ml-auto shrink-0" aria-hidden="true" />
+            : <span className="ml-auto shrink-0 font-bold text-sm" style={{ color: "#EF4444" }} aria-hidden="true">✕</span>}
+        </div>
+        {d.actionLabel ? (
+          <p className="text-cream/75 text-[11px] leading-relaxed mt-1.5"><span className="font-semibold" style={{ color: verdict }}>You picked:</span> {d.actionLabel}.</p>
+        ) : d.correct ? (
+          <p className="text-cream/65 text-[11px] leading-relaxed mt-1.5">Resolved automatically when you fixed the incident root.</p>
+        ) : (
+          <p className="text-cream/65 text-[11px] leading-relaxed mt-1.5">No fix was committed on this one before it ran out.</p>
+        )}
+        {d.teach && <p className="text-cream/75 text-[11px] leading-relaxed mt-1">{d.teach}</p>}
+        {!d.correct && d.correctLabel && (
+          <p className="text-cream/75 text-[11px] leading-relaxed mt-1"><span className="text-[#2BBE6B] font-semibold">Right move:</span> {d.correctLabel}.{d.correctTeach ? ` ${d.correctTeach}` : ""}</p>
+        )}
+      </div>
+
+      {/* Step controls: prev and next buttons plus a slider, all keyboard operable. */}
+      <div className="flex items-center gap-2 mt-3">
+        <button
+          type="button"
+          onClick={() => go(safeIdx - 1)}
+          disabled={safeIdx === 0}
+          aria-label="Previous decision"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/15 text-cream/70 hover:bg-white/[0.06] hover:text-cream transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
+        >
+          <CaretLeft size={14} weight="bold" aria-hidden="true" />
+        </button>
+        <input
+          type="range"
+          min={1}
+          max={total}
+          step={1}
+          value={safeIdx + 1}
+          onChange={(e) => go(Number(e.target.value) - 1)}
+          aria-label={`Decision ${safeIdx + 1} of ${total}`}
+          className="flex-1 min-w-0 cursor-pointer"
+          style={{ accentColor: "#4A90D9" }}
+        />
+        <button
+          type="button"
+          onClick={() => go(safeIdx + 1)}
+          disabled={safeIdx >= total - 1}
+          aria-label="Next decision"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/15 text-cream/70 hover:bg-white/[0.06] hover:text-cream transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
+        >
+          <CaretRight size={14} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
+
+      {/* Polite announcement so the step change is heard by a screen reader. */}
+      <span className="sr-only" aria-live="polite">
+        Decision {safeIdx + 1} of {total}. {d.subject}. {d.correct ? "Handled cleanly." : "Mishandled."}
+      </span>
     </div>
   );
 }
