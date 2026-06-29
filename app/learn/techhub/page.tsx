@@ -4,8 +4,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { Terminal } from "@phosphor-icons/react";
 import TechHubHome from "@/components/helpdesk/TechHubHome";
+import CommandPalette from "@/components/helpdesk/CommandPalette";
 
-// TechHub — a terminal-driven career simulator. Pick a track (IT support, SOC,
+// TechHub, a terminal-driven career simulator. Pick a track (IT support, SOC,
 // software, red team), work real tickets in a fake terminal, and climb the rank
 // ladder from intern to the top. All scenarios are authored logic (zero API
 // cost). Progress is stored locally for now; Fangs/XP shown on a solve are a
@@ -28,6 +29,10 @@ export default function TechHubPage() {
         <div className="animate-slide-up" style={{ animationDelay: "0.06s" }}>
           <TechHubHome />
         </div>
+
+        {/* Idea 35: Cmd/Ctrl+K command palette for fast hub navigation. Mounted
+            once here; renders its own hint button and keyboard driven overlay. */}
+        <CommandPalette />
       </div>
     </ProtectedRoute>
   );
