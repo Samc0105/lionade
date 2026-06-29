@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-29: Live-prod fixes batch 3 (onboarding funnel, question-bank flywheel, Fang idempotency)
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Onboarding funnel activation** (flag-driven gate + grandfather carve-out so it actually runs for new users) | ✅ shipped | 🚫 N/A — the web onboarding funnel and its gate (ProtectedRoute) are web-only; iOS has its own onboarding flow. |
+| **Question-bank curation flywheel** (cron driver + loosened promote thresholds) | ✅ shipped | ✅ SHARED-BACKEND (latent) — the curated question pool is backend; iOS would inherit a better pool once `getApprovedQuestions` has a consumer (a flagged follow-up). |
+| **Fang-grant idempotency** (30s dup-guard on `ninny/complete`) | ✅ shipped | ✅ SHARED-BACKEND — iOS calls the same route, so it inherits the no-duplicate-grant guard automatically. |
+
+---
+
 ## 2026-06-29: Live-prod fixes batch 2 (viral loop, OAuth age-gate, error boundaries)
 
 | Surface | Web | iOS |
