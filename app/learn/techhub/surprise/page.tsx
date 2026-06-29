@@ -4,7 +4,36 @@ import { useSearchParams } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { Shuffle } from "@phosphor-icons/react";
-import PlayGeneratedShift from "@/components/liondesk/PlayGeneratedShift";
+import dynamic from "next/dynamic";
+
+// Light placeholder shown while the heavy chunk loads. It matches the dark glass
+// chrome and shows neutral bars (never a zero), so the route shell paints
+// instantly with no flash of empty content. The pulse is motion safe, so it
+// stays still when the player prefers reduced motion.
+function LoadingPanel() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 motion-safe:animate-pulse"
+    >
+      <div className="h-5 w-40 rounded bg-white/[0.06]" />
+      <div className="mt-4 grid gap-3">
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+      </div>
+    </div>
+  );
+}
+
+// Code split: the generated shift player (LionDesk plus the RNG generator) only
+// ships when a player opens a surprise link. It seeds from the date and reads
+// localStorage, so it is client only (ssr false).
+const PlayGeneratedShift = dynamic(() => import("@/components/liondesk/PlayGeneratedShift"), {
+  ssr: false,
+  loading: () => <LoadingPanel />,
+});
 
 // Procedurally combined shifts. ?seed=<code> (Idea 14: a shared, exact shift,
 // highest precedence), ?daily=1 (date-seeded), ?chaos=1 (stacked mutators; with

@@ -4,12 +4,41 @@ import { useParams, useSearchParams, notFound } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { Desktop } from "@phosphor-icons/react";
-import Campaign from "@/components/liondesk/Campaign";
+import dynamic from "next/dynamic";
 import { shiftsForTrack } from "@/lib/liondesk/shifts";
 import { getTrack } from "@/lib/helpdesk/tracks";
 import type { Track } from "@/lib/helpdesk/types";
 
-// LionDesk campaign — the immersive "shift" simulator. Any track that has
+// Light placeholder shown while the heavy chunk loads. It matches the dark glass
+// chrome and shows neutral bars (never a zero), so the route shell paints
+// instantly with no flash of empty content. The pulse is motion safe, so it
+// stays still when the player prefers reduced motion.
+function LoadingPanel() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 motion-safe:animate-pulse"
+    >
+      <div className="h-5 w-40 rounded bg-white/[0.06]" />
+      <div className="mt-4 grid gap-3">
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+      </div>
+    </div>
+  );
+}
+
+// Code split: the campaign simulator (LionDesk plus the shift engine) only ships
+// when a player opens a shift, keeping it out of the TechHub initial bundle. It
+// reads localStorage for campaign records, so it is client only (ssr false).
+const Campaign = dynamic(() => import("@/components/liondesk/Campaign"), {
+  ssr: false,
+  loading: () => <LoadingPanel />,
+});
+
+// LionDesk campaign, the immersive "shift" simulator. Any track that has
 // shifts gets a campaign here; tracks without one fall through to notFound.
 export default function ShiftPage() {
   const params = useParams<{ track: string }>();

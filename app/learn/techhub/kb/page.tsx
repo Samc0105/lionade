@@ -3,7 +3,36 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { BookOpen } from "@phosphor-icons/react";
-import KbBrowser from "@/components/liondesk/KbBrowser";
+import dynamic from "next/dynamic";
+
+// Light placeholder shown while the heavy chunk loads. It matches the dark glass
+// chrome and shows neutral bars (never a zero), so the route shell paints
+// instantly with no flash of empty content. The pulse is motion safe, so it
+// stays still when the player prefers reduced motion.
+function LoadingPanel() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 motion-safe:animate-pulse"
+    >
+      <div className="h-5 w-40 rounded bg-white/[0.06]" />
+      <div className="mt-4 grid gap-3">
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+      </div>
+    </div>
+  );
+}
+
+// Code split: the knowledge base browser only ships when a player opens it,
+// keeping its large reverse index out of the TechHub initial bundle. It builds a
+// pure, deterministic index (no localStorage, no server reads) that renders the
+// same on the server and the client, so server rendering stays on (no flash).
+const KbBrowser = dynamic(() => import("@/components/liondesk/KbBrowser"), {
+  loading: () => <LoadingPanel />,
+});
 
 // In game knowledge base browser: a searchable, filterable index of every KB
 // article a player meets on the desk, grouped by the support concept it relates

@@ -3,9 +3,38 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { Moon } from "@phosphor-icons/react";
-import NightShift from "@/components/liondesk/NightShift";
+import dynamic from "next/dynamic";
 
-// Night Shift — the FNAF-style SOC monitoring mode. Dark station, flippable
+// Light placeholder shown while the heavy chunk loads. It matches the dark glass
+// chrome and shows neutral bars (never a zero), so the route shell paints
+// instantly with no flash of empty content. The pulse is motion safe, so it
+// stays still when the player prefers reduced motion.
+function LoadingPanel() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 motion-safe:animate-pulse"
+    >
+      <div className="h-5 w-40 rounded bg-white/[0.06]" />
+      <div className="mt-4 grid gap-3">
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+      </div>
+    </div>
+  );
+}
+
+// Code split: the Night Shift station (its own reducer, audio, and timers) only
+// ships when a player opens it, keeping it out of the TechHub initial bundle. It
+// reads localStorage for best nights, so it is client only (ssr false).
+const NightShift = dynamic(() => import("@/components/liondesk/NightShift"), {
+  ssr: false,
+  loading: () => <LoadingPanel />,
+});
+
+// Night Shift, the FNAF-style SOC monitoring mode. Dark station, flippable
 // feeds, a threat that creeps toward the core in real time. Authored + zero API.
 export default function NightShiftPage() {
   return (

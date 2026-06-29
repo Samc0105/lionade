@@ -3,7 +3,36 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { ChartLineUp } from "@phosphor-icons/react";
-import PerformanceDashboard from "@/components/liondesk/PerformanceDashboard";
+import dynamic from "next/dynamic";
+
+// Light placeholder shown while the heavy chunk loads. It matches the dark glass
+// chrome and shows neutral bars (never a zero), so the route shell paints
+// instantly with no flash of empty content. The pulse is motion safe, so it
+// stays still when the player prefers reduced motion.
+function LoadingPanel() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 motion-safe:animate-pulse"
+    >
+      <div className="h-5 w-40 rounded bg-white/[0.06]" />
+      <div className="mt-4 grid gap-3">
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+        <div className="h-20 rounded-xl bg-white/[0.04]" />
+      </div>
+    </div>
+  );
+}
+
+// Code split: the performance dashboard only ships when a player opens their
+// stats. It reads localStorage for every number it shows, so it is client only
+// (ssr false) and mount guarded inside, which keeps it free of any flash of zero.
+const PerformanceDashboard = dynamic(() => import("@/components/liondesk/PerformanceDashboard"), {
+  ssr: false,
+  loading: () => <LoadingPanel />,
+});
 
 // Personal performance dashboard: your per track performance, best scores and
 // records, weakest concepts, streak summary, and a simple recent activity trend.
