@@ -12,6 +12,10 @@ import { SOC_SHIFT_1 } from "./soc-shift1";
 import { SWE_SHIFT_1 } from "./swe-shift1";
 import { REDTEAM_SHIFT_1 } from "./redteam-shift1";
 import { NETOPS_SHIFT_1 } from "./netops-shift1";
+import { SOC_SHIFT_2 } from "./soc-shift2";
+import { SWE_SHIFT_2 } from "./swe-shift2";
+import { REDTEAM_SHIFT_2 } from "./redteam-shift2";
+import { NETOPS_SHIFT_2 } from "./netops-shift2";
 import { EXTRA_INCIDENT_GROUPS } from "./extra-tickets";
 import { SEASONAL_SHIFTS, activeSeasonalShifts, isSeasonalShiftId } from "./seasonal";
 import extraShifts from "./extra-shifts.generated.json";
@@ -93,10 +97,16 @@ export const HELPDESK_MAJOR_INCIDENT: Shift = {
   ]),
 };
 
-// Authored campaign shifts + the workflow-authored second shifts (SOC/SWE/Red
-// Team) + the shift 3-5 ladder that fills out every track's Intern->senior climb.
-// All auto-register from their generated JSON files.
-const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1, NETOPS_SHIFT_1, HELPDESK_MAJOR_INCIDENT];
+// Authored campaign shifts + the hand authored second shifts for every
+// specialist track (SOC/SWE/Red Team/NetOps) + the shift 3-5 ladder that fills
+// out every track's Intern->senior climb. The ladder shifts auto-register from
+// their generated JSON files.
+const AUTHORED: Shift[] = [
+  SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5,
+  SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1, NETOPS_SHIFT_1,
+  SOC_SHIFT_2, SWE_SHIFT_2, REDTEAM_SHIFT_2, NETOPS_SHIFT_2,
+  HELPDESK_MAJOR_INCIDENT,
+];
 // The canonical campaign registry. lib/liondesk/pool.ts builds the combination
 // POOL from exactly this list, and lib/liondesk/daily.ts rotates the "shift of
 // the day" over it. Seasonal shifts are DELIBERATELY NOT in here: folding them in
@@ -106,11 +116,32 @@ const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIF
 // and breaks the seed reproduction combocode.ts promises. Seasonal shifts live in
 // their own registry (./seasonal) and rejoin only in the campaign accessors
 // below, which the UI and the deep link read.
-export const SHIFTS: Shift[] = [
+//
+// De-duplicate by shift id, keeping the FIRST occurrence. AUTHORED is listed
+// first, so a hand authored shift always supersedes a same id machine generated
+// one. This is how the campaign shift 2s for SOC, SWE, and Red Team (authored in
+// soc-shift2 / swe-shift2 / redteam-shift2) replace the earlier generated
+// placeholders of the same id that still live in extra-shifts.generated.json,
+// without leaving two order 1 shifts in a track's ladder. NetOps shift 2 has no
+// generated twin, so it simply joins the list. This content expansion changes the
+// combination POOL composition by design (see pool.ts), which is expected as the
+// campaign grows, unlike seasonal shifts which are deliberately kept out above.
+function dedupeShiftsById(shifts: Shift[]): Shift[] {
+  const seen = new Set<string>();
+  const out: Shift[] = [];
+  for (const s of shifts) {
+    if (seen.has(s.id)) continue;
+    seen.add(s.id);
+    out.push(s);
+  }
+  return out;
+}
+
+export const SHIFTS: Shift[] = dedupeShiftsById([
   ...AUTHORED,
   ...(extraShifts as unknown as Shift[]),
   ...(ladderShifts as unknown as Shift[]),
-];
+]);
 
 // Campaign-facing registry: the canonical shifts plus the seasonal shifts. Used
 // ONLY by shiftsForTrack and getShift (the campaign UI and the deep link). It is

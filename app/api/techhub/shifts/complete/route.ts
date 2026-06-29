@@ -37,6 +37,7 @@ const SHIFT_REWARDS: Record<string, { maxFangs: number }> = {
   "redteam-shift-4": { maxFangs: 340 },
   "redteam-shift-5": { maxFangs: 380 },
   "netops-shift-1": { maxFangs: 240 },
+  "netops-shift-2": { maxFangs: 300 },
   // Seasonal / limited time shifts (lib/liondesk/seasonal.ts). Like every other
   // entry these are PREVIEW ONLY until the held migration 20260626120000 is
   // applied: the table is missing, so the route returns { pending: true } and
