@@ -730,4 +730,165 @@ export const EXTRA_INCIDENT_GROUPS: { group: string; track: Track; items: ShiftI
       },
     ],
   },
+
+  // ── MAJOR INCIDENT (boss): a two-phase company-wide outage. Phase 1 is a
+  // single sign on outage (this group's root plus its flood of duplicates).
+  // Resolving the phase 1 root does NOT end the incident: its chainOnResolve
+  // spawns the phase 2 root (the reconnect stampede below), so fixing phase 1
+  // escalates straight into phase 2. The Bridge Pressure meter (engine state)
+  // climbs the whole time the org is on the bridge. The shifts.ts boss shift
+  // (helpdesk-major-incident) assembles both groups into one climactic shift,
+  // and the Doubles modifier can also draw this group on its own. Preview only:
+  // every reward field is a Fangs display preview; real banking is server
+  // authoritative and clamped (held while migration 20260626120000 is unapplied).
+  {
+    group: "mi-sso-outage",
+    track: "helpdesk",
+    items: [
+      {
+        id: "mi-sso-root",
+        channel: "ticket",
+        priority: "P1",
+        from: { name: "Everyone", role: "Company-wide" },
+        subject: "Major incident: nobody can sign in to anything",
+        slaMinutes: 15,
+        arriveAfter: 0,
+        reward: 60,
+        xp: 48,
+        incident: { group: "mi-sso-outage", root: true },
+        ticketBody: "A flood of tickets in the same minute: single sign on is rejecting everyone. Email, the app, the VPN, all of it bounces users back to a login error. The whole company is dead in the water.",
+        evidence: [
+          { label: "Identity provider status", lines: ["SSO (identity provider): rejecting 100% of logins since 09:14", "Error: SAML response signature invalid", "Signing certificate expired 09:14 today", "Network, database, and app servers all healthy"] },
+        ],
+        commands: [
+          { aliases: ["status", "sso", "idp", "cert"], output: "The identity provider's SAML signing certificate expired at 09:14, so every signed login assertion is now rejected as invalid. Nothing else is wrong. Renewing the certificate restores sign in for everyone at once.", step: "diag" },
+        ],
+        kbArticleId: "kb-sso-cert",
+        goal: "Restore sign in for the whole company. Find the single root cause.",
+        hint: "Everything fails at the same second and the back end is healthy. One shared thing gates every login. Read what the identity provider is complaining about.",
+        actions: [
+          { id: "renew-sso-cert", label: "Renew the expired SSO signing certificate and restore login", correct: true, requires: ["diag"], csat: 18, teach: "That is the incident. One expired signing certificate on the identity provider invalidated every login assertion at once, so the whole company locked out together. Renewing the certificate brings sign in back for everyone and clears the flood. The incident is not over yet though." },
+          { id: "reset-everyone-pw", label: "Force a password reset on every employee", correct: false, csat: -8, teach: "Passwords were never the problem. The certificate expired, not anyone's credentials. Resetting tens of thousands of passwords during an outage is chaos and fixes nothing. Renew the certificate." },
+          { id: "reboot-idp", label: "Reboot the identity provider and hope it clears", correct: false, csat: -6, teach: "A reboot brings the service back up with the same expired certificate, so logins still fail. Reboots do not renew an expired certificate. Read the error and replace the certificate." },
+        ],
+        chainOnResolve: {
+          id: "mi-db-root",
+          channel: "ticket",
+          priority: "P1",
+          from: { name: "App reliability", role: "On-call" },
+          subject: "Logins are back but now the app times out for everyone",
+          slaMinutes: 15,
+          arriveAfter: 0,
+          reward: 60,
+          xp: 48,
+          incident: { group: "mi-db-stampede", root: true },
+          ticketBody: "The certificate fix worked and sign in is back, but the second it returned the whole company tried to reconnect at once. The database is now refusing connections and every page times out. We traded one outage for another.",
+          evidence: [
+            { label: "Database connection pool", lines: ["Reconnect storm: every client that was locked out is reconnecting in the same window", "Connection pool: 100% used, new connections refused", "Database CPU healthy, it is the connection count, not load", "Classic login stampede right after the SSO restore"] },
+          ],
+          commands: [
+            { aliases: ["conns", "pool", "db", "connections"], output: "The pool is saturated by a thundering herd: everyone who was locked out is reconnecting at the same instant. The fix is to stagger the reconnects (and lift the pool ceiling) so the herd drains in waves instead of all at once.", step: "diag" },
+          ],
+          kbArticleId: "kb-conn-stampede",
+          goal: "Drain the login stampede without dropping everyone again.",
+          hint: "Fixing phase one let everyone back at the same second. The database is not overloaded on CPU, it is out of connection slots. How do you let a thundering herd in without it trampling the door?",
+          actions: [
+            { id: "stagger-reconnect", label: "Stagger the reconnects in waves and raise the connection pool ceiling", correct: true, requires: ["diag"], csat: 18, teach: "Right. This is a thundering herd: the SSO fix released every locked out client at once and they all reconnected together, exhausting the pool. Staggering the reconnects (with a little jitter) and lifting the ceiling lets the herd drain in waves, and the timeouts clear. A boss fight has two phases." },
+            { id: "restart-db-stampede", label: "Restart the database to clear the stuck connections", correct: false, csat: -8, teach: "A restart drops every session and, the moment it returns, the same herd stampedes it again, harder. You would loop the outage. Stagger the reconnects instead of resetting the door everyone is pushing on." },
+            { id: "scale-app-only", label: "Spin up more app servers to handle the load", correct: false, csat: -6, teach: "More app servers open more database connections, which makes the pool exhaustion worse, not better. The bottleneck is connection slots, not app capacity. Stagger the reconnects and raise the pool ceiling." },
+          ],
+        },
+      },
+      {
+        id: "mi-sso-dup-1",
+        channel: "ticket",
+        priority: "P2",
+        from: { name: "Priya Khan", role: "Sales" },
+        subject: "I cannot log in to anything this morning",
+        slaMinutes: 20,
+        arriveAfter: 8,
+        reward: 8,
+        xp: 6,
+        incident: { group: "mi-sso-outage" },
+        ticketBody: "Every app sends me back to the login screen with an error. Is it just me?",
+        goal: "Handle it. Familiar?",
+        hint: "Half the company is reporting the exact same login error right now.",
+        actions: [
+          { id: "link-sso-1", label: "Link it to the single sign on incident", correct: true, csat: 2, outcome: "resolved", teach: "Right, it is the SSO outage. The root fix closes this with the rest." },
+          { id: "reset-pkhan-pw", label: "Reset her password to get her back in", correct: false, csat: -3, teach: "Her password is fine. It is the company wide SSO outage, not her account. Tie it to the incident and fix the root." },
+        ],
+      },
+      {
+        id: "mi-sso-dup-2",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Owen Diaz", role: "Support" },
+        subject: "login loop, it keeps kicking me out",
+        slaMinutes: 25,
+        arriveAfter: 16,
+        reward: 8,
+        xp: 6,
+        incident: { group: "mi-sso-outage" },
+        ticketBody: "I type my password, it accepts, then throws me straight back to login. Coworkers say the same thing.",
+        goal: "Same incident.",
+        hint: "Fix the root and this closes itself.",
+        actions: [
+          { id: "link-sso-2", label: "Link it to the single sign on incident", correct: true, csat: 2, outcome: "resolved", teach: "Yes, the root fix mass resolves these duplicates." },
+          { id: "clear-owen-cache", label: "Walk him through clearing his browser cache", correct: false, csat: -4, teach: "His browser is fine. The signed login assertion is being rejected server side for everyone. It is the incident, not his cache." },
+        ],
+      },
+    ],
+  },
+
+  // Phase 2 duplicates for the major incident boss. These belong to the second
+  // incident root (mi-db-root, spawned by mi-sso-root's chainOnResolve), so they
+  // stay hidden until phase 1 is fixed (revealedBy the phase 1 root). The phase 2
+  // root mass-resolves them when it is fixed. Kept in a separate group so the
+  // root's mass-resolve targets only the phase 2 flood.
+  {
+    group: "mi-db-stampede",
+    track: "helpdesk",
+    items: [
+      {
+        id: "mi-db-dup-1",
+        channel: "ticket",
+        priority: "P2",
+        from: { name: "Dana Lopez", role: "Accounting" },
+        subject: "Now the app just spins and times out",
+        slaMinutes: 20,
+        arriveAfter: 0,
+        reward: 8,
+        xp: 6,
+        incident: { group: "mi-db-stampede" },
+        revealedBy: { itemId: "mi-sso-root", on: "resolve" },
+        ticketBody: "I can finally log in but every page hangs and then times out. Loads of us hit this at the same moment.",
+        goal: "Handle it. Seen this in the last minute?",
+        hint: "This started the instant sign in came back and everyone reconnected together.",
+        actions: [
+          { id: "link-db-1", label: "Link it to the reconnect stampede incident", correct: true, csat: 2, outcome: "resolved", teach: "Right, it is the second phase: the reconnect storm. The root fix drains it and closes this." },
+          { id: "reinstall-app-dana", label: "Tell her to reinstall the app", correct: false, csat: -3, teach: "Reinstalling does nothing for a saturated connection pool on the server. It is the stampede, not her install. Fix the root." },
+        ],
+      },
+      {
+        id: "mi-db-dup-2",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Marcus Reed", role: "Sales" },
+        subject: "everything is so slow right after the login fix",
+        slaMinutes: 25,
+        arriveAfter: 0,
+        reward: 8,
+        xp: 6,
+        incident: { group: "mi-db-stampede" },
+        revealedBy: { itemId: "mi-sso-root", on: "resolve" },
+        ticketBody: "Logged in fine now but the app is crawling and timing out. It started right when it came back.",
+        goal: "Same second phase.",
+        hint: "Fix the root of the stampede and this closes with it.",
+        actions: [
+          { id: "link-db-2", label: "Link it to the reconnect stampede incident", correct: true, csat: 2, outcome: "resolved", teach: "Yes, the root fix on the connection stampede mass resolves these." },
+          { id: "reboot-marcus", label: "Tell him to reboot his laptop", correct: false, csat: -4, teach: "His laptop is fine. The database is refusing connections under the reconnect storm. It is the incident, handle it at the root." },
+        ],
+      },
+    ],
+  },
 ];

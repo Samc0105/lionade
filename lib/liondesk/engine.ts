@@ -11,6 +11,7 @@
 // complete. Never grant from the client.
 
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
+import { gradeFor, PASS_SCORE } from "@/lib/liondesk/scoring";
 
 /** The result a finished shift reports up to the campaign (preview economy). */
 export interface ShiftResult {
@@ -25,6 +26,13 @@ export interface ShiftResult {
   difficulty: "easy" | "normal" | "hard";
   usedLifeline: boolean;
   bestStreak: number;
+  /**
+   * Preview mirror of how the server weights this shift's Fang ceiling for how
+   * it was played (difficulty, clean clear, best streak), as a 0..1 factor.
+   * Display only: the server owns the per-shift ceiling and the real, clamped
+   * grant. This never grants on its own. See payoutWeight / shiftPayout below.
+   */
+  payoutFactor: number;
 }
 
 /* ───────────────────────── state ───────────────────────── */
@@ -46,6 +54,13 @@ export function isLive(i: ShiftItem, m: Record<string, ItemRuntime>): boolean {
   const st = m[i.revealedBy.itemId]?.status;
   if (!st) return false;
   return i.revealedBy.on === "resolve" ? GOOD_FOR_REVEAL.includes(st) : st === "mishandled";
+}
+
+/** A MAJOR incident is "open" while any incident root is live and unresolved.
+ *  The Bridge Pressure meter climbs while this holds and stands down once the
+ *  root (or, in a phased boss, the final root) is fixed. Read-only and pure. */
+export function majorIncidentOpen(shift: Shift, items: Record<string, ItemRuntime>): boolean {
+  return shift.items.some((i) => i.incident?.root && isLive(i, items) && !isTerminal(items[i.id].status));
 }
 
 /** A part on the way: deducted from budget at order time, lands in stock at its ETA. */
@@ -78,6 +93,14 @@ export interface State {
   // move resets it. Preview-only; the server still clamps the real grant.
   streak: number;
   bestStreak: number;
+  // Bridge Pressure: a rising-tension meter for a MAJOR incident. It climbs each
+  // second while any incident root is live and unresolved (the whole org is on
+  // the incident bridge) and eases once the root is fixed and the bridge stands
+  // down. bridgeStage is the highest tension stage the room has reacted to, so
+  // each reaction fires once. This is pure tension plus room chatter: it never
+  // grants or clamps Fangs, so the economy stays server-authoritative.
+  bridgePressure: number;
+  bridgeStage: number;
 }
 
 export type Action =
@@ -119,6 +142,27 @@ export const VENDOR_LEAD: Record<string, number> = { "Amazon Biz": 18, Newegg: 2
 export const PATIENCE_DECAY = 2;
 export const PATIENCE_WRONG = 18;
 export const PATIENCE_HANGUP_PENALTY = 12;
+
+// Bridge Pressure: while a major incident (an open incident root) stays
+// unresolved, the whole org is on an incident bridge and the tension climbs each
+// second. It rises faster on harder difficulties (reusing the patience scale)
+// and eases (faster than it rises, so the stand down feels like relief) once the
+// root is fixed. Stage thresholds drive the room's reactions. This is flavor and
+// chatter only: it never grants or clamps Fangs, so the economy stays
+// server-authoritative.
+export const BRIDGE_RISE = 1.5;
+export const BRIDGE_EASE = 4;
+export const BRIDGE_STAGE_1 = 34;
+export const BRIDGE_STAGE_2 = 67;
+export const BRIDGE_STAGE_3 = 100;
+// What the room says as the bridge heats up, indexed by stage (1..3). Index 0 is
+// unused so a stage number maps straight to its line.
+export const BRIDGE_LINES: string[] = [
+  "",
+  "Incident bridge is live. The whole floor is watching this one.",
+  "Leadership joined the bridge. Eyes are on you. Find the root and fix it.",
+  "The bridge is white hot. Every minute this stays open hurts. Fix the root.",
+];
 
 // Difficulty scales the whole desk: how much SLA budget you get, how hard wrong
 // moves and breaches hit, how fast callers lose patience, how many lifelines you
@@ -169,6 +213,8 @@ export function buildInitial(shift: Shift): State {
     revealed: [],
     streak: 0,
     bestStreak: 0,
+    bridgePressure: 0,
+    bridgeStage: 0,
   };
 }
 
@@ -246,6 +292,27 @@ export function makeReducer(shift: Shift) {
           }
         }
         if (hungUp && shift.items.every((i) => isTerminal(ns.items[i.id].status) || !isLive(i, ns.items))) ns = { ...ns, ended: true };
+
+        // Bridge Pressure: a major incident keeps the org on an incident bridge.
+        // Tension climbs while an incident root is open and the room reacts at
+        // each stage; it eases once the last root is fixed and the bridge stands
+        // down. Pure tension plus chatter, never Fangs.
+        const bridgeOpen = majorIncidentOpen(shift, ns.items);
+        const nextPressure = bridgeOpen
+          ? clamp(ns.bridgePressure + BRIDGE_RISE * DIFF[ns.difficulty].patience)
+          : Math.max(0, ns.bridgePressure - BRIDGE_EASE);
+        ns = { ...ns, bridgePressure: nextPressure };
+        if (bridgeOpen) {
+          const stage = nextPressure >= BRIDGE_STAGE_3 ? 3 : nextPressure >= BRIDGE_STAGE_2 ? 2 : nextPressure >= BRIDGE_STAGE_1 ? 1 : 0;
+          if (stage > ns.bridgeStage) {
+            ns = { ...ns, bridgeStage: stage };
+            ns = pushFeed(ns, BRIDGE_LINES[stage], stage >= 2 ? "bad" : "info");
+          }
+        } else if (ns.bridgeStage > 0) {
+          // The last incident root is fixed: the bridge stands down (once).
+          ns = { ...ns, bridgeStage: 0 };
+          ns = pushFeed(ns, "Major incident resolved. The bridge stands down. Strong work under pressure.", "good");
+        }
 
         if (nextLeft === 0) ns = { ...ns, ended: true };
         return ns;
@@ -452,12 +519,65 @@ export function makeReducer(shift: Shift) {
 
 export const GOOD_STATUSES: ItemStatus[] = ["resolved", "escalated", "archived", "reported"];
 
+/* ─────────────────── difficulty-weighted payout ─────────────────── */
+// One source of truth for how a shift's Fang reward is weighted by HOW it was
+// played. Each shift's SHIFT_REWARDS maxFangs (server-owned, in the completion
+// route) is the HARD ceiling. Easy and Normal scale down by fixed factors, a
+// clean clear (no lifeline spent) earns a small bonus, and a long best streak
+// adds a tiny one. The combined weight is clamped to 1.0 so Hard plus every
+// bonus can never pay above the ceiling. The server completion route applies
+// this to the authoritative, clamped, idempotent grant; the engine preview
+// applies the same weight for display only and grants nothing.
+
+/** Each difficulty's share of the HARD Fang ceiling. Easy and Normal scale down. */
+export const PAYOUT_DIFFICULTY_FACTOR: Record<Difficulty, number> = { easy: 0.7, normal: 0.85, hard: 1 };
+/** Bonus share for clearing a shift without spending a lifeline. */
+export const PAYOUT_CLEAN_CLEAR_BONUS = 0.05;
+/** Bonus share per best-streak point, and the cap on the total streak bonus. */
+export const PAYOUT_STREAK_STEP = 0.01;
+export const PAYOUT_STREAK_MAX = 0.1;
+
+/**
+ * The 0..1 weight applied to a shift's HARD Fang ceiling for how it was played.
+ * Clamped to 1 so Hard plus every bonus stays at the ceiling and never exceeds
+ * it. Pure and side effect free: the server grant and the client preview both
+ * read this, so they can never disagree on the weighting. It only shapes the
+ * (clamped) amount, it never grants. The economy stays server-authoritative.
+ */
+export function payoutWeight(difficulty: Difficulty, usedLifeline: boolean, bestStreak: number): number {
+  const base = PAYOUT_DIFFICULTY_FACTOR[difficulty] ?? PAYOUT_DIFFICULTY_FACTOR.hard;
+  const clean = usedLifeline ? 0 : PAYOUT_CLEAN_CLEAR_BONUS;
+  const streak = Math.min(PAYOUT_STREAK_MAX, Math.max(0, bestStreak) * PAYOUT_STREAK_STEP);
+  return Math.min(1, base + clean + streak);
+}
+
+/**
+ * The difficulty-weighted Fang payout for a clear, clamped to its HARD ceiling.
+ * `maxFangs` is that ceiling (SHIFT_REWARDS.maxFangs on the server). A score
+ * below PASS_SCORE banks nothing, matching the clear gate. This is the ONE
+ * payout formula: the server completion route calls it for the authoritative,
+ * idempotent, clamped grant, and any preview can call it for a display-only
+ * mirror that grants nothing. With difficulty "hard", no lifeline penalty, and
+ * a zero streak it reduces to round(maxFangs * score/100), the prior flat math.
+ */
+export function shiftPayout(maxFangs: number, score: number, difficulty: Difficulty, usedLifeline: boolean, bestStreak: number): number {
+  const ceiling = Math.max(0, Math.round(maxFangs));
+  const cleared = Math.max(0, Math.min(100, Math.round(score)));
+  if (ceiling <= 0 || cleared < PASS_SCORE) return 0;
+  const weighted = ceiling * (cleared / 100) * payoutWeight(difficulty, usedLifeline, bestStreak);
+  return Math.min(ceiling, Math.round(weighted));
+}
+
 export function computeResult(shift: Shift, state: State): ShiftResult {
   const live = shift.items.filter((i) => isLive(i, state.items));
   const resolved = live.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
   const total = Math.max(1, live.length);
   const score = Math.round(state.csat * 0.6 + (resolved / total) * 40);
-  const grade = score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
+  const grade = gradeFor(score);
   const usedLifeline = (DIFF[state.difficulty].coffee - state.lifelines.coffee) > 0 || (DIFF[state.difficulty].senior - state.lifelines.senior) > 0;
-  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline, bestStreak: state.bestStreak };
+  // Preview mirror of the server's difficulty weighting (display only, grants
+  // nothing). The absolute Fang ceiling is server-owned, so the engine reports
+  // the weight; the server multiplies it into the real, clamped grant.
+  const payoutFactor = payoutWeight(state.difficulty, usedLifeline, state.bestStreak);
+  return { shiftId: shift.id, score, grade, csat: state.csat, fangs: state.fangs, xp: state.xp, resolved, total, difficulty: state.difficulty, usedLifeline, bestStreak: state.bestStreak, payoutFactor };
 }

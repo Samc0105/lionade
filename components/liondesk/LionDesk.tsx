@@ -4,18 +4,19 @@ import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type 
 import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
-  SpeakerHigh, SpeakerSlash, X,
+  SpeakerHigh, SpeakerSlash, X, WarningOctagon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
 import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
+import { slaRemaining } from "@/lib/liondesk/scoring";
 
 import {
   type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
   type Difficulty, type FeedEntry, type FeedTone,
-  DIFF, GOOD_STATUSES,
+  DIFF, GOOD_STATUSES, BRIDGE_STAGE_1, BRIDGE_STAGE_2, BRIDGE_STAGE_3,
   isTerminal, isLive, slaBudget, leadFor, buildInitial, makeReducer, computeResult,
 } from "@/lib/liondesk/engine";
 
@@ -192,8 +193,9 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
 
   return (
     <div className="ld-motion-scope relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
-      <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
+      <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}@keyframes ld-bridge-pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:inset 0 0 26px 0 rgba(239,68,68,0.28)}}.ld-bridge-pulse{animation:ld-bridge-pulse 1.8s ease-in-out infinite}.ld-bridge-fill{transition:width 600ms ease-out}@media (prefers-reduced-motion: reduce){.ld-bridge-fill{transition:none}.ld-bridge-pulse{animation:none}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} />
+      <BridgePressureBar state={state} />
 
       <div className="grid grid-cols-[64px_1fr] min-h-[560px]">
         {/* Dock */}
@@ -354,6 +356,47 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
   );
 }
 
+/* ───────────────────────── bridge pressure ───────────────────────── */
+
+// Major-incident tension meter. While an incident root stays open the engine's
+// Bridge Pressure climbs (the org is on the incident bridge); this surfaces it as
+// a slim banner under the status bar, matching the CSAT / patience / SLA visuals.
+// It is hidden when there is no pressure (pure engine state, so no flash-of-zero:
+// it renders 0 the same on the server and the client and simply stays hidden).
+// The fill transition and the critical-stage glow both snap to their final state
+// under prefers-reduced-motion (see the ld-bridge-* rules in the root <style>).
+function BridgePressureBar({ state }: { state: State }) {
+  const p = Math.round(state.bridgePressure);
+  if (p <= 0) return null;
+  const critical = p >= BRIDGE_STAGE_3;
+  const color = p >= BRIDGE_STAGE_2 ? "#EF4444" : p >= BRIDGE_STAGE_1 ? "#F59E0B" : "#FFD700";
+  const stageLabel = critical
+    ? "Critical"
+    : p >= BRIDGE_STAGE_2 ? "Leadership on the bridge"
+    : p >= BRIDGE_STAGE_1 ? "Bridge live"
+    : "Spinning up";
+  return (
+    <div className={`flex items-center gap-3 px-4 py-2 border-b border-white/[0.06] bg-gradient-to-r from-red-500/[0.06] to-transparent ${critical ? "ld-bridge-pulse" : ""}`}>
+      <span className="flex items-center gap-1.5 shrink-0">
+        <WarningOctagon size={14} weight="fill" color={color} aria-hidden="true" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/55 hidden sm:inline">Bridge pressure</span>
+      </span>
+      <span
+        className="flex-1 min-w-0 h-1.5 rounded-full overflow-hidden bg-white/10"
+        role="progressbar"
+        aria-valuenow={p}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Major incident bridge pressure"
+      >
+        <span className="ld-bridge-fill block h-full rounded-full" style={{ width: `${p}%`, background: color }} />
+      </span>
+      <span className="font-mono text-[9px] uppercase tracking-wider shrink-0 hidden sm:inline" style={{ color }}>{stageLabel}</span>
+      <span className="font-mono text-[10px] tabular-nums shrink-0" style={{ color }}>{p}%</span>
+    </div>
+  );
+}
+
 /* ───────────────────────── app panels ───────────────────────── */
 
 function AppPanel({ shift, state, dispatch, landed }: { shift: Shift; state: State; dispatch: Dispatch<Action>; landed: (i: ShiftItem) => boolean }) {
@@ -380,7 +423,7 @@ function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
-            const remaining = (st.landedAt ?? (i.revealedBy ? elapsed : i.arriveAfter)) + slaBudget(shift, i.priority, state.difficulty) - elapsed;
+            const remaining = slaRemaining(i, st, elapsed, slaBudget(shift, i.priority, state.difficulty));
             return (
               <li key={i.id}>
                 <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
@@ -539,7 +582,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
   const it = state.items[item.id];
   const [showHint, setShowHint] = useState(false);
   const elapsed = shift.durationSeconds - state.secondsLeft;
-  const slaRemaining = (it.landedAt ?? (item.revealedBy ? elapsed : item.arriveAfter)) + slaBudget(shift, item.priority, state.difficulty) - elapsed;
+  const remaining = slaRemaining(item, it, elapsed, slaBudget(shift, item.priority, state.difficulty));
   const kbArticle = item.kbArticleId ? shift.kb.find((a) => a.id === item.kbArticleId) ?? null : null;
   const part = item.part ? shift.inventory.find((p) => p.sku === item.part!.sku) ?? null : null;
   const stepDone = (k: string) => (k === "kb" ? state.kbRead.includes(item.kbArticleId ?? "") : it.steps.includes(k));
@@ -555,7 +598,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
         {!isTerminal(it.status) && (it.breached ? (
           <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/40">breached</span>
         ) : (
-          <span className="font-mono text-[9px] tabular-nums px-1.5 py-0.5 rounded" style={{ color: slaRemaining <= 30 ? "#EF4444" : "#9FB2CC", background: "rgba(255,255,255,0.04)" }}>{fmt(Math.max(0, slaRemaining))}</span>
+          <span className="font-mono text-[9px] tabular-nums px-1.5 py-0.5 rounded" style={{ color: remaining <= 30 ? "#EF4444" : "#9FB2CC", background: "rgba(255,255,255,0.04)" }}>{fmt(Math.max(0, remaining))}</span>
         ))}
         {item.from.vip && <span className="font-mono text-[8px] uppercase tracking-wider px-1 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">VIP</span>}
       </div>

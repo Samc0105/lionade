@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { shiftPayout, type Difficulty } from "@/lib/liondesk/engine";
 
 // ── Server-owned reward ceilings ───────────────────────────────────────────
-// The client NEVER decides the grant. It reports a score; the server clamps the
-// Fang reward to this ceiling per shift and grants it at most once (first
-// qualifying clear). Mirrors the save-quiz-results philosophy: derive/clamp the
-// reward server-side so a crafted client cannot self-grant. Keep these in sync
-// with the shift definitions in lib/liondesk/*.
+// The client NEVER decides the grant. It reports how a shift went; the server
+// derives and clamps the Fang reward per shift and grants it at most once (first
+// qualifying clear, plus a top-up on a higher-scoring replay). Each maxFangs
+// below is now the HARD-difficulty ceiling: shiftPayout() (the one shared payout
+// helper, in lib/liondesk/engine) scales Easy and Normal down by fixed factors,
+// adds a small clean-clear bonus when no lifeline was spent and a tiny best-
+// streak bonus, and clamps so a shift can never pay above its maxFangs. Mirrors
+// the save-quiz-results philosophy (derive and clamp server-side so a crafted
+// client cannot self-grant). Keep these in sync with the shift definitions in
+// lib/liondesk/*.
 const SHIFT_REWARDS: Record<string, { maxFangs: number }> = {
   "helpdesk-shift-1": { maxFangs: 220 },
   "helpdesk-shift-2": { maxFangs: 260 },
   "helpdesk-shift-3": { maxFangs: 280 },
   "helpdesk-shift-4": { maxFangs: 280 },
   "helpdesk-shift-5": { maxFangs: 320 },
+  "helpdesk-major-incident": { maxFangs: 360 },
   "soc-shift-1": { maxFangs: 240 },
   "soc-shift-2": { maxFangs: 300 },
   "soc-shift-3": { maxFangs: 320 },
@@ -31,20 +38,37 @@ const SHIFT_REWARDS: Record<string, { maxFangs: number }> = {
   "redteam-shift-5": { maxFangs: 380 },
 };
 
-const PASS_SCORE = 50;
-
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
-  const body = (await req.json().catch(() => null)) as { shiftId?: string; score?: number; csat?: number } | null;
+  const body = (await req.json().catch(() => null)) as {
+    shiftId?: string;
+    score?: number;
+    csat?: number;
+    difficulty?: string;
+    usedLifeline?: boolean;
+    bestStreak?: number;
+  } | null;
   const shiftId = String(body?.shiftId ?? "");
   // Coerce defensively: Number("x") is NaN, which survives Math.round/min/max and
   // would violate the NOT NULL int columns. A non-finite value is treated as 0.
   const toScore = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0; };
   const score = toScore(body?.score);
   const csat = toScore(body?.csat);
+  // Difficulty-weighting inputs for the payout. These shape the (still clamped)
+  // amount; they can never lift it above the shift's maxFangs ceiling. Defaults
+  // are conservative so missing or crafted fields never overpay: HARD (full
+  // ceiling, no scale-down), lifeline assumed spent (no clean-clear bonus), and
+  // a zero streak. With those defaults shiftPayout reduces to the prior flat
+  // round(maxFangs * score/100), so this stays backward compatible until the
+  // client reports how a shift was played.
+  const rawDifficulty = body?.difficulty;
+  const difficulty: Difficulty = rawDifficulty === "easy" || rawDifficulty === "normal" ? rawDifficulty : "hard";
+  const usedLifeline = body?.usedLifeline !== false;
+  const rawStreak = Number(body?.bestStreak);
+  const bestStreak = Number.isFinite(rawStreak) ? Math.max(0, Math.round(rawStreak)) : 0;
 
   const cap = SHIFT_REWARDS[shiftId];
   if (!cap) return NextResponse.json({ error: "Unknown shift." }, { status: 400 });
@@ -66,11 +90,14 @@ export async function POST(req: NextRequest) {
 
   const bestScore = Math.max(score, existing?.best_score ?? 0);
   const alreadyGranted = existing?.granted_fangs ?? 0;
-  // The reward is owed against the player's BEST score, capped server-side. We
-  // pay only the positive difference vs. what was already granted: full amount
-  // on a first qualifying clear, the top-up on a higher-scoring replay, and
-  // nothing on a same/lower replay. Idempotent on the amount.
-  const owedForBest = bestScore >= PASS_SCORE ? Math.round(cap.maxFangs * (bestScore / 100)) : 0;
+  // The reward is owed against the player's BEST score, difficulty-weighted and
+  // clamped server-side to the shift's maxFangs ceiling (shiftPayout handles the
+  // PASS_SCORE clear gate and the ceiling clamp). We pay only the positive
+  // difference vs. what was already granted: full amount on a first qualifying
+  // clear, the top-up on a higher-scoring replay, and nothing on a same/lower
+  // replay. max(0, ...) keeps the ledger monotonic, so a lower-weighted replay
+  // (e.g. a later Easy run) never claws back. Idempotent on the amount.
+  const owedForBest = shiftPayout(cap.maxFangs, bestScore, difficulty, usedLifeline, bestStreak);
   const delta = Math.max(0, owedForBest - alreadyGranted);
   const newGrantedTotal = alreadyGranted + delta;
   const completedAt = new Date().toISOString();
