@@ -123,7 +123,7 @@ export default function HelpDeskSim({
       c.aliases.some((a) => norm === a || norm.startsWith(a + " ")),
     );
     if (!match) {
-      push({ tone: "error", text: `command not recognized: "${cmd}" — type \`help\`` });
+      push({ tone: "error", text: `command not recognized: "${cmd}". type \`help\`` });
       return;
     }
 

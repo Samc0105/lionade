@@ -184,7 +184,7 @@ export default function TechHubHome() {
         </p>
         <div className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
           <span>tickets resolved</span>
-          <span className="text-gold tabular-nums">{mounted ? resolvedTotal : "—"}</span>
+          <span className="text-gold tabular-nums">{mounted ? resolvedTotal : "…"}</span>
         </div>
       </div>
 

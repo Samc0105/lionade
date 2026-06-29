@@ -50,7 +50,7 @@ export default function AchievementsPanel() {
     { label: "shifts cleared", value: stats?.shiftsCleared ?? 0 },
     { label: "perfect (100%)", value: stats?.perfectShifts ?? 0 },
     { label: "nights survived", value: night.max },
-    { label: "endless best", value: night.endless ? fmt(night.endless) : "—" },
+    { label: "endless best", value: night.endless ? fmt(night.endless) : "none yet" },
     { label: "mutators seen", value: stats?.mutatorsSeen.length ?? 0 },
     { label: "tracks played", value: stats?.tracksPlayed.length ?? 0 },
     { label: "best score", value: stats?.bestShiftScore ?? 0 },
@@ -80,7 +80,7 @@ export default function AchievementsPanel() {
         <div className="flex items-center gap-3">
           <Trophy size={26} weight="fill" color="#FFD700" aria-hidden="true" />
           <div className="flex-1">
-            <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{mounted ? `${got} / ${total}` : "—"} unlocked</p>
+            <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{mounted ? `${got} / ${total}` : "…"} unlocked</p>
             <div className="h-1.5 rounded-full overflow-hidden bg-white/10 mt-2">
               <div className="h-full" style={{ width: `${mounted ? pct : 0}%`, background: "linear-gradient(90deg,#FFD700,#FFA500)" }} />
             </div>
@@ -92,7 +92,7 @@ export default function AchievementsPanel() {
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {tiles.map((t) => (
           <div key={t.label} className="rounded-lg border border-white/[0.07] p-2.5 text-center">
-            <p className="font-bebas text-xl tabular-nums text-cream leading-none">{mounted ? t.value : "—"}</p>
+            <p className="font-bebas text-xl tabular-nums text-cream leading-none">{mounted ? t.value : "…"}</p>
             <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">{t.label}</p>
           </div>
         ))}
