@@ -534,7 +534,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <p className="text-cream/60 text-sm mt-3">
-            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join 50K students already grinding."}
+            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Free to join. Your streak starts today."}
           </p>
         </div>
 
@@ -619,6 +619,11 @@ export default function LoginPage() {
                     <label className={labelCls}>Password</label>
                     <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••" autoComplete="current-password" className={inputCls} />
+                    <div className="text-right mt-1.5">
+                      <Link href="/forgot-password" className="text-xs text-cream/50 hover:text-gold transition-colors">
+                        Forgot password?
+                      </Link>
+                    </div>
                   </div>
                   {error && <ErrorBox msg={error} />}
                   <button type="submit" disabled={submitting}
