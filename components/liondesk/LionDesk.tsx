@@ -8,7 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
-import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
+import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, playEscalate, playBridgeSpike, startDeskHum, stopDeskHum, resumeAudio, isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
 import { slaRemaining } from "@/lib/liondesk/scoring";
@@ -199,11 +199,12 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
       window.removeEventListener("keydown", resume);
     };
   }, []);
-  const soundPrev = useRef<{ landed: number; resolved: number; breached: number; mishandled: number; ended: boolean; stockSum: number; streak: number; started: boolean } | null>(null);
+  const soundPrev = useRef<{ landed: number; resolved: number; escalated: number; breached: number; mishandled: number; ended: boolean; stockSum: number; streak: number; started: boolean; bridgeStage: number } | null>(null);
   useEffect(() => {
     const el = shift.durationSeconds - state.secondsLeft;
     const landedN = shift.items.filter((i) => el >= i.arriveAfter && isLive(i, state.items)).length;
     const resolvedN = shift.items.filter((i) => GOOD_STATUSES.includes(state.items[i.id].status)).length;
+    const escalatedN = shift.items.filter((i) => state.items[i.id].status === "escalated").length;
     const breachedN = shift.items.filter((i) => state.items[i.id].breached).length;
     const mishandledN = shift.items.filter((i) => state.items[i.id].status === "mishandled").length;
     const stockSum = Object.values(state.stock).reduce((a, b) => a + b, 0);
@@ -213,21 +214,42 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
       // another, and each cue must fire (an else-if would drop one for good).
       if (breachedN > p.breached) playBreach();
       if (mishandledN > p.mishandled) playFail();
-      if (resolvedN > p.resolved) playResolve();
+      // Escalating a ticket up the chain and resolving it yourself are both
+      // GOOD_STATUSES, but they get different cues. Subtracting escalations from
+      // the good count keeps each outcome to exactly one sound, so an escalate
+      // plays only the escalate motif and never doubles up with the resolve chime.
+      if (escalatedN > p.escalated) playEscalate();
+      if (resolvedN - escalatedN > p.resolved - p.escalated) playResolve();
       if (landedN > p.landed) playArrival();
       if (stockSum > p.stockSum) playDelivery(); // stock only ever rises on a delivery
       if (state.streak > p.streak && [3, 5, 8, 12].includes(state.streak)) playStreak();
-      if (state.started && !p.started) playClockIn();
-      if (state.ended && !p.ended) playWin();
+      // Bridge Pressure crossed into a new tension stage (1..3): a rising spike
+      // that gets more urgent the higher the stage. bridgeStage only ever climbs
+      // while a major incident is open, so this fires once per stage.
+      if (state.bridgeStage > p.bridgeStage) playBridgeSpike(state.bridgeStage);
+      // Clocking in starts the ambient office hum (the click is the user gesture
+      // that lets it play); the shift ending stops it. Both fire exactly once.
+      if (state.started && !p.started) { playClockIn(); startDeskHum(); }
+      if (state.ended && !p.ended) { playWin(); stopDeskHum(); }
     }
-    soundPrev.current = { landed: landedN, resolved: resolvedN, breached: breachedN, mishandled: mishandledN, ended: state.ended, stockSum, streak: state.streak, started: state.started };
+    soundPrev.current = { landed: landedN, resolved: resolvedN, escalated: escalatedN, breached: breachedN, mishandled: mishandledN, ended: state.ended, stockSum, streak: state.streak, started: state.started, bridgeStage: state.bridgeStage };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
+  // Stop the ambient hum if the desk unmounts mid-shift (navigating away, or a
+  // replay remount), so it never lingers after the component is gone.
+  useEffect(() => () => { stopDeskHum(); }, []);
   function toggleMute() {
     const next = !muted;
     setMuted(next);
     setMutedState(next);
-    if (!next) resumeAudio();
+    // Muting silences the cues and the ambient hum at once; unmuting brings the
+    // office hum back, but only while a shift is actually live.
+    if (next) {
+      stopDeskHum();
+    } else {
+      resumeAudio();
+      if (state.started && !state.ended) startDeskHum();
+    }
   }
 
   // Coworker chatter: teammates react to how the shift is going. Each line fires
