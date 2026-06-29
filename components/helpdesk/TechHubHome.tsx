@@ -10,6 +10,7 @@ import { computeUnlocked, ACHIEVEMENTS } from "@/lib/liondesk/stats";
 import { getPlayStreak } from "@/lib/liondesk/playstreak";
 import { getTodayStatus, getRecentDays, type DailyMode } from "@/lib/liondesk/dailyLog";
 import { getQuests, syncQuests } from "@/lib/liondesk/quests";
+import { activeSeasonalDef, syncSeasonalRewards, isSeasonalShiftCleared, SEASONAL_DEFS } from "@/lib/liondesk/seasonal";
 import { trackIconFor } from "@/components/helpdesk/icons";
 import Board from "@/components/liondesk/Board";
 
@@ -72,11 +73,21 @@ export default function TechHubHome() {
   // The side-effecting half of the quest read: persist period baselines and grant
   // any cleared cosmetic badge. Kept out of the render-phase useMemo above so the
   // memo stays pure. Runs after mount and on each focus refresh (version bump);
-  // syncQuests is idempotent and client-only.
+  // syncQuests is idempotent and client-only. syncSeasonalRewards is the same
+  // shape: it grants the cosmetic badge for any cleared seasonal shift, never any
+  // Fangs, so the economy stays server-authoritative.
   useEffect(() => {
     if (!mounted) return;
     syncQuests();
+    syncSeasonalRewards();
   }, [mounted, version]);
+
+  // This week's special: the active seasonal shift (deterministic by the
+  // calendar, the same for everyone) and whether it has been cleared. Read only
+  // after mount so the date-derived card and the localStorage cleared state never
+  // flash; before mount the card shows a skeleton. Cosmetic only.
+  const special = useMemo(() => (mounted ? activeSeasonalDef() : null), [mounted, version]);
+  const specialCleared = useMemo(() => (mounted && special ? isSeasonalShiftCleared(special.shift.id) : false), [mounted, version, special]);
 
   return (
     <div className="space-y-6">
@@ -89,6 +100,78 @@ export default function TechHubHome() {
         </div>
         <ArrowRight size={14} weight="bold" color="#2BBE6B" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
       </Link>
+
+      {/* This week's special: a seasonal, limited-time themed shift that rotates
+          in by the calendar (lib/liondesk/seasonal.ts). The window is
+          deterministic, so the special is the same for everyone, like the Daily
+          Combo and Weekly Challenge. Clearing it grants a collectible cosmetic
+          badge, never Fangs, so the economy stays server-authoritative.
+          Mount-guarded with a skeleton and a clear empty state so neither the
+          date-derived card nor the localStorage cleared flag ever flashes. */}
+      {!mounted ? (
+        <div className="rounded-2xl p-4 sm:p-5 border border-white/[0.08] bg-white/[0.03]">
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 rounded bg-white/10 motion-safe:animate-pulse" aria-hidden="true" />
+            <span className="h-4 w-44 rounded bg-white/10 motion-safe:animate-pulse" aria-hidden="true" />
+          </div>
+          <div className="h-3 w-3/4 rounded bg-white/10 motion-safe:animate-pulse mt-3" aria-hidden="true" />
+        </div>
+      ) : special ? (
+        <Link
+          href={`/learn/techhub/${special.shift.track}/shift?shift=${special.shift.id}`}
+          className="group block rounded-2xl p-4 sm:p-5 transition-colors"
+          style={{
+            background: `linear-gradient(110deg, ${special.shift.accent}26 0%, rgba(168,85,247,0.06) 55%, rgba(12,16,32,0.96) 100%)`,
+            border: `1px solid ${special.shift.accent}55`,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${special.shift.accent}1f`, border: `1px solid ${special.shift.accent}55` }}>
+              <CalendarBlank size={22} weight="fill" color={special.shift.accent} aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-bebas text-xl text-cream tracking-wider leading-none">THIS WEEK'S SPECIAL</p>
+                <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded" style={{ background: `${special.shift.accent}1f`, color: special.shift.accent, border: `1px solid ${special.shift.accent}55` }}>limited time</span>
+              </div>
+              <p className="font-syne font-semibold text-sm text-cream mt-1.5 truncate">{special.shift.name}</p>
+              <p className="text-cream/65 text-xs mt-1">{special.tagline}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-cream/55">{special.windowLabel}</span>
+                <span
+                  className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded"
+                  style={{ color: special.badge.color, background: `${special.badge.color}1a`, border: `1px solid ${special.badge.color}40` }}
+                  title={`Reward: ${special.badge.name} badge`}
+                >
+                  <Medal size={11} weight="fill" aria-hidden="true" /> {special.badge.name}
+                </span>
+                {specialCleared && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "#2BBE6B" }}>
+                    <CheckCircle size={14} weight="fill" aria-hidden="true" /> Cosmetic earned
+                  </span>
+                )}
+              </div>
+            </div>
+            <ArrowRight size={18} weight="bold" color={special.shift.accent} aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+      ) : (
+        <div className="rounded-2xl p-4 sm:p-5 border border-white/[0.08] bg-white/[0.03]">
+          <div className="flex items-center gap-2">
+            <CalendarBlank size={18} weight="fill" className="text-cream/40" aria-hidden="true" />
+            <h2 className="font-bebas text-xl text-cream/80 tracking-wider leading-none">THIS WEEK'S SPECIAL</h2>
+          </div>
+          <p className="text-cream/55 text-[11px] mt-1.5">No limited time shift is running right now. Seasonal shifts rotate in by the calendar, the same for everyone. Check back during these windows:</p>
+          <ul className="mt-2 space-y-1">
+            {SEASONAL_DEFS.map((d) => (
+              <li key={d.shift.id} className="flex items-start gap-2 text-[11px] text-cream/55">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: d.badge.color }} aria-hidden="true" />
+                <span><span className="text-cream/75">{d.shift.name}.</span> {d.scheduleHint}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Today's Board: a daily-return checklist of the three shared modes plus a
           compact 14-day clock-in calendar. A pure completion tracker, it grants

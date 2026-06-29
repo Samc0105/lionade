@@ -13,6 +13,7 @@ import { SWE_SHIFT_1 } from "./swe-shift1";
 import { REDTEAM_SHIFT_1 } from "./redteam-shift1";
 import { NETOPS_SHIFT_1 } from "./netops-shift1";
 import { EXTRA_INCIDENT_GROUPS } from "./extra-tickets";
+import { SEASONAL_SHIFTS, activeSeasonalShifts, isSeasonalShiftId } from "./seasonal";
 import extraShifts from "./extra-shifts.generated.json";
 import ladderShifts from "./extra-shifts-ladder.generated.json";
 
@@ -96,16 +97,39 @@ export const HELPDESK_MAJOR_INCIDENT: Shift = {
 // Team) + the shift 3-5 ladder that fills out every track's Intern->senior climb.
 // All auto-register from their generated JSON files.
 const AUTHORED: Shift[] = [SHIFT_1, SHIFT_2, SHIFT_3, SHIFT_4, SHIFT_5, SOC_SHIFT_1, SWE_SHIFT_1, REDTEAM_SHIFT_1, NETOPS_SHIFT_1, HELPDESK_MAJOR_INCIDENT];
+// The canonical campaign registry. lib/liondesk/pool.ts builds the combination
+// POOL from exactly this list, and lib/liondesk/daily.ts rotates the "shift of
+// the day" over it. Seasonal shifts are DELIBERATELY NOT in here: folding them in
+// would push all of their tickets into the year round combination pool (Surprise,
+// Daily Combo, Weekly, Weak Spots, Adaptive), and would change the POOL length
+// and ordering, which reseeds the Fisher Yates shuffle for every shareable code
+// and breaks the seed reproduction combocode.ts promises. Seasonal shifts live in
+// their own registry (./seasonal) and rejoin only in the campaign accessors
+// below, which the UI and the deep link read.
 export const SHIFTS: Shift[] = [
   ...AUTHORED,
   ...(extraShifts as unknown as Shift[]),
   ...(ladderShifts as unknown as Shift[]),
 ];
 
-export function shiftsForTrack(track: Track): Shift[] {
-  return SHIFTS.filter((s) => s.track === track).sort((a, b) => a.order - b.order);
+// Campaign-facing registry: the canonical shifts plus the seasonal shifts. Used
+// ONLY by shiftsForTrack and getShift (the campaign UI and the deep link). It is
+// never handed to pool.ts or daily.ts, so the combination pool and the shareable
+// seeds stay exactly as they were before seasonal shifts existed.
+const CAMPAIGN_SHIFTS: Shift[] = [...SHIFTS, ...SEASONAL_SHIFTS];
+
+export function shiftsForTrack(track: Track, date: Date = new Date()): Shift[] {
+  // A seasonal shift only appears in its track's campaign while its window is
+  // open; outside the window it stays in CAMPAIGN_SHIFTS (so getShift can still
+  // resolve a direct id) but is hidden from the ladder. Its high order keeps it
+  // from ever gating the regular ladder, and the hub's "this week's special" card
+  // deep links straight into the active one.
+  const activeSeasonal = new Set(activeSeasonalShifts(date).map((s) => s.id));
+  return CAMPAIGN_SHIFTS
+    .filter((s) => s.track === track && (!isSeasonalShiftId(s.id) || activeSeasonal.has(s.id)))
+    .sort((a, b) => a.order - b.order);
 }
 
 export function getShift(id: string): Shift | undefined {
-  return SHIFTS.find((s) => s.id === id);
+  return CAMPAIGN_SHIFTS.find((s) => s.id === id);
 }
