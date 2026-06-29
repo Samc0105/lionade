@@ -49,12 +49,24 @@ function gradeColor(grade: string): string {
   return GRADE_COLOR[grade] ?? "#9DB4E0";
 }
 
+// Seasons: each mode runs as a sequence of periods (a day for the dailies, a week
+// for the weekly). "current" is the live period you can still post into; previous
+// is the season archive, the final standings of the day or week just gone. The
+// server owns both period keys (seed aligned), so switching only changes which
+// bucket we read; it never writes and never grants Fangs.
+type Period = "current" | "previous";
+const PERIODS: { id: Period; label: string }[] = [
+  { id: "current", label: "This period" },
+  { id: "previous", label: "Previous" },
+];
+
 export default function Board() {
   // The board only exists on the server (and only once the held migration is
   // live). Read after mount so SSR and first paint never show a misleading board;
   // the "mounted" flag guards every dynamic read.
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<DailyMode>("combo");
+  const [period, setPeriod] = useState<Period>("current");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<BoardResponse | null>(null);
 
@@ -66,7 +78,7 @@ export default function Board() {
     if (!mounted) return;
     let cancelled = false;
     setLoading(true);
-    apiGet<BoardResponse>(`/api/techhub/leaderboard?mode=${mode}&limit=10`).then((res) => {
+    apiGet<BoardResponse>(`/api/techhub/leaderboard?mode=${mode}&period=${period}&limit=10`).then((res) => {
       if (cancelled) return;
       // Any non-ok result (not signed in, route error) degrades to the preview
       // state, exactly like a held migration would. Never an error flash.
@@ -76,16 +88,15 @@ export default function Board() {
     return () => {
       cancelled = true;
     };
-  }, [mounted, mode]);
+  }, [mounted, mode, period]);
 
   const meta = MODE_META[mode];
+  // For period aware copy: the dailies run a day at a time, the weekly a week.
+  const periodNoun = mode === "weekly" ? "week" : "day";
   const showSkeleton = !mounted || loading;
   const liveYet = !!data?.liveYet;
   const entries = data?.entries ?? [];
   const you = data?.you ?? null;
-  // The signed-in player already appears in the visible top N, so we do not
-  // repeat their standing in the footer.
-  const youInTop = entries.some((e) => e.you);
 
   return (
     <div
@@ -137,6 +148,36 @@ export default function Board() {
 
       <p className="text-cream/45 text-[11px] mt-2.5">{meta.blurb}</p>
 
+      {/* Period switcher: the live period vs the previous period's archive (a
+          season). The server owns the period key, so this only picks which bucket
+          to read. */}
+      <div className="mt-2.5 flex items-center gap-1.5" role="tablist" aria-label="Leaderboard period">
+        {PERIODS.map((p) => {
+          const active = period === p.id;
+          return (
+            <button
+              key={p.id}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setPeriod(p.id)}
+              className="rounded-lg px-2.5 py-1 min-h-[32px] font-mono text-[9px] uppercase tracking-[0.14em] motion-safe:transition-colors"
+              style={{
+                background: active ? "rgba(168,85,247,0.16)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${active ? "rgba(168,85,247,0.5)" : "rgba(255,255,255,0.08)"}`,
+                color: active ? "#C9A2F2" : "rgba(245,239,224,0.5)",
+              }}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+        {period === "previous" && (
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream/35 ml-1">
+            season archive
+          </span>
+        )}
+      </div>
+
       {/* Body */}
       <div className="mt-3">
         {showSkeleton ? (
@@ -163,30 +204,41 @@ export default function Board() {
             </p>
           </div>
         ) : entries.length === 0 ? (
-          // Live, but no one has posted a grade for this period yet.
+          // Live, but the bucket is empty: no one posted this period, or nobody
+          // posted the previous one before it closed.
           <div
             className="rounded-xl p-4 text-center"
             style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <Medal size={24} weight="fill" color={meta.color} aria-hidden="true" className="mx-auto" />
-            <p className="font-bebas text-base text-cream tracking-wide mt-2 leading-none">NO GRADES POSTED YET</p>
-            <p className="text-cream/55 text-[12px] mt-1.5">Clear {meta.label} to take the top spot. Be the first.</p>
+            {period === "previous" ? (
+              <>
+                <p className="font-bebas text-base text-cream tracking-wide mt-2 leading-none">THE ARCHIVE IS EMPTY</p>
+                <p className="text-cream/55 text-[12px] mt-1.5">No grades were posted for the previous {periodNoun}.</p>
+              </>
+            ) : (
+              <>
+                <p className="font-bebas text-base text-cream tracking-wide mt-2 leading-none">NO GRADES POSTED YET</p>
+                <p className="text-cream/55 text-[12px] mt-1.5">Clear {meta.label} to take the top spot. Be the first.</p>
+              </>
+            )}
           </div>
         ) : (
           <>
+            {/* The player's own best for the loaded period, surfaced up top so it
+                is always visible whether or not they sit in the top N. */}
+            {you && (
+              <YourBest
+                entry={you}
+                accent={meta.color}
+                label={period === "current" ? "your best this period" : "your best, archived"}
+              />
+            )}
             <ul className="space-y-2">
               {entries.map((e) => (
                 <BoardRow key={e.rank} entry={e} accent={meta.color} />
               ))}
             </ul>
-
-            {/* The player's own standing, when they are outside the visible top N. */}
-            {you && !youInTop && (
-              <>
-                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/35 mt-3 mb-1.5">your standing</p>
-                <BoardRow entry={you} accent={meta.color} />
-              </>
-            )}
           </>
         )}
       </div>
@@ -243,5 +295,36 @@ function BoardRow({ entry, accent }: { entry: BoardEntry; accent: string }) {
         </span>
       </span>
     </li>
+  );
+}
+
+// A compact callout for the signed-in player's own best in the loaded period.
+// Distinct from a ranked row so it reads as "here is where you stand," and shown
+// whether or not the player sits in the visible top N. The score and grade are
+// the server's values, only rendered in the live branch (after mount and load),
+// so there is never a flash of zero.
+function YourBest({ entry, accent, label }: { entry: BoardEntry; accent: string; label: string }) {
+  const gc = gradeColor(entry.grade);
+  return (
+    <div
+      className="mb-3 flex items-center gap-3 rounded-xl px-3 py-2.5"
+      style={{ background: `${accent}14`, border: `1px solid ${accent}40` }}
+    >
+      <span className="font-mono text-[9px] uppercase tracking-[0.18em] flex-shrink-0" style={{ color: accent }}>
+        {label}
+      </span>
+      <span className="ml-auto flex items-center gap-2.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-cream/45">
+          rank <span className="tabular-nums text-cream/70">{entry.rank}</span>
+        </span>
+        <span className="font-mono text-[11px] tabular-nums text-cream/55">{entry.score}</span>
+        <span
+          className="font-bebas text-base leading-none px-2 py-0.5 rounded tabular-nums"
+          style={{ background: `${gc}1f`, color: gc, border: `1px solid ${gc}44` }}
+        >
+          {entry.grade}
+        </span>
+      </span>
+    </div>
   );
 }

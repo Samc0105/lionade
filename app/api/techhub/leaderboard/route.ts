@@ -28,6 +28,21 @@ function isBoardMode(v: unknown): v is BoardMode {
   return typeof v === "string" && (MODES as readonly string[]).includes(v);
 }
 
+// Seasons: each shared mode runs as a sequence of periods (a day for the two
+// dailies, a week for the weekly). "current" is the live period a player can
+// still post into; "previous" is the last completed period, exposed read only so
+// a season archive (the final standings of the day or week just gone) can be
+// viewed. The period is the only season control, and it is read off a query
+// param; the period KEY itself stays server computed and seed aligned (below), so
+// the client can ask to look back but can never name or back date a bucket.
+type Period = "current" | "previous";
+
+function isPeriod(v: string | null): v is Period {
+  return v === "current" || v === "previous";
+}
+
+const DAY_MS = 86400000;
+
 // A Postgres "relation does not exist" error means the held migration has not
 // been applied yet. Same detection the shift-completions route uses.
 function tableMissing(err: { code?: string; message?: string } | null): boolean {
@@ -50,9 +65,18 @@ function toScore(v: unknown): number {
 // (see lib/liondesk/generate). The weekly keys on weekSeed(now), the exact seed
 // the Weekly Challenge shift is generated from, so the ladder always ranks a
 // single deterministic shift against itself for that shift's whole life.
-function periodKeyFor(mode: BoardMode, now: Date = new Date()): string {
-  if (mode === "weekly") return `weekly-${weekSeed(now)}`;
-  return now.toISOString().slice(0, 10); // YYYY-MM-DD (UTC day, matches dateSeed)
+//
+// The "previous" period (the season archive) is the very same calculation run
+// one bucket back: one UTC day earlier for a daily, one week earlier for the
+// weekly. We shift the reference instant back through the SAME seed machinery
+// rather than parsing or decrementing a key string, so an archived key is always
+// a real past key the shift was once generated from, and stays seed aligned.
+function periodKeyFor(mode: BoardMode, period: Period = "current", now: Date = new Date()): string {
+  const at = period === "previous"
+    ? new Date(now.getTime() - (mode === "weekly" ? 7 : 1) * DAY_MS)
+    : now;
+  if (mode === "weekly") return `weekly-${weekSeed(at)}`;
+  return at.toISOString().slice(0, 10); // YYYY-MM-DD (UTC day, matches dateSeed)
 }
 
 interface BoardEntry {
@@ -63,8 +87,9 @@ interface BoardEntry {
   you: boolean;
 }
 
-// GET top N for a mode in the CURRENT period, plus the signed-in player's own
-// standing (even when they fall outside the top N).
+// GET top N for a mode in a period (the current live period by default, or the
+// previous period's archive with ?period=previous), plus the signed-in player's
+// own standing for that period (even when they fall outside the top N).
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
@@ -73,9 +98,11 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const modeParam = url.searchParams.get("mode");
   const mode: BoardMode = isBoardMode(modeParam) ? modeParam : "combo";
+  const periodParam = url.searchParams.get("period");
+  const period: Period = isPeriod(periodParam) ? periodParam : "current";
   const rawLimit = Number(url.searchParams.get("limit"));
   const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(50, Math.round(rawLimit))) : 10;
-  const periodKey = periodKeyFor(mode);
+  const periodKey = periodKeyFor(mode, period);
 
   const { data, error } = await supabaseAdmin
     .from("techhub_leaderboard")
@@ -89,7 +116,7 @@ export async function GET(req: NextRequest) {
   if (error) {
     // Migration not applied yet (table missing): the Board shows its preview.
     if (tableMissing(error)) {
-      return NextResponse.json({ liveYet: false, mode, periodKey, entries: [], you: null });
+      return NextResponse.json({ liveYet: false, mode, period, periodKey, entries: [], you: null });
     }
     return NextResponse.json({ error: "Couldn't load the board." }, { status: 500 });
   }
@@ -124,20 +151,34 @@ export async function GET(req: NextRequest) {
   if (!you) {
     const { data: mine } = await supabaseAdmin
       .from("techhub_leaderboard")
-      .select("best_score, best_grade")
+      .select("best_score, best_grade, updated_at")
       .eq("mode", mode)
       .eq("period_key", periodKey)
       .eq("user_id", userId)
       .maybeSingle();
     if (mine) {
-      const { count } = await supabaseAdmin
-        .from("techhub_leaderboard")
-        .select("user_id", { count: "exact", head: true })
-        .eq("mode", mode)
-        .eq("period_key", periodKey)
-        .gt("best_score", mine.best_score);
+      // Rank exactly the way the ladder above is ordered (best_score desc, then
+      // updated_at asc). Count everyone strictly above on score, PLUS anyone tied
+      // on score who reached it earlier, so a player tied with someone already
+      // shown in the top N gets the next rank down rather than sharing that rank.
+      // The two counts run in parallel and only on the outside top N path.
+      const [aboveRes, tiedEarlierRes] = await Promise.all([
+        supabaseAdmin
+          .from("techhub_leaderboard")
+          .select("user_id", { count: "exact", head: true })
+          .eq("mode", mode)
+          .eq("period_key", periodKey)
+          .gt("best_score", mine.best_score),
+        supabaseAdmin
+          .from("techhub_leaderboard")
+          .select("user_id", { count: "exact", head: true })
+          .eq("mode", mode)
+          .eq("period_key", periodKey)
+          .eq("best_score", mine.best_score)
+          .lt("updated_at", mine.updated_at),
+      ]);
       you = {
-        rank: (count ?? 0) + 1,
+        rank: (aboveRes.count ?? 0) + (tiedEarlierRes.count ?? 0) + 1,
         name: nameMap.get(userId) ?? "You",
         score: mine.best_score,
         grade: mine.best_grade,
@@ -146,7 +187,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ liveYet: true, mode, periodKey, entries, you });
+  return NextResponse.json({ liveYet: true, mode, period, periodKey, entries, you });
 }
 
 // POST a score for one of the three shared modes. The score is clamped and the
@@ -164,7 +205,10 @@ export async function POST(req: NextRequest) {
   }
   const mode: BoardMode = body.mode;
   const score = toScore(body?.score);
-  const periodKey = periodKeyFor(mode);
+  // Writes only ever land in the CURRENT period. The previous period is the
+  // read only season archive (GET ?period=previous); there is no path to post
+  // into a closed period, so a finished bucket can never be edited after the fact.
+  const periodKey = periodKeyFor(mode, "current");
 
   // Load any existing standing for this period to keep the best score.
   const { data: existing, error: readErr } = await supabaseAdmin

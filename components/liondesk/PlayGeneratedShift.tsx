@@ -9,6 +9,7 @@ import { recordShiftResult } from "@/lib/liondesk/stats";
 import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import { recordDailyClear, type DailyMode } from "@/lib/liondesk/dailyLog";
+import { apiPost } from "@/lib/api-client";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import ChallengeResult from "@/components/liondesk/ChallengeResult";
 import type { Shift } from "@/lib/liondesk/types";
@@ -28,6 +29,19 @@ interface Props {
 function seedOf(s: Shift): number | null {
   const m = /(\d+)$/.exec(s.id);
   return m ? Number(m[1]) >>> 0 : null;
+}
+
+// Idea 31: record a finished shared deterministic run on The Board. Best effort
+// and fire and forget: the server clamps the score, derives the grade, computes
+// the period key, and keeps the player's best for the current period. It grants
+// nothing (the economy stays in the shift completions route). A held migration or
+// a signed out player simply no ops with liveYet false, and any failure is
+// swallowed, so a board write can never block, delay, or break the run itself.
+// Called only for the three shared modes (Daily Combo, Daily Chaos, Weekly
+// Challenge) the player can fairly be ranked on, never for seeded, combo, plain
+// chaos, surprise, or beat my desk challenge runs (see dailyModeFor).
+function postBoardScore(mode: DailyMode, score: number): void {
+  apiPost<{ ok?: boolean; liveYet?: boolean }>("/api/techhub/leaderboard", { mode, score }).catch(() => {});
 }
 
 // Plays a procedurally generated shift. Modes:
@@ -236,7 +250,21 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
         )}
       </div>
 
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); setResult(r); }} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => {
+        recordPlayDay();
+        recordShiftConcepts(shift, state);
+        const dm = dailyModeFor();
+        if (dm) {
+          // Local clock in log keeps the best non-D grade for the day (display only).
+          if (r.grade !== "D") recordDailyClear(dm, r.grade);
+          // Idea 31: post the run to the server ranked Board. Every finished shared
+          // run counts (the server keeps your best), even a D, so your standing is
+          // always your true best for the period. Best effort, never blocks.
+          postBoardScore(dm, r.score);
+        }
+        setNewAch(recordShiftResult(shift, r));
+        setResult(r);
+      }} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {sharedCode
           ? "A shared shift. The same queue every time you open this link."
