@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ShareNetwork } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { ShareNetwork, Sword } from "@phosphor-icons/react";
 import LionDesk from "@/components/liondesk/LionDesk";
 import { generateShift, dateSeed, weekSeed } from "@/lib/liondesk/generate";
-import { decodeCombo, encodeCombo, type ComboData } from "@/lib/liondesk/combocode";
+import { decodeCombo, encodeCombo, type ComboData, type ChallengeVs } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
 import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import { recordDailyClear, type DailyMode } from "@/lib/liondesk/dailyLog";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
+import ChallengeResult from "@/components/liondesk/ChallengeResult";
 import type { Shift } from "@/lib/liondesk/types";
-import type { State } from "@/lib/liondesk/engine";
+import type { State, ShiftResult } from "@/lib/liondesk/engine";
 
 interface Props {
   daily?: boolean;
@@ -43,6 +44,19 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
   const [runKey, setRunKey] = useState(0);
   const [newAch, setNewAch] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  // Idea 29: the recipient's own finished result, captured on completion so a
+  // challenge link can embed it and the you versus them comparison can render.
+  const [result, setResult] = useState<ShiftResult | null>(null);
+  const [challengeCopied, setChallengeCopied] = useState(false);
+
+  // The sharer's embedded score and grade, if this run was opened from a beat my
+  // desk challenge link (Idea 29). Null for a plain seed, combo, daily, or
+  // surprise run. Decoded from the URL (deterministic, no storage), so there is no
+  // flash-of-zero to guard.
+  const challenger = useMemo<ChallengeVs | null>(() => {
+    if (!sharedCode) return null;
+    return decodeCombo(sharedCode)?.vs ?? null;
+  }, [sharedCode]);
 
   function makeShift(): Shift {
     // A seeded share code wins over every other flag, so the link is exact and
@@ -122,9 +136,39 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
     }
   }
 
+  // Idea 29: copy a beat my desk challenge link. It rebuilds the exact shift just
+  // played and embeds the player's own score and grade, so a friend who opens it
+  // plays the identical queue and sees how they stack up. Available only once the
+  // shift is finished (you cannot challenge with a score you do not have yet). It
+  // grants nothing and touches no server; the seed and the vs both live in the URL.
+  function challengeFriend() {
+    if (!shift || !result || typeof window === "undefined") return;
+    const vs: ChallengeVs = { score: result.score, grade: result.grade };
+    // From a shared or challenge link, reuse its exact config and just swap in my
+    // own score as the new bar. Otherwise pack this shift's recipe like a share.
+    let data: ComboData | null = null;
+    if (sharedCode) {
+      const c = decodeCombo(sharedCode);
+      if (c) data = { ...c, vs };
+    }
+    if (!data) {
+      const base = shareDataFor(shift);
+      if (!base) return;
+      data = { ...base, vs };
+    }
+    const code = encodeCombo(data);
+    if (!code) return;
+    const url = `${window.location.origin}/learn/techhub/surprise?seed=${code}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => { setChallengeCopied(true); setTimeout(() => setChallengeCopied(false), 1800); }).catch(() => {});
+    }
+  }
+
   useEffect(() => {
     setShift(makeShift());
     setCopied(false);
+    setChallengeCopied(false);
+    setResult(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daily, chaos, weekly, comboCode, sharedCode]);
 
@@ -132,6 +176,8 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
     setShift(makeShift());
     setRunKey((k) => k + 1);
     setCopied(false);
+    setChallengeCopied(false);
+    setResult(null);
   }
 
   if (!shift) {
@@ -141,6 +187,12 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
   return (
     <div className="space-y-3">
       <AchievementBanner ids={newAch} />
+      {/* Idea 29: beat my desk. When this run was opened from a challenge link,
+          show the bar to beat before the recipient finishes, then the you versus
+          them comparison on completion. Rendered here (above the desk, outside the
+          focus trapped report) so it stays keyboard and screen reader reachable,
+          the same reasoning as the Share this shift control below. */}
+      {challenger && <ChallengeResult theirs={challenger} mine={result} />}
       {shift.modifiers && shift.modifiers.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">modifiers</span>
@@ -166,12 +218,25 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
         >
           <ShareNetwork size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{copied ? "Link copied" : "Copy link"}</span>
         </button>
+        {result && (
+          <button
+            onClick={challengeFriend}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gold/45 text-gold text-[11px] hover:bg-gold/10 transition-colors"
+          >
+            <Sword size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{challengeCopied ? "Challenge copied" : "Challenge a friend"}</span>
+          </button>
+        )}
         <p className="w-full font-mono text-[10px] text-cream/40 leading-relaxed">
           Copies a link that rebuilds this shift, the same tickets in the same order, for anyone you send it to.
         </p>
+        {result && (
+          <p className="w-full font-mono text-[10px] text-cream/40 leading-relaxed">
+            Beat my desk: the challenge link adds your score ({result.score}, grade {result.grade}) so a friend plays this exact shift and sees how they stack up against you.
+          </p>
+        )}
       </div>
 
-      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); }} onReplay={rerollable ? reroll : undefined} />
+      <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); const dm = dailyModeFor(); if (dm && r.grade !== "D") recordDailyClear(dm, r.grade); setNewAch(recordShiftResult(shift, r)); setResult(r); }} onReplay={rerollable ? reroll : undefined} />
       <p className="font-mono text-[10px] text-cream/40">
         {sharedCode
           ? "A shared shift. The same queue every time you open this link."
