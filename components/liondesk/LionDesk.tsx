@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type Dispatch, type ReactNode } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type Dispatch, type ReactNode, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
@@ -12,6 +12,7 @@ import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, p
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
 import { managerReviewFor } from "@/lib/liondesk/managerReview";
 import { slaRemaining } from "@/lib/liondesk/scoring";
+import { CONCEPTS, conceptForItem } from "@/lib/liondesk/concepts";
 
 import {
   type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
@@ -21,7 +22,7 @@ import {
 } from "@/lib/liondesk/engine";
 
 // The game logic (reducer, SLA/patience/streak math, scoring, all the state
-// types and tuning constants) now lives in @/lib/liondesk/engine — a pure,
+// types and tuning constants) now lives in @/lib/liondesk/engine, a pure,
 // framework-free module that can be unit-tested without React. This file keeps
 // only the React components + effects. ShiftResult is re-exported so existing
 // importers (components/liondesk/Campaign.tsx, lib/liondesk/stats.ts) keep
@@ -36,6 +37,82 @@ function fmt(sec: number) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+// Screen-reader-friendly time. "4:30" reads as "four colon thirty"; this spells
+// it out as "4 minutes 30 seconds" for an aria-label so the clock makes sense
+// without sight. Display copy is unchanged; this is the accessible name only.
+function spokenTime(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  const mm = m > 0 ? `${m} minute${m === 1 ? "" : "s"}` : "";
+  const ss = `${s} second${s === 1 ? "" : "s"}`;
+  return m > 0 ? `${mm} ${ss}` : ss;
+}
+
+// Roving focus for a group of action buttons: Up/Down (and Left/Right) move
+// focus between the choices, wrapping at the ends. This is focus movement only,
+// it never triggers a choice (Enter/Space still does that), so gameplay is
+// untouched. Used on the "Choose your move" group in WorkView.
+function onGroupArrowKeys(e: ReactKeyboardEvent<HTMLDivElement>) {
+  if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const btns = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>("button")).filter((b) => !b.disabled);
+  if (btns.length === 0) return;
+  const idx = btns.indexOf(document.activeElement as HTMLButtonElement);
+  if (idx === -1) return;
+  e.preventDefault();
+  const fwd = e.key === "ArrowDown" || e.key === "ArrowRight";
+  const next = fwd ? (idx + 1) % btns.length : (idx - 1 + btns.length) % btns.length;
+  btns[next].focus();
+}
+
+// Modal focus management shared by ClockIn and ShiftReport: on open, move focus
+// to the dialog surface (so its label is announced and Tab starts at the top),
+// trap Tab within it while it is mounted, and restore focus to the previously
+// focused element on dismiss. Purely additive; it changes no game state.
+function useDialogFocus<T extends HTMLElement = HTMLDivElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const root = ref.current;
+    root?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !root) return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) { e.preventDefault(); root.focus(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      // If focus has fallen outside the dialog (e.g. the browser moved it to
+      // body after the focused control was disabled or unmounted, such as
+      // answering or dismissing the Quick recall card), pull it back in.
+      if (!root.contains(active)) { e.preventDefault(); first.focus(); return; }
+      if (e.shiftKey) {
+        if (active === first || active === root) { e.preventDefault(); last.focus(); }
+      } else if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus?.();
+    };
+  }, []);
+  return ref;
+}
+
+// Join a list of names into readable prose ("A", "A and B", "A, B, and C").
+// Comma based so it never introduces a dash. Used by the Real world skills recap.
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }
 
 const STATUS_LABEL: Record<ItemStatus, string> = {
@@ -199,7 +276,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
 
       <div className="grid grid-cols-[64px_1fr] min-h-[560px]">
         {/* Dock */}
-        <div className="border-r border-white/[0.06] bg-white/[0.015] py-3 flex flex-col items-center gap-2">
+        <div className="border-r border-white/[0.06] bg-white/[0.015] py-3 flex flex-col items-center gap-2" role="group" aria-label="Desk apps">
           {APPS.filter((app) => usedApps.has(app.id)).map(({ id, label, Icon }) => {
             const active = state.activeApp === id && !activeItem;
             const badge = openByApp(id);
@@ -208,12 +285,14 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
                 key={id}
                 onClick={() => dispatch({ t: "APP", app: id })}
                 title={label}
+                aria-label={badge > 0 ? `${label}, ${badge} open` : label}
+                aria-pressed={active}
                 className={`relative w-11 h-11 rounded-xl flex items-center justify-center border transition-colors ${active ? "" : "border-transparent hover:bg-white/[0.05]"}`}
                 style={active ? { background: `${accent}26`, borderColor: `${accent}80` } : undefined}
               >
                 <Icon size={20} weight={active ? "fill" : "regular"} color={active ? accent : "#9FB2CC"} aria-hidden="true" />
                 {badge > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">{badge}</span>
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center" aria-hidden="true">{badge}</span>
                 )}
               </button>
             );
@@ -242,6 +321,7 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
 function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<AppId>; onStart: (d: Difficulty) => void }) {
   const accent = shift.accent ?? "#4A90D9";
   const [diff, setDiff] = useState<Difficulty>("normal");
+  const dialogRef = useDialogFocus();
   const surfaces = [
     usedApps.has("tickets") && "Tickets",
     usedApps.has("inbox") && "Inbox",
@@ -259,9 +339,9 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
   ].filter(Boolean) as string[];
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl border bg-[#0a0f1c] p-6 max-h-[92%] overflow-y-auto" style={{ borderColor: `${accent}55` }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ld-clockin-title" tabIndex={-1} className="w-full max-w-md rounded-2xl border bg-[#0a0f1c] p-6 max-h-[92%] overflow-y-auto focus:outline-none" style={{ borderColor: `${accent}55` }}>
         <p className="font-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: accent }}>{shift.rank} · clocking in</p>
-        <h3 className="font-bebas text-3xl text-cream tracking-wide leading-none mt-1">{shift.name}</h3>
+        <h3 id="ld-clockin-title" className="font-bebas text-3xl text-cream tracking-wide leading-none mt-1">{shift.name}</h3>
 
         <div className="grid grid-cols-2 gap-2 mt-4">
           <div className="rounded-lg border border-white/[0.08] p-2.5 text-center">
@@ -291,12 +371,12 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
           {tips.map((t, i) => <li key={i} className="text-cream/65 text-xs leading-relaxed flex gap-2"><span style={{ color: accent }}>›</span>{t}</li>)}
         </ul>
 
-        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40 mt-4 mb-1.5">Difficulty</p>
-        <div className="grid grid-cols-3 gap-2">
+        <p id="ld-difficulty-label" className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40 mt-4 mb-1.5">Difficulty</p>
+        <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="ld-difficulty-label">
           {(Object.keys(DIFF) as Difficulty[]).map((d) => {
             const on = diff === d;
             return (
-              <button key={d} onClick={() => setDiff(d)} className="rounded-lg border p-2 text-center transition-colors" style={on ? { borderColor: `${accent}aa`, background: `${accent}1f` } : { borderColor: "rgba(255,255,255,0.1)" }}>
+              <button key={d} onClick={() => setDiff(d)} aria-pressed={on} className="rounded-lg border p-2 text-center transition-colors" style={on ? { borderColor: `${accent}aa`, background: `${accent}1f` } : { borderColor: "rgba(255,255,255,0.1)" }}>
                 <span className="block text-cream text-sm font-semibold" style={on ? { color: accent } : undefined}>{DIFF[d].label}</span>
               </button>
             );
@@ -328,23 +408,23 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
         )}
       </div>
       <div className="ml-auto flex items-center gap-4 font-mono text-[11px]">
-        <span className="flex items-center gap-1.5" style={{ color: low ? "#EF4444" : "#9FB2CC" }}>
+        <span className="flex items-center gap-1.5" style={{ color: low ? "#EF4444" : "#9FB2CC" }} role="timer" aria-label={`Time remaining ${spokenTime(state.secondsLeft)}`}>
           <Clock size={13} weight="bold" aria-hidden="true" /> {fmt(state.secondsLeft)}
         </span>
-        <span className="flex items-center gap-1.5" title="User satisfaction">
-          <span className="text-cream/45">CSAT</span>
-          <span className="w-16 h-1.5 rounded-full overflow-hidden bg-white/10 hidden sm:inline-block align-middle">
+        <span className="flex items-center gap-1.5" title="User satisfaction" role="progressbar" aria-valuenow={state.csat} aria-valuemin={0} aria-valuemax={100} aria-label="Customer satisfaction">
+          <span className="text-cream/45" aria-hidden="true">CSAT</span>
+          <span className="w-16 h-1.5 rounded-full overflow-hidden bg-white/10 hidden sm:inline-block align-middle" aria-hidden="true">
             <span className="block h-full" style={{ width: `${state.csat}%`, background: csatColor }} />
           </span>
-          <span style={{ color: csatColor }}>{state.csat}%</span>
+          <span style={{ color: csatColor }} aria-hidden="true">{state.csat}%</span>
         </span>
         {state.streak >= 2 && (
-          <span className="flex items-center gap-1 tabular-nums" style={{ color: state.streak >= 5 ? "#FF6B35" : "#F59E0B" }} title="Resolve streak">
+          <span className="flex items-center gap-1 tabular-nums" style={{ color: state.streak >= 5 ? "#FF6B35" : "#F59E0B" }} title="Resolve streak" aria-label={`Resolve streak, ${state.streak} in a row`}>
             <Lightning size={12} weight="fill" aria-hidden="true" />x{state.streak}
           </span>
         )}
-        <span className="text-gold tabular-nums">{state.fangs} Fangs</span>
-        <span className="text-cream/55 tabular-nums">{resolved}/{total}</span>
+        <span className="text-gold tabular-nums" aria-label={`${state.fangs} Fangs this shift`}>{state.fangs} Fangs</span>
+        <span className="text-cream/55 tabular-nums" aria-label={`${resolved} of ${total} items resolved`}>{resolved}/{total}</span>
         <button onClick={onToggleMute} title={muted ? "Unmute" : "Mute"} aria-label={muted ? "Unmute sounds" : "Mute sounds"} className="w-7 h-7 rounded-md border border-white/15 text-cream/60 hover:bg-white/[0.06] hover:text-cream transition-colors flex items-center justify-center">
           {muted ? <SpeakerSlash size={13} weight="fill" aria-hidden="true" /> : <SpeakerHigh size={13} weight="fill" aria-hidden="true" />}
         </button>
@@ -352,6 +432,9 @@ function StatusBar({ shift, state, resolved, total, onEnd, muted, onToggleMute }
           End shift
         </button>
       </div>
+      {/* Urgent-only announcement. The string is constant while urgent, so it is
+          spoken once when time runs low and never repeats on every tick. */}
+      <span className="sr-only" aria-live="assertive">{state.started && !state.ended && low ? "Under one minute left in the shift." : ""}</span>
     </div>
   );
 }
@@ -414,19 +497,28 @@ function AppPanel({ shift, state, dispatch, landed }: { shift: Shift; state: Sta
 function ChannelList({ shift, state, dispatch, landed, channel, empty }: { shift: Shift; state: State; dispatch: Dispatch<Action>; landed: (i: ShiftItem) => boolean; channel: ShiftItem["channel"]; empty: string }) {
   const rows = shift.items.filter((i) => i.channel === channel && landed(i));
   const elapsed = shift.durationSeconds - state.secondsLeft;
+  const listLabel = channel === "email" ? "Inbox" : channel === "phone" ? "Phone queue" : "Ticket queue";
   return (
     <div className="p-4 max-h-[560px] overflow-y-auto">
       {rows.length === 0 ? (
         <div className="text-center text-cream/45 text-sm py-16">{empty}</div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2" aria-label={listLabel}>
           {rows.map((i) => {
             const st = state.items[i.id];
             const done = isTerminal(st.status);
             const remaining = slaRemaining(i, st, elapsed, slaBudget(shift, i.priority, state.difficulty));
+            const statusText = done ? STATUS_LABEL[st.status] : st.breached ? "SLA breached" : `${fmt(Math.max(0, remaining))} until SLA`;
+            const itemLabel = [
+              channel === "ticket" ? `Priority ${i.priority}` : null,
+              i.subject,
+              `from ${i.from.name}, ${i.from.role}`,
+              i.from.vip ? "VIP" : null,
+              statusText,
+            ].filter(Boolean).join(", ");
             return (
               <li key={i.id}>
-                <button onClick={() => dispatch({ t: "OPEN", id: i.id })} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
+                <button onClick={() => dispatch({ t: "OPEN", id: i.id })} aria-label={itemLabel} className={`w-full text-left rounded-xl border p-3 transition-colors ${done ? "opacity-60" : "hover:bg-white/[0.04]"}`} style={{ borderColor: "rgba(255,255,255,0.08)", background: done ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.025)", animation: "ld-toast-in 240ms ease-out" }}>
                   <div className="flex items-center gap-2">
                     {channel === "ticket" && (
                       <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: PRIORITY_COLOR[i.priority], background: `${PRIORITY_COLOR[i.priority]}1f`, border: `1px solid ${PRIORITY_COLOR[i.priority]}40` }}>{i.priority}</span>
@@ -528,7 +620,7 @@ function KbApp({ shift, state, dispatch }: { shift: Shift; state: State; dispatc
       <h3 className="font-bebas text-lg text-cream tracking-wide mb-2">Knowledge Base</h3>
       <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-black/20 px-3 py-2 mb-3">
         <MagnifyingGlass size={14} color="#9FB2CC" aria-hidden="true" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="search the KB..." className="bg-transparent text-sm text-cream placeholder:text-cream/30 focus:outline-none flex-1" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="search the KB..." aria-label="Search the knowledge base" className="bg-transparent text-sm text-cream placeholder:text-cream/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 rounded-sm flex-1" />
       </div>
       <ul className="space-y-2">
         {results.map((a) => (
@@ -616,7 +708,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
 
       {/* evidence */}
       {item.evidence && item.evidence.map((ev) => (
-        <div key={ev.label} className="mt-3">
+        <div key={ev.label} className="mt-3" role="group" aria-label={`Evidence, ${ev.label}`}>
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-electric/70 mb-1">{ev.label}</p>
           <pre className="text-[11px] leading-relaxed text-cream/70 font-mono bg-black/30 border border-white/[0.06] rounded-lg p-2.5 overflow-x-auto whitespace-pre-wrap">{ev.lines.join("\n")}</pre>
         </div>
@@ -676,7 +768,7 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
 
       {/* lifelines */}
       {!isTerminal(it.status) && (
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex items-center gap-2 mt-4" role="group" aria-label="Lifelines">
           <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40">Lifelines</span>
           <button
             onClick={() => dispatch({ t: "COFFEE" })}
@@ -702,13 +794,13 @@ function WorkView({ shift, state, item, dispatch }: { shift: Shift; state: State
               const triesLeft = Math.max(0, DIFF[state.difficulty].attempts - it.attempts);
               const tColor = triesLeft <= 1 ? "#EF4444" : triesLeft === 2 ? "#F59E0B" : "#2BBE6B";
               return (
-                <span className="ml-auto font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded tabular-nums" style={{ color: tColor, background: `${tColor}1f`, border: `1px solid ${tColor}40` }} title="Wrong moves are limited. Run out and the item locks.">
+                <span className="ml-auto font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded tabular-nums" style={{ color: tColor, background: `${tColor}1f`, border: `1px solid ${tColor}40` }} title="Wrong moves are limited. Run out and the item locks." aria-label={`${triesLeft} tr${triesLeft === 1 ? "y" : "ies"} left`}>
                   {triesLeft} tr{triesLeft === 1 ? "y" : "ies"} left
                 </span>
               );
             })()}
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2" role="group" aria-label={`Choose your move. Goal, ${item.goal}`} onKeyDown={onGroupArrowKeys}>
             {item.actions.map((act) => {
               const recommended = state.revealed.includes(item.id) && act.correct;
               return (
@@ -768,15 +860,19 @@ function PhoneThread({ item, runtime, dispatch }: { item: ShiftItem; runtime: It
     <div className="mt-3 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
       {/* live patience meter while you're on the line */}
       {onCall && (
-        <div className="flex items-center gap-2 mb-2.5">
-          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45">Caller patience</span>
-          <span className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/10">
-            <span className="block h-full transition-[width] duration-500" style={{ width: `${patience}%`, background: pColor }} />
-          </span>
-          <span className="font-mono text-[10px] tabular-nums" style={{ color: pColor }}>{Math.round(patience)}%</span>
-        </div>
+        <>
+          <div className="flex items-center gap-2 mb-2.5">
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45" aria-hidden="true">Caller patience</span>
+            <span className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/10" role="progressbar" aria-valuenow={Math.round(patience)} aria-valuemin={0} aria-valuemax={100} aria-label="Caller patience">
+              <span className="block h-full transition-[width] duration-500" style={{ width: `${patience}%`, background: pColor }} />
+            </span>
+            <span className="font-mono text-[10px] tabular-nums" style={{ color: pColor }} aria-hidden="true">{Math.round(patience)}%</span>
+          </div>
+          {/* Urgent-only: spoken once when patience crosses into the danger zone. */}
+          <span className="sr-only" aria-live="assertive">{patience < 30 ? "Caller patience is critically low." : ""}</span>
+        </>
       )}
-      <div className="space-y-2">
+      <div className="space-y-2" role="log" aria-live="polite" aria-label="Call transcript">
         <Bubble who="user" text={item.phone!.opener} />
         {chosen !== null && <Bubble who="you" text={fu[chosen].label} />}
         {chosen !== null && <Bubble who="user" text={fu[chosen].reply} />}
@@ -825,12 +921,12 @@ function MiniTerminal({ item, onStep }: { item: ShiftItem; onStep: (step: string
 
   return (
     <ToolBox label="Terminal" done={false}>
-      <div ref={scrollRef} className="max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5 mb-2">
+      <div ref={scrollRef} className="max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5 mb-2" role="log" aria-live="polite" aria-label="Terminal output">
         {lines.map((l, i) => <div key={i} className={l.tone === "in" ? "text-electric" : "text-cream/75 whitespace-pre-wrap"}>{l.text}</div>)}
       </div>
       <form onSubmit={submit} className="flex items-center gap-2">
-        <span className="font-mono text-[11px] text-electric">$</span>
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="run a command..." spellCheck={false} className="flex-1 bg-transparent font-mono text-[11px] text-cream placeholder:text-cream/25 focus:outline-none" />
+        <span className="font-mono text-[11px] text-electric" aria-hidden="true">$</span>
+        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="run a command..." aria-label="Terminal command input" spellCheck={false} className="flex-1 bg-transparent font-mono text-[11px] text-cream placeholder:text-cream/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 rounded-sm" />
       </form>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {item.commands!.map((c) => (
@@ -866,7 +962,7 @@ function Toasts({ feed }: { feed: FeedEntry[] }) {
   if (visible.length === 0) return null;
   const color = (t: FeedTone) => (t === "good" ? "#2BBE6B" : t === "bad" ? "#EF4444" : "#4A90D9");
   return (
-    <div className="absolute bottom-3 right-3 left-3 sm:left-auto sm:w-80 space-y-2 pointer-events-none z-30">
+    <div className="absolute bottom-3 right-3 left-3 sm:left-auto sm:w-80 space-y-2 pointer-events-none z-30" role="log" aria-live="polite" aria-atomic="false" aria-label="Notifications">
       {visible.map((f) => (
         <div key={f.seq} className="rounded-lg border bg-[#0a0f1c]/95 backdrop-blur px-3 py-2 text-xs leading-snug shadow-lg" style={{ borderColor: `${color(f.tone)}55`, color: "#E7EEFA", animation: "ld-toast-life 4200ms ease-out forwards" }}>
           <span style={{ color: color(f.tone) }}>{f.tone === "good" ? "✓ " : f.tone === "bad" ? "✕ " : "› "}</span>{f.text}
@@ -886,6 +982,10 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
   const breaches = live.filter((i) => state.items[i.id].breached).length;
   const { score, grade } = computeResult(shift, state);
   const gradeColor = grade === "S" || grade === "A" ? "#2BBE6B" : grade === "B" ? "#4A90D9" : grade === "C" ? "#F59E0B" : "#EF4444";
+  // The report is the actionable surface at shift end, so focus moves into it and
+  // is trapped until the player chooses Run it back or Back. Focus returns to
+  // wherever it was on dismiss.
+  const dialogRef = useDialogFocus();
 
   // The teaching content lives in each action's `teach`. During a shift it only
   // flashes in a 4.2s toast, so the report is where the lesson actually lands:
@@ -897,13 +997,35 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
     return cid ? i.actions.find((act) => act.id === cid) ?? null : null;
   };
 
+  // Real world skills: which support concepts this shift exercised, derived from
+  // the concept taxonomy over the live items, plus which ones the player handled
+  // cleanly (every item of that concept resolved well, none fumbled). Pure client
+  // derivation over per-item correctness already in scope. Grants nothing, reads
+  // no localStorage or server value, so there is no flash-of-zero to guard.
+  const skillRows = (() => {
+    const tally = new Map<string, { good: number; bad: number }>();
+    for (const i of live) {
+      const c = conceptForItem(i);
+      const cur = tally.get(c) ?? { good: 0, bad: 0 };
+      const st = state.items[i.id].status;
+      if (GOOD_STATUSES.includes(st)) cur.good += 1;
+      else if (st === "mishandled") cur.bad += 1;
+      tally.set(c, cur);
+    }
+    return CONCEPTS.filter((def) => tally.has(def.id)).map((def) => {
+      const t = tally.get(def.id)!;
+      return { def, nailed: t.good > 0 && t.bad === 0 };
+    });
+  })();
+  const nailedSkills = skillRows.filter((r) => r.nailed);
+
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-[#0a0f1c] p-6 max-h-[90vh] overflow-y-auto">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ld-report-title" tabIndex={-1} className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-[#0a0f1c] p-6 max-h-[90vh] overflow-y-auto focus:outline-none">
         <div className="flex items-center gap-3 mb-4">
           <Trophy size={28} weight="fill" color={gradeColor} aria-hidden="true" />
           <div>
-            <h3 className="font-bebas text-2xl text-cream tracking-wide leading-none">Shift complete</h3>
+            <h3 id="ld-report-title" className="font-bebas text-2xl text-cream tracking-wide leading-none">Shift complete</h3>
             <p className="text-cream/50 text-xs mt-0.5">{shift.name}</p>
           </div>
           <span className="ml-auto font-bebas text-4xl leading-none" style={{ color: gradeColor }}>{grade}</span>
@@ -1012,6 +1134,37 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
             })}
           </ul>
         </details>
+
+        {skillRows.length > 0 && (
+          <div className="mb-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5">
+            <div className="flex items-center gap-2 mb-1">
+              <IdentificationBadge size={14} weight="fill" color="#A855F7" aria-hidden="true" />
+              <p className="font-mono text-[10px] uppercase tracking-wider text-purple-300">Real-world skills</p>
+            </div>
+            <p className="text-cream/55 text-[11px] leading-relaxed mb-2.5">This shift maps to real certification objectives and on the job skills.</p>
+            <ul className="space-y-2">
+              {skillRows.map(({ def, nailed }) => (
+                <li
+                  key={def.id}
+                  className="rounded-lg border p-2.5"
+                  style={nailed ? { borderColor: "rgba(255,215,0,0.3)", background: "rgba(255,215,0,0.04)" } : { borderColor: "rgba(255,255,255,0.07)" }}
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-cream/90 text-xs font-semibold">{def.label}</span>
+                    <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-electric/10 text-electric/80 border border-electric/25">{def.cert}</span>
+                    {nailed && <CheckCircle size={13} weight="fill" color="#2BBE6B" className="ml-auto shrink-0" aria-hidden="true" />}
+                  </div>
+                  <p className="text-cream/60 text-[11px] leading-relaxed mt-1">{def.realWorld}</p>
+                </li>
+              ))}
+            </ul>
+            {nailedSkills.length > 0 && (
+              <p className="text-cream/80 text-[11px] leading-relaxed mt-2.5">
+                <span className="text-gold font-semibold">What you nailed:</span> you handled {joinNames(nailedSkills.map((r) => r.def.label))} cleanly this shift. {nailedSkills.length === 1 ? "That skill is" : "Those skills are"} exactly what the desk is built on.
+              </p>
+            )}
+          </div>
+        )}
 
         {typeof bankedFangs === "number" && bankedFangs > 0 ? (
           <p className="font-mono text-[10px] text-[#2BBE6B] leading-relaxed mb-4">

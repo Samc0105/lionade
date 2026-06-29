@@ -181,7 +181,7 @@ export default function HelpDeskSim({
 
         <div className="mt-5 space-y-3">
           {scenario.evidence.map((ev) => (
-            <div key={ev.label}>
+            <div key={ev.label} role="group" aria-label={`Evidence, ${ev.label}`}>
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-electric/70 mb-1.5">{ev.label}</p>
               <pre className="text-[11px] leading-relaxed text-cream/70 font-mono bg-black/30 border border-white/[0.06] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
 {ev.lines.join("\n")}
@@ -213,7 +213,7 @@ export default function HelpDeskSim({
           </span>
         </div>
 
-        <div ref={scrollRef} className="flex-1 min-h-[340px] max-h-[60vh] overflow-y-auto p-4 font-mono text-[12.5px] leading-relaxed space-y-0.5">
+        <div ref={scrollRef} role="log" aria-live="polite" aria-label="Terminal output" className="flex-1 min-h-[340px] max-h-[60vh] overflow-y-auto p-4 font-mono text-[12.5px] leading-relaxed space-y-0.5">
           {lines.map((l, i) => (
             <div key={i} className={`${TONE_CLASS[l.tone]} whitespace-pre-wrap`}>{l.text || " "}</div>
           ))}
@@ -238,7 +238,7 @@ export default function HelpDeskSim({
           </div>
         ) : (
           <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-white/[0.06] px-4 py-3">
-            <span className="font-mono text-[12.5px] text-electric shrink-0">{PROMPT}</span>
+            <span className="font-mono text-[12.5px] text-electric shrink-0" aria-hidden="true">{PROMPT}</span>
             <input
               ref={inputRef}
               value={input}
@@ -248,7 +248,7 @@ export default function HelpDeskSim({
               autoComplete="off"
               aria-label="TechHub terminal command input"
               placeholder="type a command…  (try `help`)"
-              className="flex-1 bg-transparent font-mono text-[12.5px] text-cream placeholder:text-cream/25 focus:outline-none"
+              className="flex-1 bg-transparent font-mono text-[12.5px] text-cream placeholder:text-cream/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 rounded-sm"
             />
           </form>
         )}

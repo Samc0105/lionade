@@ -13,19 +13,28 @@ export interface ConceptDef {
   label: string;
   /** One line on what the concept covers. */
   blurb: string;
+  /**
+   * Real world / certification mapping: a short objective or cert reference
+   * (CompTIA A+, Security+, Network+, ITIL, or a plain job skill name) this
+   * concept builds toward. Display only; reinforces why the shift mattered in
+   * career terms. No dashes in the blurbs below.
+   */
+  cert: string;
+  /** One line on the real world payoff of getting this concept right. */
+  realWorld: string;
 }
 
 // Display order on the review surface. The last entry is the catch-all default.
 export const CONCEPTS: ConceptDef[] = [
-  { id: "phishing-id", label: "Phishing & Email Threats", blurb: "Spotting malicious mail and reporting it instead of clicking." },
-  { id: "account-lockout", label: "Account Lockouts", blurb: "Getting people back in with safe unlocks and resets." },
-  { id: "credential-hygiene", label: "Credential Hygiene", blurb: "MFA, password policy, and keeping logins secure." },
-  { id: "privilege-escalation", label: "Privilege & Access", blurb: "Granting the right access without over provisioning." },
-  { id: "dns-troubleshooting", label: "DNS & Connectivity", blurb: "Name resolution, networking, and restoring access." },
-  { id: "hardware", label: "Hardware & Stockroom", blurb: "Diagnosing devices and ordering the right part in time." },
-  { id: "incident-triage", label: "Incident Triage", blurb: "Finding one root cause behind a flood of tickets." },
-  { id: "escalation-judgment", label: "Escalation Judgment", blurb: "Knowing when to escalate and to whom." },
-  { id: "general-support", label: "General Support", blurb: "Everyday desk work that spans the basics." },
+  { id: "phishing-id", label: "Phishing & Email Threats", blurb: "Spotting malicious mail and reporting it instead of clicking.", cert: "CompTIA Security+ (Social Engineering)", realWorld: "Real desks live or die on catching the bad email before someone clicks." },
+  { id: "account-lockout", label: "Account Lockouts", blurb: "Getting people back in with safe unlocks and resets.", cert: "CompTIA A+ (Operational Procedures)", realWorld: "The number one help desk call, and the fastest way to a happy user." },
+  { id: "credential-hygiene", label: "Credential Hygiene", blurb: "MFA, password policy, and keeping logins secure.", cert: "CompTIA Security+ (Identity & Access)", realWorld: "MFA and password policy are the basics every security role expects." },
+  { id: "privilege-escalation", label: "Privilege & Access", blurb: "Granting the right access without over provisioning.", cert: "CompTIA Security+ (Least Privilege)", realWorld: "Right sizing access is the heart of least privilege on any real team." },
+  { id: "dns-troubleshooting", label: "DNS & Connectivity", blurb: "Name resolution, networking, and restoring access.", cert: "CompTIA Network+ (Troubleshooting)", realWorld: "Name resolution and connectivity fixes are daily work for a network role." },
+  { id: "hardware", label: "Hardware & Stockroom", blurb: "Diagnosing devices and ordering the right part in time.", cert: "CompTIA A+ (Hardware)", realWorld: "Diagnosing devices and sourcing parts is the core of field support." },
+  { id: "incident-triage", label: "Incident Triage", blurb: "Finding one root cause behind a flood of tickets.", cert: "ITIL (Incident Management)", realWorld: "Finding the one root cause under a flood is what keeps an outage short." },
+  { id: "escalation-judgment", label: "Escalation Judgment", blurb: "Knowing when to escalate and to whom.", cert: "ITIL (Service Operation)", realWorld: "Knowing when to escalate, and to whom, is what makes a desk trusted." },
+  { id: "general-support", label: "General Support", blurb: "Everyday desk work that spans the basics.", cert: "Help Desk Fundamentals", realWorld: "The everyday desk skills every IT career is built on." },
 ];
 
 /** The default concept used when nothing else matches. */
