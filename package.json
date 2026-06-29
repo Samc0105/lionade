@@ -12,6 +12,7 @@
     "lint": "next lint",
     "lint:migrations": "bash scripts/check-migration-rls.sh",
     "seed:questions": "npx tsx scripts/seed-questions.ts",
+    "validate:shifts": "npx tsx scripts/validate-shifts.ts",
     "core:typecheck": "npm --workspace @lionade/core run typecheck",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
