@@ -3,7 +3,7 @@
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import { Trophy, ChartLineUp, ArrowRight } from "@phosphor-icons/react";
+import { Trophy, ChartLineUp, ChatsCircle, ArrowRight } from "@phosphor-icons/react";
 import AchievementsPanel from "@/components/liondesk/AchievementsPanel";
 
 export default function AchievementsPage() {
@@ -31,6 +31,19 @@ export default function AchievementsPage() {
             <p className="text-cream/55 text-[11px] mt-0.5">Per track performance, best scores, weakest concepts, and your recent activity.</p>
           </div>
           <ArrowRight size={14} weight="bold" color="#4A90D9" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+
+        <Link
+          href="/learn/techhub/oneonone"
+          className="group flex items-center gap-3 rounded-2xl border border-gold/25 bg-gold/[0.05] p-3 mb-5 hover:bg-gold/[0.09] transition-colors animate-slide-up"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <ChatsCircle size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold/90">manager 1:1</p>
+            <p className="text-cream/55 text-[11px] mt-0.5">Periodic reviews with your manager, with goals drawn from the concepts you miss most.</p>
+          </div>
+          <ArrowRight size={14} weight="bold" color="#FFD700" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
         </Link>
 
         <div className="animate-slide-up" style={{ animationDelay: "0.06s" }}>
