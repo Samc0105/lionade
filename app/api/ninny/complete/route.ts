@@ -108,6 +108,35 @@ export async function POST(req: NextRequest) {
   // Apply plan multiplier (1.5×/2×) honoring past_due/canceled.
   const coinsEarned = applyFangMultiplierFromTier(baseCoinsEarned, profile.plan as string | null, profile.subscription_status as string | null);
 
+  // Idempotency guard (no migration): a retried POST (network blip, double-tap)
+  // would insert a second session and grant Fangs again. The atomic RPC fixes
+  // LOST grants under concurrency, not DUPLICATE grants from a resubmit, so
+  // short-circuit if the same user already completed this material+mode in the
+  // last 30 seconds. Best-effort (a hard unique index would need a held
+  // migration); this covers the common sequential-retry case.
+  const dupSince = new Date(Date.now() - 30_000).toISOString();
+  const { data: recentSession } = await supabaseAdmin
+    .from("ninny_sessions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("material_id", materialId)
+    .eq("mode", mode)
+    .gte("completed_at", dupSince)
+    .order("completed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (recentSession) {
+    return NextResponse.json({
+      success: true,
+      duplicate: true,
+      sessionId: recentSession.id,
+      coinsEarned: 0,
+      xpEarned: 0,
+      newCoins: profile.coins ?? 0,
+      newXp: profile.xp ?? 0,
+    });
+  }
+
   // 1. Insert session (audit reflects actual credited amount)
   const { data: session, error: sessionErr } = await supabaseAdmin
     .from("ninny_sessions")
