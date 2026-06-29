@@ -1,12 +1,16 @@
 // Player-saved shift combos (track + count + chosen modifiers), local only.
+//
+// A SavedCombo is a named ComboData, so it reuses the exact same shape as a
+// shareable code. That means a saved entry can also carry an optional seed
+// (Idea 14): a player who received an exact shift link can keep it around and
+// replay the identical queue later, not just a fresh draw of the recipe. The
+// extra fields are optional, so existing saves and existing callers are
+// unaffected (they simply omit them).
 
-import type { Track } from "@/lib/helpdesk/types";
+import type { ComboData } from "@/lib/liondesk/combocode";
 
-export interface SavedCombo {
+export interface SavedCombo extends ComboData {
   name: string;
-  track?: Track;
-  count: number;
-  modifierIds: string[];
 }
 
 const KEY = "lionade.techhub.combos.v1";

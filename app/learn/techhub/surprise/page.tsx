@@ -6,17 +6,21 @@ import BackButton from "@/components/BackButton";
 import { Shuffle } from "@phosphor-icons/react";
 import PlayGeneratedShift from "@/components/liondesk/PlayGeneratedShift";
 
-// Procedurally combined shifts. ?daily=1 (date-seeded), ?chaos=1 (stacked
-// mutators; with daily = the shared Daily Chaos), ?combo=<code> (a shared combo).
+// Procedurally combined shifts. ?seed=<code> (Idea 14: a shared, exact shift,
+// highest precedence), ?daily=1 (date-seeded), ?chaos=1 (stacked mutators; with
+// daily = the shared Daily Chaos), ?combo=<code> (a shared combo recipe).
 export default function SurprisePage() {
   const sp = useSearchParams();
   const daily = sp?.get("daily") === "1";
   const chaos = sp?.get("chaos") === "1";
   const weekly = sp?.get("weekly") === "1";
   const combo = sp?.get("combo") ?? undefined;
+  const seed = sp?.get("seed") ?? undefined;
 
-  const title = combo ? "SHARED COMBO" : weekly ? "WEEKLY CHALLENGE" : chaos && daily ? "DAILY CHAOS" : chaos ? "CHAOS SHIFT" : daily ? "DAILY COMBO" : "SURPRISE SHIFT";
-  const sub = combo
+  const title = seed ? "SHARED SHIFT" : combo ? "SHARED COMBO" : weekly ? "WEEKLY CHALLENGE" : chaos && daily ? "DAILY CHAOS" : chaos ? "CHAOS SHIFT" : daily ? "DAILY COMBO" : "SURPRISE SHIFT";
+  const sub = seed
+    ? "An exact shift a player shared. The same tickets, in the same order, every time you open it."
+    : combo
     ? "Someone's hand-built combo. Run it back for a fresh draw of the same recipe."
     : weekly
     ? "This week's gauntlet. The same brutal combo for everyone, all week."
@@ -40,7 +44,7 @@ export default function SurprisePage() {
         </div>
 
         <div className="animate-slide-up" style={{ animationDelay: "0.06s" }}>
-          <PlayGeneratedShift daily={daily} chaos={chaos} weekly={weekly} comboCode={combo} />
+          <PlayGeneratedShift daily={daily} chaos={chaos} weekly={weekly} comboCode={combo} sharedCode={seed} />
         </div>
       </div>
     </ProtectedRoute>
