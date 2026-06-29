@@ -8,6 +8,7 @@ import type { Shift } from "./types";
 import type { ShiftResult, State } from "./engine";
 import { GOOD_STATUSES } from "./engine";
 import { CONCEPTS, conceptForItem } from "./concepts";
+import { getHistory } from "./stats";
 
 export interface ConceptStat { correct: number; total: number }
 type Store = Record<string, ConceptStat>;
@@ -152,6 +153,31 @@ export function getWeakestConcepts(n = 3): string[] {
 /** Whether any mastery data has been recorded yet (drives the empty state). */
 export function hasMasteryData(): boolean {
   return Object.keys(read()).length > 0;
+}
+
+// The letter grades a finished shift can earn (see lib/liondesk/scoring.ts). Used
+// to validate the grade parsed off a run-history entry before it counts as a
+// recent-performance signal.
+const VALID_GRADES = new Set(["S", "A", "B", "C", "D"]);
+
+/**
+ * The player's most recent shift letter grades, newest first, read from the run
+ * history (see lib/liondesk/stats.ts, where each finished shift logs a detail
+ * line that starts with its grade). Night runs carry no letter grade and are
+ * skipped. This is the recent-performance signal the adaptive generator pairs
+ * with the weakest-concepts list: a run of strong grades steps the next shift up,
+ * a run of weak ones eases it, to keep the player in productive struggle range.
+ * Client only, read only, grants nothing (the economy stays server authoritative).
+ */
+export function getRecentGrades(n = 5): string[] {
+  const out: string[] = [];
+  for (const e of getHistory()) {
+    if (e.kind !== "shift") continue;
+    const g = e.detail.trim().charAt(0).toUpperCase();
+    if (VALID_GRADES.has(g)) out.push(g);
+    if (out.length >= n) break;
+  }
+  return out;
 }
 
 // Re-exported so the review surface can label targeted concepts without a second

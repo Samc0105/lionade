@@ -246,3 +246,111 @@ export function generateWeakSpotsShift(opts: WeakSpotsOpts = {}): Shift {
     modifiers: [],
   };
 }
+
+// Adaptive difficulty (Idea 28). Letter grades map to points so a run of recent
+// grades averages into one number: S is the top, D the floor (see the grade
+// ladder in lib/liondesk/scoring.ts). The adaptive generator reads this average
+// to decide whether to step the next shift up, hold it, or ease it.
+const GRADE_POINTS: Record<string, number> = { S: 4, A: 3, B: 2, C: 1, D: 0 };
+
+export interface AdaptiveTuning {
+  /** The chosen move: 1 stepped up, 0 held steady, -1 eased off. */
+  step: -1 | 0 | 1;
+  /** Ticket count after the size nudge, clamped to the lab's 4 to 9 range. */
+  count: number;
+  /** SLA budget multiplier (above 1 looser, below 1 tighter). Undefined is the 1.0 baseline. */
+  slaScale?: number;
+  /** A short, user-facing summary of the tuning. No dashes. */
+  summary: string;
+}
+
+/**
+ * Decide how to tune the next shift from the player's recent letter grades, to
+ * hold them in productive struggle range. A run of strong clears (averaging
+ * roughly a B or better) steps the shift up: one more ticket and a tighter SLA
+ * clock. A run of struggles (averaging below a C) eases it: one fewer ticket and
+ * a more generous clock. A mixed or empty record holds steady at the baseline.
+ * Pure and deterministic with no side effects, so the UI can call it for a preview
+ * and the generator can call it to build the shift, and the two never disagree.
+ */
+export function adaptiveTuning(recentGrades: string[] = [], baseCount = 6): AdaptiveTuning {
+  const clampCount = (n: number) => Math.max(4, Math.min(9, n));
+  const pts = recentGrades.map((g) => GRADE_POINTS[g]).filter((p): p is number => p != null);
+  if (pts.length === 0) {
+    return { step: 0, count: clampCount(baseCount), summary: "No recent grades yet, so this one starts at a steady baseline." };
+  }
+  const avg = pts.reduce((a, b) => a + b, 0) / pts.length;
+  if (avg >= 2.5) {
+    return { step: 1, count: clampCount(baseCount + 1), slaScale: 0.85, summary: "Your recent grades are strong, so this one steps up: an extra ticket and a tighter clock." };
+  }
+  if (avg < 1.5) {
+    return { step: -1, count: clampCount(baseCount - 1), slaScale: 1.3, summary: "Your recent grades dipped, so this one eases off: one fewer ticket and a more generous clock." };
+  }
+  return { step: 0, count: clampCount(baseCount), summary: "Your recent grades are holding steady, so the difficulty holds too." };
+}
+
+export interface AdaptiveOpts {
+  /** Concept ids to bias toward, weakest first (from getWeakestConcepts). */
+  weakConcepts?: string[];
+  /** Recent letter grades, newest first (from getRecentGrades). Drives the size and SLA nudge. */
+  recentGrades?: string[];
+  seed?: number;
+  track?: Track;
+  /** Base ticket count before the adaptive nudge. Defaults to 6. */
+  count?: number;
+  name?: string;
+}
+
+/**
+ * Build an adaptive practice shift that tunes to the player. It biases item
+ * selection toward the concepts they handle worst (the same weak-concept
+ * partition as generateWeakSpotsShift) AND nudges size and SLA pressure from
+ * their recent grades (see adaptiveTuning) to hold them in productive struggle
+ * range. Reuses the shared ticket POOL, the seeded RNG, and expandChains, and
+ * skips the random mutator roll so the run stays focused. No economy: the Fangs
+ * and XP a solve previews are granted server side only, never from the client.
+ */
+export function generateAdaptiveShift(opts: AdaptiveOpts = {}): Shift {
+  const seed = (opts.seed ?? Math.floor(Math.random() * 1e9)) >>> 0;
+  const rnd = mulberry32(seed);
+  const tuning = adaptiveTuning(opts.recentGrades ?? [], opts.count ?? 6);
+  const count = tuning.count;
+  const weak = new Set(opts.weakConcepts ?? []);
+
+  const pool: PoolEntry[] = POOL.filter((p) => !opts.track || p.track === opts.track);
+  const shuffled = shuffle(pool, rnd);
+
+  // Same weak-concept partition as generateWeakSpotsShift: aim about 70% of the
+  // board at weak concepts, then top up from the rest so the queue is always full
+  // even when weak-concept tickets are scarce.
+  const onWeak: PoolEntry[] = [];
+  const rest: PoolEntry[] = [];
+  for (const p of shuffled) (weak.has(conceptForItem(p.item)) ? onWeak : rest).push(p);
+
+  const target = weak.size ? Math.max(1, Math.ceil(count * 0.7)) : 0;
+  const picked: PoolEntry[] = [];
+  for (const p of onWeak) { if (picked.length >= target) break; picked.push(p); }
+  for (const p of rest) { if (picked.length >= count) break; picked.push(p); }
+  for (const p of onWeak) { if (picked.length >= count) break; if (!picked.includes(p)) picked.push(p); }
+  const chosen = picked.slice(0, count);
+
+  const items: ShiftItem[] = chosen.map((p, i) => ({ ...p.item, arriveAfter: i < 3 ? 0 : (i - 2) * 18 }));
+  const expanded = expandChains(items);
+
+  return {
+    id: `adaptive-${seed}`,
+    track: opts.track ?? "helpdesk",
+    order: -1,
+    name: opts.name ?? "Adaptive Shift",
+    rank: "Adaptive Practice",
+    accent: "#A855F7",
+    durationSeconds: 600,
+    startingBudget: 3000,
+    inventory: MASTER_INVENTORY,
+    kb: MASTER_KB,
+    adUsers: MASTER_AD,
+    items: expanded,
+    slaScale: tuning.slaScale,
+    modifiers: [],
+  };
+}

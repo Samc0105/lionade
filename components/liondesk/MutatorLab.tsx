@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask, ShareNetwork, DeviceMobile, LinkSimple, WarningOctagon, type Icon } from "@phosphor-icons/react";
+import { ArrowLeft, FloppyDisk, Trash, Lightning, Shuffle, Flask, ShareNetwork, DeviceMobile, LinkSimple, WarningOctagon, Brain, type Icon } from "@phosphor-icons/react";
 import LionDesk from "@/components/liondesk/LionDesk";
-import { generateShift, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/generate";
+import { generateShift, generateAdaptiveShift, adaptiveTuning, MODIFIERS, type GenerateOpts } from "@/lib/liondesk/generate";
 import { getCombos, saveCombo, deleteCombo, type SavedCombo } from "@/lib/liondesk/savedCombos";
 import { encodeCombo, decodeCombo } from "@/lib/liondesk/combocode";
 import { recordShiftResult } from "@/lib/liondesk/stats";
-import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
+import { recordShiftConcepts, getWeakestConcepts, getRecentGrades } from "@/lib/liondesk/conceptMastery";
 import { recordPlayDay } from "@/lib/liondesk/playstreak";
 import AchievementBanner from "@/components/liondesk/AchievementBanner";
 import type { Shift } from "@/lib/liondesk/types";
@@ -47,13 +47,28 @@ export default function MutatorLab() {
   const [copied, setCopied] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [newAch, setNewAch] = useState<string[]>([]);
+  // One-line summary of what the adaptive generator decided for the current run,
+  // shown in the playing view. Null for every non-adaptive launch.
+  const [adaptiveNote, setAdaptiveNote] = useState<string | null>(null);
 
   useEffect(() => { setCombos(getCombos()); }, []);
 
   const trackOpt = (): Track | undefined => (track === "any" ? undefined : track);
   function play(opts: GenerateOpts) {
+    setAdaptiveNote(null);
     setLastOpts(opts);
     setShift(generateShift(opts));
+    setRunKey((k) => k + 1);
+  }
+  // Adaptive launch (Idea 28): bias the queue toward the player's weakest concepts
+  // and nudge size and SLA pressure from their recent grades. Both signals are read
+  // from local stores on click (never at first paint, so there is no flash of
+  // zero), and a fresh draw is rolled each launch and each replay.
+  function playAdaptive() {
+    const weakConcepts = getWeakestConcepts(3);
+    const recentGrades = getRecentGrades();
+    setAdaptiveNote(adaptiveTuning(recentGrades, count).summary);
+    setShift(generateAdaptiveShift({ track: trackOpt(), count, weakConcepts, recentGrades, name: "Adaptive Shift" }));
     setRunKey((k) => k + 1);
   }
   function toggle(id: string) {
@@ -93,6 +108,12 @@ export default function MutatorLab() {
           <ArrowLeft size={14} weight="bold" aria-hidden="true" /> back to the lab
         </button>
         <AchievementBanner ids={newAch} />
+        {adaptiveNote && (
+          <div className="rounded-lg border border-[#A855F7]/30 bg-[#A855F7]/[0.08] px-3 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C9A2F2] mb-0.5">adaptive</p>
+            <p className="text-cream/70 text-[12px] leading-snug">{adaptiveNote}</p>
+          </div>
+        )}
         {shift.modifiers && shift.modifiers.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">modifiers</span>
@@ -101,7 +122,7 @@ export default function MutatorLab() {
             ))}
           </div>
         )}
-        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); setNewAch(recordShiftResult(shift, r)); }} onReplay={() => play(lastOpts)} onExit={() => setShift(null)} />
+        <LionDesk key={`${shift.id}-${runKey}`} shift={shift} onComplete={(r, state: State) => { recordPlayDay(); recordShiftConcepts(shift, state); setNewAch(recordShiftResult(shift, r)); }} onReplay={() => (shift.id.startsWith("adaptive-") ? playAdaptive() : play(lastOpts))} onExit={() => setShift(null)} />
       </div>
     );
   }
@@ -161,6 +182,17 @@ export default function MutatorLab() {
               );
             })}
           </div>
+        </div>
+
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-1.5">adaptive</p>
+          <button onClick={playAdaptive} className="w-full text-left rounded-lg border p-2.5 transition-colors hover:bg-white/[0.04]" style={{ borderColor: "#A855F755" }}>
+            <div className="flex items-center gap-2">
+              <Brain size={16} weight="fill" color="#C9A2F2" aria-hidden="true" />
+              <span className="text-cream text-sm font-semibold">Adaptive shift</span>
+            </div>
+            <p className="text-cream/50 text-[11px] mt-1 leading-snug">Tunes to you. Biases the queue toward your weak concepts and nudges size and SLA pressure from your recent grades, to keep you in the productive struggle range.</p>
+          </button>
         </div>
 
         <div className="flex gap-2 flex-wrap pt-1">
