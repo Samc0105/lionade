@@ -451,7 +451,7 @@
     },
     "evidence": [
       {
-        "label": "Netflow — WKS-1042 outbound (last 6 min)",
+        "label": "Netflow: WKS-1042 outbound (last 6 min)",
         "lines": [
           "12:00:03  10.4.7.42:51002 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
           "12:01:03  10.4.7.42:51118 -> 185.220.101.7:443  cdn-update-sync.live  TLS  1.4 KB",
@@ -462,7 +462,7 @@
         ]
       },
       {
-        "label": "EDR process tree — WKS-1042",
+        "label": "EDR process tree: WKS-1042",
         "lines": [
           "svch0st.exe   PID 6612   parent: explorer.exe (user shell)   signed: NO",
           "  path: C:\\Users\\j.okafor\\AppData\\Local\\Temp\\svch0st.exe",
@@ -473,7 +473,7 @@
         ]
       },
       {
-        "label": "Threat intel lookup — cdn-update-sync.live",
+        "label": "Threat intel lookup: cdn-update-sync.live",
         "lines": [
           "WHOIS: registered 2 days ago (2026-06-24), privacy-proxy registrant, 1-year reg",
           "Category: UNCATEGORIZED. No CDN ASN. Hosted on a bulletproof VPS range.",
@@ -667,7 +667,7 @@
     },
     "evidence": [
       {
-        "label": "CI run #4417 (failed) — math-utils.test.js",
+        "label": "CI run #4417 (failed): math-utils.test.js",
         "lines": [
           "RUN  v ci-runner  branch=main  commit=a1f9c2e",
           "",
@@ -703,7 +703,7 @@
         ]
       },
       {
-        "label": "utils/range.test.js (the assertions — UNCHANGED this commit)",
+        "label": "utils/range.test.js (the assertions, UNCHANGED this commit)",
         "lines": [
           "// line 12",
           "it('sumRange adds inclusive bounds', () => {",
