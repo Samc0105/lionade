@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-29: Live-prod bug fixes (money race, forgot-password, front-door brand)
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Atomic Fang grant in `ninny/complete`** (stop the lost-grant race; now uses the `update_user_coins` RPC) | ✅ shipped to `main` | ✅ SHARED-BACKEND — iOS inherits the safer server-side grant automatically; no iOS client work. |
+| **Self-serve forgot-password** (`/forgot-password` -> `resetPasswordForEmail` -> `/reset-password`) | ✅ shipped | 🚫 N/A — iOS uses Sign in with Apple + native auth; no email/password reset surface to mirror. |
+| **Front-door brand fix** (landing "coins" -> Fangs, em-dashes stripped; `/login` "50K students" de-staled) | ✅ shipped | 🚫 N/A — web marketing/auth pages; no iOS counterpart. |
+
+---
+
 ## 2026-06-29: TechHub / LionDesk 40-feature sprint: WEB-ONLY by design (deliberate no-row)
 
 **Status:** Shipped to `main` (live getlionade.com), main tip `4033bb7`. The entire TechHub/LionDesk shift simulator at `/learn/techhub` is **web-only by design with no iOS parity obligation**, recorded here as a deliberate no-row decision. It is a desktop-OS/terminal simulator built for the web app; there is no planned iOS port, so there is no drift to track.
