@@ -128,7 +128,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save session" }, { status: 500 });
   }
 
-  const newCoins = (profile.coins ?? 0) + coinsEarned;
   const newXp = (profile.xp ?? 0) + xpEarned;
 
   // 3. Daily activity + streak (mirrors save-quiz-results step 5)
@@ -197,7 +196,6 @@ export async function POST(req: NextRequest) {
   const { error: profileUpdateErr } = await supabaseAdmin
     .from("profiles")
     .update({
-      coins: newCoins,
       xp: newXp,
       streak: newStreak,
       max_streak: newMaxStreak,
@@ -210,6 +208,26 @@ export async function POST(req: NextRequest) {
   if (profileUpdateErr) {
     console.error("[ninny/complete] profile update:", profileUpdateErr.message);
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
+  }
+
+  // Grant Fangs atomically via the shared RPC (matches save-quiz-results and the
+  // other earn paths). Coins are deliberately NOT written in the profile update
+  // above: a read-modify-write on coins lets two concurrent completions overwrite
+  // each other and silently destroy a grant. The RPC increments the balance in one
+  // atomic statement and returns the new total.
+  let newCoins = profile.coins ?? 0;
+  if (coinsEarned > 0) {
+    const { data: coinData, error: coinErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: coinsEarned,
+      p_min_balance: 0,
+      p_source: "cashable",
+    });
+    if (coinErr) {
+      console.error("[ninny/complete] coin grant:", coinErr.message);
+      return NextResponse.json({ error: "Failed to grant Fangs" }, { status: 500 });
+    }
+    newCoins = (Array.isArray(coinData) ? coinData[0]?.new_coins : (coinData as { new_coins: number } | null)?.new_coins) ?? newCoins;
   }
 
   // 4. Log coin transaction
