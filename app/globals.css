@@ -41,6 +41,87 @@ html {
   }
 }
 
+/* ── TechHub LionDesk: desk visual ambiance (idea 30) ──────────────────────
+   A calm ambient lighting wash sits behind the desk chrome, and a crimson
+   incident vignette fades in and pulses harder as Bridge Pressure climbs. Both
+   layers ride the desk root's own pseudo elements (the `.ld-ambient` hook in
+   components/liondesk/LionDesk.tsx), so they add zero markup and cannot shift
+   layout. They are GPU friendly: each paints a static gradient and only the
+   crimson layer animates (opacity only, no box-shadow or layout properties).
+   `isolation: isolate` turns the desk root into a stacking context so the
+   z-index:-1 layers tuck behind the in flow content while still painting above
+   the desk background, and the existing overflow hidden clips them to the
+   rounded desk. NightShift shares .ld-motion-scope but not .ld-ambient, so it
+   is untouched. The pulse and fade are frozen for motion sensitive players by
+   the scoped reduced motion rule at the end of this block. */
+.ld-ambient {
+  isolation: isolate;
+}
+
+.ld-ambient::before,
+.ld-ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Calm desk lighting: a cool electric glow from the top (overhead light plus
+   monitor wash) easing into a faint purple from below. Low contrast, static. */
+.ld-ambient::before {
+  background:
+    radial-gradient(125% 80% at 50% -12%, rgba(74, 144, 217, 0.07) 0%, transparent 55%),
+    radial-gradient(110% 70% at 50% 115%, rgba(168, 85, 247, 0.05) 0%, transparent 60%);
+}
+
+/* Incident red alert: a crimson edge vignette, hidden at rest. It fades in at
+   stage 1 and pulses on opacity at the higher stages. The static opacity on each
+   stage is the resting frame the pulse falls back to under reduced motion, so
+   the alert stays visible (just still) rather than snapping to invisible. */
+.ld-ambient::after {
+  opacity: 0;
+  background: radial-gradient(125% 105% at 50% 50%, transparent 52%, rgba(239, 68, 68, 0.22) 100%);
+  transition: opacity 600ms ease;
+}
+
+.ld-ambient[data-ld-alert="1"]::after {
+  opacity: 0.85;
+  background: radial-gradient(125% 105% at 50% 50%, transparent 54%, rgba(239, 68, 68, 0.16) 100%);
+}
+
+.ld-ambient[data-ld-alert="2"]::after {
+  opacity: 0.9;
+  background: radial-gradient(125% 105% at 50% 50%, transparent 50%, rgba(239, 68, 68, 0.24) 100%);
+  animation: ld-alert-pulse 2.6s ease-in-out infinite;
+}
+
+.ld-ambient[data-ld-alert="3"]::after {
+  opacity: 1;
+  background: radial-gradient(122% 105% at 50% 50%, transparent 46%, rgba(239, 68, 68, 0.32) 100%);
+  animation: ld-alert-pulse 1.7s ease-in-out infinite;
+}
+
+@keyframes ld-alert-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Snap the alert to its steady final frame: no pulse, no fade. The calm wash
+     is static already, so motion sensitive players get a still calm desk with a
+     steady crimson tint at the matching stage. */
+  .ld-motion-scope.ld-ambient::after {
+    animation: none !important;
+    transition: none;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Motion palette (source of truth — 2026-06-06)
    ───────────────────────────────────────────────────────────────────────────

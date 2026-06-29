@@ -4,7 +4,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type 
 import {
   EnvelopeSimple, Ticket, DeviceMobile, Package, BookBookmark, IdentificationBadge,
   Clock, CheckCircle, ArrowLeft, MagnifyingGlass, Lightning, Trophy, ArrowClockwise,
-  SpeakerHigh, SpeakerSlash, X, WarningOctagon, Compass, Gear,
+  SpeakerHigh, SpeakerSlash, X, WarningOctagon, Compass, Gear, ImageSquare, DownloadSimple, LinkSimple,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
@@ -14,6 +14,9 @@ import { managerReviewFor } from "@/lib/liondesk/managerReview";
 import { slaRemaining } from "@/lib/liondesk/scoring";
 import { CONCEPTS, conceptForItem } from "@/lib/liondesk/concepts";
 import { takeNextCoachMark, type CoachMarkDef } from "@/lib/liondesk/coachmarks";
+import { getTrack } from "@/lib/helpdesk/tracks";
+import { encodeCombo } from "@/lib/liondesk/combocode";
+import { renderShareCardDataUrl, renderShareCardBlob, shareCardFilename, type ShareCardData } from "@/lib/liondesk/shareCard";
 
 import {
   type ShiftResult, type State, type Action, type ItemRuntime, type ItemStatus,
@@ -332,8 +335,14 @@ export default function LionDesk({ shift, onComplete, onExit, onReplay, bankedFa
     return shift.items.filter((i) => i.channel === chan && landed(i) && !isTerminal(state.items[i.id].status)).length;
   };
 
+  // Desk visual ambiance (idea 30). The `ld-ambient` class hangs a calm CSS
+  // lighting wash and an incident crimson vignette on the desk root's pseudo
+  // elements (see app/globals.css). `data-ld-alert` carries the live Bridge
+  // Pressure stage (0..3) so the crimson layer fades in and pulses harder as the
+  // incident escalates. It is CSS only, adds no markup, and causes no layout
+  // shift; the pulse is gated by the .ld-motion-scope reduced motion rule.
   return (
-    <div className="ld-motion-scope relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
+    <div data-ld-alert={state.bridgeStage} className="ld-motion-scope ld-ambient relative rounded-2xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: shift.graveyard ? "#04060c" : (theme?.bg ?? "#070b14"), backgroundImage: (theme?.scanlines || shift.graveyard) ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)" : undefined }}>
       <style>{`@keyframes ld-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes ld-toast-life{0%{opacity:0;transform:translateY(8px)}6%{opacity:1;transform:translateY(0)}84%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}@keyframes ld-bridge-pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:inset 0 0 26px 0 rgba(239,68,68,0.28)}}.ld-bridge-pulse{animation:ld-bridge-pulse 1.8s ease-in-out infinite}.ld-bridge-fill{transition:width 600ms ease-out}@media (prefers-reduced-motion: reduce){.ld-bridge-fill{transition:none}.ld-bridge-pulse{animation:none}}`}</style>
       <StatusBar shift={shift} state={state} resolved={resolvedCount} total={liveItems.length} onEnd={() => dispatch({ t: "END" })} muted={muted} onToggleMute={toggleMute} ambient={ambient} onToggleAmbient={toggleAmbient} volume={volume} onVolume={changeVolume} settingsReady={settingsReady} />
       <BridgePressureBar state={state} />
@@ -1325,6 +1334,134 @@ function Toasts({ feed }: { feed: FeedEntry[] }) {
 
 /* ───────────────────────── shift report ───────────────────────── */
 
+// Build a replay link for the shift on screen. A generated Surprise shift carries
+// its seed in the id (generate.ts sets `surprise-<seed>`), so we rebuild the same
+// shareable seed code the share control above the desk uses for a rolled run: the
+// mutators come from the seed (chaos when three or more rolled), so for the rolled
+// path (surprise, daily, weekly, chaos) the code is byte for byte what
+// PlayGeneratedShift would produce. A hand picked Shared Combo (opened via
+// ?combo=) also lands on a `surprise-<seed>` id but applied its mutators verbatim,
+// so the rolled encoding here is only best effort for it until idea 30 passes an
+// exact code. A curated campaign shift has no seed, so we fall back to its track
+// page. Client only (reads window.location.origin); the report only ever renders
+// after a shift ends, never during SSR, so window is always present here.
+function replayUrlForShift(shift: Shift): string | null {
+  if (typeof window === "undefined") return null;
+  const origin = window.location.origin;
+  const m = /^surprise-(\d+)$/.exec(shift.id);
+  if (m) {
+    const seed = Number(m[1]) >>> 0;
+    const chaos = (shift.modifiers?.length ?? 0) >= 3;
+    const code = encodeCombo({ count: 6, modifierIds: [], seed, rolled: true, chaos });
+    if (code) return `${origin}/learn/techhub/surprise?seed=${code}`;
+  }
+  return `${origin}/learn/techhub/${shift.track}`;
+}
+
+// Idea 26: a shareable result card. Renders a static PNG (see lib/liondesk/
+// shareCard) summarizing the shift and offers a download plus a copy of the
+// replay link. It lives inside the focus trapped report dialog, so both controls
+// are reachable by keyboard without breaking the trap (they are ordinary buttons
+// the trap already enumerates). The image is static, so it is reduced motion
+// safe, and it grants nothing: the Fangs it prints are the same preview number
+// the report shows. No backend, web only.
+function ShareResultCard({ shift, grade, score, csat, fangs, resolved, total, difficultyLabel }: { shift: Shift; grade: string; score: number; csat: number; fangs: number; resolved: number; total: number; difficultyLabel: string }) {
+  const [status, setStatus] = useState("");
+  const statusTimer = useRef<number | null>(null);
+
+  function flash(msg: string) {
+    setStatus(msg);
+    if (statusTimer.current) window.clearTimeout(statusTimer.current);
+    statusTimer.current = window.setTimeout(() => setStatus(""), 3200);
+  }
+  useEffect(() => () => { if (statusTimer.current) window.clearTimeout(statusTimer.current); }, []);
+
+  function buildData(): ShareCardData {
+    // A `surprise-<seed>` id can come from a rolled run (replayable byte for byte
+    // from the seed) or from a hand picked Shared Combo opened via ?combo=, which
+    // applies its mutators verbatim and so does not reproduce exactly from the seed
+    // alone. The two are indistinguishable from the Shift object here, so the card
+    // says "Replay this shift" (true for both) rather than promising "exact" for a
+    // case it cannot guarantee. Idea 30 can pass an exact code prop and restore the
+    // exact wording once the comboCode path is reproducible.
+    const hasSeed = /^surprise-\d+$/.test(shift.id);
+    return {
+      trackLabel: getTrack(shift.track)?.name ?? shift.track,
+      shiftName: shift.name,
+      grade,
+      score,
+      csat,
+      fangs,
+      resolved,
+      total,
+      difficultyLabel,
+      accent: shift.accent ?? "#4A90D9",
+      replayLabel: hasSeed ? "Replay this shift" : "Train on the TechHub career tracks",
+    };
+  }
+
+  function save() {
+    // No busy guard: the download is idempotent, so a double click just re saves
+    // the same file. A guard set true then false in the same synchronous call would
+    // never render disabled (React batches it), so it would be dead state.
+    try {
+      const data = buildData();
+      // A synchronous data URL keeps the download inside the click gesture so it
+      // is never blocked (some browsers drop a programmatic download issued after
+      // an await). The temporary anchor is hidden and removed at once, so it never
+      // shows and cannot enter the dialog focus trap.
+      const dataUrl = renderShareCardDataUrl(data);
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = shareCardFilename(data);
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      flash("Result card saved to your downloads.");
+      // Best effort: also copy the PNG to the clipboard where supported. A failure
+      // is silent, the download already gave a reliable path on every browser.
+      if (typeof window !== "undefined" && "ClipboardItem" in window && navigator.clipboard?.write) {
+        renderShareCardBlob(data)
+          .then((blob) => navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]))
+          .then(() => flash("Result card saved and copied to your clipboard."))
+          .catch(() => {});
+      }
+    } catch {
+      flash("Could not build the card. Try again.");
+    }
+  }
+
+  function copyLink() {
+    const url = replayUrlForShift(shift);
+    if (!url || !navigator.clipboard?.writeText) { flash("Copy is not available here."); return; }
+    navigator.clipboard.writeText(url)
+      .then(() => flash("Replay link copied. Paste it anywhere to share."))
+      .catch(() => flash("Could not copy the link."));
+  }
+
+  return (
+    <div className="mb-4 rounded-xl border border-gold/20 bg-gold/[0.04] p-3.5">
+      <div className="flex items-center gap-2 mb-2">
+        <ImageSquare size={14} weight="fill" color="#FFD700" aria-hidden="true" />
+        <p className="font-mono text-[10px] uppercase tracking-wider text-gold">Share result card</p>
+      </div>
+      <p className="text-cream/55 text-[11px] leading-relaxed mb-2.5">
+        Save a card with your grade, score, and a Fangs preview, plus a link to replay this shift. The card is an image, nothing is granted.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={save} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gold/40 text-gold text-[11px] hover:bg-gold/10 transition-colors">
+          <DownloadSimple size={13} weight="bold" aria-hidden="true" /> Save image
+        </button>
+        <button type="button" onClick={copyLink} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 text-cream/80 text-[11px] hover:bg-white/[0.06] transition-colors">
+          <LinkSimple size={13} weight="bold" aria-hidden="true" /> Copy replay link
+        </button>
+      </div>
+      <p role="status" aria-live="polite" className="font-mono text-[10px] text-cream/50 mt-2 min-h-[1.2em]">{status}</p>
+    </div>
+  );
+}
+
 function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending }: { shift: Shift; state: State; onReplay?: () => void; onExit?: () => void; bankedFangs?: number | null; bankPending?: boolean }) {
   const live = shift.items.filter((i) => isLive(i, state.items));
   const resolved = live.filter((i) => ["resolved", "escalated", "archived", "reported"].includes(state.items[i.id].status));
@@ -1547,6 +1684,8 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
             Fangs and XP are a preview. They are granted for real once a shift is validated server-side, so the economy stays tamper-proof.
           </p>
         )}
+
+        <ShareResultCard shift={shift} grade={grade} score={score} csat={state.csat} fangs={state.fangs} resolved={resolved.length} total={live.length} difficultyLabel={DIFF[state.difficulty].label} />
 
         <div className="flex gap-2">
           <button onClick={() => (onReplay ? onReplay() : window.location.reload())} className="flex-1 min-h-[44px] rounded-xl font-bold text-sm text-[#04080F] flex items-center justify-center gap-2" style={{ background: "linear-gradient(135deg,#FFD700,#FFA500)" }}>
