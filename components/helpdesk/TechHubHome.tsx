@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
 import { computeUnlocked, ACHIEVEMENTS } from "@/lib/liondesk/stats";
 import { getPlayStreak } from "@/lib/liondesk/playstreak";
 import { getTodayStatus, getRecentDays, type DailyMode } from "@/lib/liondesk/dailyLog";
+import { getQuests, syncQuests } from "@/lib/liondesk/quests";
 import { trackIconFor } from "@/components/helpdesk/icons";
+import Board from "@/components/liondesk/Board";
 
 // The three deterministic shared modes shown on Today's Board, each matched to
 // its hub card's accent and entry route. Order: the two dailies, then weekly.
@@ -55,6 +57,26 @@ export default function TechHubHome() {
   const recentDays = useMemo(() => (mounted ? getRecentDays(14) : []), [mounted, version]);
   const todayCleared = todayStatus.filter((s) => s.cleared).length;
   const daysActive = recentDays.filter((d) => d.cleared > 0).length;
+
+  // Quests: today's + this week's rotating objectives with personal progress.
+  // getQuests is a pure read, so it is safe inside useMemo. Read only after mount
+  // (localStorage), keyed on `version` so the on-focus refresh re-evaluates them.
+  // Cosmetic only: clearing a quest grants a badge, never Fangs. The total is a
+  // fixed 3 daily + 2 weekly, so the pre-mount label shows the real "/5" rather
+  // than a misleading zero.
+  const quests = useMemo(() => (mounted ? getQuests() : { daily: [], weekly: [] }), [mounted, version]);
+  const questList = [...quests.daily, ...quests.weekly];
+  const questsDone = questList.filter((q) => q.done).length;
+  const questsTotal = questList.length;
+
+  // The side-effecting half of the quest read: persist period baselines and grant
+  // any cleared cosmetic badge. Kept out of the render-phase useMemo above so the
+  // memo stays pure. Runs after mount and on each focus refresh (version bump);
+  // syncQuests is idempotent and client-only.
+  useEffect(() => {
+    if (!mounted) return;
+    syncQuests();
+  }, [mounted, version]);
 
   return (
     <div className="space-y-6">
@@ -159,7 +181,94 @@ export default function TechHubHome() {
         </div>
       </div>
 
-      {/* Weekly Challenge — a shared gauntlet, fixed for the week. */}
+      {/* Quests: rotating daily + weekly objectives, the same set for everyone
+          today (seeded like the Daily Combo and Weekly Challenge). Clearing one
+          grants a collectible badge, never Fangs, so the economy stays
+          server-authoritative. Mount-guarded with skeleton rows so localStorage
+          progress never flashes zero. */}
+      <div
+        className="rounded-2xl p-4 sm:p-5"
+        style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(74,144,217,0.06) 55%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(168,85,247,0.22)" }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Target size={18} weight="fill" color="#C9A2F2" aria-hidden="true" />
+            <h2 className="font-bebas text-xl text-cream tracking-wider leading-none">QUESTS</h2>
+          </div>
+          <span className="font-mono text-[10px] tabular-nums text-cream/55">{mounted ? `${questsDone}/${questsTotal} done` : "…/5 done"}</span>
+        </div>
+        <p className="text-cream/55 text-[11px] mt-1.5">Fresh objectives every day and week, the same for everyone. Clear them to collect cosmetic badges. No Fangs, just bragging rights.</p>
+
+        <div className="mt-3 space-y-3">
+          {([
+            { tier: "daily" as const, heading: "Today", count: 3 },
+            { tier: "weekly" as const, heading: "This week", count: 2 },
+          ]).map((section) => {
+            const list = section.tier === "daily" ? quests.daily : quests.weekly;
+            return (
+              <div key={section.tier}>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-1.5">{section.heading}</p>
+                <div className="space-y-2">
+                  {!mounted
+                    ? Array.from({ length: section.count }).map((_, i) => (
+                        <div key={i} className="rounded-xl p-2.5 border border-white/[0.07] bg-white/[0.025]">
+                          <div className="flex items-center gap-2">
+                            <span className="w-3.5 h-3.5 rounded-full bg-white/10 motion-safe:animate-pulse" aria-hidden="true" />
+                            <span className="h-3 w-28 rounded bg-white/10 motion-safe:animate-pulse" aria-hidden="true" />
+                            <span className="ml-auto h-3 w-16 rounded bg-white/10 motion-safe:animate-pulse" aria-hidden="true" />
+                          </div>
+                          <div className="h-1 rounded-full bg-white/[0.06] mt-3" aria-hidden="true" />
+                        </div>
+                      ))
+                    : list.map((q) => {
+                        const pct = q.target > 0 ? Math.round((q.progress / q.target) * 100) : 0;
+                        return (
+                          <div
+                            key={q.id}
+                            className="rounded-xl p-2.5"
+                            style={{
+                              background: q.done ? `${q.badge.color}12` : "rgba(255,255,255,0.025)",
+                              border: `1px solid ${q.done ? `${q.badge.color}3a` : "rgba(255,255,255,0.07)"}`,
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              {q.done ? (
+                                <CheckCircle size={15} weight="fill" color={q.badge.color} aria-hidden="true" />
+                              ) : (
+                                <Circle size={15} weight="bold" className="text-cream/40" aria-hidden="true" />
+                              )}
+                              <p className="font-bebas text-base text-cream tracking-wide leading-none flex-1 min-w-0 truncate">{q.title}</p>
+                              <span
+                                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded flex-shrink-0"
+                                style={{ color: q.badge.color, background: `${q.badge.color}1a`, border: `1px solid ${q.badge.color}40` }}
+                                title={`Reward: ${q.badge.name} badge`}
+                              >
+                                <Medal size={11} weight="fill" aria-hidden="true" /> {q.badge.name}
+                              </span>
+                            </div>
+                            <p className="text-cream/55 text-[11px] mt-1">{q.desc}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="flex-1 h-1 rounded-full overflow-hidden bg-white/10">
+                                <span className="block h-full" style={{ width: `${pct}%`, background: q.done ? q.badge.color : "linear-gradient(90deg,#A855F7,#4A90D9)" }} />
+                              </span>
+                              <span className="font-mono text-[10px] tabular-nums text-cream/55 flex-shrink-0">{q.progress}/{q.target}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* The Board: a server-ranked leaderboard for the three shared modes, sat
+          right under Today's Board. It ranks grades and scores, grants nothing,
+          and shows a clean preview until the held leaderboard migration is live. */}
+      <Board />
+
+      {/* Weekly Challenge: a shared gauntlet, fixed for the week. */}
       <Link href="/learn/techhub/surprise?weekly=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(239,68,68,0.08) 55%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.35)" }}>
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.45)" }}>
@@ -176,7 +285,7 @@ export default function TechHubHome() {
         </div>
       </Link>
 
-      {/* Combination modes — a different mix of tickets + mutators every session. */}
+      {/* Combination modes: a different mix of tickets + mutators every session. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Link href="/learn/techhub/surprise?daily=1" className="group block rounded-2xl p-4 transition-colors" style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.14) 0%, rgba(168,85,247,0.06) 60%, rgba(12,16,32,0.95) 100%)", border: "1px solid rgba(255,215,0,0.3)" }}>
           <div className="flex items-center gap-3">
@@ -269,7 +378,7 @@ export default function TechHubHome() {
         </Link>
       )}
 
-      {/* Night Shift — the FNAF-style monitoring mode. */}
+      {/* Night Shift: the FNAF-style monitoring mode. */}
       <Link
         href="/learn/techhub/nightshift"
         className="group block rounded-2xl p-4 transition-colors"

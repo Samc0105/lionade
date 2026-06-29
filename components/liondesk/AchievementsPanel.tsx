@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trophy, LockSimple, CheckCircle, Lightning } from "@phosphor-icons/react";
+import { Trophy, LockSimple, CheckCircle, Lightning, Medal } from "@phosphor-icons/react";
 import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, getCareerLevel, type TechhubStats, type HistoryEntry, type CareerLevel } from "@/lib/liondesk/stats";
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
 import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked, unlockedStreakIds } from "@/lib/liondesk/themes";
+import { QUEST_BADGES, getEarnedQuestBadgeIds } from "@/lib/liondesk/quests";
 import { getPlayStreak, STREAK_MILESTONES, type PlayStreak } from "@/lib/liondesk/playstreak";
 import { isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getReputation, REP_DEPTS } from "@/lib/liondesk/reputation";
@@ -20,6 +21,7 @@ export default function AchievementsPanel() {
   const [soundOn, setSoundOn] = useState(true);
   const [reputation, setReputation] = useState<Record<string, number>>({});
   const [streak, setStreak] = useState<PlayStreak>({ current: 0, best: 0, lastDay: "" });
+  const [questBadges, setQuestBadges] = useState<string[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -32,6 +34,7 @@ export default function AchievementsPanel() {
     setSoundOn(!isMuted());
     setReputation(getReputation());
     setStreak(getPlayStreak());
+    setQuestBadges(getEarnedQuestBadgeIds());
   }, []);
 
   function equip(id: string) {
@@ -51,6 +54,9 @@ export default function AchievementsPanel() {
 
   // Streak themes resolve via "streak:N" ids merged into the achievement set.
   const themeUnlocked = mounted ? [...unlocked, ...unlockedStreakIds(streak.best)] : [];
+  // Cosmetic quest badges earned from the daily/weekly quests on the hub.
+  const earnedBadges = new Set(mounted ? questBadges : []);
+  const earnedBadgeCount = mounted ? questBadges.length : 0;
   const streakThemeName = (m: number) => THEMES.find((t) => t.unlock === `streak:${m}`)?.name ?? null;
   const nextMilestone = STREAK_MILESTONES.find((m) => streak.best < m) ?? null;
   const remaining = nextMilestone ? nextMilestone - streak.current : 0;
@@ -193,6 +199,35 @@ export default function AchievementsPanel() {
                 </div>
                 {!ok && need && <p className="font-mono text-[9px] text-cream/40 mt-1">unlock: {need}</p>}
               </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* quest badges (cosmetic, earned from the daily/weekly quests on the hub).
+          A separate collection from the desk themes; never grants Fangs. Static
+          styling, so it is reduced-motion safe by construction. */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">quest badges</p>
+          <span className="font-mono text-[10px] tabular-nums text-cream/45">{mounted ? `${earnedBadgeCount} / ${QUEST_BADGES.length}` : "…"}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {QUEST_BADGES.map((b) => {
+            const got = earnedBadges.has(b.id);
+            return (
+              <div
+                key={b.id}
+                className={`rounded-lg border px-3 py-2 ${got ? "" : "opacity-45"}`}
+                style={{ borderColor: got ? `${b.color}66` : "rgba(255,255,255,0.06)", background: got ? `${b.color}12` : "rgba(255,255,255,0.015)" }}
+              >
+                <div className="flex items-center gap-2">
+                  {mounted && (got ? <Medal size={15} weight="fill" color={b.color} aria-hidden="true" /> : <LockSimple size={13} weight="fill" color="#6B7280" aria-hidden="true" />)}
+                  <span className="text-cream text-sm">{b.name}</span>
+                  <span className="font-mono text-[8px] uppercase tracking-wider px-1 py-0.5 rounded" style={{ color: b.color, background: `${b.color}1a` }}>{b.tier}</span>
+                </div>
+                <p className="font-mono text-[9px] text-cream/40 mt-1">{b.desc}</p>
+              </div>
             );
           })}
         </div>
