@@ -20,6 +20,13 @@ export const THEMES: DeskTheme[] = [
   { id: "holo", name: "Holo", unlock: "beloved", bg: "#04121a", scanlines: true },
   { id: "crimson", name: "Crimson", unlock: "iron-desk", bg: "#140404", scanlines: true },
   { id: "legend", name: "Gold Desk", unlock: "desk-legend", bg: "#0c0a04" },
+  // Streak-gated cosmetics, unlocked by your best daily play streak (the
+  // "streak:N" ids resolve via unlockedStreakIds + lib/liondesk/playstreak.ts).
+  // Purely cosmetic progression, never any Fangs.
+  { id: "ember", name: "Ember", unlock: "streak:3", bg: "#120803", scanlines: true },
+  { id: "blaze", name: "Blaze", unlock: "streak:7", bg: "#170a02", scanlines: true },
+  { id: "solar", name: "Solar Flare", unlock: "streak:14", bg: "#1a0b02", scanlines: true },
+  { id: "supernova", name: "Supernova", unlock: "streak:30", bg: "#0b0416" },
 ];
 
 const KEY = "lionade.techhub.theme.v1";
@@ -52,4 +59,17 @@ export function setEquippedTheme(id: string): void {
 
 export function isThemeUnlocked(theme: DeskTheme, unlocked: string[]): boolean {
   return theme.unlock === null || unlocked.includes(theme.unlock);
+}
+
+/**
+ * Streak unlock ids satisfied by a best streak of `best` days. Merge these into
+ * the achievement unlock set before calling isThemeUnlocked so the streak-gated
+ * themes resolve. Gated on best (not current) so an earned cosmetic stays
+ * unlocked even after the streak lapses.
+ */
+export function unlockedStreakIds(best: number): string[] {
+  return THEMES
+    .map((t) => t.unlock)
+    .filter((u): u is string => !!u && u.startsWith("streak:"))
+    .filter((u) => best >= Number(u.split(":")[1]));
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trophy, LockSimple, CheckCircle } from "@phosphor-icons/react";
+import { Trophy, LockSimple, CheckCircle, Lightning } from "@phosphor-icons/react";
 import { ACHIEVEMENTS, computeUnlocked, getStats, getHistory, getCareerLevel, type TechhubStats, type HistoryEntry, type CareerLevel } from "@/lib/liondesk/stats";
 import { getMaxNightSurvived, getEndlessBest } from "@/lib/liondesk/nightshift";
-import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked } from "@/lib/liondesk/themes";
+import { THEMES, getEquippedThemeId, setEquippedTheme, isThemeUnlocked, unlockedStreakIds } from "@/lib/liondesk/themes";
+import { getPlayStreak, STREAK_MILESTONES, type PlayStreak } from "@/lib/liondesk/playstreak";
 import { isMuted, setMuted } from "@/lib/liondesk/sound";
 import { getReputation, REP_DEPTS } from "@/lib/liondesk/reputation";
 
@@ -18,6 +19,7 @@ export default function AchievementsPanel() {
   const [career, setCareer] = useState<CareerLevel | null>(null);
   const [soundOn, setSoundOn] = useState(true);
   const [reputation, setReputation] = useState<Record<string, number>>({});
+  const [streak, setStreak] = useState<PlayStreak>({ current: 0, best: 0, lastDay: "" });
 
   useEffect(() => {
     setMounted(true);
@@ -29,6 +31,7 @@ export default function AchievementsPanel() {
     setCareer(getCareerLevel());
     setSoundOn(!isMuted());
     setReputation(getReputation());
+    setStreak(getPlayStreak());
   }, []);
 
   function equip(id: string) {
@@ -45,6 +48,21 @@ export default function AchievementsPanel() {
   const got = mounted ? unlocked.length : 0;
   const pct = Math.round((got / total) * 100);
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  // Streak themes resolve via "streak:N" ids merged into the achievement set.
+  const themeUnlocked = mounted ? [...unlocked, ...unlockedStreakIds(streak.best)] : [];
+  const streakThemeName = (m: number) => THEMES.find((t) => t.unlock === `streak:${m}`)?.name ?? null;
+  const nextMilestone = STREAK_MILESTONES.find((m) => streak.best < m) ?? null;
+  const remaining = nextMilestone ? nextMilestone - streak.current : 0;
+  const streakNote = !mounted
+    ? "…"
+    : streak.current >= 1
+      ? nextMilestone
+        ? `${remaining} day${remaining === 1 ? "" : "s"} to ${streakThemeName(nextMilestone) ?? "the next reward"}. Clock in daily to keep it alive.`
+        : `Every streak theme unlocked. Keep clocking in to hold your best of ${streak.best} days.`
+      : streak.best > 0
+        ? `Your streak lapsed at ${streak.best} days. Clear a shift today to start it again.`
+        : "Clear a shift today to start a streak. Reach 3, 7, 14, and 30 days to unlock desk themes.";
 
   const tiles = [
     { label: "shifts cleared", value: stats?.shiftsCleared ?? 0 },
@@ -98,6 +116,35 @@ export default function AchievementsPanel() {
         ))}
       </div>
 
+      {/* streak milestones */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">streak milestones</p>
+        <div className="rounded-2xl border border-orange-400/25 bg-orange-400/[0.05] p-4">
+          <div className="flex items-center gap-3">
+            <Lightning size={24} weight="fill" color="#FB923C" aria-hidden="true" />
+            <div className="flex-1 min-w-0">
+              <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{mounted ? `${streak.current}-day streak` : "…"}</p>
+              <p className="font-mono text-[10px] text-cream/45 mt-1">{streakNote}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+            {STREAK_MILESTONES.map((m) => {
+              const reached = mounted && streak.best >= m;
+              const name = streakThemeName(m);
+              return (
+                <div key={m} className="rounded-lg border p-2.5 text-center" style={{ borderColor: reached ? "rgba(251,146,60,0.4)" : "rgba(255,255,255,0.07)", background: reached ? "rgba(251,146,60,0.06)" : "rgba(255,255,255,0.015)" }}>
+                  <div className="flex items-center justify-center gap-1">
+                    {mounted && (reached ? <CheckCircle size={14} weight="fill" color="#FB923C" aria-hidden="true" /> : <LockSimple size={12} weight="fill" color="#6B7280" aria-hidden="true" />)}
+                    <span className="font-bebas text-lg tabular-nums text-cream leading-none">{m}</span>
+                  </div>
+                  <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45 mt-1">{name ? `${name} theme` : `${m} days`}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* department reputation */}
       <div>
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">department reputation</p>
@@ -130,9 +177,13 @@ export default function AchievementsPanel() {
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mb-2">desk themes</p>
         <div className="flex flex-wrap gap-2">
           {THEMES.map((t) => {
-            const ok = mounted && isThemeUnlocked(t, unlocked);
+            const ok = mounted && isThemeUnlocked(t, themeUnlocked);
             const on = equipped === t.id;
-            const need = t.unlock ? ACHIEVEMENTS.find((a) => a.id === t.unlock)?.name ?? t.unlock : null;
+            const need = t.unlock
+              ? t.unlock.startsWith("streak:")
+                ? `${t.unlock.split(":")[1]} day streak`
+                : ACHIEVEMENTS.find((a) => a.id === t.unlock)?.name ?? t.unlock
+              : null;
             return (
               <button key={t.id} disabled={!ok} onClick={() => equip(t.id)} className={`rounded-lg border px-3 py-2 text-left transition-colors ${on ? "border-gold/60 bg-gold/10" : ok ? "border-white/12 hover:bg-white/[0.05]" : "border-white/[0.06] opacity-40 cursor-not-allowed"}`}>
                 <div className="flex items-center gap-2">
