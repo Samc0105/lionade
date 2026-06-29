@@ -102,7 +102,10 @@ export async function POST(req: NextRequest) {
       type: "arena_challenge",
       title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
       message: `${safeWager} Fangs wager`,
-      action_url: "/social",
+      // Land the recipient on the duel lobby, which already has the incoming
+      // challenge poll + Accept/Decline cards + join-match flow. Pointing at
+      // /social was a dead end (no accept UI there), so duels never closed.
+      action_url: "/compete/arena/duel",
       related_user_id: challengerId,
     });
 
