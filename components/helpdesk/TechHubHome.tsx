@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal, Scroll, UsersThree, BookOpen } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal, Scroll, UsersThree, BookOpen, Compass } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -11,6 +11,7 @@ import { getPlayStreak } from "@/lib/liondesk/playstreak";
 import { getTodayStatus, getRecentDays, type DailyMode } from "@/lib/liondesk/dailyLog";
 import { getQuests, syncQuests } from "@/lib/liondesk/quests";
 import { activeSeasonalDef, syncSeasonalRewards, isSeasonalShiftCleared, SEASONAL_DEFS } from "@/lib/liondesk/seasonal";
+import { hasTakenPlacement } from "@/lib/liondesk/placement";
 import { trackIconFor } from "@/components/helpdesk/icons";
 import Board from "@/components/liondesk/Board";
 
@@ -50,6 +51,13 @@ export default function TechHubHome() {
   const achGot = mounted ? computeUnlocked().length : 0;
   const achPct = Math.round((achGot / achTotal) * 100);
   const streak = useMemo(() => (mounted ? getPlayStreak() : { current: 0, best: 0, lastDay: "" }), [mounted, version]);
+
+  // Whether the player has taken the placement test. Read only after mount
+  // (localStorage), keyed on `version` so the on-focus refresh re-evaluates it.
+  // Drives the "Find your track" nudge for newcomers, which hides itself once the
+  // test is taken. False before mount, but the nudge is mount-guarded below, so
+  // nothing flashes.
+  const takenPlacement = useMemo(() => (mounted ? hasTakenPlacement() : false), [mounted, version]);
 
   // Today's Board: which shared modes are cleared today + the last 14 days for
   // the clock-in calendar. Read only after mount (localStorage), so before mount
@@ -100,6 +108,23 @@ export default function TechHubHome() {
         </div>
         <ArrowRight size={14} weight="bold" color="#2BBE6B" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
       </Link>
+
+      {/* Placement test (Idea 40): a discoverable nudge for newcomers who have not
+          taken it yet. A short mixed concept quiz recommends a starting track and
+          difficulty, then deep links them in. Mount-guarded and keyed on the
+          localStorage "taken" flag, so it appears only after mount (no flash) and
+          hides itself once the player has taken the test. Advisory only, grants
+          nothing (the economy stays server-authoritative). */}
+      {mounted && !takenPlacement && (
+        <Link href="/learn/techhub/placement" className="group flex items-center gap-3 rounded-2xl border border-[#A855F7]/30 bg-[#A855F7]/[0.06] p-3 hover:bg-[#A855F7]/[0.10] transition-colors">
+          <Compass size={20} weight="fill" color="#C9A2F2" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="font-syne font-semibold text-sm text-cream">New here? Find your track</p>
+            <p className="text-cream/55 text-[11px]">Answer a few quick questions and we will recommend where to start.</p>
+          </div>
+          <ArrowRight size={14} weight="bold" color="#C9A2F2" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+      )}
 
       {/* This week's special: a seasonal, limited-time themed shift that rotates
           in by the calendar (lib/liondesk/seasonal.ts). The window is
