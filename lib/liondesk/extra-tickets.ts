@@ -351,6 +351,238 @@ export const EXTRA_TICKETS: { item: ShiftItem; track: Track }[] = [
       ],
     },
   },
+
+  // ── SOC / SWE / Red Team get track-appropriate surfaces. These three tracks
+  // were terminal-only across most shifts, so the pool drew them as flat
+  // tickets. The items below give SOC an email phishing chain, SWE an on-call
+  // chain plus a stakeholder phone call, and Red Team a vishing call plus a
+  // phishing-simulation email where the win is a reported finding. Every
+  // kbArticleId reuses an article that already lives in a registered shift, so
+  // it resolves in MASTER_KB without touching pool.ts. Preview-only: nothing
+  // here grants live Fangs.
+
+  // SOC: a user-reported phish (email) whose correct quarantine reveals the
+  // fallout chain (two accounts already submitted credentials). Triage, then
+  // contain.
+  {
+    track: "soc",
+    item: {
+      id: "soc-phish-docusign",
+      channel: "email",
+      priority: "P2",
+      from: { name: "Reported by rkapoor", role: "user-reported phish" },
+      subject: "User reported: 'shared document, do I sign in?'",
+      slaMinutes: 25,
+      arriveAfter: 0,
+      reward: 44,
+      xp: 36,
+      email: {
+        isPhish: true,
+        body: "Forwarded by an employee: an email says a colleague shared a document and they must sign in with their work account at a link to open it. The page looked like our login. They are asking if it is safe before entering anything.",
+      },
+      evidence: [
+        { label: "Headers of the reported message", lines: ["From: Document Share <noreply@secure-doc-share.co>", "SPF: FAIL   DKIM: FAIL", "Link host: secure-doc-share.co/login  (not our domain)", "Landing page clones our sign in screen", "Delivered to: 64 internal recipients"] },
+      ],
+      kbArticleId: "kb-alert-triage",
+      goal: "The user reported before entering anything. Decide and act.",
+      hint: "Headers fail, the domain is a lookalike, the page clones your login, and it hit 64 mailboxes. That last number sets the scope of your action.",
+      actions: [
+        { id: "quarantine-block", label: "Confirm phishing, quarantine it from all 64 mailboxes, and block the lookalike domain", correct: true, csat: 13, outcome: "reported", teach: "Right. It fails SPF and DKIM, the domain is a lookalike, and the page is a credential harvest. Quarantine org wide so the other 63 cannot fall for it, block the domain, and thank the reporter. The job is not done yet though: someone may have entered credentials before you pulled it." },
+        { id: "warn-one", label: "Reply telling the one reporter not to sign in, then close it", correct: false, csat: -5, teach: "You protected the one person who asked. The other 63 still have a live credential trap in their inbox. When a phish hits many mailboxes, pull it for everyone." },
+        { id: "close-noclick", label: "Close it benign since the reporter did not enter anything", correct: false, csat: -8, teach: "One careful reporter is luck, not safety. The headers fail and the page harvests credentials. This needs an org wide quarantine, not a close." },
+      ],
+      chainOnResolve: {
+        id: "soc-phish-fallout",
+        channel: "ticket",
+        priority: "P1",
+        from: { name: "Identity alert", role: "SIEM" },
+        subject: "Two accounts signed in from the phishing host",
+        slaMinutes: 15,
+        arriveAfter: 0,
+        reward: 48,
+        xp: 40,
+        ticketBody: "After the quarantine, the SIEM correlated sign ins: two users submitted their credentials to the harvest page before you pulled it, and both accounts then logged in from the attacker's hosting IP.",
+        evidence: [
+          { label: "Identity events", lines: ["2 users entered credentials on secure-doc-share.co before quarantine", "Both accounts: successful sign in from 203.0.113.45 (the phish host)", "One account already created an inbox forwarding rule to an external address", "Normal sign ins for both are internal only"] },
+        ],
+        commands: [
+          { aliases: ["timeline", "siem", "query"], output: "2 credential submissions to the harvest page, then 2 successful external sign ins from 203.0.113.45. One mailbox has a new auto forward rule to an outside address. The sessions are live.", step: "diag" },
+          { aliases: ["whois", "geo"], output: "203.0.113.45: hosting provider, same IP fronting the phishing domain. Not a corporate egress." },
+        ],
+        kbArticleId: "kb-account-compromise",
+        goal: "Two accounts are compromised. Contain them the right way.",
+        hint: "They have valid sessions now, and one already set up forwarding. Resetting the password alone leaves the live session and the rule in place.",
+        actions: [
+          { id: "contain-accounts", label: "Force a reset on both accounts, revoke their active sessions, and remove the malicious forwarding rule", correct: true, requires: ["diag"], csat: 16, teach: "Full containment. The credentials are burned, so reset them, but a reset alone leaves the attacker's existing session alive, so revoke sessions too. The forwarding rule is how they keep reading mail after you lock them out, so delete it. That is the complete cleanup." },
+          { id: "reset-only", label: "Reset both passwords and close it", correct: false, csat: -7, teach: "A reset does not kill a session that is already signed in, and it does nothing about the forwarding rule still copying their mail out. Revoke the sessions and remove the rule too." },
+          { id: "monitor-only", label: "Just watch the accounts for more activity", correct: false, csat: -10, teach: "Watching a live, attacker controlled session while mail forwards out is letting the breach run. Contain first: reset, revoke, and kill the rule, then investigate." },
+        ],
+      },
+    },
+  },
+
+  // SWE: an on-call OOM crash loop (rollback to stop the bleeding) that reveals
+  // a postmortem follow-up, so the lesson is stop the fire, then learn from it.
+  {
+    track: "swe",
+    item: {
+      id: "swe-oom-crashloop",
+      channel: "ticket",
+      priority: "P1",
+      from: { name: "PagerDuty", role: "alert" },
+      subject: "api pods OOMKilled in a crash loop",
+      slaMinutes: 15,
+      arriveAfter: 0,
+      reward: 50,
+      xp: 42,
+      ticketBody: "The API is crash looping. Pods start, memory climbs, the kernel kills them, they restart, repeat. It started right after the 13:50 deploy. Customers are seeing intermittent 503s.",
+      evidence: [
+        { label: "Pod and deploy timeline", lines: ["13:50  deploy v4.1.0 (added an in memory response cache)", "13:54  memory per pod climbing without leveling off", "13:57  first OOMKilled, restart, climbs again", "Now: steady crash loop, intermittent 503s", "last known good: v4.0.7"] },
+      ],
+      commands: [
+        { aliases: ["mem", "top", "metrics"], output: "Heap grows steadily after each restart and never plateaus. The new response cache has no size bound or eviction, so it grows until the pod is OOMKilled.", step: "diag" },
+        { aliases: ["diff", "changelog"], output: "v4.1.0 added an in memory cache keyed per request with no max size and no TTL. That is the only memory relevant change in the release." },
+      ],
+      kbArticleId: "kb-rollback",
+      goal: "You are on fire. Do the right thing first.",
+      hint: "The deploy and the crash loop line up, and the cache grows unbounded. Under an active incident, what stops the bleeding fastest and safest?",
+      actions: [
+        { id: "rollback-oom", label: "Roll back to the last known good release (v4.0.7) and confirm the pods stabilize", correct: true, requires: ["diag"], csat: 16, teach: "Correct on call instinct. Roll back to known good to stop the crash loop now, watch memory level off and the 503s clear, then fix the unbounded cache calmly. Stop the fire before you study it." },
+        { id: "raise-mem-limit", label: "Raise the pod memory limit so they stop getting killed", correct: false, csat: -8, teach: "An unbounded cache fills any limit you give it, just a little later. You would buy minutes and still crash, with a bigger blast radius. Roll back, then bound the cache." },
+        { id: "restart-pods-oom", label: "Just keep restarting the pods until it settles", correct: false, csat: -7, teach: "Each fresh pod climbs and dies the same way because the bad code ships in every one. Restarting is not a fix. Roll back to known good." },
+      ],
+      chainOnResolve: {
+        id: "swe-oom-postmortem",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Incident bot", role: "follow up task" },
+        subject: "Write the postmortem for the OOM incident",
+        slaMinutes: 40,
+        arriveAfter: 0,
+        reward: 36,
+        xp: 30,
+        ticketBody: "The rollback stopped the bleeding and the API is healthy. The incident is not closed until there is a postmortem, so this does not ship again on the next deploy.",
+        evidence: [
+          { label: "What you know", lines: ["Root cause: unbounded in memory cache in v4.1.0 (no max size, no TTL)", "Detection gap: no alert fired on memory until pods were already dying", "The rollback fixed the symptom, not the cache", "Same code will redeploy unless the cause and the gap are addressed"] },
+        ],
+        kbArticleId: "kb-rollback",
+        goal: "Close the loop the right way.",
+        hint: "A rollback stops the bleeding. What turns this incident into something the team actually learns from?",
+        actions: [
+          { id: "blameless-pm", label: "Write a blameless postmortem: timeline, root cause, and action items (bound and expire the cache, add a memory alert, add a regression test)", correct: true, csat: 14, teach: "That is how an incident becomes a lesson. A blameless writeup with concrete action items means the cache gets a real bound, an alert catches memory growth next time, and a test stops the regression. The rollback bought time, this is what spends it well." },
+          { id: "blame-author", label: "Name the engineer who wrote the cache so it is on their record", correct: false, csat: -9, teach: "Blame kills the honesty an incident review depends on. People stop reporting and root causes hide. Postmortems are blameless on purpose: fix the system, not the person." },
+          { id: "skip-pm", label: "The rollback worked, mark it resolved and move on", correct: false, csat: -7, teach: "The rollback only undid the symptom. The unbounded cache is still in the codebase and ships again on the next deploy. Without the postmortem and its fixes, you will be paged for this exact thing again." },
+        ],
+      },
+    },
+  },
+
+  // SWE: a panicked product-manager call. The patience meter and one scoping
+  // question separate a real but tiny bug from the "everything is on fire" the
+  // caller believes. The lesson is severity is measured, not caught.
+  {
+    track: "swe",
+    item: {
+      id: "swe-call-pm-sev",
+      channel: "phone",
+      priority: "P2",
+      from: { name: "Dana Okafor", role: "Product Manager" },
+      subject: "PM says checkout is totally broken",
+      slaMinutes: 20,
+      arriveAfter: 0,
+      reward: 44,
+      xp: 36,
+      phone: {
+        opener: "Hey, I am seeing tweets that checkout is completely broken and we are losing money every minute. You have to drop everything and fix this right now.",
+        followups: [
+          { label: "Which exact step fails, and is it every checkout or only some?", reply: "Let me actually try it... oh. Regular checkout goes through fine. It is only the promo code box, and only when people type the old SUMMER code that expired.", correct: true },
+          { label: "Should I roll back the last release to be safe?", reply: "I do not know, you are the engineer, you tell me. I just need it fixed." },
+          { label: "Can you forward me all the angry tweets first?", reply: "I mean, sure, but people are upset right now, can you just look at it?" },
+        ],
+      },
+      evidence: [
+        { label: "What your dashboards show", lines: ["Overall error rate: 0.2% (normal)", "Checkout success rate: 99.1% (normal)", "One endpoint logging some 400s: POST /api/promo", "No deploy in the last 18 hours"] },
+      ],
+      goal: "Find out what is actually broken, then respond at the right size.",
+      hint: "The caller is panicking, but your dashboards look calm. Ask one scoping question to find the real blast radius before you react.",
+      actions: [
+        { id: "right-size", label: "Triage it accurately: a scoped, low severity bug (an expired promo code returns a 400), log it at the right priority, ship a normal fix, and tell the PM what you found", correct: true, requires: ["phone"], csat: 14, teach: "Right call under pressure. The dashboards were calm and the scoping question pinned it: one expired promo code returning a 400, not an outage. You logged a real but small bug, set a realistic expectation with the PM, and did not torch your day over a panic. Severity is something you measure, not something you catch from the caller." },
+        { id: "declare-sev1", label: "Declare a Sev1 and roll back the last deploy immediately", correct: false, requires: ["phone"], csat: -7, teach: "You scoped it: one expired promo code returning a 400, with no deploy in 18 hours. Declaring a Sev1 and rolling back healthy code anyway is a big overreaction that risks real regressions. Match the response to the blast radius you measured." },
+        { id: "dismiss-pm", label: "Brush it off as nothing and tell the PM to stop panicking", correct: false, csat: -6, teach: "You pinned a real bug, small as it is. Brushing the PM off and not logging it loses their trust and leaves the expired code error in place. Right size the response, do not zero it out." },
+      ],
+    },
+  },
+
+  // Red Team: an authorized vishing call to the help desk. The patience meter is
+  // the agent's willingness to keep talking; the smooth in scope pretext proves
+  // the weakness (no identity check before a reset). The win is a reported
+  // finding, never a real account takeover.
+  {
+    track: "redteam",
+    item: {
+      id: "rt-vishing-helpdesk",
+      channel: "phone",
+      priority: "P2",
+      from: { name: "Help desk (Priya)", role: "Authorized vishing test, in scope" },
+      subject: "Authorized vishing call to the help desk",
+      slaMinutes: 25,
+      arriveAfter: 0,
+      reward: 44,
+      xp: 36,
+      phone: {
+        opener: "IT Help Desk, this is Priya. How can I help you today?",
+        followups: [
+          { label: "Hi Priya, this is the test account holder from the engagement. I am locked out and need a password reset. What do you need to verify it is really me?", reply: "Oh, no problem at all, I can reset that for you right now. What would you like the new password to be? (She never asked for any ID.)", correct: true },
+          { label: "This is corporate security and I am ordering you to hand over the admin credentials immediately.", reply: "Um, that does not sound right. Let me get my supervisor on the line first." },
+          { label: "While you are at it, can you read me the home addresses of the executive team?", reply: "Why would you need that? I am not comfortable with this call." },
+        ],
+      },
+      evidence: [
+        { label: "Signed engagement scope", lines: ["IN SCOPE: vishing the help desk using the agreed test account", "Goal: assess whether identity is verified before a reset", "Do NOT access any real account or real data", "Stop at proof of concept and report the finding"] },
+      ],
+      kbArticleId: "kb-finding",
+      goal: "Run the authorized pretext, prove the weakness, and stay in scope.",
+      hint: "You are testing one thing: does the desk verify identity before resetting? The smooth, in scope ask gets there. Pushing for credentials or other people's data is out of scope and blows the test.",
+      actions: [
+        { id: "report-vishing", label: "Note that the desk reset with no identity check, end the call politely, and document it as a finding with remediation (require identity verification or a callback before any reset)", correct: true, requires: ["phone"], csat: 14, outcome: "reported", teach: "Clean engagement work. You proved the weakness, the desk would reset with zero verification, without ever touching a real account. End there and hand back the finding plus the fix: verify identity, or call the user back on a known number, before any reset. Proof, not intrusion." },
+        { id: "use-the-reset", label: "Take the offered reset and log into the real account to prove impact", correct: false, requires: ["phone"], csat: -12, ends: true, outcome: "mishandled", teach: "You already proved the weakness the moment she offered a reset with no checks. Logging into a real account is real account takeover, beyond the proof of concept the scope allows. Confirm, document, remediate. Do not actually break in." },
+        { id: "press-out-of-scope", label: "Keep pushing for admin credentials and the executives' details while she is talking", correct: false, csat: -10, teach: "Demanding credentials and personal data on staff outside the test pretext is out of scope and tips the desk off, which blows the assessment. Stay on the agreed pretext, prove the one weakness, and report it." },
+      ],
+    },
+  },
+
+  // Red Team: an authorized phishing simulation (email). The deliverable is a
+  // reported finding (click rate plus remediation). Capturing real passwords or
+  // logging into accounts is out of scope, so REPORTING is the correct action.
+  {
+    track: "redteam",
+    item: {
+      id: "rt-phish-sim",
+      channel: "email",
+      priority: "P2",
+      from: { name: "Engagement task", role: "Client (in scope)" },
+      subject: "Authorized phishing simulation: the pretext is ready",
+      slaMinutes: 25,
+      arriveAfter: 0,
+      reward: 42,
+      xp: 34,
+      email: {
+        isPhish: true,
+        body: "Your drafted pretext for the authorized phishing test, ready to send to the in scope user group: a notice that mimics the internal IT portal asking staff to 'reconfirm' their password at a link. The scope allows measuring who clicks. It does not allow capturing real passwords or accessing accounts.",
+      },
+      evidence: [
+        { label: "Signed scope for the phishing test", lines: ["IN SCOPE: send the pretext to the agreed user group", "Measure: who opens and who clicks the link", "Landing page records the click only, no password capture", "OUT OF SCOPE: storing real credentials, accessing any account"] },
+      ],
+      kbArticleId: "kb-finding",
+      goal: "Run the authorized test and turn it into something the client can act on.",
+      hint: "The win here is a finding, not a trophy. What do you measure, and what do you absolutely not capture?",
+      actions: [
+        { id: "report-phish-finding", label: "Send the authorized pretext, record clicks only, and report the finding with remediation (security awareness training and phishing resistant MFA)", correct: true, requires: ["kb"], csat: 14, outcome: "reported", teach: "Exactly right. The deliverable is a finding: a measured click rate plus a concrete fix, training and phishing resistant MFA, so a real attacker's stolen password is not enough on its own. You proved human risk without ever capturing a real credential. Report it and the client can act." },
+        { id: "harvest-creds", label: "Configure the landing page to capture the real passwords people enter, then use them to log in as proof", correct: false, csat: -12, ends: true, outcome: "mishandled", teach: "Capturing real credentials and logging into accounts is explicitly out of scope and is real account takeover. You do not need stolen passwords to prove the risk: a click rate makes the case. Measure the click, never harvest the password." },
+        { id: "keep-it-quiet", label: "Run the test for your own notes but leave it out of the report", correct: false, csat: -8, teach: "A finding you do not report cannot be fixed, and the whole value of the test is the client learning where the human risk is. Always report it with remediation." },
+      ],
+    },
+  },
 ];
 
 // A second incident group (file-server outage) so Doubles has more variety.
@@ -417,6 +649,83 @@ export const EXTRA_INCIDENT_GROUPS: { group: string; track: Track; items: ShiftI
         actions: [
           { id: "ack-fs-2", label: "Link it to the file-server incident", correct: true, csat: 2, outcome: "resolved", teach: "Yep, the root fix mass-resolves these." },
           { id: "reboot-owen", label: "Tell him to reboot his PC", csat: -4, teach: "His PC is fine. It's a server-side outage." },
+        ],
+      },
+    ],
+  },
+
+  // SOC: a password-spray incident for the Doubles modifier. One source IP tries
+  // one common password against hundreds of accounts; a few succeed. The root
+  // fix (block source, contain the accounts that fell) mass-resolves the flood
+  // of "weird sign in alert" reports behind it.
+  {
+    group: "auth-spray",
+    track: "soc",
+    items: [
+      {
+        id: "spray-root",
+        channel: "ticket",
+        priority: "P1",
+        from: { name: "Auth alert", role: "SIEM" },
+        subject: "One password tried across hundreds of accounts",
+        slaMinutes: 15,
+        arriveAfter: 0,
+        reward: 55,
+        xp: 44,
+        incident: { group: "auth-spray", root: true },
+        ticketBody: "SIEM correlation: a single external IP tried the same common password against hundreds of usernames in a short window. A few accounts returned a successful sign in.",
+        evidence: [
+          { label: "Auth events", lines: ["1 source IP 198.51.100.23 vs 412 distinct usernames in 9 min", "Same password attempted against each (classic password spray)", "3 SUCCESS results among the 412", "Source never seen before, accounts normally sign in internally only"] },
+        ],
+        commands: [
+          { aliases: ["timeline", "siem", "query"], output: "198.51.100.23 sprayed one password across 412 usernames. 3 succeeded. Low and slow enough to dodge per account lockout, but obvious in correlation.", step: "diag" },
+          { aliases: ["whois", "geo", "lookup ip"], output: "198.51.100.23: hosting provider, foreign region. Not a corporate egress IP." },
+        ],
+        kbArticleId: "kb-account-compromise",
+        goal: "Stop the spray and contain the accounts that fell. Find the single cause.",
+        hint: "One IP, one password, many accounts, and three got in. Blocking the IP stops new tries, but what about the three valid sessions it created?",
+        actions: [
+          { id: "block-and-contain", label: "Block the source IP, force a reset on the 3 compromised accounts, and revoke their sessions", correct: true, requires: ["diag"], csat: 16, teach: "That is the incident. Blocking the IP stops the spray, but three accounts already returned a success, so reset them and revoke their sessions or the attacker stays signed in. One source, one fix, and the duplicates close behind it." },
+          { id: "block-ip-only", label: "Block the IP and close it", correct: false, csat: -7, teach: "You stopped new attempts but left three valid, attacker controlled sessions live. Contain the accounts that actually fell, not just the source." },
+          { id: "reset-all-412", label: "Force a password reset on all 412 accounts immediately", correct: false, csat: -6, teach: "Only three succeeded. Resetting 412 people locks out the whole org over a handful of real hits and buries the actual compromise in noise. Contain the three, block the source." },
+        ],
+      },
+      {
+        id: "spray-dup-1",
+        channel: "ticket",
+        priority: "P2",
+        from: { name: "Liam Pierce", role: "Marketing" },
+        subject: "Got a weird 'new sign in' alert overnight",
+        slaMinutes: 20,
+        arriveAfter: 8,
+        reward: 8,
+        xp: 6,
+        incident: { group: "auth-spray" },
+        ticketBody: "I woke up to an alert about a sign in attempt on my account from somewhere I have never been. Should I worry?",
+        goal: "Handle it. Seen this pattern this morning?",
+        hint: "Several people are reporting the same overnight alert right now.",
+        actions: [
+          { id: "ack-spray-1", label: "Link it to the password spray incident", correct: true, csat: 2, outcome: "resolved", teach: "Right, it is the spray. The root containment covers his account, and you can confirm whether his was one of the three." },
+          { id: "shrug-1", label: "Tell him alerts like that are always nothing", correct: false, csat: -4, teach: "Dismissing a real auth alert during an active spray is how a hit gets missed. Tie it to the incident and check if he was one of the successes." },
+        ],
+      },
+      {
+        id: "spray-dup-2",
+        channel: "ticket",
+        priority: "P3",
+        from: { name: "Nadia Brooks", role: "Sales" },
+        subject: "Am I locked out? Login feels off",
+        slaMinutes: 25,
+        arriveAfter: 16,
+        reward: 8,
+        xp: 6,
+        incident: { group: "auth-spray" },
+        ticketBody: "My login is acting strange this morning and a coworker said theirs was too.",
+        goal: "Same incident.",
+        hint: "Fix the root and this closes with it.",
+        actions: [
+          { id: "ack-spray-2", label: "Link it to the password spray incident", correct: true, csat: 2, outcome: "resolved", teach: "Yes, the root fix mass resolves these reports." },
+          { id: "reset-nadia", label: "Just reset her password and move on", correct: false, csat: -3, teach: "A blind reset outside the incident misses the bigger picture. It is the spray. Handle it through the root containment." },
         ],
       },
     ],
