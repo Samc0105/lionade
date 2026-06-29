@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-29: Live-prod fixes batch 2 (viral loop, OAuth age-gate, error boundaries)
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Duel-challenge notification routing** (point recipient at `/compete/arena/duel` where the accept flow lives) | ✅ shipped | 🚫 N/A — the web arena duel flow is web-only; iOS has no friend-duel surface to mirror. |
+| **OAuth signup 13+ age gate** (checkbox gating Google/Apple on the signup tab) | ✅ shipped | 🚫 N/A — iOS auth is Sign in with Apple; Apple enforces account age natively, and there is no iOS email/OAuth signup form with this gate. The COPPA posture is consistent across both. |
+| **Widget + segment error boundaries** (`WidgetErrorBoundary`, per-segment `error.tsx`) | ✅ shipped | 🚫 N/A — React-web error-boundary pattern; RN/iOS has its own error-handling and no Next.js `error.tsx` concept. |
+
+---
+
 ## 2026-06-29: Live-prod bug fixes (money race, forgot-password, front-door brand)
 
 | Surface | Web | iOS |
