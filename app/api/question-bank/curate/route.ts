@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
+import { requireRole } from "@/lib/admin-auth";
 import { runCurationPipeline, getQuestionBankStats } from "@/lib/question-bank";
 
 // Admin gate: set LIONADE_ADMIN_USER_IDS in env to a comma-separated list of
@@ -31,10 +32,12 @@ export async function POST(req: NextRequest) {
 }
 
 // GET /api/question-bank/curate
-// Returns stats about the question bank
+// Returns stats about the question bank. Admin-only: the stats are a moderation
+// surface, so don't leak them to any authed user (the role-gated
+// /api/admin/question-bank supersedes this legacy route).
 export async function GET(req: NextRequest) {
-  const auth = await requireAuth(req);
-  if (auth instanceof NextResponse) return auth;
+  const staff = await requireRole(req, "admin");
+  if (staff instanceof NextResponse) return staff;
 
   const stats = await getQuestionBankStats();
   return NextResponse.json(stats);

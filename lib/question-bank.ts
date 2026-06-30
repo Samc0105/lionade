@@ -296,3 +296,88 @@ export async function getQuestionBankStats(): Promise<{
     return { total: 0, pending: 0, approved: 0, rejected: 0, bySubject: {} };
   }
 }
+
+// ── Moderation (admin dashboard) ────────────────────────────
+
+export interface ModerationQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string | null;
+  subject: string | null;
+  topic: string | null;
+  difficulty: string | null;
+  status: string;
+  timesShown: number;
+  timesCorrect: number;
+  successRate: number | null;
+  createdAt: string | null;
+}
+
+/**
+ * List question-bank rows for the admin moderation dashboard, filtered by
+ * status, newest first. Service-role only (RLS has no policies). `options` is
+ * JSONB but can arrive as a string, so parse defensively (same as
+ * getApprovedQuestions). `success_rate` is REAL and NULL until a question has
+ * been shown — callers must handle null.
+ */
+export async function listQuestionsByStatus(
+  status: "pending" | "approved" | "rejected" | "duplicate",
+  limit = 50,
+  offset = 0,
+): Promise<ModerationQuestion[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("question_bank")
+      .select(
+        "id, question, options, correct_index, explanation, subject, topic, difficulty, status, times_shown, times_correct, success_rate, created_at",
+      )
+      .eq("status", status)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.warn("[question-bank] listQuestionsByStatus:", error.message);
+      return [];
+    }
+    return (data ?? []).map((q: any) => ({
+      id: q.id,
+      question: q.question,
+      options: typeof q.options === "string" ? JSON.parse(q.options) : (q.options ?? []),
+      correctIndex: q.correct_index,
+      explanation: q.explanation ?? null,
+      subject: q.subject ?? null,
+      topic: q.topic ?? null,
+      difficulty: q.difficulty ?? null,
+      status: q.status,
+      timesShown: q.times_shown ?? 0,
+      timesCorrect: q.times_correct ?? 0,
+      successRate: q.success_rate ?? null,
+      createdAt: q.created_at ?? null,
+    }));
+  } catch (e) {
+    console.warn("[question-bank] listQuestionsByStatus error:", e);
+    return [];
+  }
+}
+
+/**
+ * Admin override: set a question's status (approve/reject). A plain
+ * last-write-wins UPDATE — the human override beats the auto-curation pipeline.
+ * Service-role only.
+ */
+export async function setQuestionStatus(
+  id: string,
+  status: "approved" | "rejected",
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabaseAdmin
+    .from("question_bank")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) {
+    console.error("[question-bank] setQuestionStatus:", error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
