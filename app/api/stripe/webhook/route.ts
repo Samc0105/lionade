@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { stripe, lookupPrice } from "@/lib/stripe";
 import { FANG_PACKS, isFangPackId } from "@/lib/fang-packs";
+import { getPremiumItem } from "@/lib/premium-items";
 import { isFounderCapOpen } from "@/lib/cosmetic-grants";
 import { getFounderBadge } from "@/lib/shop-catalog";
 import { recomputeEffectivePlan } from "@/lib/plan-grants";
@@ -118,7 +119,15 @@ async function dispatchHandler(event: Stripe.Event): Promise<void> {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.mode === "payment") {
-        await handleFangIapPayment(session);
+        // Both Fang IAP and premium-cosmetic purchases are mode:"payment".
+        // They are distinguished ONLY by metadata.purchase_kind so the
+        // existing Fang path (which sets no purchase_kind) is provably
+        // untouched: anything that isn't "premium_cosmetic" stays Fang IAP.
+        if (session.metadata?.purchase_kind === "premium_cosmetic") {
+          await handlePremiumUsdPurchase(session);
+        } else {
+          await handleFangIapPayment(session);
+        }
         return;
       }
       // Subscription mode: no-op — subscription.created fires too and carries
@@ -384,6 +393,75 @@ async function handleInvoicePayment(
   // baseline unless an active grant still covers the user; a flip back to
   // 'active' must restore it. Recompute to keep the effective plan in sync.
   await recomputeEffectivePlan((data[0] as { id: string }).id);
+}
+
+/**
+ * Fulfill a one-time USD premium-cosmetic / founder-bundle purchase. Mirrors
+ * handleFangIapPayment's never-trust-metadata stance: the item TYPE/RARITY are
+ * resolved from the server catalog (getPremiumItem), never from the session.
+ *
+ * Idempotency: the outer claim_stripe_event lock dedupes the whole event, and
+ * the table UNIQUEs (user_inventory(user_id,item_id), founder_grants(user_id,
+ * badge_id)) make a Stripe retry safe — a 23505 means "already owned" = success,
+ * so we swallow it. Any OTHER db error throws so the event flips to 'errored'
+ * and Stripe retries.
+ */
+async function handlePremiumUsdPurchase(session: Stripe.Checkout.Session) {
+  const meta = session.metadata ?? {};
+  const userId = typeof meta.user_id === "string" ? meta.user_id : null;
+  const itemId = typeof meta.item_id === "string" ? meta.item_id : null;
+
+  if (!userId || !itemId) {
+    console.error("[stripe-webhook] premium purchase missing metadata", session.id, meta);
+    throw new Error("premium purchase missing metadata");
+  }
+
+  const item = getPremiumItem(itemId);
+  if (!item) {
+    console.error("[stripe-webhook] premium purchase unknown item", session.id, itemId);
+    throw new Error("premium purchase unknown item");
+  }
+
+  if (item.grantKind === "founder_badge") {
+    // Money already changed hands. If the cap raced closed between checkout and
+    // now, GRANT ANYWAY and log loudly rather than swallow a paid purchase.
+    const open = await isFounderCapOpen(supabaseAdmin, item.id, item.cap ?? 0);
+    if (!open) {
+      console.error(
+        "[stripe-webhook] premium founder cap closed AFTER payment, granting anyway",
+        session.id,
+        item.id,
+      );
+    }
+    const { error: grantErr } = await supabaseAdmin.from("founder_grants").insert({
+      user_id: userId,
+      badge_id: item.id,
+      source: "stripe_purchase",
+      reference_id: session.id,
+    });
+    if (grantErr && grantErr.code !== "23505") {
+      console.error("[stripe-webhook] premium founder grant", grantErr.message);
+      throw new Error("premium founder grant failed");
+    }
+    console.info("[stripe-webhook] premium founder granted:", userId, item.id);
+    return;
+  }
+
+  // Cosmetic: insert into user_inventory, mirroring /api/shop/purchase. The
+  // UNIQUE(user_id, item_id) makes a Stripe retry idempotent.
+  const { error: invErr } = await supabaseAdmin.from("user_inventory").insert({
+    user_id: userId,
+    item_id: item.id,
+    item_type: item.type,
+    quantity: 1,
+    equipped: false,
+    rarity: item.rarity,
+  });
+  if (invErr && invErr.code !== "23505") {
+    console.error("[stripe-webhook] premium cosmetic grant", invErr.message);
+    throw new Error("premium cosmetic grant failed");
+  }
+  console.info("[stripe-webhook] premium cosmetic granted:", userId, item.id);
 }
 
 async function handleFangIapPayment(session: Stripe.Checkout.Session) {

@@ -596,6 +596,15 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "stripe-fang-purchase",
   },
+  {
+    // Same envelope as fang-purchase: each POST fires up to two outbound Stripe
+    // calls (customers.create + sessions.create), so cap session-creation churn.
+    test: (p) => p === "/api/stripe/usd-purchase",
+    method: "POST",
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "stripe-usd-purchase",
+  },
 
   // Currency-mutating financial routes — anti-burst. Every route that mints or
   // spends Fangs lives here at 60/min so the anti-burst envelope is uniform.

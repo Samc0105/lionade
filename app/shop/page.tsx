@@ -964,7 +964,7 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
 }
 
 // ── Premium Card ──
-function PremiumCard({ item }: { item: PremiumItem }) {
+function PremiumCard({ item, available = false, onBuy }: { item: PremiumItem; available?: boolean; onBuy?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
@@ -992,14 +992,30 @@ function PremiumCard({ item }: { item: PremiumItem }) {
         <p className="shop-card-desc text-cream/55 text-xs mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-4">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
-          {/* Disabled Notify-me state — was a dead "Coming Soon" pill that did
-              nothing. Now reads as a real future affordance; click is a no-op
-              for now (the waitlist endpoint exists but isn't wired here yet —
-              telling Sam to wire it before we make the click work, otherwise
-              the button would silently lie). */}
-          <button type="button" disabled aria-disabled="true" aria-label={`Notify me when ${item.name} launches`} className="relative flex-shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/8 text-purple-200/80 cursor-not-allowed">
-            Notify me
-          </button>
+          {/* When a Stripe Price is configured for this id (available), the buy
+              button is live and opens Stripe Checkout. Otherwise it stays a
+              disabled "Coming soon" — the USD store ships dormant until Sam
+              pastes the Stripe price ids, so the button can never lie. */}
+          {available && onBuy ? (
+            <button
+              type="button"
+              onClick={onBuy}
+              aria-label={`Buy ${item.name} for $${item.priceUSD.toFixed(2)}`}
+              className="relative flex-shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-xs font-bold border border-purple-400/50 bg-purple-500/20 text-purple-100 hover:bg-purple-500/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              Buy
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              aria-label={`${item.name} is not yet available`}
+              className="relative flex-shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/8 text-purple-200/80 cursor-not-allowed"
+            >
+              Coming soon
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1445,6 +1461,35 @@ export default function ShopPage() {
   const founderRemaining = (id: string): number | null => {
     const c = founderCaps[id];
     return c ? Math.max(0, c.cap - c.granted) : null;
+  };
+
+  // Premium USD store — which premium ids have a configured Stripe Price. The
+  // store ships DORMANT: until Sam pastes the STRIPE_PRICE_ID_* env vars this
+  // set is empty and every premium buy button stays a disabled "Coming soon".
+  const { data: premiumAvailData } = useSWR(
+    "stripe/premium-availability",
+    () => apiGet<{ available: string[] }>("/api/stripe/usd-purchase"),
+    { dedupingInterval: 300_000, revalidateOnFocus: false, shouldRetryOnError: false },
+  );
+  const premiumAvailable: Set<string> = new Set(
+    premiumAvailData?.ok ? (premiumAvailData.data?.available ?? []) : [],
+  );
+
+  // Open Stripe Checkout for a premium USD item. The route is fail-closed, so
+  // an unconfigured item returns 503 and we surface a friendly toast rather
+  // than a broken redirect.
+  const handleBuyPremium = async (itemId: string) => {
+    if (requireLogin()) return;
+    const res = await apiPost<{ url: string }>("/api/stripe/usd-purchase", { itemId });
+    if (res.ok && res.data?.url) {
+      window.location.href = res.data.url;
+      return;
+    }
+    if (res.status === 401) {
+      requireLogin();
+      return;
+    }
+    toastError(res.error ?? "Couldn't open checkout. Try again.");
   };
 
   // Page-level reduced-motion preference. Declared before any early return so
@@ -2031,7 +2076,12 @@ export default function ShopPage() {
                     return false;
                   })
                   .map((item) => (
-                    <PremiumCard key={item.id} item={item} />
+                    <PremiumCard
+                      key={item.id}
+                      item={item}
+                      available={premiumAvailable.has(item.id)}
+                      onBuy={() => handleBuyPremium(item.id)}
+                    />
                   ))}
               </div>
             )}
@@ -2257,7 +2307,12 @@ export default function ShopPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     {CASH_PREMIUM_BANNERS.map((item) => (
-                      <PremiumCard key={item.id} item={item} />
+                      <PremiumCard
+                        key={item.id}
+                        item={item}
+                        available={premiumAvailable.has(item.id)}
+                        onBuy={() => handleBuyPremium(item.id)}
+                      />
                     ))}
                   </div>
                 </section>
