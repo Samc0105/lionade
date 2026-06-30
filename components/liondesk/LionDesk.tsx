@@ -8,6 +8,7 @@ import {
   CaretLeft, CaretRight,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import type { AppId, ShiftItem, Shift, Priority } from "@/lib/liondesk/types";
 import { playArrival, playResolve, playBreach, playFail, playWin, playClockIn, playDelivery, playStreak, playEscalate, playBridgeSpike, startDeskHum, stopDeskHum, resumeAudio, isMuted, setMuted, isAmbientEnabled, setAmbientEnabled, getVolume, setVolume } from "@/lib/liondesk/sound";
 import { getEquippedTheme, type DeskTheme } from "@/lib/liondesk/themes";
@@ -34,6 +35,19 @@ import {
 // importers (components/liondesk/Campaign.tsx, lib/liondesk/stats.ts) keep
 // importing it from here unchanged.
 export type { ShiftResult };
+
+/**
+ * Renders children into document.body via a portal, so a modal escapes the desk
+ * container's `overflow-hidden` (and any transformed ancestor that would trap
+ * position:fixed). This is what keeps the shift-report and clock-in buttons
+ * reachable instead of clipped by the desk panel. Mounted-guarded for SSR.
+ */
+function ModalPortal({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
 
 /* ───────────────────────── view helpers ───────────────────────── */
 
@@ -413,8 +427,9 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
     "Stuck? Spend a lifeline: Coffee resets a call, Ask a senior reveals the right move.",
   ].filter(Boolean) as string[];
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ld-clockin-title" tabIndex={-1} className="w-full max-w-md rounded-2xl border bg-[#0a0f1c] p-6 max-h-[92%] overflow-y-auto focus:outline-none" style={{ borderColor: `${accent}55` }}>
+    <ModalPortal>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ld-clockin-title" tabIndex={-1} className="w-full max-w-md rounded-2xl border bg-[#0a0f1c] p-6 max-h-[92vh] overflow-y-auto focus:outline-none" style={{ borderColor: `${accent}55` }}>
         <p className="font-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: accent }}>{shift.rank} · clocking in</p>
         <h3 id="ld-clockin-title" className="font-bebas text-3xl text-cream tracking-wide leading-none mt-1">{shift.name}</h3>
 
@@ -464,6 +479,7 @@ function ClockIn({ shift, usedApps, onStart }: { shift: Shift; usedApps: Set<App
         </button>
       </div>
     </div>
+    </ModalPortal>
   );
 }
 
@@ -1510,7 +1526,8 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
   const nailedSkills = skillRows.filter((r) => r.nailed);
 
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ld-report-title" tabIndex={-1} className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-[#0a0f1c] p-6 max-h-[90vh] overflow-y-auto focus:outline-none">
         <div className="flex items-center gap-3 mb-4">
           <Trophy size={28} weight="fill" color={gradeColor} aria-hidden="true" />
@@ -1703,6 +1720,7 @@ function ShiftReport({ shift, state, onReplay, onExit, bankedFangs, bankPending 
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
 

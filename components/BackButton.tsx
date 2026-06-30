@@ -16,6 +16,7 @@ const PARENT_PATHS: Record<string, string> = {
   // Sub-pages of /learn
   "/learn/ninny": "/learn",
   "/learn/paths": "/learn",
+  "/learn/techhub": "/learn",
   "/quiz": "/learn",
   "/quiz/ap-exams": "/quiz",
 
@@ -46,6 +47,7 @@ const PARENT_LABELS: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/learn": "Learn",
   "/learn/paths": "Paths",
+  "/learn/techhub": "TechHub",
   "/compete": "Compete",
   "/compete/arena": "Arena",
   "/games": "Games",
@@ -68,6 +70,11 @@ function getParentPath(currentPath: string): string | null {
 
   // /compete/arena/[mode]/[matchId] → /compete/arena
   if (/^\/compete\/arena\/[^/]+\/[^/]+$/.test(currentPath)) return "/compete/arena";
+
+  // Every TechHub sub-page (tracks, tutorial, shift, surprise, lab, kb, oneonone,
+  // achievements, nightshift, etc.) returns to the TechHub hub. The hub itself
+  // maps to /learn via the exact match in PARENT_PATHS above.
+  if (/^\/learn\/techhub\/.+/.test(currentPath)) return "/learn/techhub";
 
   // No parent → top-level page, hide the back button
   return null;
