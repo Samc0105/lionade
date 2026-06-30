@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-30: Founder-badge wiring repair + flywheel output-sink
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Founder-badge section fix** (canonical `badge_*` ids, status cards, "Get with Pro" CTA, caps `{granted,cap}`, fixed `cosmeticsOwned` merge + latent inventory-crash) | ✅ shipped | 🟡 **parity gap** — iOS has no founder-badge shop section; if it ever adds one, use canonical `badge_*` ids and the same status-card framing (never a Fangs buy). The `cosmeticsOwned` merge bug was a web-only client shape mismatch. |
+| **Flywheel output-sink** (Blitz blends `getApprovedQuestions()` into each round) | ✅ shipped | ✅ SHARED-BACKEND — this is the consumer the 2026-06-29 row flagged as missing; iOS Blitz inherits the richer pool the moment it calls `/api/games/blitz/questions`. |
+
+---
+
 ## 2026-06-29: Live-prod fixes batch 3 (onboarding funnel, question-bank flywheel, Fang idempotency)
 
 | Surface | Web | iOS |
