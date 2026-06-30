@@ -401,20 +401,29 @@ const CASH_PREMIUM_BANNERS: PremiumItem[] = [
   { id: "prem_banner_chromium",  name: "Chromium",        description: "Reactive chrome surface that catches light",type: "banner", rarity: "epic",    priceUSD: 3.49, Icon: DiamondsFour,iconWeight: "fill", iconColor: "#E8EAF2" },
 ];
 
-// 3 founder badges — capped supply, server enforces remaining count.
+// 3 founder badges. These are NEVER bought with Fangs. Founding Scholar ships
+// with a Pro subscription (auto-granted to the first 1,000 subscribers by the
+// Stripe webhook); the other two are auto-granted by signup order / pre-launch
+// activity. The ids MUST match the server catalog + founder_grants table
+// (badge_*) or the owned-state and cap countdown silently never resolve — the
+// previous `founder_*` ids matched nothing server-side, so every "Claim"
+// button 404'd and the FOMO counter never rendered.
+type FounderAcquire = "pro" | "auto";
 interface FounderBadgeSKU {
   id: string;
   name: string;
   tagline: string;
   cap: number;
-  price: number;
+  showCap: boolean;        // render the "N of cap remaining" FOMO countdown
+  acquire: FounderAcquire; // "pro" → Get-with-Pro CTA; "auto" → status only
+  acquireNote: string;     // muted status line shown to non-owners
   Icon: PhosphorIcon;
   iconColor: string;
 }
 const FOUNDER_BADGES: FounderBadgeSKU[] = [
-  { id: "founder_lionade_og",    name: "Lionade OG",      tagline: "First 1,000 supporters. Forever.",      cap: 1000, price: 5000,  Icon: Crown,  iconColor: "#FFD700" },
-  { id: "founder_beta_witness",  name: "Beta Witness",    tagline: "You were here before launch.",          cap: 500,  price: 3500,  Icon: Star,   iconColor: "#A855F7" },
-  { id: "founder_day_one",       name: "Day One Pride",   tagline: "Caught the very first sunrise.",        cap: 100,  price: 10000, Icon: PawPrint, iconColor: "#FFD700" },
+  { id: "badge_founding_scholar", name: "Founding Scholar", tagline: "First 1,000 Pro subscribers. Permanent.",  cap: 1000,   showCap: true,  acquire: "pro",  acquireNote: "Included with Pro",                       Icon: Medal, iconColor: "#FFD700" },
+  { id: "badge_lionade_og",       name: "Lionade OG",       tagline: "First 500 signups. You were here first.",  cap: 500,    showCap: true,  acquire: "auto", acquireNote: "Auto-granted to the first 500 signups",   Icon: Crown, iconColor: "#FFD700" },
+  { id: "badge_beta_witness",     name: "Beta Witness",     tagline: "Active before launch day.",                cap: 100000, showCap: false, acquire: "auto", acquireNote: "Granted to everyone active before launch", Icon: Star,  iconColor: "#A855F7" },
 ];
 
 // ── Helpers ──
@@ -1137,30 +1146,32 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
   );
 }
 
-// Founder badge card with cap countdown + sold-out overlay.
+// Founder badge card. Founder badges are NEVER sold for Fangs, so the footer
+// is a STATUS, not a Buy: Founding Scholar shows a "Get with Pro" CTA; the
+// auto-granted badges show how they're earned. Owned always wins.
 function FounderBadgeCard({
-  item, remaining, owned, canAfford, onBuy,
+  item, remaining, owned,
 }: {
   item: FounderBadgeSKU;
   remaining: number | null;
   owned: boolean;
-  canAfford: boolean | null;
-  onBuy: () => void;
 }) {
   const Icon = item.Icon;
-  const soldOut = remaining !== null && remaining <= 0;
+  // "Closed" = a capped badge whose remaining hit 0, for a viewer who doesn't
+  // own it. Owned takes precedence (never overlay "claimed" on your own badge).
+  const closed = !owned && item.showCap && remaining !== null && remaining <= 0;
   return (
     <div className="fluid-card-hover shop-card shop-legendary-sparkle relative rounded-2xl overflow-hidden h-full flex flex-col"
       style={{
         background: "linear-gradient(135deg, rgba(40,28,8,0.95), rgba(8,6,16,0.95))",
-        border: `1px solid ${soldOut ? "rgba(156,163,175,0.20)" : "rgba(255,215,0,0.35)"}`,
+        border: `1px solid ${closed ? "rgba(156,163,175,0.20)" : "rgba(255,215,0,0.35)"}`,
         backdropFilter: "blur(16px)",
       }}>
-      {soldOut && (
+      {closed && (
         <div className="absolute inset-0 z-10 bg-black/55 backdrop-blur-sm flex flex-col items-center justify-center">
           <Lock size={32} weight="fill" color="#9CA3AF" aria-hidden="true" />
-          <p className="font-bebas text-xl text-cream/80 tracking-wider mt-2">SOLD OUT</p>
-          <p className="text-cream/60 text-[10px] font-mono uppercase tracking-[0.22em] mt-0.5">All {item.cap.toLocaleString()} claimed</p>
+          <p className="font-bebas text-xl text-cream/80 tracking-wider mt-2">CLAIMED</p>
+          <p className="text-cream/60 text-[10px] font-mono uppercase tracking-[0.22em] mt-0.5">All {item.cap.toLocaleString()} taken</p>
         </div>
       )}
       <div className="relative p-5 flex flex-col flex-1">
@@ -1173,43 +1184,40 @@ function FounderBadgeCard({
         <h4 className="font-bebas text-xl text-cream tracking-wide text-center">{item.name}</h4>
         <p className="text-cream/55 text-xs text-center mb-3 leading-relaxed">{item.tagline}</p>
 
-        {/* FOMO counter — `1 of 1000 — 247 remaining` */}
-        <div className="text-center mb-4 py-2 rounded-lg" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.12)" }}>
-          {remaining === null ? (
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60">Cap of {item.cap.toLocaleString()}</p>
-          ) : (
-            <>
-              <p className="font-bebas text-xl text-gold tracking-wider leading-none">{remaining.toLocaleString()}</p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/60 mt-0.5">
-                of {item.cap.toLocaleString()} remaining
-              </p>
-            </>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-1 gap-3">
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+        {/* FOMO counter — only for capped badges. `247 of 1,000 remaining`. */}
+        {item.showCap && (
+          <div className="text-center mb-4 py-2 rounded-lg" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.12)" }}>
+            {remaining === null ? (
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60">Cap of {item.cap.toLocaleString()}</p>
+            ) : (
+              <>
+                <p className="font-bebas text-xl text-gold tracking-wider leading-none">{remaining.toLocaleString()}</p>
+                <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/60 mt-0.5">
+                  of {item.cap.toLocaleString()} remaining
+                </p>
+              </>
+            )}
           </div>
+        )}
+
+        {/* Footer: status, never a Fangs buy. */}
+        <div className="mt-auto pt-1">
           {owned ? (
-            <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
-              <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Yours
+            <span className="flex items-center justify-center gap-1.5 text-green-400 text-sm font-bold py-2.5 rounded-lg bg-green-500/10 border border-green-500/25">
+              <Check size={15} weight="bold" color="#22C55E" aria-hidden="true" /> Yours
             </span>
+          ) : item.acquire === "pro" ? (
+            <a
+              href="/pricing"
+              aria-label={`Get ${item.name} with Lionade Pro`}
+              className="gold-btn shop-btn-pulse flex items-center justify-center gap-1.5 min-h-[44px] py-2.5 rounded-lg text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              <Crown size={15} weight="fill" aria-hidden="true" /> Get with Pro
+            </a>
           ) : (
-            <button type="button" onClick={onBuy} disabled={canAfford !== true || soldOut}
-              aria-label={soldOut ? `${item.name} is sold out` : canAfford === false ? `Not enough Fangs for ${item.name}` : `Claim ${item.name} for ${formatCoins(item.price)} Fangs`}
-              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
-                soldOut
-                  ? "bg-gray-700/30 text-gray-400 cursor-not-allowed border border-gray-600/20"
-                  : canAfford === true
-                  ? "gold-btn shop-btn-pulse focus-visible:ring-gold"
-                  : canAfford === false
-                  ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50"
-                  : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"
-              }`}>
-              {soldOut ? "Sold Out" : canAfford === false ? "Can't Afford" : "Claim"}
-            </button>
+            <span className="flex items-center justify-center text-center gap-1.5 text-cream/55 text-[11px] font-mono uppercase tracking-[0.14em] py-2.5 px-2 rounded-lg bg-white/5 border border-white/10 leading-tight">
+              {item.acquireNote}
+            </span>
           )}
         </div>
       </div>
@@ -1401,20 +1409,43 @@ export default function ShopPage() {
   const cosmeticsOwnedKey = user?.id ? `cosmetics-owned/${user.id}` : null;
   const { data: cosmeticsOwnedData, mutate: mutateCosmeticsOwned } = useSWR(
     cosmeticsOwnedKey,
-    () => apiGet<{ items: { id: string; type: string; source: "purchased" | "founder" | "earned"; equipped?: boolean }[] }>("/api/cosmetics/owned"),
+    // The route returns TWO arrays: `cosmetics` carries id/type/source, `items`
+    // carries the equipped flag (keyed by itemId). Merge them so each owned row
+    // has id+type+source+equipped. Reading `items` alone (its keys are
+    // itemId/itemType, NOT id/type) silently broke every owned-state check and
+    // crashed the inventory render on `c.type.replace(...)`.
+    () => apiGet<{
+      items: { itemId: string; itemType: string | null; equipped?: boolean; acquiredAt: string | null }[];
+      cosmetics: { id: string; type: string | null; source: "purchased" | "founder" | "earned"; acquiredAt: string | null }[];
+    }>("/api/cosmetics/owned"),
     { dedupingInterval: 60_000, keepPreviousData: true, revalidateOnFocus: true, shouldRetryOnError: false },
   );
-  const cosmeticsOwned = cosmeticsOwnedData?.ok ? (cosmeticsOwnedData.data?.items ?? []) : [];
+  const cosmeticsOwnedRaw = cosmeticsOwnedData?.ok ? cosmeticsOwnedData.data : null;
+  const cosmeticsEquippedById = new Map(
+    (cosmeticsOwnedRaw?.items ?? []).map((i) => [i.itemId, i.equipped ?? false] as const),
+  );
+  const cosmeticsOwned = (cosmeticsOwnedRaw?.cosmetics ?? []).map((c) => ({
+    id: c.id,
+    type: c.type,
+    source: c.source,
+    equipped: cosmeticsEquippedById.get(c.id) ?? false,
+  }));
 
   // Shop V2 — founder badge cap counts. Endpoint returns remaining per id.
   // Defaults to `null` (count unknown / cap closed unclear) if not yet shipped.
   const founderCapsKey = user?.id ? `founder-caps/${user.id}` : null;
   const { data: founderCapsData } = useSWR(
     founderCapsKey,
-    () => apiGet<{ caps: Record<string, number> }>("/api/shop/founder-caps"),
+    () => apiGet<{ caps: Record<string, { granted: number; cap: number }> }>("/api/shop/founder-caps"),
     { dedupingInterval: 30_000, keepPreviousData: true, revalidateOnFocus: true, shouldRetryOnError: false },
   );
-  const founderCaps: Record<string, number> = founderCapsData?.ok ? (founderCapsData.data?.caps ?? {}) : {};
+  // Endpoint returns `{ badge_id: { granted, cap } }`. remaining = cap - granted,
+  // clamped at 0; null when the count is unknown (endpoint down / id absent).
+  const founderCaps: Record<string, { granted: number; cap: number }> = founderCapsData?.ok ? (founderCapsData.data?.caps ?? {}) : {};
+  const founderRemaining = (id: string): number | null => {
+    const c = founderCaps[id];
+    return c ? Math.max(0, c.cap - c.granted) : null;
+  };
 
   // Page-level reduced-motion preference. Declared before any early return so
   // the hook order stays stable. Gates the one-shot mount entrance transitions.
@@ -1621,14 +1652,6 @@ export default function ShopPage() {
     return live.slice(0, 3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trendingIds.join("|")]);
-
-  // ── Limited time (founder badges with caps still open) ──
-  // V1: only the FOUNDER_BADGES set. Filter to "remaining > 0 OR remaining
-  // unknown". If everything is sold out / owned, the section hides entirely.
-  const limitedTimeBadges = FOUNDER_BADGES.filter((b) => {
-    const r = founderCaps[b.id];
-    return r === undefined || r > 0;
-  });
 
   // Shop V2 — equip a username effect via PATCH /api/me/equip. Endpoint may
   // not yet be live (backend follow-up flagged in the vault note). Falls back
@@ -1891,42 +1914,30 @@ export default function ShopPage() {
           </section>
         )}
 
-        {/* ══════════ LIMITED TIME (founder badges still purchasable) ══════════ */}
-        {!isPremium && limitedTimeBadges.length > 0 && (
+        {/* ══════════ FOUNDER BADGES (earned / Pro, never Fangs) ══════════ */}
+        {!isPremium && (
           <FeatureGate feature="shop.founder_badges" compact>
           <section className="mb-8" aria-labelledby="limited-time-heading">
             <div className="shop-banner flex items-center justify-between mb-4 px-4 py-3 rounded-xl"
               style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.30)" }}>
               <div className="flex items-center gap-2">
                 <Crown size={20} weight="fill" color="#FFD700" aria-hidden="true" />
-                <h2 id="limited-time-heading" className="font-bebas text-xl text-gold tracking-wider">LIMITED TIME</h2>
+                <h2 id="limited-time-heading" className="font-bebas text-xl text-gold tracking-wider">FOUNDER BADGES</h2>
               </div>
               <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
-                Capped supply &middot; once they&apos;re gone, they&apos;re gone
+                Earned, not sold &middot; capped forever
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 shop-grid-stagger">
-              {limitedTimeBadges.map((b) => {
-                const remaining = founderCaps[b.id] ?? null;
-                const owned = cosmeticsOwned.some((c) => c.id === b.id);
-                return (
-                  <div key={b.id} className="fluid-card-hover">
-                    <FounderBadgeCard
-                      item={b}
-                      remaining={remaining}
-                      owned={owned}
-                      canAfford={affords(b.price)}
-                      onBuy={() => {
-                        if (requireLogin()) return;
-                        setConfirmItem({
-                          item: { id: b.id, name: b.name, description: b.tagline, type: "frame", rarity: "legendary", price: b.price, Icon: b.Icon, iconWeight: "fill", iconColor: b.iconColor },
-                          quantity: 1,
-                        });
-                      }}
-                    />
-                  </div>
-                );
-              })}
+              {FOUNDER_BADGES.map((b) => (
+                <div key={b.id} className="fluid-card-hover">
+                  <FounderBadgeCard
+                    item={b}
+                    remaining={founderRemaining(b.id)}
+                    owned={cosmeticsOwned.some((c) => c.id === b.id)}
+                  />
+                </div>
+              ))}
             </div>
           </section>
           </FeatureGate>
@@ -2141,10 +2152,7 @@ export default function ShopPage() {
               <FeatureGate feature="shop.cosmetics" compact>
               <div id="coin-tabpanel-cosmetics" role="tabpanel" aria-labelledby="coin-tab-cosmetics" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* ── EXCLUSIVE: Founder badges (top of cosmetics tab) ── */}
-                {FOUNDER_BADGES.some((b) => {
-                  const r = founderCaps[b.id];
-                  return r === undefined || r > 0 || cosmeticsOwned.some((c) => c.id === b.id);
-                }) && (
+                {FOUNDER_BADGES.length > 0 && (
                   <FeatureGate feature="shop.founder_badges" compact>
                   <section className="mb-10" aria-labelledby="founder-badges-heading">
                     <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
@@ -2154,31 +2162,18 @@ export default function ShopPage() {
                         <h2 id="founder-badges-heading" className="font-bebas text-xl text-gold tracking-wider">EXCLUSIVE &middot; FOUNDER BADGES</h2>
                       </div>
                       <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
-                        Capped supply &middot; once they're gone, they're gone
+                        Earned, not sold &middot; capped forever
                       </span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      {FOUNDER_BADGES.map((b) => {
-                        const remaining = founderCaps[b.id] ?? null;
-                        const owned = cosmeticsOwned.some((c) => c.id === b.id);
-                        return (
-                          <FounderBadgeCard
-                            key={b.id}
-                            item={b}
-                            remaining={remaining}
-                            owned={owned}
-                            canAfford={affords(b.price)}
-                            onBuy={() => {
-                              if (requireLogin()) return;
-                              // Founder badges reuse the standard ConfirmModal path.
-                              setConfirmItem({
-                                item: { id: b.id, name: b.name, description: b.tagline, type: "frame", rarity: "legendary", price: b.price, Icon: b.Icon, iconWeight: "fill", iconColor: b.iconColor },
-                                quantity: 1,
-                              });
-                            }}
-                          />
-                        );
-                      })}
+                      {FOUNDER_BADGES.map((b) => (
+                        <FounderBadgeCard
+                          key={b.id}
+                          item={b}
+                          remaining={founderRemaining(b.id)}
+                          owned={cosmeticsOwned.some((c) => c.id === b.id)}
+                        />
+                      ))}
                     </div>
                   </section>
                   </FeatureGate>
@@ -2382,7 +2377,7 @@ export default function ShopPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-bebas text-base text-cream tracking-wide truncate">{displayName}</p>
-                              <p className="text-cream/55 text-[11px] capitalize">{c.type.replace(/_/g, " ")}</p>
+                              <p className="text-cream/55 text-[11px] capitalize">{(c.type ?? "").replace(/_/g, " ")}</p>
                             </div>
                             {isUsernameEffect && (
                               <button
