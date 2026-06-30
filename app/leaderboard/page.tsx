@@ -14,6 +14,8 @@ import { avatarFor } from "@/lib/avatar";
 import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree, ArrowUp } from "@phosphor-icons/react";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import Avatar from "@/components/Avatar";
+import EquippedFlair from "@/components/EquippedFlair";
+import { apiPost } from "@/lib/api-client";
 import {
   resolveRowUsernameEffect,
   resolveRowNameColor,
@@ -58,6 +60,10 @@ export default function LeaderboardPage() {
   // empty/zero board (no flash-of-empty). `[]` is a genuine empty board.
   const [entries, setEntries] = useState<LbEntry[] | null>(null);
   const [loadError, setLoadError] = useState(false);
+  // Founder-badge flair per user, resolved via a server endpoint. founder_grants
+  // is RLS-restricted to own rows, so the anon client behind getLadderLeaderboard
+  // cannot read other users' grants — we enrich best-effort after the board loads.
+  const [flairByUser, setFlairByUser] = useState<Record<string, string>>({});
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const loading = entries === null && !loadError;
@@ -67,10 +73,23 @@ export default function LeaderboardPage() {
     let active = true;
     setEntries(null);
     setLoadError(false);
+    setFlairByUser({});
+
+    // Best-effort founder-flair enrichment via a server route (the anon client
+    // can't read other users' RLS-protected founder_grants). Never blocks the
+    // board: on any failure the rows simply render without pills.
+    const enrichFlair = (lbRows: { user_id: string }[]) => {
+      const ids = lbRows.map((r) => r.user_id).filter(Boolean);
+      if (ids.length === 0) return;
+      apiPost<{ flair: Record<string, string> }>("/api/cosmetics/flair-batch", { userIds: ids })
+        .then((res) => { if (active && res.ok && res.data) setFlairByUser(res.data.flair); })
+        .catch(() => {});
+    };
+
     if (filter !== "weekly") {
       getLadderLeaderboard(LADDER_FOR[filter], 200).then(data => {
         if (!active) return;
-        setEntries(data.map(d => ({
+        const mapped: LbEntry[] = data.map(d => ({
           rank: d.rank,
           user_id: d.user_id,
           username: d.username,
@@ -83,12 +102,15 @@ export default function LeaderboardPage() {
           equipped_frame: d.equipped_frame ?? null,
           equipped_name_color: d.equipped_name_color ?? null,
           equipped_avatar_aura: d.equipped_avatar_aura ?? null,
-        })));
+        }));
+        setEntries(mapped);
+        enrichFlair(mapped);
       }).catch(() => { if (active) { setEntries([]); setLoadError(true); } });
     } else {
       getLeaderboard(200).then(data => {
         if (!active) return;
         setEntries(data);
+        enrichFlair(data);
       }).catch(() => { if (active) { setEntries([]); setLoadError(true); } });
     }
     return () => { active = false; };
@@ -355,6 +377,9 @@ export default function LeaderboardPage() {
                           size="sm"
                         />
                       </p>
+                      <div className="flex justify-center mt-0.5" aria-hidden="true">
+                        <EquippedFlair flair={topThree[1]?.user_id === user?.id ? myCosmetics.flair : flairByUser[topThree[1]?.user_id ?? ""]} compact />
+                      </div>
                       <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1" aria-hidden="true">
                         {isElo ? `${(topThree[1]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}
                       </p>
@@ -391,6 +416,9 @@ export default function LeaderboardPage() {
                           size="sm"
                         />
                       </p>
+                      <div className="flex justify-center mt-0.5" aria-hidden="true">
+                        <EquippedFlair flair={topThree[0]?.user_id === user?.id ? myCosmetics.flair : flairByUser[topThree[0]?.user_id ?? ""]} compact />
+                      </div>
                       <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1" aria-hidden="true">
                         {isElo ? `${(topThree[0]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}
                       </p>
@@ -425,6 +453,9 @@ export default function LeaderboardPage() {
                           size="sm"
                         />
                       </p>
+                      <div className="flex justify-center mt-0.5" aria-hidden="true">
+                        <EquippedFlair flair={topThree[2]?.user_id === user?.id ? myCosmetics.flair : flairByUser[topThree[2]?.user_id ?? ""]} compact />
+                      </div>
                       <p className="text-amber-500 font-bebas text-lg flex items-center justify-center gap-1" aria-hidden="true">
                         {isElo ? `${(topThree[2]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}
                       </p>
@@ -484,6 +515,7 @@ export default function LeaderboardPage() {
                             />
                           </span>
                           {isMe && <span className="text-[10px] font-bold tracking-[0.16em] bg-electric/20 text-electric px-2 py-0.5 rounded-full border border-electric/40 uppercase">You</span>}
+                          <EquippedFlair flair={isMe ? myCosmetics.flair : flairByUser[entry.user_id]} />
                           {tier && (
                             <span
                               className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border"

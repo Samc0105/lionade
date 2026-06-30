@@ -15,6 +15,7 @@ import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaph
 import { toastError, toastSuccess } from "@/lib/toast";
 import CountUp from "@/components/CountUp";
 import AnimatedUsername from "@/components/AnimatedUsername";
+import EquippedFlair from "@/components/EquippedFlair";
 import Avatar from "@/components/Avatar";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 import PastLobbiesPanel from "@/components/social/PastLobbiesPanel";
@@ -34,6 +35,7 @@ interface Friend {
   equipped_frame?: string | null;
   equipped_name_color?: string | null;
   equipped_avatar_aura?: string | null;
+  flair?: string | null;
 }
 
 interface PendingRequest {
@@ -46,6 +48,7 @@ interface PendingRequest {
   equipped_frame?: string | null;
   equipped_name_color?: string | null;
   equipped_avatar_aura?: string | null;
+  flair?: string | null;
 }
 
 interface OutgoingRequest {
@@ -1042,9 +1045,12 @@ export default function SocialPage() {
                         style={{ background: "rgba(255,255,255,0.03)" }}>
                         <Avatar url={avatarFor(req.username, req.avatar_url)} alt={req.username} size="sm" frame={req.equipped_frame} aura={req.equipped_avatar_aura} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-cream text-xs font-semibold truncate">
-                            <AnimatedUsername username={req.username} effect={resolveRowUsernameEffect(req.equipped_username_effect)} nameColor={resolveRowNameColor(req.equipped_name_color)} size="sm" />
-                          </p>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-cream text-xs font-semibold truncate">
+                              <AnimatedUsername username={req.username} effect={resolveRowUsernameEffect(req.equipped_username_effect)} nameColor={resolveRowNameColor(req.equipped_name_color)} size="sm" />
+                            </span>
+                            <EquippedFlair flair={req.flair} compact />
+                          </div>
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
                             <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
                             {tier.name}
@@ -1155,10 +1161,11 @@ export default function SocialPage() {
 
                     {/* Name + meta */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <span className="text-cream text-sm font-semibold truncate">
                           <AnimatedUsername username={friend.username} effect={resolveRowUsernameEffect(friend.equipped_username_effect)} nameColor={resolveRowNameColor(friend.equipped_name_color)} size="sm" />
                         </span>
+                        <EquippedFlair flair={friend.flair} compact />
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1" style={{
                           color: tier.color,
                           background: `${tier.color}15`,

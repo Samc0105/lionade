@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
 import { notifyUser, DEFAULT_PRIVACY_PREFS, type PrivacyPrefs } from "@/lib/db";
+import { fetchTopFounderFlairByUser } from "@/lib/cosmetics/founder-flair";
 
 // GET — List friends + pending requests
 //
@@ -86,6 +87,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Founder-badge flair per user — one batched query. founder_grants is RLS
+    // own-only, so this server route resolves it on supabaseAdmin. Display-only.
+    const flairMap = await fetchTopFounderFlairByUser(Array.from(profileIds));
+
     // Build unread-count map
     const unreadMap: Record<string, number> = {};
     for (const m of unreadRows) {
@@ -100,6 +105,7 @@ export async function GET(req: NextRequest) {
       equipped_frame: p.equipped_frame,
       equipped_name_color: p.equipped_name_color,
       equipped_avatar_aura: p.equipped_avatar_aura,
+      flair: flairMap.get(p.id) ?? null,
     });
 
     // Shape the response
