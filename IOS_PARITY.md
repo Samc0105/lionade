@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-30: Admin moderation + founder-flair + dormant USD store
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Admin question-bank moderation** (`/admin/question-bank`, role-gated list + approve/reject) | ✅ shipped | 🚫 N/A — the Admin Console is a web-only internal tool; iOS has no admin surface. |
+| **Founder-flair pill on leaderboard + social** (top-3 podium + full list + friend/pending rows) | ✅ shipped | 🟡 **parity gap** — iOS leaderboard/social render usernames but no founder pill. The `flair-batch` endpoint is shared-backend, so an iOS port is client-only: call `/api/cosmetics/flair-batch` and render the badge. Mirror later. |
+| **USD premium-cosmetics store** (Stripe checkout for premium cosmetics + the $14.99 Founding Scholar bundle) | ✅ shipped **DORMANT** (fail-closed until Stripe price ids configured) | 🚫 N/A on the web Stripe path — **iOS must use Apple IAP for digital goods (StoreKit), NOT Stripe**, or it fails App Store review (anti-steering). The grant/webhook backend is shared, but the iOS purchase UI is a separate StoreKit build. Do NOT surface the web Stripe checkout in the iOS app. |
+
+---
+
 ## 2026-06-30: Founder-badge wiring repair + flywheel output-sink
 
 | Surface | Web | iOS |
