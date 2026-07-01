@@ -583,6 +583,189 @@ export const EXTRA_TICKETS: { item: ShiftItem; track: Track }[] = [
       ],
     },
   },
+  {
+    "track": "helpdesk",
+    "item": {
+      "id": "inbox-payroll-bank-change",
+      "channel": "email",
+      "priority": "P2",
+      "from": {
+        "name": "Denise Park (Payroll)",
+        "role": "spoofed display name"
+      },
+      "subject": "Please update my direct deposit before Friday's run",
+      "slaMinutes": 30,
+      "arriveAfter": 0,
+      "reward": 46,
+      "xp": 38,
+      "email": {
+        "isPhish": true,
+        "body": "Hi, I switched banks and need my paycheck going to my new account starting this week. Here are the new routing and account numbers. Can you get this in before Friday's payroll run so I don't miss it? My old phone is being set up so email is easiest right now. Thanks so much."
+      },
+      "evidence": [
+        {
+          "label": "Message headers",
+          "lines": [
+            "Display name: Denise Park (Payroll)",
+            "Actual sender: denise.park.hr@mailfence.com (not our domain)",
+            "Reply-To: d.park.payroll@outlook.com",
+            "SPF: not aligned with company domain   DKIM: none",
+            "Pattern: bank-detail change + deadline + 'can't use phone' = payroll BEC"
+          ]
+        }
+      ],
+      "kbArticleId": "kb-vendor-bank-change",
+      "goal": "Decide what to do with this direct-deposit change request.",
+      "hint": "A bank-detail change plus a deadline plus a reason you can't call is the classic payroll scam. Look at the real sender, then verify the person on a number you already have.",
+      "actions": [
+        {
+          "id": "verify-payroll",
+          "label": "Do not change anything, call Denise back on her number on file to confirm, and report the message as a likely payroll BEC scam",
+          "correct": true,
+          "requires": [
+            "kb"
+          ],
+          "csat": 14,
+          "outcome": "reported",
+          "teach": "Right. The display name says Payroll but the real sender is a personal mailbox, the reply-to is different again, and the excuse for not calling is doing a lot of work. A bank-detail change is never actioned from email alone. Call the person on a number you already have, and report the message so it gets pulled. That callback is what saves the paycheck from landing in a criminal's account."
+        },
+        {
+          "id": "update-deposit",
+          "label": "Update the direct deposit with the new numbers so she doesn't miss Friday's run",
+          "csat": -13,
+          "ends": true,
+          "outcome": "mishandled",
+          "teach": "That is exactly the trap. The whole scam runs on the deadline and your good intentions. The moment you save those numbers, Friday's paycheck routes to the attacker and the real employee is short a full paycheck. Verify any banking change by callback before you touch it, every time."
+        },
+        {
+          "id": "reply-payroll",
+          "label": "Reply to the email to ask her to confirm the account numbers",
+          "csat": -7,
+          "teach": "Replying confirms your address is live and reaches the attacker, not Denise, since the reply-to is their mailbox. You still have not verified anything. Do not reply to the suspicious address. Call the real person on a known number and report it."
+        }
+      ]
+    }
+  },
+  {
+    "track": "helpdesk",
+    "item": {
+      "id": "inbox-storage-quota",
+      "channel": "email",
+      "priority": "P2",
+      "from": {
+        "name": "Mail Admin",
+        "role": "storage-alert@mail-quota-support.net"
+      },
+      "subject": "URGENT: your mailbox is full, messages will be deleted",
+      "slaMinutes": 20,
+      "arriveAfter": 0,
+      "reward": 42,
+      "xp": 34,
+      "email": {
+        "isPhish": true,
+        "body": "Your mailbox has reached 100% of its storage limit. Incoming and outgoing messages are now being rejected and older mail will be deleted within 24 hours. Re-validate your account now to restore full capacity at the storage portal below.\n\nRe-validate: http://webmail-quota-restore.mail-quota-support.net/verify"
+      },
+      "evidence": [
+        {
+          "label": "Email headers",
+          "lines": [
+            "From: Mail Admin <storage-alert@mail-quota-support.net>",
+            "Return-Path: bounce@relay7.mail-quota-support.net",
+            "SPF: FAIL   DKIM: FAIL   DMARC: FAIL",
+            "Link host: webmail-quota-restore.mail-quota-support.net  (not getlionade.com)",
+            "Real mailbox is at 61% per the admin console"
+          ]
+        }
+      ],
+      "kbArticleId": "kb-hover-before-click",
+      "goal": "Decide what this 'mailbox full' warning really is.",
+      "hint": "Quota threats with a countdown and a 're-validate' link are a common credential lure. Check the sender domain and where the link actually goes, not the scary subject line.",
+      "actions": [
+        {
+          "id": "report-storage-phish",
+          "label": "Report it as phishing",
+          "correct": true,
+          "csat": 13,
+          "outcome": "reported",
+          "teach": "Caught it. SPF, DKIM, and DMARC all fail, the sender is an unrelated domain, and the 're-validate' link host is not getlionade.com. Real quota notices come from your own mail system and never send you off-domain to 're-validate' credentials. The mailbox is only 61% full anyway. Reporting it lets the SOC quarantine it for everyone who got the same lure."
+        },
+        {
+          "id": "panic-storage",
+          "label": "Click the link and re-validate to avoid losing mail",
+          "csat": -16,
+          "ends": true,
+          "outcome": "mishandled",
+          "teach": "That was the trap. The link is a credential harvester on a lookalike domain, and the countdown exists only to rush you past checking it. You just handed over a password. The urgency is the tell: verify the domain and hover the link before you ever click."
+        },
+        {
+          "id": "make-storage-ticket",
+          "label": "Open a ticket to get your mailbox quota raised",
+          "csat": -4,
+          "teach": "There is nothing to raise. The console shows the mailbox at 61%, and the warning is a fake. You would be spending real effort on an attacker's invented problem. Report the message instead of servicing it."
+        }
+      ]
+    }
+  },
+  {
+    "track": "helpdesk",
+    "item": {
+      "id": "inbox-mfa-approval-legit",
+      "channel": "email",
+      "priority": "P3",
+      "from": {
+        "name": "Security Notifications",
+        "role": "internal, verified sender"
+      },
+      "subject": "New sign-in approved on your account",
+      "slaMinutes": 40,
+      "arriveAfter": 0,
+      "reward": 34,
+      "xp": 28,
+      "email": {
+        "body": "You approved a sign-in to Lionade Mail a moment ago from your usual office network on your enrolled phone. If this was you, no action is needed. If you did not approve this, use the report button in this notice so we can secure the account."
+      },
+      "evidence": [
+        {
+          "label": "Message and event details",
+          "lines": [
+            "Sender: security-notifications@OUR-company-domain (aligned)",
+            "SPF: PASS   DKIM: PASS   DMARC: PASS",
+            "Event: MFA approval you completed 30 seconds ago",
+            "Location: office network, enrolled device (your normal pattern)",
+            "No link to sign in, no credential request; only an in-notice report button"
+          ]
+        }
+      ],
+      "kbArticleId": "kb-mfa-fatigue",
+      "goal": "Decide how to handle this sign-in notice.",
+      "hint": "Headers pass from your own domain, it matches an approval you just made from your normal location, and it asks for nothing. Not every security email is an attack.",
+      "actions": [
+        {
+          "id": "acknowledge-mfa-legit",
+          "label": "Recognize it as a legitimate confirmation of a sign-in you just made and file it, no action needed",
+          "correct": true,
+          "requires": [
+            "kb"
+          ],
+          "csat": 11,
+          "outcome": "archived",
+          "teach": "Correct. It passes SPF, DKIM, and DMARC from your own domain, it matches the MFA approval you completed seconds ago from your usual network and enrolled device, and it asks for nothing. This is a real confirmation of your own action. Treating every security notice as an attack floods the team and teaches people to ignore the ones that matter."
+        },
+        {
+          "id": "report-mfa-legit",
+          "label": "Report it to security as a phishing attempt",
+          "csat": -5,
+          "teach": "Over-reporting authenticated internal mail that simply confirms your own sign-in floods the security team and dulls their response to real alerts. The headers pass and the event matches something you actually did. Read the evidence: this one is genuine."
+        },
+        {
+          "id": "reset-mfa-panic",
+          "label": "Reset your password and re-enroll MFA just in case",
+          "csat": -4,
+          "teach": "Nothing here is compromised. This notice confirms an approval you made yourself, from your normal location, and asks for nothing. Reflexive 'just in case' resets waste your time and lock you out of your own tools. Acknowledge it and move on. Report only if you did not start the sign-in."
+        }
+      ]
+    }
+  },
 ];
 
 // A second incident group (file-server outage) so Doubles has more variety.

@@ -35,6 +35,104 @@ export const SHIFT_1: Shift = {
 
   kb: [
     {
+      "id": "kb-vendor-bank-change",
+      "title": "Verify a vendor or payroll bank-account change",
+      "tags": [
+        "phishing",
+        "invoice",
+        "payroll",
+        "bec",
+        "finance",
+        "security"
+      ],
+      "body": [
+        "A request to update a vendor's or an employee's bank details is a top target for business email compromise. The attacker just wants the next payment redirected to their account, so the email leans on a real-looking name and a fresh reply address.",
+        "Never action a banking change from an inbound email alone. Call the vendor or employee back on a phone number you already have on file, not one printed in the email, and confirm the change with them directly.",
+        "If the sender domain, reply-to, or headers do not line up, treat it as phishing and report it so the SOC can pull it from every inbox. A single unverified change can send an entire payroll run to a criminal."
+      ]
+    },
+    {
+      "id": "kb-mfa-fatigue",
+      "title": "Tell a real MFA prompt from an MFA-fatigue attack",
+      "tags": [
+        "mfa",
+        "security",
+        "authentication",
+        "phishing",
+        "account"
+      ],
+      "body": [
+        "Multi-factor prompts are normal when you just signed in or unlocked an app. A legitimate approval names the app, the location, and the time, and it lines up with something you actually did in that moment.",
+        "An MFA-fatigue attack is a flood of approval requests you did not trigger, often at odd hours, betting you will tap Approve just to make it stop. Approving one hands an attacker who already has your password a live session.",
+        "The rule is simple: if you did not start a sign-in, deny it, then report it so the account can be checked. If you did start it and the details match, approving is the correct and expected action. Denying every prompt out of reflex locks you out of your own tools."
+      ]
+    },
+    {
+      "id": "kb-callback-verify",
+      "title": "Verify identity with an out-of-band callback",
+      "tags": [
+        "verification",
+        "callback",
+        "identity",
+        "security",
+        "bec"
+      ],
+      "body": [
+        "Out-of-band verification means confirming a request through a second channel the requester did not choose. If a suspicious ask arrives by email, you verify by phone; if it arrives by phone, you verify through a known internal record.",
+        "The number, link, or contact must come from a trusted source you already hold, never from the message under suspicion. Attackers happily supply their own callback number and answer it in your requester's name.",
+        "Use this before any high-impact action a message asks for: a password reset, a payment, a bank-detail change, or granting access. The extra minute of a callback is what stops a convincing fake from costing real money or access."
+      ]
+    },
+    {
+      "id": "kb-quarantine-scope",
+      "title": "Scope a phishing quarantine to every affected mailbox",
+      "tags": [
+        "phishing",
+        "quarantine",
+        "soc",
+        "incident",
+        "email"
+      ],
+      "body": [
+        "When you confirm a phishing message, the fix is rarely one mailbox. The same lure is usually delivered to many recipients at once, so protecting only the person who reported it leaves the rest exposed.",
+        "Check the delivery count in the headers or mail trace, then quarantine the message from all recipients and block the sending domain or link host so new copies cannot land. Thank the reporter, since a quick report is what let you act early.",
+        "Deleting your own copy or replying to warn a single person does not remove the threat for everyone else. Report and quarantine at the true scope of the delivery, not the scope of who happened to speak up."
+      ]
+    },
+    {
+      "id": "kb-legit-vs-phish",
+      "title": "Read the headers before you report an email",
+      "tags": [
+        "phishing",
+        "headers",
+        "spf",
+        "dkim",
+        "triage",
+        "security"
+      ],
+      "body": [
+        "Not every unexpected or urgent email is an attack. Judging by the subject line alone leads to two failures: clicking a real phish, or flooding security with genuine mail that only looked alarming.",
+        "The evidence is in the headers. A message that passes SPF and DKIM from your own domain, asks for nothing sensitive, and carries no link or attachment is almost always legitimate internal traffic, even if the topic is a maintenance window or an account notice.",
+        "Reserve a report for the real tells: authentication failures, a lookalike or mismatched sender domain, a credential or payment ask, or a link whose host is not your company. Over-reporting authenticated internal mail trains people to ignore the alerts that matter."
+      ]
+    },
+    {
+      "id": "kb-hover-before-click",
+      "title": "Check where a link really goes before clicking",
+      "tags": [
+        "phishing",
+        "links",
+        "url",
+        "security",
+        "email"
+      ],
+      "body": [
+        "The visible text of a link is just a label and can say anything. What matters is the real destination, which you see by hovering over the link or long-pressing it on mobile to reveal the actual host.",
+        "Compare that host to the company you expect. A lookalike domain, a swapped character, an unrelated host, or a link buried inside a URL shortener is a strong signal to stop. Legitimate internal tools live on your own domain.",
+        "When the destination does not match, do not click and do not sign in. Report the message so it can be quarantined. One careful look at the real URL prevents most credential-harvest phishing."
+      ]
+    },
+    {
       id: "kb-outlook-profile",
       title: "Fix a corrupt Outlook profile",
       tags: ["outlook", "email", "crash", "office"],
