@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { fetchTopFounderFlairByUser } from "@/lib/cosmetics/founder-flair";
 
 // GET — Fetch match state (questions, answers, scores)
 export async function GET(req: NextRequest) {
@@ -43,6 +44,9 @@ export async function GET(req: NextRequest) {
         .eq("id", match.player2_id)
         .single(),
     ]);
+
+    // Founder-badge flair for both players (one batched query, server-side).
+    const flairMap = await fetchTopFounderFlairByUser([match.player1_id, match.player2_id]);
 
     // Get match questions with judge data (WITHOUT correct answers)
     const { data: matchQuestions } = await supabaseAdmin
@@ -110,8 +114,8 @@ export async function GET(req: NextRequest) {
         startedAt: match.started_at,
         completedAt: match.completed_at,
       },
-      player1: p1 ? { id: p1.id, username: p1.username, avatarUrl: p1.avatar_url, elo: p1.arena_elo } : null,
-      player2: p2 ? { id: p2.id, username: p2.username, avatarUrl: p2.avatar_url, elo: p2.arena_elo } : null,
+      player1: p1 ? { id: p1.id, username: p1.username, avatarUrl: p1.avatar_url, elo: p1.arena_elo, flair: flairMap.get(p1.id) ?? null } : null,
+      player2: p2 ? { id: p2.id, username: p2.username, avatarUrl: p2.avatar_url, elo: p2.arena_elo, flair: flairMap.get(p2.id) ?? null } : null,
       questions: orderedQuestions,
       answers: answerMap,
     });

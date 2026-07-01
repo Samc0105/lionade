@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { DEMO_USER_ID } from "@/lib/demo-guard";
 import { DEFAULT_PRIVACY_PREFS, type PrivacyPrefs } from "@/lib/db";
+import { fetchTopFounderFlairByUser } from "@/lib/cosmetics/founder-flair";
 
 /**
  * Activity feed for a user's friends — recent coin-earning events that are
@@ -20,6 +21,7 @@ interface FeedItem {
   friendId: string;
   friendUsername: string;
   friendAvatarUrl: string | null;
+  flair: string | null;
   type: string;
   amount: number;
   description: string | null;
@@ -30,6 +32,7 @@ interface CircleRank {
   userId: string;
   username: string;
   avatarUrl: string | null;
+  flair: string | null;
   coinsThisWeek: number;
   isMe: boolean;
 }
@@ -115,6 +118,10 @@ export async function GET(req: NextRequest) {
       ]),
     );
 
+    // Founder-badge flair for everyone shown in the feed + circle (one batched
+    // query, server-side on supabaseAdmin). Display-only, fails soft.
+    const flairMap = await fetchTopFounderFlairByUser(Array.from(profileMap.keys()));
+
     // Privacy enforcement (2026-06-11): users with privacy.show_activity_feed
     // set to false don't have their activity rows surfaced to friends. Prefs
     // were batch-read in the circle profiles query above (no extra round
@@ -144,6 +151,7 @@ export async function GET(req: NextRequest) {
           userId: id,
           username: p.username,
           avatarUrl: p.avatar_url,
+          flair: flairMap.get(id) ?? null,
           coinsThisWeek: weeklyTotals.get(id) ?? 0,
           isMe: id === userId,
         } satisfies CircleRank;
@@ -162,6 +170,7 @@ export async function GET(req: NextRequest) {
           friendId: t.user_id,
           friendUsername: p.username,
           friendAvatarUrl: p.avatar_url,
+          flair: flairMap.get(t.user_id) ?? null,
           type: t.type,
           amount: t.amount,
           description: t.description,

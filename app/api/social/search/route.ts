@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { DEMO_USER_ID } from "@/lib/demo-guard";
+import { fetchTopFounderFlairByUser } from "@/lib/cosmetics/founder-flair";
 
 export const dynamic = "force-dynamic";
 
@@ -85,20 +86,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Search failed" }, { status: 500 });
     }
 
-    const users = (data ?? [])
+    const shown = (data ?? [])
       .filter(u => u.id !== userId) // exclude ONLY self
-      .slice(0, 8)
-      .map(u => {
-        const rel = relById.get(u.id);
-        return {
-          ...u,
-          arena_elo: u.arena_elo ?? 1000,
-          relationship: rel?.relationship ?? "none",
-          // friendshipId is only meaningful for incoming (Accept) /
-          // outgoing requests; null for none/friends.
-          friendshipId: rel?.friendshipId ?? null,
-        };
-      });
+      .slice(0, 8);
+
+    // Founder-badge flair for the shown results (one batched query, server-side).
+    const flairMap = await fetchTopFounderFlairByUser(shown.map(u => u.id));
+
+    const users = shown.map(u => {
+      const rel = relById.get(u.id);
+      return {
+        ...u,
+        arena_elo: u.arena_elo ?? 1000,
+        relationship: rel?.relationship ?? "none",
+        // friendshipId is only meaningful for incoming (Accept) /
+        // outgoing requests; null for none/friends.
+        friendshipId: rel?.friendshipId ?? null,
+        flair: flairMap.get(u.id) ?? null,
+      };
+    });
 
     return NextResponse.json({ users });
   } catch (e) {

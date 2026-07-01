@@ -12,6 +12,7 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { subscribeResilient, type ResilientHandle } from "@/lib/realtime-resilient";
 import { avatarFor } from "@/lib/avatar";
+import EquippedFlair from "@/components/EquippedFlair";
 import Confetti from "@/components/Confetti";
 import {
   Medal,
@@ -47,6 +48,7 @@ interface ArenaPlayer {
   username: string;
   avatarUrl: string | null;
   elo: number;
+  flair?: string | null;
 }
 
 interface ArenaQuestion {
@@ -351,8 +353,8 @@ function ArenaPage() {
     const meData = isP1 ? data.player1 : data.player2;
     const opData = isP1 ? data.player2 : data.player1;
 
-    if (meData) setMe({ id: meData.id, username: meData.username, avatarUrl: meData.avatarUrl, elo: meData.elo });
-    if (opData) setOpponent({ id: opData.id, username: opData.username, avatarUrl: opData.avatarUrl, elo: opData.elo });
+    if (meData) setMe({ id: meData.id, username: meData.username, avatarUrl: meData.avatarUrl, elo: meData.elo, flair: meData.flair ?? null });
+    if (opData) setOpponent({ id: opData.id, username: opData.username, avatarUrl: opData.avatarUrl, elo: opData.elo, flair: opData.flair ?? null });
 
     // Start prematch
     setPhase("prematch");
@@ -1199,7 +1201,7 @@ function ArenaPage() {
                   style={{ border: `3px solid ${myTier.color}` }}>
                   <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-full h-full rounded-full object-cover" />
                 </div>
-                <p className="font-bold text-cream text-sm sm:text-base mb-1">{me?.username ?? "You"}</p>
+                <p className="font-bold text-cream text-sm sm:text-base mb-1">{me?.username ?? "You"} <EquippedFlair flair={me?.flair} compact /></p>
                 <div className="flex items-center gap-1.5">
                   <myTier.Icon size={16} weight="fill" color={myTier.color} aria-hidden="true" />
                   <span className="font-bebas text-sm" style={{ color: myTier.color }}>{myElo}</span>
@@ -1222,7 +1224,7 @@ function ArenaPage() {
                   style={{ border: `3px solid ${opTier?.color ?? "#EF4444"}` }}>
                   <img src={opAvatarUrl} alt={opponent?.username ?? "Opponent"} className="w-full h-full rounded-full object-cover" />
                 </div>
-                <p className="font-bold text-cream text-sm sm:text-base mb-1">{opponent?.username ?? "Opponent"}</p>
+                <p className="font-bold text-cream text-sm sm:text-base mb-1">{opponent?.username ?? "Opponent"} <EquippedFlair flair={opponent?.flair} compact /></p>
                 <div className="flex items-center gap-1.5">
                   {opTier && <opTier.Icon size={16} weight="fill" color={opTier.color} aria-hidden="true" />}
                   <span className="font-bebas text-sm" style={{ color: opTier?.color }}>{opponent?.elo}</span>
@@ -1282,7 +1284,7 @@ function ArenaPage() {
                     <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-10 h-10 rounded-full object-cover" />
                   </div>
                   <div>
-                    <p className="text-electric font-bold text-xs">{me?.username ?? "You"}</p>
+                    <p className="text-electric font-bold text-xs">{me?.username ?? "You"} <EquippedFlair flair={me?.flair} compact /></p>
                     <p className="font-bebas text-2xl text-cream leading-none">{myTotalPoints}</p>
                   </div>
                 </div>
@@ -1319,7 +1321,7 @@ function ArenaPage() {
                 <div className="flex items-center gap-3 flex-1 justify-end">
                   <div className="text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <p className="text-red-400 font-bold text-xs">{opponent?.username ?? "Opponent"}</p>
+                      <p className="text-red-400 font-bold text-xs">{opponent?.username ?? "Opponent"} <EquippedFlair flair={opponent?.flair} compact /></p>
                       {answerResult && !answerResult.bothAnswered && !opponentAnswered && (
                         <span className="text-cream/30 text-[10px] animate-pulse">thinking...</span>
                       )}
@@ -1542,7 +1544,7 @@ function ArenaPage() {
                     style={{ border: `3px solid ${iWon || isDraw ? "#FFD700" : "#E74C3C"}` }}>
                     <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-16 h-16 rounded-full object-cover" />
                   </div>
-                  <p className="text-electric font-bold text-sm mb-1">{me?.username ?? "You"}</p>
+                  <p className="text-electric font-bold text-sm mb-1">{me?.username ?? "You"} <EquippedFlair flair={me?.flair} compact /></p>
                   <p className="font-bebas text-5xl leading-none"
                     style={{ color: iWon ? "#FFD700" : isDraw ? "#E67E22" : "#E74C3C" }}>
                     {myTotalPoints}
@@ -1558,7 +1560,7 @@ function ArenaPage() {
                     style={{ border: `3px solid ${!iWon && !isDraw ? "#FFD700" : "#E74C3C"}` }}>
                     <img src={opAvatarUrl} alt={opponent?.username ?? "Opponent"} className="w-16 h-16 rounded-full object-cover" />
                   </div>
-                  <p className="text-red-400 font-bold text-sm mb-1">{opponent?.username ?? "Opponent"}</p>
+                  <p className="text-red-400 font-bold text-sm mb-1">{opponent?.username ?? "Opponent"} <EquippedFlair flair={opponent?.flair} compact /></p>
                   <p className="font-bebas text-5xl leading-none"
                     style={{ color: !iWon && !isDraw ? "#FFD700" : isDraw ? "#E67E22" : "#E74C3C" }}>
                     {opTotalPoints}

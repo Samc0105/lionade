@@ -75,6 +75,7 @@ interface SearchResult {
   arena_elo: number;
   relationship: Relationship;
   friendshipId: string | null;
+  flair?: string | null;
 }
 
 interface Message {
@@ -103,6 +104,7 @@ interface FeedItem {
   friendId: string;
   friendUsername: string;
   friendAvatarUrl: string | null;
+  flair?: string | null;
   type: string;
   amount: number;
   description: string | null;
@@ -113,6 +115,7 @@ interface CircleRank {
   userId: string;
   username: string;
   avatarUrl: string | null;
+  flair?: string | null;
   coinsThisWeek: number;
   isMe: boolean;
 }
@@ -1555,7 +1558,8 @@ export default function SocialPage() {
                                 <div className="flex items-start gap-3">
                                   <div className="flex-1 min-w-0">
                                     <p className="text-cream text-sm font-semibold leading-tight">
-                                      <span className="text-cream">{item.friendUsername}</span>
+                                      <span className="text-cream">{item.friendUsername}</span>{" "}
+                                      <EquippedFlair flair={item.flair} compact />
                                       <span className="text-cream/60 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
                                     </p>
                                     <p className="text-cream/55 text-[10px] mt-1 font-mono uppercase tracking-wider">
@@ -2037,7 +2041,10 @@ export default function SocialPage() {
                                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
+                                  <EquippedFlair flair={u.flair} compact />
+                                </div>
                                 <span
                                   className="text-[9px] font-bold inline-flex items-center gap-1"
                                   style={{ color: tier.color }}
