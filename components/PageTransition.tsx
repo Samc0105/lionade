@@ -51,18 +51,23 @@ export default function PageTransition({ children }: { children: React.ReactNode
   // HTML to contain a <div> in <div>" on navigation.
   if (!mounted || reduce) return <div>{children}</div>;
 
-  // Tuned tight: 80ms enter, 0ms exit (mode="sync" so the new page mounts
-  // immediately while the old one is still fading is intentionally avoided —
-  // we just skip the exit animation so navigation feels instant). 180ms
-  // exit + 180ms enter = 360ms perceived delay; this is ~80ms.
+  // A perceptible per-route ENTER (fade + 8px rise) with an INSTANT exit. The
+  // `transition` prop applies to the enter (0.26s, --ease-out-expo). The exit
+  // gets its OWN duration:0 so `mode="wait"` doesn't stall the new page behind
+  // an exit animation (that exit+enter stacking is exactly the perceived-delay
+  // trap the old 80ms tuning was avoiding). Net: the new page slides up and
+  // fades in over ~260ms while the old one leaves immediately. GPU-only
+  // (transform + opacity), no layout shift; reduced-motion users hit the plain
+  // <div> branch above and get a pure synchronous swap.
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 1 }}
-        transition={{ duration: 0.08, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 1, transition: { duration: 0 } }}
+        transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+        style={{ willChange: "transform, opacity" }}
       >
         {children}
       </motion.div>

@@ -196,6 +196,37 @@ html {
   --radius-pill: 9999px;
 }
 
+/* ── Reusable micro-interaction utilities (GPU-only, palette-aligned) ─────────
+   Opt-in classes for tactile feedback on interactive elements. transform +
+   opacity only (no layout), so they compose with any element. All three
+   disable themselves under prefers-reduced-motion (block below). */
+.lift {
+  transition: transform var(--dur-state) var(--ease-out-emil),
+    box-shadow var(--dur-state) var(--ease-out-emil);
+  will-change: transform;
+}
+.lift:hover { transform: translateY(-2px); }
+
+.press { transition: transform var(--dur-feedback) var(--ease-out-quart); }
+.press:active { transform: scale(0.97); }
+
+/* Combined: cards/buttons that lift on hover and depress on click. */
+.interactive {
+  transition: transform var(--dur-state) var(--ease-out-emil);
+  will-change: transform;
+}
+.interactive:hover { transform: translateY(-2px); }
+.interactive:active { transform: translateY(0) scale(0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .lift:hover,
+  .press, .press:active,
+  .interactive, .interactive:hover, .interactive:active {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* ── Global focus-visible — keyboard users need to see where they are. */
 /* Covers the WCAG 2.4.7 gap. Gold accent on dark, darker gold on light. */
 *:focus {
