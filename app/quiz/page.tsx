@@ -277,6 +277,11 @@ export default function QuizPage() {
   // Anti-cheat: result comes back from server after user selects
   const [currentResult, setCurrentResult] = useState<{ correctIndex: number; explanation: string | null } | null>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards the post-reveal NEXT / skip control: a rapid double-click otherwise
+  // calls advanceToNext twice, and the functional setCurrentIndex(prev => prev+1)
+  // updater compounds to +2, skipping a whole question the user never saw or
+  // earned on. Released when the index actually moves (effect below).
+  const advancingRef = useRef(false);
   const [showMistakes, setShowMistakes] = useState(false);
   const [bonusFangs, setBonusFangs] = useState(0);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; bonus: number } | null>(null);
@@ -420,6 +425,8 @@ export default function QuizPage() {
   };
 
   function advanceToNext() {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
     const isLast = currentIndex + 1 >= questions.length;
     if (isLast) {
       finishQuiz(answers);
@@ -428,6 +435,10 @@ export default function QuizPage() {
       setCurrentResult(null);
     }
   }
+
+  // Release the advance guard once the index has actually moved (or the quiz
+  // resets to 0), so the next question's NEXT button works normally.
+  useEffect(() => { advancingRef.current = false; }, [currentIndex]);
 
   function advanceAfterAnswer(updatedAnswers: AnswerRecord[]) {
     const isLast = currentIndex + 1 >= questions.length;
@@ -1359,7 +1370,7 @@ function ResultsScreen({
             <Fire size={28} weight="fill" color="#FFD700" aria-hidden="true" />
             <div className="text-left">
               <p className="font-bebas text-lg text-[#FFD700] tracking-wider leading-none">3 QUIZZES IN A ROW!</p>
-              <p className="text-cream/55 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
+              <p className="text-cream/55 text-xs mt-0.5">Bonus +{bonusFangs} Fangs added to your wallet</p>
             </div>
             <span className="font-bebas text-2xl text-[#FFD700] ml-auto inline-flex items-center gap-1">+{bonusFangs} <Coin size={20} weight="fill" aria-hidden="true" /></span>
           </div>
