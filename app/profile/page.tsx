@@ -369,10 +369,10 @@ const labelCls = "block text-cream/60 text-xs font-bold uppercase tracking-wides
 // role=dialog + aria-modal, focuses its first control on open, traps Tab,
 // closes on Escape / backdrop, and restores focus to the trigger on close.
 function ConfirmModal({
-  titleId, title, children, confirmLabel, onConfirm, onCancel,
+  titleId, title, children, confirmLabel, onConfirm, onCancel, saving = false,
 }: {
   titleId: string; title: string; children: React.ReactNode;
-  confirmLabel: string; onConfirm: () => void; onCancel: () => void;
+  confirmLabel: string; onConfirm: () => void; onCancel: () => void; saving?: boolean;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -420,10 +420,10 @@ function ConfirmModal({
             className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/70 text-sm font-bold hover:bg-white/5 transition-all">
             Cancel
           </button>
-          <button onClick={onConfirm}
-            className="flex-1 py-3 rounded-xl font-bold text-sm text-navy transition-all"
+          <button onClick={onConfirm} disabled={saving} aria-busy={saving}
+            className="flex-1 py-3 rounded-xl font-bold text-sm text-navy transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-            {confirmLabel}
+            {saving ? "Saving…" : confirmLabel}
           </button>
         </div>
       </div>
@@ -899,6 +899,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
   }, [username, usernameLocked]);
 
   const handleSave = async () => {
+    if (saving) return; // in-flight guard: block a second confirm while saving
     if (usernameStatus === "taken") { setToast({ msg: "Username already taken", err: true }); return; }
     if (usernameStatus === "checking") { setToast({ msg: "Wait for username check", err: true }); return; }
 
@@ -960,6 +961,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
           titleId="confirm-username-title"
           title="CONFIRM USERNAME CHANGE"
           confirmLabel="Confirm Change"
+          saving={saving}
           onCancel={() => setShowConfirm(false)}
           onConfirm={handleSave}
         >
