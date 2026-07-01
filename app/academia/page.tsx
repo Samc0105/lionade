@@ -244,7 +244,7 @@ export default function AcademiaPage() {
               {classesLoading && classes.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="h-44 rounded-[14px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+                    <div key={i} className="h-44 rounded-[14px] bg-white/[0.03] border border-white/[0.06] motion-safe:animate-pulse" />
                   ))}
                 </div>
               ) : classesError && classes.length === 0 ? (
@@ -346,7 +346,7 @@ function GradeSnapshot() {
   if (isLoading && !data) {
     return (
       <section className="mb-10">
-        <div className="h-[104px] rounded-[16px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+        <div className="h-[104px] rounded-[16px] bg-white/[0.03] border border-white/[0.06] motion-safe:animate-pulse" />
       </section>
     );
   }
@@ -401,7 +401,7 @@ function GradeSnapshot() {
                   className="font-bebas text-5xl sm:text-6xl tracking-wider leading-none tabular-nums"
                   style={{ color: gpaTierColor(termGpa) }}
                 >
-                  {termGpa !== null ? termGpa.toFixed(2) : "—"}
+                  {termGpa !== null ? termGpa.toFixed(2) : ""}
                 </p>
               </>
             )}
@@ -521,9 +521,17 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
     return map;
   }, [items]);
 
+  // Synchronous in-flight guard. A ref (not state) so two clicks in the same
+  // tick can't both pass the check before React re-renders, which is exactly how
+  // a double-click fired two identical PATCHes off the same stale status and
+  // advanced the cycle only one step instead of racing the optimistic cache.
+  const inFlightStatus = useRef<Set<string>>(new Set());
+
   // Optimistic status toggle for assignments, then revalidate.
   const cycleStatus = async (item: AgendaItem) => {
     if (item.kind !== "assignment") return;
+    if (inFlightStatus.current.has(item.id)) return;
+    inFlightStatus.current.add(item.id);
     const next = nextStatus(item.status ?? "todo");
     const optimistic: { items: AgendaItem[] } = {
       items: items.map(i => (i.id === item.id ? { ...i, status: next } : i)),
@@ -541,6 +549,8 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
     } catch (e) {
       console.error("[academia:agenda] status toggle failed", e);
       setAnnounce(`Couldn't update ${item.title}. Try again.`);
+    } finally {
+      inFlightStatus.current.delete(item.id);
     }
   };
 
@@ -605,7 +615,7 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
           {isLoading && items.length === 0 ? (
             <div className="space-y-2.5">
               {[0, 1, 2].map(i => (
-                <div key={i} className="h-14 rounded-[12px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+                <div key={i} className="h-14 rounded-[12px] bg-white/[0.03] border border-white/[0.06] motion-safe:animate-pulse" />
               ))}
             </div>
           ) : error && items.length === 0 ? (
@@ -926,7 +936,7 @@ function MonthCalendar({
       </div>
 
       <div className="relative">
-        <div className={`transition-opacity duration-200 ${overlay ? "opacity-30" : "opacity-100"}`}>
+        <div className={`motion-safe:transition-opacity duration-200 ${overlay ? "opacity-30" : "opacity-100"}`}>
           <div className="grid grid-cols-7 gap-1 mb-1" aria-hidden="true">
             {WEEKDAY_LABELS.map((d, i) => (
               <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/50 py-1">
@@ -1064,7 +1074,7 @@ function StatTile({
   label, value, icon, color, sublabel, muted,
 }: {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: React.ReactNode;
   color: string;
   sublabel?: string;
@@ -1122,7 +1132,7 @@ function DueThisWeekTile() {
   return (
     <StatTile
       label="Due this week"
-      value={resolved ? count : "—"}
+      value={resolved ? count : <span className="inline-block h-6 w-8 rounded bg-white/10 motion-safe:animate-pulse motion-reduce:bg-white/20 align-middle" aria-hidden="true" />}
       muted={!resolved}
       icon={<CalendarBlank size={14} weight="bold" />}
       color="#EF4444"
@@ -1472,9 +1482,9 @@ function CreateClassModal({
                   role="radio"
                   aria-checked={color === c}
                   aria-label={`Color ${i + 1}${color === c ? ", selected" : ""}`}
-                  className={`grid place-items-center w-9 h-9 rounded-full transition-transform
+                  className={`grid place-items-center w-9 h-9 rounded-full motion-safe:transition-transform
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 ${
-                    color === c ? "scale-105" : ""
+                    color === c ? "motion-safe:scale-105" : ""
                   }`}
                 >
                   <span
