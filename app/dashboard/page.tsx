@@ -542,7 +542,11 @@ function DashboardContent() {
                       ? <span className="shimmer-text">{user.username}</span>
                       : <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider" />}
                   </h1>
-                  <p className="text-cream/65 text-sm mt-2 font-syne">{getGreeting()}</p>
+                  {/* Time-based greeting is gated on `mounted`: getGreeting() reads
+                      the local hour, which differs between the SSR render and the
+                      client, so rendering it pre-mount risks a hydration mismatch.
+                      Show a stable line first, then the time-aware one post-mount. */}
+                  <p className="text-cream/65 text-sm mt-2 font-syne">{mounted ? getGreeting() : "Ready when you are."}</p>
                 </div>
               </div>
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
