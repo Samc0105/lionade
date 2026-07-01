@@ -5,6 +5,7 @@ import BackButton from "@/components/BackButton";
 import { Terminal } from "@phosphor-icons/react";
 import TechHubHome from "@/components/helpdesk/TechHubHome";
 import CommandPalette from "@/components/helpdesk/CommandPalette";
+import WhatsNew from "@/components/helpdesk/WhatsNew";
 
 // TechHub, a terminal-driven career simulator. Pick a track (IT support, SOC,
 // software, red team), work real tickets in a fake terminal, and climb the rank
@@ -33,6 +34,11 @@ export default function TechHubPage() {
         {/* Idea 35: Cmd/Ctrl+K command palette for fast hub navigation. Mounted
             once here; renders its own hint button and keyboard driven overlay. */}
         <CommandPalette />
+
+        {/* Idea 43: What's New highlights + guided tour. Mounted once here; it is
+            mount guarded and self opens (no flash) the first time after a version
+            bump, then stays out of the way. Pure discovery, grants nothing. */}
+        <WhatsNew />
       </div>
     </ProtectedRoute>
   );
