@@ -242,6 +242,203 @@ export const PARDY_DECKS: PardyDeck[] = [
   DECK_GEOGRAPHY,
   DECK_GEN_KNOWLEDGE,
   DECK_AWS_BASICS,
+  {
+    "id": "space-101",
+    "name": "Space & Astronomy",
+    "description": "Planets, moons, missions, stars, and cosmic phenomena.",
+    "icon": "🪐",
+    "categories": [
+      {
+        "name": "The Planets",
+        "tiles": [
+          {
+            "value": 10,
+            "question": "The planet known as the Red Planet.",
+            "correctAnswer": "Mars"
+          },
+          {
+            "value": 20,
+            "question": "The largest planet in the Solar System.",
+            "correctAnswer": "Jupiter"
+          },
+          {
+            "value": 50,
+            "question": "The hottest planet in the Solar System, thanks to its thick carbon dioxide atmosphere.",
+            "correctAnswer": "Venus"
+          },
+          {
+            "value": 100,
+            "question": "The planet that spins on its side, with an axial tilt of about 98 degrees.",
+            "correctAnswer": "Uranus"
+          },
+          {
+            "value": 200,
+            "question": "This ice giant is tilted about 98 degrees, so it essentially orbits the Sun on its side.",
+            "correctAnswer": "Uranus"
+          }
+        ]
+      },
+      {
+        "name": "Moons & Rings",
+        "tiles": [
+          {
+            "value": 10,
+            "question": "The planet most famous for its prominent ring system.",
+            "correctAnswer": "Saturn"
+          },
+          {
+            "value": 20,
+            "question": "Earth's only natural satellite.",
+            "correctAnswer": "The Moon",
+            "alternateAnswers": [
+              "Moon",
+              "Luna"
+            ]
+          },
+          {
+            "value": 50,
+            "question": "The largest moon of Saturn, which has a thick nitrogen atmosphere.",
+            "correctAnswer": "Titan"
+          },
+          {
+            "value": 100,
+            "question": "The largest moon in the Solar System, orbiting Jupiter.",
+            "correctAnswer": "Ganymede"
+          },
+          {
+            "value": 200,
+            "question": "Jupiter's moon with a subsurface ocean beneath a smooth icy crust, a top target in the search for life.",
+            "correctAnswer": "Europa"
+          }
+        ]
+      },
+      {
+        "name": "Space Exploration",
+        "tiles": [
+          {
+            "value": 10,
+            "question": "The first human to walk on the Moon.",
+            "correctAnswer": "Neil Armstrong",
+            "alternateAnswers": [
+              "Armstrong"
+            ]
+          },
+          {
+            "value": 20,
+            "question": "The Apollo mission that achieved the first crewed Moon landing in 1969.",
+            "correctAnswer": "Apollo 11",
+            "alternateAnswers": [
+              "Apollo Eleven"
+            ]
+          },
+          {
+            "value": 50,
+            "question": "The space telescope launched in 1990 that orbits Earth and is named for an American astronomer.",
+            "correctAnswer": "Hubble Space Telescope",
+            "alternateAnswers": [
+              "Hubble",
+              "Hubble Telescope",
+              "HST"
+            ]
+          },
+          {
+            "value": 100,
+            "question": "The NASA rover that landed in Jezero Crater on Mars in 2021 carrying the Ingenuity helicopter.",
+            "correctAnswer": "Perseverance",
+            "alternateAnswers": [
+              "Perseverance Rover"
+            ]
+          },
+          {
+            "value": 200,
+            "question": "The most distant human-made object from Earth, launched by NASA in 1977 and now in interstellar space.",
+            "correctAnswer": "Voyager 1",
+            "alternateAnswers": [
+              "Voyager One"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Stars & Galaxies",
+        "tiles": [
+          {
+            "value": 10,
+            "question": "The galaxy that contains our Solar System.",
+            "correctAnswer": "The Milky Way",
+            "alternateAnswers": [
+              "Milky Way"
+            ]
+          },
+          {
+            "value": 20,
+            "question": "The star at the center of our Solar System.",
+            "correctAnswer": "The Sun",
+            "alternateAnswers": [
+              "Sun",
+              "Sol"
+            ]
+          },
+          {
+            "value": 50,
+            "question": "The brightest star in Earth's night sky, in the constellation Canis Major.",
+            "correctAnswer": "Sirius"
+          },
+          {
+            "value": 100,
+            "question": "The closest known star to the Sun, about 4.2 light years away.",
+            "correctAnswer": "Proxima Centauri"
+          },
+          {
+            "value": 200,
+            "question": "The large spiral galaxy nearest to the Milky Way, on a collision course with it in the far future.",
+            "correctAnswer": "Andromeda Galaxy",
+            "alternateAnswers": [
+              "Andromeda",
+              "M31"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Astro Phenomena",
+        "tiles": [
+          {
+            "value": 10,
+            "question": "The force that keeps planets in orbit around the Sun.",
+            "correctAnswer": "Gravity"
+          },
+          {
+            "value": 20,
+            "question": "The event when the Moon passes between the Earth and the Sun, blocking the Sun's light.",
+            "correctAnswer": "Solar Eclipse",
+            "alternateAnswers": [
+              "Eclipse",
+              "A Solar Eclipse"
+            ]
+          },
+          {
+            "value": 50,
+            "question": "The boundary around a black hole beyond which not even light can escape.",
+            "correctAnswer": "Event Horizon"
+          },
+          {
+            "value": 100,
+            "question": "The point in an object's orbit where it is closest to the Sun.",
+            "correctAnswer": "Perihelion"
+          },
+          {
+            "value": 200,
+            "question": "The theoretical spherical shell of icy bodies far beyond Neptune thought to be the source of long-period comets.",
+            "correctAnswer": "Oort Cloud",
+            "alternateAnswers": [
+              "The Oort Cloud"
+            ]
+          }
+        ]
+      }
+    ]
+  },
 ];
 
 /** Look a deck up by id. Returns null if unknown. */
