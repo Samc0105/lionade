@@ -1575,8 +1575,17 @@ export default function ShopPage() {
     }
   };
 
+  // Per-item in-flight guard for equips: a double-click otherwise fires duplicate
+  // PATCH /api/shop/equip (or /api/me/equip) requests that race the revalidation
+  // and can leave the equipped-cosmetic state flickering out of sync. A ref is the
+  // synchronous gate (catches same-tick clicks), keyed by id so different items
+  // still equip independently. Shared by both equip handlers.
+  const equipInFlightRef = useRef<Set<string>>(new Set());
+
   const handleEquip = async (itemId: string) => {
     if (!user) return;
+    if (equipInFlightRef.current.has(itemId)) return;
+    equipInFlightRef.current.add(itemId);
     try {
       const res = await apiPost("/api/shop/equip", { itemId });
       if (!res.ok) {
@@ -1593,6 +1602,8 @@ export default function ShopPage() {
     } catch (e) {
       console.error("[shop:equip] threw", e);
       toastError("Couldn't update that item. Try again.");
+    } finally {
+      equipInFlightRef.current.delete(itemId);
     }
   };
 
@@ -1703,16 +1714,22 @@ export default function ShopPage() {
   // to a polite toast if the route 404s.
   const handleEquipUsernameEffect = async (cosmeticId: string) => {
     if (!user) return;
-    const res = await apiPost("/api/me/equip", { slot: "username_effect", cosmetic_id: cosmeticId });
-    if (!res.ok) {
-      console.error("[shop:equip-username-effect] failed", res.error);
-      toastError("Couldn't equip that yet. Try again shortly.");
-      setAnnounce("Couldn't equip that yet.");
-      return;
+    if (equipInFlightRef.current.has(cosmeticId)) return;
+    equipInFlightRef.current.add(cosmeticId);
+    try {
+      const res = await apiPost("/api/me/equip", { slot: "username_effect", cosmetic_id: cosmeticId });
+      if (!res.ok) {
+        console.error("[shop:equip-username-effect] failed", res.error);
+        toastError("Couldn't equip that yet. Try again shortly.");
+        setAnnounce("Couldn't equip that yet.");
+        return;
+      }
+      toastSuccess("Equipped");
+      setAnnounce("Equipped.");
+      await Promise.all([mutateInventory(), mutateCosmeticsOwned()]);
+    } finally {
+      equipInFlightRef.current.delete(cosmeticId);
     }
-    toastSuccess("Equipped");
-    setAnnounce("Equipped.");
-    await Promise.all([mutateInventory(), mutateCosmeticsOwned()]);
   };
 
   const isPremium = storeMode === "premium";
