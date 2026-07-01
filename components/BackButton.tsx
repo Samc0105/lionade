@@ -17,8 +17,23 @@ const PARENT_PATHS: Record<string, string> = {
   "/learn/ninny": "/learn",
   "/learn/paths": "/learn",
   "/learn/techhub": "/learn",
+  "/learn/sim": "/learn",
+  "/learn/vocab": "/learn",
+  "/learn/review": "/learn",
+  "/learn/resume-coach": "/learn",
+  "/learn/mastery": "/learn",
+  "/academia": "/learn",
+  "/study-dna": "/dashboard",
+  "/classes": "/dashboard",
   "/quiz": "/learn",
   "/quiz/ap-exams": "/quiz",
+
+  // Account / settings / info pages
+  "/help": "/dashboard",
+  "/security": "/settings",
+  "/account": "/settings",
+  "/pricing": "/",
+  "/status": "/",
 
   // Sub-pages of /compete
   "/compete/blitz": "/compete",
@@ -48,13 +63,22 @@ const PARENT_LABELS: Record<string, string> = {
   "/learn": "Learn",
   "/learn/paths": "Paths",
   "/learn/techhub": "TechHub",
+  "/learn/mastery": "Mastery Mode",
   "/compete": "Compete",
   "/compete/arena": "Arena",
   "/games": "Games",
   "/games/party": "Party",
   "/profile": "Profile",
   "/quiz": "Quiz",
+  "/settings": "Settings",
+  "/classes": "Classes",
+  "/blog": "Blog",
 };
+
+// Genuine top-level destinations — a single-segment route here has no parent, so
+// the fail-safe fallback below must NOT invent one (prevents a stray back button
+// on a hub page that happens to render <BackButton>).
+const TOP_LEVEL = new Set(["dashboard", "learn", "compete", "games", "social", "shop"]);
 
 /** Resolves the parent path for the current location, supporting dynamic routes. */
 function getParentPath(currentPath: string): string | null {
@@ -76,7 +100,19 @@ function getParentPath(currentPath: string): string | null {
   // maps to /learn via the exact match in PARENT_PATHS above.
   if (/^\/learn\/techhub\/.+/.test(currentPath)) return "/learn/techhub";
 
-  // No parent → top-level page, hide the back button
+  // /learn/mastery/[examId] → /learn/mastery ; /classes/[id] → /classes
+  if (/^\/learn\/mastery\/[^/]+$/.test(currentPath)) return "/learn/mastery";
+  if (/^\/classes\/[^/]+$/.test(currentPath)) return "/classes";
+
+  // Fail-safe fallback: derive a parent by stripping the last path segment, so a
+  // route absent from every map above can NEVER yield an invisible back button
+  // (the class of bug where <BackButton/> renders nothing). Route-derived, so it
+  // still works on direct load / refresh (no router.back dependency).
+  const segs = currentPath.split("/").filter(Boolean);
+  if (segs.length >= 2) return "/" + segs.slice(0, -1).join("/");
+  if (segs.length === 1 && !TOP_LEVEL.has(segs[0])) return "/dashboard";
+
+  // Only the true root '/' (and top-level hubs) have no parent.
   return null;
 }
 

@@ -30,6 +30,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { apiGet, apiPost } from "@/lib/api-client";
@@ -279,6 +280,10 @@ export default function SettingsLayout({
         <Navbar />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+          {/* One back affordance for all 8 settings sub-sections. Resolves to
+              /settings from a sub-section (segment strip) and to /dashboard from
+              /settings itself (PARENT_PATHS). */}
+          <BackButton />
           {/* Header */}
           <header className="mb-8 animate-slide-up transform-gpu">
             <div className="flex items-center gap-2 mb-2">

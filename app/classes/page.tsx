@@ -8,6 +8,7 @@ import {
   Sparkle, X, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { apiPost, swrFetcher } from "@/lib/api-client";
@@ -55,6 +56,7 @@ export default function ClassesIndexPage() {
         <Navbar />
 
         <div className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+          <BackButton />
           <header className="mb-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold mb-2">
               Class Notebook

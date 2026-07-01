@@ -23,6 +23,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass, ArrowsClockwise } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 import dynamic from "next/dynamic";
 import BankSelector from "@/components/Vocab/BankSelector";
 import BankStreakPill, { type BankStreak } from "@/components/Vocab/BankStreakPill";
@@ -192,6 +193,7 @@ export default function VocabPage() {
       <div className="min-h-screen pt-16 pb-20 md:pb-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+          <BackButton />
           {/* Header */}
           <header className="mb-8 animate-slide-up flex items-start justify-between gap-4">
             <div>
