@@ -23,6 +23,7 @@ import FluidReveal from "@/components/FluidReveal";
 import WidgetErrorBoundary from "@/components/WidgetErrorBoundary";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
+import StreakFreezeWidget from "@/components/StreakFreezeWidget";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
 import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -617,6 +618,9 @@ function DashboardContent() {
 
           {/* ═══ 3.4) Streak Revive — only renders when a 24h grace window is open ═══ */}
           <StreakReviveBanner />
+
+          {/* ═══ 3.42) Streak Freeze — buy streak insurance; auto-hides when dormant ═══ */}
+          <StreakFreezeWidget />
 
           {/* ═══ 3.45) Free → Pro upgrade nudge — only renders for free-tier users ═══ */}
           <ProUpgradeNudge />
