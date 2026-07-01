@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import type { Subject } from "@/types";
 import { DEMO_USER_ID } from "@/lib/demo-guard";
+import { apiGet, apiPost } from "@/lib/api-client";
 
 // ── Profile ───────────────────────────────────────────────────
 
@@ -460,31 +461,42 @@ export async function getQuizQuestions(subject: Subject, difficulty: string, top
   }
   const { data: staticData, error } = await query.limit(50);
   if (error) throw error;
-
-  // 2. Fetch from question_bank (approved AI-generated questions)
-  const normalizedSubject = subject.toLowerCase().replace(/\s+/g, "-");
-  const bankDifficulty = difficulty === "easy" ? "easy" : difficulty === "hard" ? "hard" : "medium";
-  const { data: bankData } = await supabase
-    .from("question_bank")
-    .select("id, subject, question, options, difficulty, correct_index")
-    .eq("status", "approved")
-    .eq("difficulty", bankDifficulty)
-    .or(`subject.eq.${normalizedSubject},topic.eq.${normalizedSubject}`)
-    .limit(20);
-
-  // 3. Normalize bank questions to same shape (strip correct_index for anti-cheat)
-  const bankQuestions = (bankData ?? []).map((q: any) => ({
-    id: q.id,
-    subject: q.subject,
-    question: q.question,
-    options: typeof q.options === "string" ? JSON.parse(q.options) : q.options,
-    difficulty: q.difficulty,
+  type QuizQ = { id: string; subject: string; question: string; options: string[]; difficulty: string };
+  const staticQuestions: QuizQ[] = (staticData ?? []).map((q: any) => ({
+    id: q.id as string,
+    subject: q.subject as string,
+    question: q.question as string,
+    options: (typeof q.options === "string" ? JSON.parse(q.options) : q.options) as string[],
+    difficulty: q.difficulty as string,
   }));
 
-  // 4. Merge, shuffle, take 10
-  const allQuestions = [...(staticData ?? []), ...bankQuestions];
-  const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 10);
-  return shuffled.map((q: any) => ({ ...q, options: q.options as string[] }));
+  // 2. Fetch approved community questions from the bank via the auth-gated
+  //    server route. question_bank is service-role-only (RLS with no policies),
+  //    so this anon client cannot read it directly — the previous direct read
+  //    silently returned []. Best-effort: on any failure we serve static-only.
+  const bankParams = new URLSearchParams({ subject, difficulty });
+  if (topic) bankParams.set("topic", topic);
+  let bankQuestions: typeof staticQuestions = [];
+  try {
+    const res = await apiGet<{ questions: typeof staticQuestions }>(
+      `/api/quiz/questions?${bankParams.toString()}`,
+    );
+    if (res.ok && res.data?.questions) bankQuestions = res.data.questions;
+  } catch {
+    bankQuestions = [];
+  }
+
+  // 3. Blend: reserve up to COMMUNITY_SLOTS of the 10 for fresh bank questions
+  //    (de-duped against static by text), fill the rest from static, shuffle.
+  //    A naive concat-then-slice(0,10) would drop every bank question whenever
+  //    the static pool alone already has 10 (the Blitz-route gotcha).
+  const COMMUNITY_SLOTS = 3;
+  const seen = new Set(staticQuestions.map((q) => q.question.trim().toLowerCase()));
+  const freshBank = bankQuestions.filter((q) => !seen.has(q.question.trim().toLowerCase()));
+  const reserved = freshBank.slice(0, COMMUNITY_SLOTS);
+  const fromStatic = staticQuestions.slice(0, Math.max(0, 10 - reserved.length));
+  const blended = [...fromStatic, ...reserved].sort(() => Math.random() - 0.5).slice(0, 10);
+  return blended.map((q) => ({ ...q, options: q.options as string[] }));
 }
 
 /** Fetch correct answer + explanation for a single question (called after user answers).
@@ -504,18 +516,19 @@ export async function checkAnswer(questionId: string): Promise<{
     return { correct_answer: Number(data.correct_answer), explanation: data.explanation };
   }
 
-  // Fall back to question_bank
-  const { data: bankQ, error: bankErr } = await supabase
-    .from("question_bank")
-    .select("correct_index, explanation")
-    .eq("id", questionId)
-    .maybeSingle();
-
-  if (bankQ) {
-    return { correct_answer: bankQ.correct_index, explanation: bankQ.explanation };
+  // Fall back to question_bank via the auth-gated server route. The bank is
+  // service-role-only (RLS), so a direct anon read here returned null and any
+  // blended community question was ungradeable (always marked wrong). The
+  // server grades it by id with supabaseAdmin.
+  const res = await apiPost<{ correctIndex: number; explanation: string | null }>(
+    "/api/quiz/questions",
+    { questionId },
+  );
+  if (res.ok && res.data && typeof res.data.correctIndex === "number") {
+    return { correct_answer: res.data.correctIndex, explanation: res.data.explanation };
   }
 
-  throw error ?? bankErr ?? new Error("Question not found");
+  throw error ?? new Error("Question not found");
 }
 
 /** Legacy: fetch questions with answers (used by existing code like getQuestions) */

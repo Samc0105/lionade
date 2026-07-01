@@ -266,6 +266,77 @@ export async function getApprovedQuestions(
   }
 }
 
+/**
+ * Like getApprovedQuestions but carries the real bank row `id` and OMITS
+ * correct_index (anti-cheat) — for the MAIN quiz serve path, which grades a
+ * blended community question via a later server lookup by id (getBankAnswer).
+ * Blitz can't use this (it has no id + grades client-side from correctIndex);
+ * the two serve paths intentionally differ.
+ */
+export async function getApprovedQuestionsWithId(
+  limit = 20,
+  subject?: string,
+  difficulty?: string,
+  topic?: string,
+): Promise<{ id: string; subject: string; question: string; options: string[]; difficulty: string }[]> {
+  try {
+    let query = supabaseAdmin
+      .from("question_bank")
+      .select("id, subject, question, options, difficulty")
+      .eq("status", "approved")
+      .limit(limit);
+
+    if (subject) {
+      const s = normalizeSubject(subject);
+      const t = normalizeSubject(topic ?? subject);
+      query = query.or(`subject.eq.${s},topic.eq.${t}`);
+    }
+    if (difficulty) query = query.eq("difficulty", normalizeDifficulty(difficulty));
+
+    const { data } = await query;
+    return (data ?? []).map((q: any) => ({
+      id: q.id,
+      subject: q.subject,
+      question: q.question,
+      options: typeof q.options === "string" ? JSON.parse(q.options) : q.options,
+      difficulty: q.difficulty,
+    }));
+  } catch (e) {
+    console.warn("[question-bank] getApprovedQuestionsWithId error:", e);
+    return [];
+  }
+}
+
+/**
+ * Server-side answer lookup for a single approved bank question, by id. Reads
+ * correct_index + explanation via supabaseAdmin (question_bank RLS is
+ * service-role-only), so the anon client can grade a blended community
+ * question. Returns null if the id isn't a question_bank row.
+ */
+export async function getBankAnswer(
+  id: string,
+): Promise<{ correctIndex: number; explanation: string | null } | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("question_bank")
+      .select("correct_index, explanation")
+      .eq("id", id)
+      // Only grade APPROVED rows — the same contract the serve path enforces,
+      // so a guessed/enumerated id can't pull the answer for a pending/rejected
+      // question that was never handed out.
+      .eq("status", "approved")
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      correctIndex: (data as { correct_index: number }).correct_index,
+      explanation: (data as { explanation: string | null }).explanation ?? null,
+    };
+  } catch (e) {
+    console.warn("[question-bank] getBankAnswer error:", e);
+    return null;
+  }
+}
+
 // ── Stats for admin dashboard ───────────────────────────────
 
 export async function getQuestionBankStats(): Promise<{
