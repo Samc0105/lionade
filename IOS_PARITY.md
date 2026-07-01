@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-01: Referral loop + streak freeze + weak-spot review
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Referral growth loop** (shareable code, first-quiz dual Fang reward, anti-abuse) | ✅ shipped (dormant until HELD migration) | ✅ SHARED-BACKEND (latent) — iOS signups would inherit the loop; the `?ref=` capture + ReferralCard are a client port. |
+| **Streak freeze** (Fang sink, auto-protects a missed-day streak) | ✅ shipped (dormant until migration 083) | 🟡 **parity gap** — the buy/consume backend is shared; iOS needs a StoreKit-safe buy UI + the widget. |
+| **Weak-spot spaced-repetition review** | ✅ shipped (dormant until HELD migration) | 🟡 **parity gap** — backend + SR logic shared; iOS needs the review screen. |
+
+---
+
 ## 2026-07-01: Quiz flywheel bridge + founder-flair on arena & social
 
 | Surface | Web | iOS |
