@@ -95,7 +95,7 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
 function StatSkeleton({ className = "h-5 w-9" }: { className?: string }) {
   return (
     <span
-      className={`inline-block rounded bg-white/10 motion-safe:animate-pulse align-middle ${className}`}
+      className={`inline-block rounded bg-white/10 motion-safe:animate-pulse motion-reduce:bg-white/20 align-middle ${className}`}
       aria-hidden="true"
     />
   );

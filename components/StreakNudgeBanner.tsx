@@ -50,9 +50,8 @@ export default function StreakNudgeBanner({
       setShow(false);
       return;
     }
-    const dismissedToday =
-      typeof window !== "undefined" &&
-      sessionStorage.getItem(DISMISS_KEY) === todayKey();
+    // Effects are client-only, so window/sessionStorage are always available here.
+    const dismissedToday = sessionStorage.getItem(DISMISS_KEY) === todayKey();
     setShow(!dismissedToday);
   }, [ready, streak, dailyDone]);
 
@@ -60,7 +59,7 @@ export default function StreakNudgeBanner({
 
   const onDismiss = () => {
     setShow(false);
-    if (typeof window !== "undefined") sessionStorage.setItem(DISMISS_KEY, todayKey());
+    sessionStorage.setItem(DISMISS_KEY, todayKey());
   };
 
   return (
