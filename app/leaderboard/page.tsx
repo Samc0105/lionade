@@ -11,7 +11,7 @@ import FeatureGate from "@/components/FeatureGate";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
-import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree, ArrowUp } from "@phosphor-icons/react";
+import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree, ArrowUp, MagnifyingGlass } from "@phosphor-icons/react";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import Avatar from "@/components/Avatar";
 import EquippedFlair from "@/components/EquippedFlair";
@@ -65,6 +65,10 @@ export default function LeaderboardPage() {
   // cannot read other users' grants — we enrich best-effort after the board loads.
   const [flairByUser, setFlairByUser] = useState<Record<string, string>>({});
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // Search filter for the full list + a ref to the viewer's own row so
+  // "Jump to me" can scroll it into view even when it sits far down the board.
+  const [query, setQuery] = useState("");
+  const myRowRef = useRef<HTMLLIElement | null>(null);
 
   const loading = entries === null && !loadError;
   const isElo = filter !== "weekly";
@@ -118,6 +122,12 @@ export default function LeaderboardPage() {
 
   const rows = entries ?? [];
   const topThree = rows.slice(0, 3);
+  // Client-side username filter over the already-loaded board (no refetch).
+  const trimmedQuery = query.trim().toLowerCase();
+  const isSearching = trimmedQuery.length > 0;
+  const visibleRows = isSearching
+    ? rows.filter((e) => e.username.toLowerCase().includes(trimmedQuery))
+    : rows;
 
   const rankBorderColor: Record<number, string> = { 1: "#FFD700", 2: "#9CA3AF", 3: "#B45309" };
 
@@ -170,6 +180,17 @@ export default function LeaderboardPage() {
   const myValue = myEntry ? (isElo ? (myEntry.elo ?? 1000) : myEntry.coins_this_week) : null;
   const aboveValue = personAboveMe ? (isElo ? (personAboveMe.elo ?? 1000) : personAboveMe.coins_this_week) : null;
   const gapToAbove = myValue != null && aboveValue != null ? Math.max(0, aboveValue - myValue) : null;
+
+  // Clear any active search (so the full board is mounted) then smooth-scroll
+  // the viewer's own row to center. Double rAF waits for the re-rendered list.
+  const jumpToMe = () => {
+    if (isSearching) setQuery("");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        myRowRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }),
+      ),
+    );
+  };
 
   const filterLabel =
     filter === "duel" ? "Quiz Duel Rankings"
@@ -248,14 +269,16 @@ export default function LeaderboardPage() {
               ? `Loading ${filterLabel}`
               : loadError
                 ? "Could not load the leaderboard. Please try again."
-                : rows.length === 0
-                  ? `${filterLabel}: no players yet`
-                  : `${filterLabel}: ${rows.length} ${rows.length === 1 ? "player" : "players"} ranked`}
+                : isSearching
+                  ? `${visibleRows.length} ${visibleRows.length === 1 ? "player matches" : "players match"} your search`
+                  : rows.length === 0
+                    ? `${filterLabel}: no players yet`
+                    : `${filterLabel}: ${rows.length} ${rows.length === 1 ? "player" : "players"} ranked`}
           </p>
 
           {/* Overtake hero callout — visible above podium when user is logged in
               and ranked. Creates a direct competitive prompt. */}
-          {!loading && !loadError && user && myEntry && myRank && personAboveMe && (
+          {!loading && !loadError && !isSearching && user && myEntry && myRank && personAboveMe && (
             <div
               className="mb-6 p-4 rounded-2xl border border-electric/30 bg-gradient-to-r from-electric/12 via-electric/6 to-transparent backdrop-blur-sm animate-slide-up will-change-transform"
               style={{ animationDelay: "0.15s" }}
@@ -338,8 +361,36 @@ export default function LeaderboardPage() {
             </div>
           ) : (
             <>
+              {/* Search + jump-to-me controls for the full board */}
+              <div className="flex items-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: "0.18s" }}>
+                <div className="relative flex-1">
+                  <MagnifyingGlass size={16} weight="bold" color="currentColor" aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search players by name"
+                    aria-label="Search players by username"
+                    className="w-full min-h-[44px] pl-9 pr-3 rounded-xl bg-navy-50 border border-electric/20 text-cream text-sm placeholder:text-cream/40
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                  />
+                </div>
+                {myEntry && (
+                  <button
+                    type="button"
+                    onClick={jumpToMe}
+                    aria-label="Scroll to your position on the board"
+                    className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl bg-electric/15 border border-electric/40 text-electric text-sm font-semibold hover:bg-electric/25 transition-all active:scale-95 will-change-transform
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                  >
+                    <Crosshair size={16} weight="bold" color="currentColor" aria-hidden="true" />
+                    Jump to me
+                  </button>
+                )}
+              </div>
+
               {/* Podium */}
-              {topThree.length >= 3 && (
+              {!isSearching && topThree.length >= 3 && (
                 <div className="relative grid grid-cols-3 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
                   {/* Soft podium glow backdrop */}
                   <div
@@ -469,12 +520,13 @@ export default function LeaderboardPage() {
                   standing in an aria-label so SR users get rank + name + score
                   + tier (tier is NOT conveyed by the color tint alone). */}
               <ol role="list" className="space-y-2 animate-slide-up list-none p-0 m-0" style={{ animationDelay: "0.3s" }}>
-                {rows.map((entry, i) => {
+                {visibleRows.map((entry, i) => {
                   const isMe = entry.user_id === user?.id;
                   const isTop = entry.rank <= 3;
                   const tier = isElo ? getEloTier(entry.elo ?? 1000) : null;
                   return (
                     <li key={entry.user_id}
+                      ref={isMe ? myRowRef : undefined}
                       aria-label={rowAriaLabel(entry, isMe)}
                       className={`fluid-card-hover flex items-center gap-4 p-4 rounded-xl border will-change-transform
                         ${isMe ? "border-electric/60 bg-electric/10 shadow-lg shadow-electric/15" : isTop ? "border-gold/30 bg-gold/5" : !isElo ? "border-electric/10 bg-navy-50 hover:border-electric/30" : ""}`}
@@ -563,8 +615,15 @@ export default function LeaderboardPage() {
                 })}
               </ol>
 
+              {/* No-match empty state when a search filters everything out */}
+              {isSearching && visibleRows.length === 0 && (
+                <p className="text-center text-cream/60 text-sm py-10" role="status">
+                  No players match &ldquo;{query.trim()}&rdquo;.
+                </p>
+              )}
+
               {/* Your position pinned card when off-screen in the long list */}
-              {user && myEntry && myRank && myRank > 10 && (
+              {!isSearching && user && myEntry && myRank && myRank > 10 && (
                 <div
                   className="mt-6 p-4 rounded-xl border border-electric/40 bg-electric/10 shadow-lg shadow-electric/10"
                   aria-label={`Your position: rank ${myRank}, ${isElo ? `${(myEntry.elo ?? 1000).toLocaleString()} Elo` : `${formatCoins(myEntry.coins_this_week)} Fangs`}`}
@@ -588,7 +647,7 @@ export default function LeaderboardPage() {
               {/* Pinned "you" row when the viewer isn't anywhere in the fetched
                   board (new user with no weekly earnings, or outside the top
                   200 on ELO tabs). Gold-tinted so it reads as your spot-in-waiting. */}
-              {user && !myEntry && (
+              {!isSearching && user && !myEntry && (
                 <div className="mt-6 p-4 rounded-xl border border-gold/40 bg-gold/10 shadow-lg shadow-gold/10">
                   <p className="text-gold text-[11px] font-bold uppercase tracking-[0.18em] text-center mb-3">Your Position</p>
                   <div className="flex items-center gap-4">
