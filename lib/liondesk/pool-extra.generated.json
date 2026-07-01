@@ -1274,5 +1274,2055 @@
     ],
     "goal": "Quiet the misconfigured noisy logger so the buried ERROR surfaces, then fix that error (the missing GBP FX rate) without killing all logging.",
     "hint": "A wall of identical INFO lines is a logging misconfiguration, not the bug. Find a way to read past the noise, or stop the one source making it, before you decide nothing is there."
+  },
+  {
+    "id": "hd-outlook-autodiscover",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Nadia Osei",
+      "role": "Sales"
+    },
+    "subject": "Outlook is stuck on 'Trying to connect' since this morning",
+    "slaMinutes": 40,
+    "arriveAfter": 0,
+    "reward": 42,
+    "xp": 34,
+    "concept": "email",
+    "ticketBody": "Outlook opens but just says 'Trying to connect' forever and never loads my mail. Webmail in the browser works fine, so I can see my email there. It broke right after IT said they moved us to a new mail setup.",
+    "evidence": [
+      {
+        "label": "Outlook connection status",
+        "lines": [
+          "Autodiscover: probing autodiscover.acme.com ...",
+          "autodiscover.acme.com -> NXDOMAIN (no such record)",
+          "falling back to SCP / root domain: no endpoint returned",
+          "OWA (browser) reaches mail directly and works"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "nslookup autodiscover",
+          "dig autodiscover",
+          "check dns"
+        ],
+        "output": "autodiscover.acme.com  ->  NXDOMAIN. The CNAME that used to point to the mail host is missing after the migration.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "ping mail",
+          "test mail host"
+        ],
+        "output": "mail.acme.com resolves and answers. The mailbox host is up; only the Autodiscover record is gone.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-hd-autodiscover",
+    "goal": "Outlook cannot connect but webmail can. Find why the desktop client cannot bootstrap, then fix it.",
+    "hint": "Webmail talks to the server directly; the desktop client has to look up how to connect first. What record does Outlook rely on to find its settings, and did the migration break it?",
+    "actions": [
+      {
+        "id": "restore-autodiscover",
+        "label": "Restore the missing Autodiscover DNS record so Outlook can find its settings",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 13,
+        "teach": "That is the cause. Outlook uses Autodiscover to look up its mailbox and connection settings, and the migration dropped the autodiscover CNAME, so the client had nothing to bootstrap from. Webmail worked the whole time because the browser hits the server directly and never needs Autodiscover. Restoring the record lets every affected Outlook connect again, no profile rebuild required."
+      },
+      {
+        "id": "rebuild-outlook-profile",
+        "label": "Delete and rebuild her Outlook profile",
+        "csat": -5,
+        "teach": "A rebuild forces a fresh Autodiscover lookup, which still fails because the record is gone, so you just cost her an hour re-adding accounts for nothing. The break is server-side DNS, not her local profile. Fix the record."
+      },
+      {
+        "id": "reinstall-office",
+        "label": "Uninstall and reinstall Office",
+        "csat": -6,
+        "teach": "The client is fine; webmail proves the account and server are healthy. Reinstalling Office cannot conjure a DNS record that was deleted during the migration. This is an infrastructure fix, not a client one."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-autodiscover",
+      "title": "Outlook stuck 'Trying to connect' but webmail works: check Autodiscover",
+      "tags": [
+        "outlook",
+        "email",
+        "autodiscover",
+        "dns",
+        "migration"
+      ],
+      "body": [
+        "When the Outlook desktop client hangs on 'Trying to connect' yet the same mailbox loads fine in a browser, the mailbox and server are healthy. The desktop client is failing an earlier step: Autodiscover, the lookup it uses to find its connection settings.",
+        "Autodiscover normally resolves a record like autodiscover.yourdomain.com. If that record is missing (NXDOMAIN), the client has no way to bootstrap and spins forever, while webmail keeps working because the browser connects to the mail host directly and never uses Autodiscover.",
+        "Migrations and DNS cleanups frequently drop the autodiscover CNAME. Fix: restore the correct Autodiscover DNS record and let the clients re-resolve. Do not rebuild profiles or reinstall Office first; those re-run the same failing lookup and fix nothing."
+      ]
+    }
+  },
+  {
+    "id": "hd-print-spooler-outage",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Facilities",
+      "role": "Office Services"
+    },
+    "subject": "Nobody on the 2nd floor can print, jobs just pile up",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 46,
+    "xp": 36,
+    "concept": "printing",
+    "ticketBody": "Half a dozen people say their print jobs vanish into the queue and never come out. The printer itself looks fine, has paper and toner, and the screen is idle. Jobs just stack up and nothing prints.",
+    "evidence": [
+      {
+        "label": "Print server queue (PRT-02)",
+        "lines": [
+          "Print Spooler service: RUNNING but wedged",
+          "queue depth: 41 jobs, oldest stuck 'Spooling' for 22 min",
+          "one corrupt job at head of queue will not clear or delete",
+          "printer PRT-02 reports Ready, no hardware error, toner/paper OK"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "show queue",
+          "queue",
+          "status"
+        ],
+        "output": "41 jobs queued. Head job is corrupt and 'Spooling' forever, blocking everything behind it. Printer hardware reports Ready.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "check printer",
+          "ping printer"
+        ],
+        "output": "PRT-02 online, Ready, no error, toner and paper fine. The block is on the server queue, not the device.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-hd-print-spooler",
+    "goal": "Everyone on the floor prints to the same server and nothing comes out. Find the shared cause and clear it.",
+    "hint": "The printer says Ready with paper and toner, yet the queue keeps growing for everyone. Where do all their jobs meet before they reach the printer?",
+    "actions": [
+      {
+        "id": "clear-spooler",
+        "label": "Clear the stuck job from the spooler and restart the print service on the print server",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 14,
+        "teach": "That is the shared cause. A single corrupt job jammed the head of the queue, and because everyone prints through the same print server spooler, the jam stalled the whole floor. Stopping the spooler, clearing the wedged job, and restarting the service drains the backlog and the held jobs finally print. One server-side fix clears every user."
+      },
+      {
+        "id": "reinstall-drivers-all",
+        "label": "Reinstall the printer driver on every affected PC",
+        "csat": -6,
+        "teach": "Six people's drivers did not all break at the same minute; the common point is the shared server queue, not each machine. Reinstalling drivers floor-wide is hours of work that never touches the jammed spooler. Clear the queue at the source."
+      },
+      {
+        "id": "power-cycle-printer",
+        "label": "Power-cycle the physical printer",
+        "csat": -4,
+        "teach": "The printer reports Ready with toner and paper; the hardware is not the problem. Power-cycling the device leaves the corrupt job still wedged in the server spooler, so the jam returns the instant it comes back online. Clear the spooler."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-print-spooler",
+      "title": "A whole floor cannot print: clear the print spooler",
+      "tags": [
+        "printing",
+        "spooler",
+        "print server",
+        "queue",
+        "outage"
+      ],
+      "body": [
+        "When many people who share one print server all stop printing at once, and the printer itself reports Ready with paper and toner, the fault is almost never the individual PCs or drivers. Their jobs all pass through one shared queue: the print spooler on the server.",
+        "A single corrupt or malformed job can wedge at the head of the queue in a 'Spooling' state and block every job behind it. The printer looks idle because nothing is being handed to it.",
+        "Fix: stop the Print Spooler service, delete the stuck jobs from the spool folder, then restart the service so the queue drains. Reinstalling drivers on every machine or power-cycling the printer does not remove the wedged job and the jam simply returns."
+      ]
+    }
+  },
+  {
+    "id": "hd-vpn-cert-expired",
+    "channel": "phone",
+    "priority": "P1",
+    "from": {
+      "name": "Remote Staff",
+      "role": "Multiple callers"
+    },
+    "subject": "The VPN is rejecting everyone this morning with a certificate error",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 55,
+    "xp": 44,
+    "concept": "vpn",
+    "phone": {
+      "opener": "Hi, none of us can get on the VPN today. I get an error about the server certificate and it refuses to connect. Three of my teammates have the exact same thing. We are all locked out and cannot reach anything internal.",
+      "followups": [
+        {
+          "label": "Can you read me the exact error the client shows when it fails?",
+          "reply": "It says 'The server certificate is expired or not valid' and then it disconnects.",
+          "correct": true
+        },
+        {
+          "label": "Have you tried restarting your laptop?",
+          "reply": "Yes, a couple of us rebooted already. Same certificate error."
+        },
+        {
+          "label": "Is your home internet working otherwise?",
+          "reply": "Yes, everything else loads fine, it is only the VPN."
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "label": "VPN gateway health",
+        "lines": [
+          "gateway VPN-GW-01: reachable, service UP",
+          "server certificate CN=vpn.acme.com  ->  NOT AFTER 2026-06-30 (EXPIRED)",
+          "all clients present valid certs; handshake fails on server cert validation",
+          "no client-side change; failures began 00:00 at cert expiry"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-hd-vpn-cert",
+    "goal": "Many remote users are blocked by the same certificate error. Find the one thing they share and fix it.",
+    "hint": "It is not one laptop; it started for everyone at the same moment. The error names the server certificate, and every client validates that same certificate.",
+    "actions": [
+      {
+        "id": "renew-vpn-cert",
+        "label": "Renew the expired VPN gateway server certificate and restore connections",
+        "correct": true,
+        "requires": [
+          "phone"
+        ],
+        "csat": 16,
+        "outcome": "escalated",
+        "teach": "Right. The VPN gateway presents a server certificate that every client validates during the handshake, and it expired at midnight, so all clients now reject it at once. This is a single server-side fix: renew the gateway certificate, reload it, and everyone reconnects. Rebuilding client configs or reinstalling the client cannot fix an expired certificate that lives on the server."
+      },
+      {
+        "id": "reinstall-vpn-clients",
+        "label": "Walk each caller through reinstalling their VPN client",
+        "requires": [
+          "phone"
+        ],
+        "csat": -7,
+        "teach": "Every caller sees the same certificate error at the same time; that is a server problem, not a client one. Reinstalling clients one by one wastes a P1 while the expired gateway certificate keeps rejecting all of them. Renew the server certificate."
+      },
+      {
+        "id": "disable-cert-check",
+        "label": "Tell users to disable certificate validation so it connects",
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Never do this. Certificate validation is what proves users are connecting to the real VPN gateway and not an impostor. Turning it off to dodge an expired cert opens the door to man-in-the-middle interception of the whole company's remote traffic. The fix is to renew the certificate, not to stop checking it."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-vpn-cert",
+      "title": "Everyone is blocked from the VPN with a certificate error",
+      "tags": [
+        "vpn",
+        "certificate",
+        "outage",
+        "escalation",
+        "security"
+      ],
+      "body": [
+        "When many remote users are all rejected from the VPN at the same moment with a 'server certificate expired or not valid' error, the cause is shared and server-side. During the connection handshake, every client validates the certificate the VPN gateway presents. If that certificate expires, all clients reject it simultaneously.",
+        "This is not a per-laptop problem, so do not reinstall clients or rebuild configs; the certificate lives on the gateway, not on the endpoints.",
+        "Fix: renew the VPN gateway's server certificate and reload it, then connections succeed again. Never work around it by disabling certificate validation. That check is what confirms users are reaching the genuine gateway; turning it off exposes all remote traffic to interception."
+      ]
+    }
+  },
+  {
+    "id": "hd-mdm-lost-iphone",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "Marcus Bell",
+      "role": "Field Account Executive"
+    },
+    "subject": "I left my work iPhone in a taxi and cannot get it back",
+    "slaMinutes": 15,
+    "arriveAfter": 0,
+    "reward": 52,
+    "xp": 42,
+    "concept": "mdm",
+    "ticketBody": "My company iPhone is gone. I left it in a taxi last night and the driver is not answering. It has my work email and the authenticator app on it. I am worried someone can get into my accounts. What do I do?",
+    "evidence": [
+      {
+        "label": "MDM console: device mbell-iphone",
+        "lines": [
+          "device mbell-iphone: enrolled, supervised, last check-in 21:14 last night",
+          "status: ONLINE (still reachable, passcode set)",
+          "available actions: Lost Mode / Remote Lock / Remote Wipe",
+          "linked account mbell has 2 active sessions on the device's authenticator"
+        ]
+      }
+    ],
+    "ad": {
+      "username": "mbell",
+      "action": "reset_mfa"
+    },
+    "kbArticleId": "kb-hd-mdm-lost-device",
+    "goal": "A managed, enrolled phone with mail and an authenticator on it is missing. Lock down the device and the account.",
+    "hint": "The phone is still enrolled in MDM and still online, so you have real controls over it. And the authenticator on it means the account side matters as much as the device side.",
+    "actions": [
+      {
+        "id": "mdm-lock-wipe-revoke",
+        "label": "Put the device in Lost Mode and remote-wipe it via MDM, then revoke its sessions and re-enroll his MFA",
+        "correct": true,
+        "requires": [
+          "ad"
+        ],
+        "csat": 16,
+        "outcome": "escalated",
+        "teach": "Exactly right, and in the right order. Because the phone is still enrolled and online, MDM can lock it and wipe the company data before anyone gets in. But the device is only half of it: the lost phone held his authenticator, so you also revoke its active sessions and re-enroll his MFA on a new device. Wipe protects the data on the phone; revoking sessions and resetting MFA protects the accounts."
+      },
+      {
+        "id": "just-reset-pw",
+        "label": "Just reset his password and issue a new phone",
+        "csat": -9,
+        "teach": "A new password does not remove the mail already cached on the missing device, and it leaves the authenticator on that phone able to approve sign-ins. You still have an enrolled, online phone you could have wiped and live sessions you could have revoked. Use the MDM controls and kill the sessions."
+      },
+      {
+        "id": "wait-and-see",
+        "label": "Tell him to keep trying the driver and file a report tomorrow if it does not turn up",
+        "csat": -13,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Every hour that enrolled phone is out there with cached mail and a working authenticator is a live account-takeover risk. This is a security event, not a lost-and-found errand. While the device is still reachable in MDM you lock and wipe it and revoke the sessions immediately."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-mdm-lost-device",
+      "title": "Lost or stolen managed mobile device: lock, wipe, and revoke",
+      "tags": [
+        "mdm",
+        "lost",
+        "stolen",
+        "mobile",
+        "security",
+        "escalation"
+      ],
+      "body": [
+        "A lost or stolen company phone is a security event, not a password ticket, especially if it holds mail, files, or an authenticator app. Treat both the device and the account.",
+        "Device side: if the phone is still enrolled in MDM, you have controls. Put it in Lost Mode to lock and locate it, and issue a remote wipe to remove company data before anyone can reach it. Acting while it is still online and reachable is best.",
+        "Account side: if the device carried an authenticator or had signed-in apps, a wipe alone is not enough. Revoke the account's active sessions so any already-signed-in session dies, and re-enroll the user's MFA on a new device so the lost phone can no longer approve sign-ins. Simply resetting the password leaves cached data on the device and lets the old authenticator keep working."
+      ]
+    }
+  },
+  {
+    "id": "hd-offboard-access",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "HR Offboarding",
+      "role": "People Ops"
+    },
+    "subject": "Contractor's last day is today, please close out access",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "concept": "accounts",
+    "ticketBody": "Today is Priya Rao's final day as a contractor. Her engagement ends at 5pm. Please make sure her access is closed out so nothing is left open after she leaves.",
+    "evidence": [
+      {
+        "label": "Identity console: account prao",
+        "lines": [
+          "account prao: ACTIVE, member of 'Engineering-Contractors'",
+          "2 active sign-in sessions right now (web app, VPN)",
+          "personal recovery email on file (external, not company)",
+          "policy: disable + revoke sessions at end of engagement, delete after 30-day retention"
+        ]
+      }
+    ],
+    "ad": {
+      "username": "prao",
+      "action": "reset_pw"
+    },
+    "kbArticleId": "kb-hd-offboarding",
+    "goal": "Close out a departing contractor's access correctly, on the last day.",
+    "hint": "The goal is to stop access now, not to erase everything instantly. Think about what has to happen at 5pm versus what waits for the retention window, and remember she still has live sessions.",
+    "actions": [
+      {
+        "id": "disable-and-revoke",
+        "label": "Disable the account, force-reset the password, and revoke her active sessions at end of day",
+        "correct": true,
+        "requires": [
+          "ad"
+        ],
+        "csat": 14,
+        "outcome": "resolved",
+        "teach": "That is a clean offboarding. Disabling the account and resetting the password stops any new sign-in, and revoking her live sessions kills the ones already open so she is out the moment her engagement ends. The account is retained but locked, so data and mailbox stay available for handover and audit, then it is deleted after the retention window per policy. Disable first, delete later."
+      },
+      {
+        "id": "delete-immediately",
+        "label": "Delete her account entirely right now",
+        "csat": -6,
+        "teach": "Deleting immediately is tidy but risky: it can orphan her mailbox, shared files, and anything she owned, and it breaks the audit trail. Policy is to disable and revoke sessions now, retain the account for a set window for handover, then delete. Lock her out first; delete after retention."
+      },
+      {
+        "id": "handle-tomorrow",
+        "label": "Leave it until tomorrow since she is trusted and it is her last day anyway",
+        "csat": -10,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Access has to end when the engagement ends, not the next business day. She has two live sessions right now and a personal recovery email on file, so an account left open overnight is an open door. Offboarding is time-sensitive: disable and revoke on the last day."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-offboarding",
+      "title": "Offboarding: disable and revoke access on the last day, delete later",
+      "tags": [
+        "accounts",
+        "offboarding",
+        "leaver",
+        "access",
+        "security"
+      ],
+      "body": [
+        "When someone leaves, the priority is to end their access at the moment their engagement ends, not to erase them instantly. The clean sequence is disable, revoke, retain, then delete.",
+        "Disable the account and force a password reset so no new sign-in is possible, and revoke any active sessions so sessions that are already open are killed too. A reset alone does not sign out a session that is already live.",
+        "Do not delete the account immediately. Deleting can orphan mailboxes, files, and owned resources and destroys the audit trail. Keep the account disabled and retained for the policy window so data is available for handover and investigation, then delete it after retention expires."
+      ]
+    }
+  },
+  {
+    "id": "hd-mac-filevault-recovery",
+    "channel": "phone",
+    "priority": "P2",
+    "from": {
+      "name": "Elena Marsh",
+      "role": "Design"
+    },
+    "subject": "My Mac boots to a screen asking for a recovery key and I do not have it",
+    "slaMinutes": 45,
+    "arriveAfter": 0,
+    "reward": 40,
+    "xp": 32,
+    "concept": "hardware",
+    "phone": {
+      "opener": "My MacBook restarted after an update and now it will not let me in. It shows a lock and asks for a recovery key, and it will not take my normal login password. All my design files are on it and I have a review this afternoon.",
+      "followups": [
+        {
+          "label": "Does the screen say FileVault or ask for a recovery key rather than your password?",
+          "reply": "Yes, it says recovery key. My usual password does nothing on this screen.",
+          "correct": true
+        },
+        {
+          "label": "Have you tried holding the power button to force a restart?",
+          "reply": "Yeah, twice. It just comes back to the same recovery key screen."
+        },
+        {
+          "label": "Is it plugged in and charged?",
+          "reply": "Yes, it is on the charger and the battery is fine."
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "label": "MDM record: mac elena-mbp",
+        "lines": [
+          "device elena-mbp: enrolled, FileVault ON (disk encrypted)",
+          "personal recovery key: ESCROWED to MDM on 2026-03-02",
+          "disk SMART status: healthy, no hardware fault",
+          "state: awaiting FileVault recovery key at pre-boot"
+        ]
+      }
+    ],
+    "part": {
+      "sku": "chg-usbc"
+    },
+    "kbArticleId": "kb-hd-filevault",
+    "goal": "The Mac is fine but locked behind full-disk encryption. Get her back in without losing her files.",
+    "hint": "The disk is encrypted and healthy; it just wants the recovery key. Where does a managed Mac store that key when FileVault is turned on?",
+    "actions": [
+      {
+        "id": "retrieve-escrowed-key",
+        "label": "Retrieve the escrowed FileVault recovery key from MDM and walk her through unlocking, then have her reset her login",
+        "correct": true,
+        "requires": [
+          "phone"
+        ],
+        "csat": 13,
+        "teach": "That is the right move. FileVault encrypts the whole disk, and on a managed Mac the recovery key is escrowed to MDM exactly for this situation. You read her the escrowed key, she unlocks the disk, boots normally, and resets her login password afterward. Her files are untouched because the disk was healthy all along; it was only locked."
+      },
+      {
+        "id": "erase-reinstall",
+        "label": "Erase the Mac and reinstall macOS to get past the lock",
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Erasing destroys everything on the encrypted disk, including her design files, and it was never necessary. The recovery key was escrowed to MDM the whole time. Wiping a recoverable machine over an unlock prompt is a data-loss incident you created. Pull the escrowed key first."
+      },
+      {
+        "id": "order-replacement-mac",
+        "label": "Order her a replacement MacBook",
+        "requires": [
+          "part"
+        ],
+        "csat": -6,
+        "teach": "The disk is healthy and the machine boots fine; it only needs the recovery key you already have in MDM. Spending budget on new hardware for a locked but working Mac is wasteful, and it still strands her files on the old encrypted disk. Retrieve the escrowed key."
+      }
+    ],
+    "track": "helpdesk",
+    "kbArticle": {
+      "id": "kb-hd-filevault",
+      "title": "Mac asks for a FileVault recovery key: pull it from MDM",
+      "tags": [
+        "mac",
+        "filevault",
+        "encryption",
+        "recovery key",
+        "mdm"
+      ],
+      "body": [
+        "FileVault is macOS full-disk encryption. If a Mac boots to a screen asking for a recovery key instead of accepting the normal login password, the disk is locked, not broken. This can follow an update, a firmware change, or a forgotten password.",
+        "On a managed Mac, FileVault is configured to escrow the personal recovery key to the MDM at enrollment. That escrowed key is the safe way back in. Look the device up in MDM, retrieve its recovery key, and use it to unlock the disk, then have the user set a new login password.",
+        "Do not erase and reinstall to get past the prompt; that destroys the user's data on an otherwise healthy disk. If the disk itself is healthy, the recovery key restores access with no data loss."
+      ]
+    }
+  },
+  {
+    "id": "soc-lowfi-dup-alert",
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "SIEM correlation",
+      "role": "SIEM"
+    },
+    "subject": "'Suspicious PowerShell' firing 40 times an hour on one host",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 35,
+    "xp": 28,
+    "ticketBody": "A low-fidelity rule keeps firing 'suspicious PowerShell execution' on FIN-DEPLOY-03 dozens of times an hour. The queue is drowning in it. Is this an attack or noise?",
+    "evidence": [
+      {
+        "label": "Alert context, FIN-DEPLOY-03",
+        "lines": [
+          "Rule: 'PowerShell -EncodedCommand seen' (low fidelity, no reputation check)",
+          "Fires 30-40x/hr, always the same host, same parent process",
+          "Parent: C:\\Program Files\\Config Mgmt\\deploy-agent.exe (code-signed, in asset inventory)",
+          "Command decodes to a routine software-inventory script",
+          "Host is a sanctioned config-management server on the change calendar"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "decode",
+          "inspect",
+          "siem",
+          "query"
+        ],
+        "output": "-EncodedCommand decodes to Get-WmiObject Win32_Product | Export-Csv. It is a signed deploy-agent running a software inventory. Same parent, same script, every hour. Benign but noisy.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "signer",
+          "verify",
+          "whois"
+        ],
+        "output": "deploy-agent.exe: valid code signature, vendor in allowlist, host tagged CONFIG-MGMT in inventory."
+      }
+    ],
+    "kbArticleId": "kb-soc-lowfi-alert",
+    "goal": "Decide whether this is signal or noise, and handle it so it stops burying the queue.",
+    "hint": "It fires constantly from one signed parent on a sanctioned host. Closing each copy by hand won't help. What do you do about the rule itself?",
+    "actions": [
+      {
+        "id": "close-tune-suppress",
+        "label": "Confirm it's benign, close as a false positive, and propose a tuning exception for this signed parent on this host",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 13,
+        "outcome": "resolved",
+        "teach": "Right. Encoded PowerShell alone is low fidelity, and here it's a signed config-management agent running a routine inventory on a sanctioned host. Close it benign and reduce the noise at the source: a scoped tuning exception (this signer, this host) so the real signal isn't buried. Tuning is triage, not laziness, as long as you scope it tightly and document why."
+      },
+      {
+        "id": "isolate-fin-deploy",
+        "label": "Isolate FIN-DEPLOY-03, encoded PowerShell means an attacker",
+        "correct": false,
+        "csat": -8,
+        "teach": "Encoded PowerShell is common in legitimate tooling; the encoding is not the threat, the intent is. You just cut off a sanctioned config-management server over a decoded inventory script. Confirm context before you contain."
+      },
+      {
+        "id": "close-each-forever",
+        "label": "Just keep closing each copy as it comes in",
+        "correct": false,
+        "csat": -6,
+        "teach": "You'll close it 40 times an hour forever, and a real alert will drown in the flood. When a low-fidelity rule proves benign, tune it at the source so the queue stays readable."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-lowfi-alert",
+      "title": "Low-fidelity alerts and safe tuning",
+      "tags": [
+        "alert",
+        "triage",
+        "tuning",
+        "false positive",
+        "soc"
+      ],
+      "body": [
+        "A low-fidelity rule fires on a technique that is common in both attacks and normal operations, such as encoded PowerShell or a service account authenticating. Volume is not evidence; a rule firing constantly usually means it lacks context, not that you are under constant attack.",
+        "Triage the underlying activity, not the alert count. Confirm the parent process, its signature, the host's role, and whether it is on the change calendar. If the activity is a sanctioned, signed process doing routine work, it is a benign false positive.",
+        "When a benign source floods the queue, tune at the source: add a tightly scoped exception (this signer, this host, this command shape) and document why. Scoped tuning removes noise so the one real alert is not buried. Blanket-disabling the rule or closing copies by hand forever are both wrong; the first blinds you, the second exhausts you."
+      ]
+    }
+  },
+  {
+    "id": "soc-bec-wire-change",
+    "channel": "email",
+    "priority": "P2",
+    "from": {
+      "name": "Reported by aperez (AP clerk)",
+      "role": "user-reported"
+    },
+    "subject": "Vendor emailed asking us to update their bank details before we pay",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 45,
+    "xp": 38,
+    "email": {
+      "body": "Accounts Payable forwarded this: our supplier 'Northwind Components' emailed saying their bank changed and this week's invoice must go to a new account. AP is about to send the wire. They want to know if it's okay.",
+      "isPhish": true
+    },
+    "evidence": [
+      {
+        "label": "Reported message, headers and content",
+        "lines": [
+          "Reply-To: billing@northwind-components-invoices.com  (real vendor domain is northwindcomponents.com)",
+          "From display name matches the real AP contact; sending address is a lookalike",
+          "SPF: SOFTFAIL for the lookalike domain",
+          "Body: 'urgent, wire before Friday, do not call our old number, our phones are down'",
+          "New beneficiary bank in a different country than the vendor's HQ"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-soc-bec-wire",
+    "goal": "AP is about to move money. Decide what this is and what to do before the wire goes out.",
+    "hint": "Lookalike reply-to, urgency, and a 'don't call us' instruction, all before a payment. What is the one out-of-band check that defeats this class of fraud?",
+    "actions": [
+      {
+        "id": "hold-verify-oob",
+        "label": "Tell AP to HOLD the payment, verify the bank change out of band using the vendor's known-good phone number on file, and report it as suspected BEC wire fraud",
+        "correct": true,
+        "csat": 15,
+        "outcome": "reported",
+        "teach": "Exactly right. This is business email compromise: a lookalike domain, manufactured urgency, and a 'do not call' line designed to stop you verifying. The kill switch is an out-of-band callback to the vendor's number you already had on file, never the number or reply address in the email. Freeze the payment, verify independently, and report it so Finance and other AP staff are warned."
+      },
+      {
+        "id": "reply-confirm",
+        "label": "Reply to the email to confirm the new bank details are correct",
+        "correct": false,
+        "csat": -10,
+        "teach": "Replying only reaches the attacker, who will happily 'confirm' their own account. You can't verify a bank change using the channel that requested it. Call the vendor's known number instead."
+      },
+      {
+        "id": "approve-vip",
+        "label": "The vendor is legit and it's urgent, tell AP to send the wire",
+        "correct": false,
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "That wire is gone the moment it sends, often unrecoverable. Every red flag is present: lookalike reply-to, SPF softfail, urgency, a suppressed callback, and a foreign beneficiary. Bank-detail changes always get an out-of-band verification before any money moves."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-bec-wire",
+      "title": "Business email compromise and wire-change fraud",
+      "tags": [
+        "phishing",
+        "bec",
+        "wire fraud",
+        "email",
+        "soc"
+      ],
+      "body": [
+        "Business email compromise (BEC) targets money and process, not malware. A common variant is the vendor bank-change: an email that looks like a supplier asks you to redirect a payment to a new account, usually with urgency and a reason you can't verify the usual way ('our phones are down', 'reply here only').",
+        "Tells: a lookalike or reply-to domain that differs from the vendor's real domain, SPF/DKIM problems on the lookalike, pressure to act before a deadline, instructions that discourage a phone call, and a beneficiary bank in an unexpected location.",
+        "The defeat is out-of-band verification. Any change to payment details is confirmed by calling the vendor on a phone number you already had on file, not a number or address supplied in the request. Freeze the payment until verification completes, then report it so Finance and other AP staff are alerted to the campaign. Never confirm a bank change by replying to the message that requested it."
+      ]
+    }
+  },
+  {
+    "id": "soc-edr-tamper",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "EDR health",
+      "role": "Endpoint"
+    },
+    "subject": "EDR agent stopped reporting on ENG-LAP-14 right after a detection",
+    "slaMinutes": 15,
+    "arriveAfter": 0,
+    "reward": 50,
+    "xp": 42,
+    "ticketBody": "The EDR sensor on ENG-LAP-14 went silent. Just before it went dark it flagged a credential-dumping tool. The host is still online on the network. Someone or something turned the sensor off.",
+    "evidence": [
+      {
+        "label": "EDR timeline, ENG-LAP-14",
+        "lines": [
+          "10:41 detection: 'LSASS access by unsigned tool' (credential dumping)",
+          "10:41 process 'sc.exe stop' targeted the EDR service",
+          "10:42 sensor heartbeat STOPPED (agent tampered / disabled)",
+          "Host still answering on the network, user session active",
+          "Last-known process tree shows a temp-folder binary spawned from a macro-enabled document"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "timeline",
+          "edr",
+          "inspect",
+          "process"
+        ],
+        "output": "Order of events: credential-dump detection, then the EDR service was stopped, then the sensor went silent. This is defense evasion following an active technique. The host is still up. Treat the machine as compromised.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "heartbeat",
+          "status",
+          "health"
+        ],
+        "output": "Sensor last check-in 10:42, no telemetry since. Console-side isolation and quarantine still work even though the local agent is silent."
+      }
+    ],
+    "kbArticleId": "kb-soc-edr-tamper",
+    "goal": "The EDR was disabled during an active detection. Contain the host without trusting the blinded endpoint.",
+    "hint": "You can't trust anything the tampered agent says, and you shouldn't wait for it. The EDR console can still isolate from the server side. What's the safe move?",
+    "actions": [
+      {
+        "id": "console-isolate-preserve",
+        "label": "Network-isolate the host from the EDR console (server-side), preserve it powered for forensics, and escalate as an active intrusion",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 16,
+        "outcome": "escalated",
+        "teach": "Correct. A sensor going silent right after a credential-dump detection is tampering, a hallmark of a hands-on-keyboard intruder, not a glitch. Console-side isolation cuts the host off the network without relying on the compromised local agent, and keeps it powered so memory and artifacts survive. Then escalate: this is an active intrusion, not a one-host cleanup."
+      },
+      {
+        "id": "reinstall-agent",
+        "label": "Remotely reinstall the EDR agent to get telemetry back",
+        "correct": false,
+        "csat": -9,
+        "teach": "You'd be poking a live, attacker-controlled host and giving the intruder more time. Restoring visibility matters, but not before you cut the network path. Isolate from the console first, investigate after."
+      },
+      {
+        "id": "wait-recheckin",
+        "label": "Wait to see if the agent checks back in on its own",
+        "correct": false,
+        "csat": -11,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "The agent didn't crash, it was stopped by 'sc.exe stop' during an active credential-dumping detection. Waiting hands the attacker uninterrupted time to spread and exfiltrate. Isolate immediately from the server side; never wait on a tampered endpoint."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-edr-tamper",
+      "title": "EDR tampering: when the agent goes silent",
+      "tags": [
+        "edr",
+        "malware",
+        "defense evasion",
+        "containment",
+        "soc"
+      ],
+      "body": [
+        "An endpoint sensor that stops reporting is not automatically a bug. If it goes silent immediately after a real detection, or right after a service-control command targeted it, treat it as tampering: a defense-evasion step that often means a hands-on-keyboard intruder is present.",
+        "Do not trust the blinded endpoint and do not wait for it to recover. Most EDR platforms can isolate and quarantine a host from the management console, server-side, even when the local agent is disabled. Use that to cut the host off the network without touching the compromised machine.",
+        "Preserve the host powered on for forensics so memory and disk artifacts survive, and escalate as an active intrusion. Reinstalling the agent or rebooting to 'restore visibility' before containment gives the attacker more time and can destroy evidence. Contain via the console first, restore telemetry and investigate second."
+      ]
+    }
+  },
+  {
+    "id": "soc-mfa-fatigue",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Identity provider",
+      "role": "IdP"
+    },
+    "subject": "User approved a push after 22 straight MFA prompts overnight",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 45,
+    "xp": 38,
+    "ticketBody": "The IdP shows a wave of MFA push notifications sent to one user's device overnight, then a single approval, then a session from an IP the user has never used. The user says they 'just tapped approve to make the buzzing stop'.",
+    "evidence": [
+      {
+        "label": "IdP sign-in log, user rdesai",
+        "lines": [
+          "02:03-02:31: 22 MFA push requests, all DENIED or ignored",
+          "02:34: 1 push APPROVED",
+          "02:34: session established from 203.0.113.45 (hosting provider, first-ever for this user)",
+          "Correct password was supplied on every attempt (credentials already known to attacker)",
+          "User's normal sign-ins: corporate IP range, business hours only"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "timeline",
+          "signin",
+          "query",
+          "idp"
+        ],
+        "output": "Password was correct on all 22 attempts, so the attacker already has the credentials. They spammed pushes until the user approved one. The approved session is from a brand-new hosting IP. This is MFA-fatigue account takeover.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "geo",
+          "whois",
+          "lookup ip"
+        ],
+        "output": "203.0.113.45: cloud hosting, foreign region, no prior association with rdesai. The corporate range is 10.0.0.0/8."
+      }
+    ],
+    "kbArticleId": "kb-soc-mfa-fatigue",
+    "goal": "The push flood ended in an approval and a foreign session. Contain the takeover correctly.",
+    "hint": "The attacker already knows the password (all 22 attempts were correct) and now holds an approved session. Resetting the password alone leaves two things live. What else has to die?",
+    "actions": [
+      {
+        "id": "revoke-reset-reenroll",
+        "label": "Revoke the active sessions/tokens, force a password reset, and re-enroll MFA (rotate the second factor); confirm with the user out of band",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 15,
+        "teach": "That's full containment. Because every attempt used the correct password, the credentials are already burned, so reset them. The attacker holds an approved session, so revoke the live tokens or they keep working after the reset. And the push approval means the MFA relationship is compromised, so re-enroll the second factor. Verify with the user through a trusted channel, not the possibly-hijacked account."
+      },
+      {
+        "id": "reset-pw-only",
+        "label": "Just force a password reset and close it",
+        "correct": false,
+        "csat": -9,
+        "teach": "A password reset doesn't kill an already-established session token; the attacker's live session keeps working. And you left the compromised push relationship in place. Revoke the sessions and re-enroll MFA too."
+      },
+      {
+        "id": "coach-deny",
+        "label": "Tell the user to deny prompts next time and move on",
+        "correct": false,
+        "csat": -11,
+        "teach": "User education is worth doing, but it isn't containment. There's an active attacker session on a valid account right now. Kill the sessions, rotate the credential and the factor, then coach the user."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-mfa-fatigue",
+      "title": "MFA fatigue (push bombing) account takeover",
+      "tags": [
+        "account",
+        "mfa",
+        "account compromise",
+        "containment",
+        "soc"
+      ],
+      "body": [
+        "MFA fatigue, or push bombing, is an attack against a valid password. The attacker already has the credentials and spams approval prompts until a tired or confused user taps approve, usually late at night. Signs: many denied or ignored push requests followed by one approval, the correct password on every attempt, and a session from an unfamiliar IP.",
+        "This is a confirmed account takeover, and it has three live pieces to contain. The credential is burned because the attacker knew the password, so force a reset. The attacker holds an approved session, so revoke active sessions and tokens; a password reset alone does not kill an existing session. The push relationship is compromised, so re-enroll or rotate the second factor.",
+        "Always confirm with the user through a trusted, out-of-band channel rather than the potentially hijacked account. User education (deny unexpected prompts, use number-matching) is valuable prevention but is not containment; contain the active takeover first."
+      ]
+    }
+  },
+  {
+    "id": "soc-impossible-travel",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "SIEM correlation",
+      "role": "SIEM"
+    },
+    "subject": "Two logins for one user, two continents, nine minutes apart",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 45,
+    "xp": 38,
+    "ticketBody": "A geo-velocity rule flagged 'impossible travel' for user tokoro. You need to read the raw auth logs and decide whether the two logins are genuinely one person or a compromise. Don't take the rule's word for it, build the timeline.",
+    "evidence": [
+      {
+        "label": "Raw auth log, user tokoro (UTC)",
+        "lines": [
+          "08:14 SUCCESS from 198.51.100.10 (corporate VPN egress, city A) user-agent: Corp-VPN client",
+          "08:23 SUCCESS from 203.0.113.200 (hosting provider, city B, different continent) user-agent: generic curl",
+          "08:23 session B immediately enumerated the mailbox and created a mail-forwarding rule",
+          "No VPN handoff or roaming event between the two",
+          "tokoro's device inventory shows no second registered device"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "timeline",
+          "logs",
+          "query",
+          "correlate"
+        ],
+        "output": "Login A: corporate VPN, known egress, normal client. Login B nine minutes later: hosting-provider IP on another continent, generic curl agent, and it immediately made a mail-forwarding rule. Physical travel in nine minutes is impossible. B is the intruder; A is the legitimate user.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "geo",
+          "whois",
+          "lookup ip"
+        ],
+        "output": "198.51.100.10 = your VPN egress (legit). 203.0.113.200 = cloud hosting, unattributed, no history for this user."
+      }
+    ],
+    "kbArticleId": "kb-soc-log-timeline",
+    "goal": "Use the log timeline to tell the real user from the intruder, and act on the finding.",
+    "hint": "One login is your VPN with a normal client; the other is a hosting IP with a curl agent that instantly set up mail forwarding. Which is which, and what does a forwarding rule tell you the attacker wants?",
+    "actions": [
+      {
+        "id": "contain-b-preserve",
+        "label": "Treat login B as the intruder: revoke its sessions/tokens, force a reset, remove the malicious forwarding rule, and preserve the logs, then verify with the user out of band",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 15,
+        "outcome": "escalated",
+        "teach": "Well read. The timeline distinguishes them: A is the corporate-VPN session with a normal client, B is a hosting-IP session with a curl agent that immediately created a mail-forwarding rule to quietly steal future mail. Revoke B's access, reset the credential, delete the forwarding rule, and preserve the raw logs as evidence. Building the timeline, not trusting the label, is what let you contain the right session."
+      },
+      {
+        "id": "dismiss-fp",
+        "label": "Impossible-travel rules are noisy, close it as a false positive",
+        "correct": false,
+        "csat": -10,
+        "teach": "Sometimes geo-velocity is a VPN artifact, but here the second login is a hosting IP with a curl agent that instantly created a mail-forwarding rule. That's not travel noise, it's a takeover mid-action. Read the log before you dismiss it."
+      },
+      {
+        "id": "block-vpn",
+        "label": "Block 198.51.100.10, that's the suspicious source",
+        "correct": false,
+        "csat": -8,
+        "teach": "You blocked your own corporate VPN egress, the legitimate user's path, and left the attacker's hosting-IP session untouched. The timeline shows which is which; act on the intruder (login B), not the VPN."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-log-timeline",
+      "title": "Reading auth logs: build the timeline before you judge",
+      "tags": [
+        "log analysis",
+        "timeline",
+        "impossible travel",
+        "triage",
+        "soc"
+      ],
+      "body": [
+        "An alert label is a hypothesis, not a verdict. 'Impossible travel' can be a real takeover or a harmless VPN/roaming artifact. The way to know is to reconstruct the timeline from the raw auth logs in one time zone (UTC) and compare the sessions.",
+        "For each login, note the source IP and its reputation (corporate egress vs hosting provider), the user-agent (a normal client vs a generic script like curl), the timing, and what the session did next. A hosting IP, a scripted user-agent, and immediate high-value actions such as creating a mail-forwarding rule together point to an intruder, not the real user.",
+        "Once the timeline separates the legitimate session from the malicious one, act only on the intruder: revoke its sessions and tokens, reset the credential, undo attacker-created changes (forwarding rules, added devices), and preserve the raw logs as evidence. Never act on the legitimate path (for example blocking your own VPN egress) or dismiss the alert without reading the log."
+      ]
+    }
+  },
+  {
+    "id": "soc-containment-order",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "IR coordination",
+      "role": "Incident Response"
+    },
+    "subject": "Confirmed intrusion on APP-07: what's the first move?",
+    "slaMinutes": 15,
+    "arriveAfter": 0,
+    "reward": 50,
+    "xp": 42,
+    "ticketBody": "An intrusion on APP-07 is confirmed: a web shell is live, an unfamiliar admin account was created, and there's active outbound traffic to an external IP. The room wants to start deleting the web shell and the rogue account right now. As the analyst, sequence the response correctly.",
+    "evidence": [
+      {
+        "label": "Current state, APP-07",
+        "lines": [
+          "Web shell active at /uploads/status.aspx (reachable, being used now)",
+          "Rogue local admin 'svc-helpdesk2' created 40 min ago",
+          "Live outbound session to 203.0.113.88 (attacker C2), moving data now",
+          "No forensic image or memory capture taken yet",
+          "Scope unknown: unclear if the attacker reached other hosts"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "state",
+          "inspect",
+          "triage",
+          "assess"
+        ],
+        "output": "Live web shell, rogue admin, and active exfil, but no evidence captured and scope unknown. If you delete artifacts now you lose the forensic record and may tip the attacker without stopping their other footholds. Contain the network path first, preserve, then eradicate.",
+        "step": "diag"
+      },
+      {
+        "aliases": [
+          "scope",
+          "hunt",
+          "spread"
+        ],
+        "output": "Lateral movement not yet ruled out. Eradicating on APP-07 alone could leave persistence elsewhere. Isolation buys time to scope safely."
+      }
+    ],
+    "kbArticleId": "kb-soc-containment-order",
+    "goal": "Order the incident response correctly: what happens first on a confirmed, active intrusion?",
+    "hint": "Deleting the web shell and the rogue account feels like progress, but the box is still exfiltrating and nothing is captured yet. What has to come before eradication?",
+    "actions": [
+      {
+        "id": "isolate-preserve-then-eradicate",
+        "label": "Network-isolate APP-07 first (stop the exfil), preserve evidence (memory + disk image), scope the spread, then eradicate the shell and rogue account",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 16,
+        "outcome": "escalated",
+        "teach": "Correct sequence. Containment comes before eradication: isolating the host stops the active exfiltration and freezes the attacker's access without destroying anything. Then preserve (memory and disk) so the investigation can learn how they got in and scope how far they went. Only after that do you eradicate the web shell and rogue account. Eradicate first and you lose the evidence and may miss persistence on other hosts."
+      },
+      {
+        "id": "delete-now",
+        "label": "Delete the web shell and the rogue admin account immediately",
+        "correct": false,
+        "csat": -10,
+        "teach": "Deleting artifacts first destroys the forensic record, tips the attacker (who has an active session and may re-establish through a foothold you haven't found), and does nothing to stop the exfil already in progress. Contain and preserve before you eradicate."
+      },
+      {
+        "id": "poweroff",
+        "label": "Power the box off to kill everything at once",
+        "correct": false,
+        "csat": -9,
+        "teach": "Powering off does stop the exfil, but it wipes volatile memory, the very evidence that reveals the attacker's tooling and scope. Network-isolate instead: it cuts the attacker off while keeping the host powered for forensics."
+      }
+    ],
+    "track": "soc",
+    "kbArticle": {
+      "id": "kb-soc-containment-order",
+      "title": "Incident response order: contain, preserve, eradicate, recover",
+      "tags": [
+        "incident",
+        "containment",
+        "eradication",
+        "forensics",
+        "soc"
+      ],
+      "body": [
+        "In a confirmed, active intrusion the sequence matters as much as the actions. The order is contain, preserve, eradicate, recover. Jumping straight to eradication (deleting the web shell, removing the rogue account) feels like progress but destroys evidence and can tip the attacker before you have stopped them or found all their footholds.",
+        "Contain first by network-isolating the host. Isolation halts active exfiltration and freezes the attacker's access without deleting anything, and unlike powering off it keeps volatile memory intact. Then preserve: capture memory and a disk image so the investigation can determine the entry point and scope. Only once you understand the spread do you eradicate the artifacts, then recover the system to a known-good state.",
+        "The reason order matters: eradicating before scoping can leave persistence on other hosts you never checked, and eradicating before preserving throws away the record you need to prove what happened and prevent a repeat. Contain and preserve buy you the safety and the evidence to eradicate completely."
+      ]
+    }
+  },
+  {
+    "id": "rt-third-party-oos",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Engagement task",
+      "role": "Client (in scope)"
+    },
+    "subject": "The in-scope app logs you into a third-party billing portal you never signed for",
+    "asset": "pay.acme-billing.example (third party)",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "ticketBody": "Testing the in-scope app, its 'View invoice' button single-sign-ons you straight into a separate billing provider's portal at pay.acme-billing.example. That provider is a different company and is not named anywhere in your signed scope. From the portal you can already see it exposes other tenants' invoices.",
+    "evidence": [
+      {
+        "label": "Where the boundary is",
+        "lines": [
+          "In scope: app.acme.example and its own APIs (owned by the client)",
+          "The invoice button federates out to pay.acme-billing.example",
+          "That domain belongs to a separate billing vendor, not the client",
+          "It is NOT listed in the signed scope",
+          "Even though your click reached it, the client cannot authorize testing a system they do not own"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-thirdparty-scope",
+    "goal": "Handle the third-party system the reachable path exposed, without testing something the client cannot authorize.",
+    "hint": "Reachability is not authorization. The client can only sign away their own assets. A vendor they merely link to is a different owner.",
+    "actions": [
+      {
+        "id": "report-thirdparty",
+        "label": "Stop at the boundary, document the reachable path as a finding, and escalate to the client to pursue written authorization from the vendor before anyone tests it",
+        "correct": true,
+        "requires": [
+          "kb"
+        ],
+        "csat": 15,
+        "outcome": "reported",
+        "teach": "That is the disciplined call. Your client can only authorize testing of assets they own, and pay.acme-billing.example belongs to a different company. The fact that a click reached it does not make it in scope. You report the exposed federation path so the client can either get the vendor to sign an authorization or take it up with them directly. Reachable is not the same as authorized.",
+        "ends": false
+      },
+      {
+        "id": "test-vendor",
+        "label": "Test the billing portal too since the app clearly connects to it and the client is paying you to find issues",
+        "correct": false,
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Testing a system your client does not own, on the strength of a link, is unauthorized access to a third party. Your client cannot sign away someone else's assets. This is exactly the kind of scope creep that turns an engagement into a crime. Stop at the boundary and escalate for written authorization."
+      },
+      {
+        "id": "ignore-vendor",
+        "label": "Note that the button leaves scope and drop it silently, since the portal is not yours to look at",
+        "correct": false,
+        "csat": -6,
+        "teach": "Staying in scope does not mean staying silent. You saw a real exposure (other tenants' invoices reachable through the client's own login flow). Do not test it, but absolutely report the path so the client can act and involve the vendor.",
+        "ends": false
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-thirdparty-scope",
+      "title": "Third-party assets: reachable is not authorized",
+      "tags": [
+        "scope",
+        "third party",
+        "authorization",
+        "escalation"
+      ],
+      "body": [
+        "A client can only authorize you to test assets they own or control. If their application links, federates, or single-sign-ons out to a vendor's system, reaching that vendor does not put it in scope. Ownership, not reachability, decides authorization.",
+        "When a reachable path leads to a system a third party owns, stop at the boundary and document the path itself as a finding. Escalate to the client so they can either obtain written authorization from the vendor or handle it through their own vendor relationship. Testing someone else's system on the strength of a link is unauthorized access, full stop."
+      ]
+    }
+  },
+  {
+    "id": "rt-cvd-disclosure",
+    "channel": "email",
+    "priority": "P3",
+    "from": {
+      "name": "Your own research",
+      "role": "Coordinated disclosure decision"
+    },
+    "subject": "You found a real bug in an open-source library used everywhere. How do you disclose it?",
+    "slaMinutes": 40,
+    "arriveAfter": 0,
+    "reward": 40,
+    "xp": 32,
+    "email": {
+      "body": "Outside of any paid engagement, on your own time, you discovered an authentication-bypass in a widely used open-source library. Millions of deployments run it. There is no active exploitation that you know of. The project has a published security policy with a security contact and a PGP key. You are deciding how to get this fixed responsibly."
+    },
+    "evidence": [
+      {
+        "label": "What you have",
+        "lines": [
+          "A reproducible auth-bypass in a popular OSS library (no live engagement, no NDA)",
+          "The project publishes a SECURITY.md with a security@ contact and a PGP key",
+          "No evidence anyone is exploiting it in the wild yet",
+          "A public issue or a tweet would tell attackers before a patch exists",
+          "Maintainers typically need time to fix, release, and let users update"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-coordinated-disclosure",
+    "goal": "Get the bug fixed with the least risk to the people running the software.",
+    "hint": "The published security policy is a gift: it tells you exactly how the maintainers want to receive this. Public-first tells attackers first.",
+    "actions": [
+      {
+        "id": "cvd-report",
+        "label": "Report it privately through the project's published security contact, share clear reproduction steps, and agree a coordinated timeline for a patch and a CVE before anything goes public",
+        "correct": true,
+        "csat": 14,
+        "outcome": "reported",
+        "teach": "That is coordinated vulnerability disclosure done right. The project told you how it wants to hear about this, so you use the security contact and its PGP key, hand over clean reproduction steps, and agree a timeline so a patch and a CVE land before the details are public. The goal is protected users, not a race to be first to post.",
+        "ends": false
+      },
+      {
+        "id": "full-disclosure-now",
+        "label": "Post the full details and a working exploit publicly right now so users know to defend themselves",
+        "correct": false,
+        "csat": -11,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Dropping a working exploit with no patch available hands every attacker a weapon before defenders have a fix to deploy. With no active exploitation, there is no justification for zero-day full disclosure. Report privately, coordinate a fix, then disclose. Public-first here endangers the very users you say you want to protect."
+      },
+      {
+        "id": "sell-the-bug",
+        "label": "Quietly sell the vulnerability to the highest bidder since you found it fair and square",
+        "correct": false,
+        "csat": -16,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Selling an unpatched vulnerability into a market feeds real attacks against real people and is the opposite of ethical research. Finding a bug does not make it yours to weaponize. Disclose it responsibly to the maintainers so it gets fixed."
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-coordinated-disclosure",
+      "title": "Coordinated (responsible) disclosure",
+      "tags": [
+        "disclosure",
+        "responsible disclosure",
+        "cvd",
+        "ethics"
+      ],
+      "body": [
+        "When you find a vulnerability outside a paid engagement, the goal is to get it fixed with the least risk to the people running the software. Coordinated disclosure means reporting privately to the owner first, giving them clear reproduction steps, and agreeing a timeline so a patch exists before technical details are public.",
+        "Check for a published security policy (SECURITY.md, a security@ address, or a PGP key); it tells you exactly how the owner wants to be contacted. Full public disclosure of a working exploit before a patch is available hands attackers a weapon and endangers users, and it is only ever a last resort when a vendor refuses to engage. Selling or hoarding an unpatched bug is never responsible research."
+      ]
+    }
+  },
+  {
+    "id": "rt-writeup-quality",
+    "channel": "ticket",
+    "priority": "P3",
+    "from": {
+      "name": "Engagement task",
+      "role": "Client (in scope)"
+    },
+    "subject": "Turn your confirmed finding into a write-up the client can actually act on",
+    "slaMinutes": 40,
+    "arriveAfter": 0,
+    "reward": 40,
+    "xp": 32,
+    "ticketBody": "You confirmed a broken access control flaw in the in-scope app earlier: changing an account ID in one API call returned another user's profile, proving the server never checks ownership. Now you have to write it up. The client's developers will read this to reproduce and fix it. A vague note that says 'auth is broken, please fix' is not a finding they can act on.",
+    "evidence": [
+      {
+        "label": "What a usable finding needs",
+        "lines": [
+          "A clear title and an accurate severity rating",
+          "Exact reproduction steps: the request, the parameter you changed, the response",
+          "The concrete impact if a real attacker used it",
+          "A specific remediation the developers can implement",
+          "Enough evidence to reproduce, and NOT a dump of real customer data"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-writeup-repro",
+    "goal": "Produce a finding the client's team can reproduce and fix.",
+    "hint": "The developers were not standing behind you. If they cannot reproduce it from your write-up, it will not get fixed. Give steps, impact, and a real fix, without pasting real customer records.",
+    "actions": [
+      {
+        "id": "structured-finding",
+        "label": "Write a structured finding: title, severity, exact reproduction steps with the request and the changed parameter, real-world impact, and a specific remediation (a server-side ownership check on every object), using redacted or your own test-account data as evidence",
+        "correct": true,
+        "requires": [
+          "kb"
+        ],
+        "csat": 15,
+        "outcome": "reported",
+        "teach": "That is a finding a developer can act on. Severity sets the priority, the reproduction steps let them see it fail themselves, the impact justifies the effort, and the remediation tells them precisely what to change. Using your own test account or redacted data as proof avoids creating a fresh exposure inside the report. A finding lives or dies on whether the team can reproduce it.",
+        "ends": false
+      },
+      {
+        "id": "vague-note",
+        "label": "Send a one-line note saying 'the authorization is broken, your devs should look into it' and move on",
+        "correct": false,
+        "csat": -8,
+        "teach": "A finding with no reproduction steps, no severity, and no specific fix is a complaint, not a deliverable. The developers cannot reproduce it, cannot prioritize it, and likely will not fix it. Your value is the detail that makes it actionable. Write the steps, the impact, and the concrete remediation.",
+        "ends": false
+      },
+      {
+        "id": "paste-real-data",
+        "label": "Paste the full set of other customers' records you can reach into the report as proof of impact",
+        "correct": false,
+        "csat": -12,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Copying real customer data into your report creates a brand-new exposure that you now own and have to protect, and it is needless: one redacted example or your own test account proves the flaw just as well. Demonstrate impact without harvesting or storing real personal data."
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-writeup-repro",
+      "title": "Writing a finding developers can reproduce",
+      "tags": [
+        "report",
+        "finding",
+        "reproduction",
+        "remediation"
+      ],
+      "body": [
+        "A finding is only useful if the client's team can reproduce and fix it. Every write-up needs a clear title, an accurate severity, exact reproduction steps (the request, the parameter you changed, the observed response), the real-world impact if an attacker used it, and a specific remediation the developers can implement.",
+        "Prove impact with the lightest evidence that makes the point: your own test account, a single redacted example, or a screenshot with sensitive fields blacked out. Never paste real customer data into the report; that creates a fresh exposure you become responsible for. The remediation is the most valuable part of the finding, because a safer system is the deliverable, not a trophy."
+      ]
+    }
+  },
+  {
+    "id": "rt-authorization-proof",
+    "channel": "phone",
+    "priority": "P2",
+    "from": {
+      "name": "Site contact (Dana)",
+      "role": "Facility staff, unaware of the test"
+    },
+    "subject": "A guard stops you mid-test and asks who authorized this",
+    "slaMinutes": 20,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "phone": {
+      "opener": "Excuse me, I am the facility manager and one of my staff says you have been probing our systems from the lobby. Nobody told us about any testing. Who authorized this, and why should I not call the police right now?",
+      "followups": [
+        {
+          "label": "You are right to check. I am on an authorized engagement and I have a signed authorization letter and my point of contact's number. Can I show you the letter and you verify it with them?",
+          "reply": "Yes. Actually, please do. If it checks out, we are fine. If it does not, this call ends differently.",
+          "correct": true
+        },
+        {
+          "label": "Do not worry about it, I do this all the time, it is completely normal.",
+          "reply": "That is not an answer. I asked who authorized it. 'Trust me' is not going to work here."
+        },
+        {
+          "label": "Your own security team hired me, so you do not need to know the details.",
+          "reply": "I run security for this site and I have never heard of you. That makes me more worried, not less."
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "label": "What you carry on an engagement",
+        "lines": [
+          "A signed authorization letter (the 'get out of jail' letter) naming you, the scope, and the dates",
+          "The name and number of your client point of contact who can vouch for you",
+          "You are testing in scope; the facility staff were simply never briefed",
+          "Physical and social engagement rules: expect to be challenged, and de-escalate"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-authorization-proof",
+    "goal": "De-escalate, prove you are authorized, and let them verify it, without bluffing.",
+    "hint": "This is exactly why you carry the authorization letter and a point-of-contact number. The professional move is to prove it and invite verification, not to talk your way out.",
+    "actions": [
+      {
+        "id": "show-letter-verify",
+        "label": "Stay calm, present the signed authorization letter, and give them your point of contact's number so they can verify the engagement themselves before you continue",
+        "correct": true,
+        "requires": [
+          "phone"
+        ],
+        "csat": 14,
+        "outcome": "resolved",
+        "teach": "Textbook handling. The whole reason you carry the authorization letter and a client contact is this moment: someone unbriefed catches you and you can prove, on the spot and to their satisfaction, that this is sanctioned. Inviting them to verify with your point of contact turns a confrontation into a check that clears. You never bluff your way past a challenge; you prove it.",
+        "ends": false
+      },
+      {
+        "id": "bluff-past",
+        "label": "Bluff confidently that you are always allowed and keep testing so you do not lose momentum",
+        "correct": false,
+        "requires": [
+          "phone"
+        ],
+        "csat": -10,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Bluffing past a legitimate challenge is how an authorized tester ends up detained. You have real authorization; use it. Refusing to prove it makes you indistinguishable from an actual intruder and can end the engagement and expose you to arrest. Stop, present the letter, and let them verify."
+      },
+      {
+        "id": "flee-scene",
+        "label": "Refuse to explain and quickly leave before they can call anyone",
+        "correct": false,
+        "csat": -9,
+        "teach": "Fleeing a challenge you could resolve with a document you are carrying looks exactly like guilt, burns your credibility with the client, and leaves the staff rightly alarmed. You are authorized. The professional response is to prove it calmly and let them verify, not to run.",
+        "ends": false
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-authorization-proof",
+      "title": "The authorization letter and being challenged",
+      "tags": [
+        "scope",
+        "authorization",
+        "physical",
+        "rules of engagement"
+      ],
+      "body": [
+        "On any engagement, especially one with a physical or social component, carry a signed authorization letter (often called the 'get out of jail' letter) that names you, the agreed scope, and the dates, plus a client point of contact who can vouch for you. Expect to be challenged by staff who were never briefed; that is a sign the test is realistic, not a failure.",
+        "When challenged, de-escalate, present the letter, and invite the person to verify it with your point of contact before you continue. Never bluff or flee. Bluffing makes you indistinguishable from a real intruder and can get you detained, and fleeing destroys your credibility with the client. Proof and verification, calmly offered, is what separates a professional from a trespasser."
+      ]
+    }
+  },
+  {
+    "id": "rt-active-attacker-escalation",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "Your recon notes",
+      "role": "during the engagement"
+    },
+    "subject": "Mid-engagement, you find signs a REAL attacker is already inside",
+    "slaMinutes": 15,
+    "arriveAfter": 0,
+    "reward": 50,
+    "xp": 42,
+    "ticketBody": "Enumerating an in-scope host, you find artifacts that are not yours: a web shell you did not plant, outbound connections to an unfamiliar external IP, and recently created accounts you did not make. This is not your tooling. It looks like a genuine, ongoing intrusion by someone who is not part of your engagement.",
+    "evidence": [
+      {
+        "label": "What you are seeing",
+        "lines": [
+          "A web shell on the in-scope host that you did not deploy",
+          "Beaconing to an external IP that is not in your engagement infrastructure",
+          "Two new local accounts created outside your activity window",
+          "This is real, active, third-party compromise, not part of your test",
+          "Your rules of engagement almost certainly have an escalation clause for exactly this"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-active-attacker-escalation",
+    "goal": "Do the one thing the rules of engagement require when you stumble onto a real breach.",
+    "hint": "This is no longer your test. A real, active intrusion is an incident. The ROE has an emergency escalation path for precisely this; do not investigate it yourself and do not stay quiet.",
+    "actions": [
+      {
+        "id": "escalate-breach",
+        "label": "Immediately pause your testing, preserve what you have observed without disturbing it, and escalate to your client emergency contact per the rules of engagement so their incident response team can take over",
+        "correct": true,
+        "requires": [
+          "kb"
+        ],
+        "csat": 16,
+        "outcome": "escalated",
+        "teach": "Exactly what the ROE is written for. Stumbling onto a real, active attacker turns your engagement into an incident, and the disciplined move is to stop, avoid trampling the evidence, and hit the emergency escalation path so the client's incident responders can own it. Chasing the intruder yourself would contaminate the investigation and blur who did what. Pause, preserve, escalate.",
+        "ends": false
+      },
+      {
+        "id": "chase-attacker",
+        "label": "Follow the real attacker's trail yourself to see how far they got, since you are already a security expert on site",
+        "correct": false,
+        "csat": -11,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Chasing a live intruder yourself is outside your scope, contaminates the forensic evidence, and can tip the attacker off or collide with the client's own responders. Your job the moment you find a real breach is to hand it off cleanly. Stop, preserve, and escalate to their incident response team, do not run your own investigation."
+      },
+      {
+        "id": "keep-quiet-breach",
+        "label": "Say nothing so it does not disrupt the schedule, and quietly work around the attacker's artifacts",
+        "correct": false,
+        "csat": -14,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "Staying silent about a live compromise so you can keep to a schedule lets a real attacker keep operating and makes you complicit in the damage. A genuine intrusion is an emergency that overrides the test plan every time. Escalate it immediately through the ROE's emergency contact."
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-active-attacker-escalation",
+      "title": "Finding a real attacker mid-engagement: emergency escalation",
+      "tags": [
+        "escalation",
+        "incident response",
+        "rules of engagement",
+        "evidence"
+      ],
+      "body": [
+        "If, during an authorized test, you find evidence of a genuine third-party intrusion (tooling you did not plant, unexplained beaconing, accounts you did not create), your engagement has just collided with a real incident. Rules of engagement include an emergency escalation clause for exactly this reason.",
+        "Stop testing, preserve what you have observed without disturbing it, and escalate immediately to your client's emergency contact so their incident response team can take over. Do not investigate or chase the attacker yourself: that is out of scope, contaminates the forensic evidence, and can tip the intruder off or interfere with the defenders. Your duty is a clean, fast hand-off, never silence and never a solo pursuit."
+      ]
+    }
+  },
+  {
+    "id": "rt-bounty-safe-harbor",
+    "channel": "email",
+    "priority": "P3",
+    "from": {
+      "name": "Your research",
+      "role": "Bug bounty scope decision"
+    },
+    "subject": "A bug bounty program's scope: how far does the safe harbor actually reach?",
+    "slaMinutes": 40,
+    "arriveAfter": 0,
+    "reward": 40,
+    "xp": 32,
+    "email": {
+      "body": "You are hunting on a company's public bug bounty program. The policy lists api.example.com and app.example.com as in scope, and explicitly lists corp.example.com (their internal corporate systems) and any subdomain hosted by a third party as OUT of scope. You have found what looks like an SSRF on the in-scope api.example.com that, if pushed, could reach the out-of-scope corp network. The safe harbor language only protects testing that stays within the stated scope."
+    },
+    "evidence": [
+      {
+        "label": "The program rules",
+        "lines": [
+          "IN SCOPE: api.example.com, app.example.com",
+          "OUT OF SCOPE: corp.example.com and any third-party-hosted subdomain",
+          "Safe harbor: protects good-faith testing that STAYS within the listed scope",
+          "Your SSRF is on an in-scope host but could be steered at the out-of-scope corp network",
+          "Reaching corp.example.com would leave the scope and void the safe harbor"
+        ]
+      }
+    ],
+    "kbArticleId": "kb-rt-bounty-safe-harbor",
+    "goal": "Report the SSRF for the bounty without stepping outside the scope that the safe harbor protects.",
+    "hint": "The safe harbor is a promise, not permission for anything. It only covers what the scope covers. Prove the bug within scope; do not follow it into the out-of-scope corp network.",
+    "actions": [
+      {
+        "id": "prove-in-scope-report",
+        "label": "Demonstrate the SSRF safely against an in-scope or harmless internal target, stop before it touches the out-of-scope corp network, and report it with clear repro steps and a remediation",
+        "correct": true,
+        "requires": [
+          "kb"
+        ],
+        "csat": 15,
+        "outcome": "reported",
+        "teach": "That keeps you inside the safe harbor. You proved the SSRF exists using an in-scope or benign target, which is plenty to establish the finding, and you did not steer it into corp.example.com, which the program explicitly excludes. The safe harbor only protects testing that stays within the stated scope, so you report the confirmed bug and its fix (an allowlist of destinations, block internal ranges, disable redirects) and let the program decide about the corp reach.",
+        "ends": false
+      },
+      {
+        "id": "pivot-to-corp",
+        "label": "Push the SSRF all the way into the out-of-scope corp network to prove maximum impact and earn a bigger payout",
+        "correct": false,
+        "csat": -13,
+        "ends": true,
+        "outcome": "mishandled",
+        "teach": "The moment you reach corp.example.com you have left the listed scope, and the safe harbor no longer protects you: that is unauthorized access to their internal network, regardless of the bounty. You do not need to breach corp to prove the SSRF; an in-scope demonstration already establishes the flaw. Stay in scope, report the reachability, and let them expand it if they choose."
+      },
+      {
+        "id": "skip-report-bounty",
+        "label": "Skip the report since it did not reach anything juicy, and go look for a flashier bug",
+        "correct": false,
+        "csat": -6,
+        "teach": "A confirmed SSRF on a production API is a real, reportable finding on its own, and quietly dropping it leaves the company exposed. You do not need to breach the corp network to make it worth reporting. Write it up with repro steps and a remediation; that is the whole point of the program.",
+        "ends": false
+      }
+    ],
+    "track": "redteam",
+    "kbArticle": {
+      "id": "kb-rt-bounty-safe-harbor",
+      "title": "Bug bounty scope and safe harbor",
+      "tags": [
+        "bug bounty",
+        "scope",
+        "safe harbor",
+        "authorization"
+      ],
+      "body": [
+        "A bug bounty program's policy defines exactly what you may test and what you may not, and its safe harbor language only protects good-faith testing that stays within that listed scope. Out-of-scope systems (internal corporate networks, third-party-hosted assets) are not covered, and reaching them voids the protection no matter how interesting the payout.",
+        "When an in-scope vulnerability could be pushed into out-of-scope territory (an SSRF on an in-scope API that could reach an internal network, for example), prove the flaw with an in-scope or benign target and stop at the boundary. Report the confirmed bug, its reachability, and a concrete remediation, and let the program decide whether to authorize going further. Chasing maximum impact across the scope line is unauthorized access, safe harbor or not."
+      ]
+    }
+  },
+  {
+    "id": "net-cors-misconfig",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Frontend team",
+      "role": "Web"
+    },
+    "subject": "Browser blocks our API calls: 'No Access-Control-Allow-Origin'",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "concept": "cors",
+    "ticketBody": "Our single page app at https://app.getlionade.com calls the API at https://api.getlionade.com and the browser blocks every response. curl to the same endpoint works fine, so the API is up. What is wrong?",
+    "evidence": [
+      {
+        "label": "Browser console and response headers",
+        "lines": [
+          "Console: blocked by CORS policy: No 'Access-Control-Allow-Origin' header on the response",
+          "curl https://api.getlionade.com/v1/me returns 200 with valid JSON (no browser, no CORS check)",
+          "Preflight OPTIONS from the app origin returns 200 but with no Access-Control-Allow-Origin header",
+          "The app origin https://app.getlionade.com is a known, trusted first-party site"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "curl",
+          "headers",
+          "preflight"
+        ],
+        "output": "OPTIONS preflight from https://app.getlionade.com returns 200 but the server sends no Access-Control-Allow-Origin. The browser enforces the same-origin policy, so with no matching allow header it blocks the response. curl has no such policy, which is why the raw request looked fine.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-cors",
+    "goal": "Let the trusted app origin call the API from the browser without opening the API to everyone.",
+    "hint": "curl works but the browser blocks it, so this is CORS, not connectivity. The safe fix names one origin, not all of them.",
+    "actions": [
+      {
+        "id": "allow-specific-origin",
+        "label": "Configure the API to return Access-Control-Allow-Origin for the specific app origin (https://app.getlionade.com) and answer the preflight",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 15,
+        "teach": "That is the fix. CORS is a browser rule, not a network failure, which is why curl worked and the browser did not. Returning Access-Control-Allow-Origin for your one trusted origin and answering the preflight lets the app through while keeping every other site blocked. Name the origin explicitly."
+      },
+      {
+        "id": "wildcard-star",
+        "label": "Set Access-Control-Allow-Origin to * so any origin can call the API",
+        "correct": false,
+        "csat": -8,
+        "teach": "A wildcard makes every website on the internet able to call your API from a victim's browser, and it cannot be combined with credentials at all. This is an authenticated first-party API, so allow your one known origin, not everyone."
+      },
+      {
+        "id": "disable-cors-frontend",
+        "label": "Tell the frontend team to launch their browser with web security disabled",
+        "correct": false,
+        "csat": -9,
+        "teach": "Disabling browser security is a dangerous local hack that never ships to a single real user, so the app is still broken in production. The server must send the correct CORS header for the trusted origin. Fix it on the API, not by crippling one developer's browser."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-cors",
+      "title": "Cross-origin requests blocked in the browser (CORS)",
+      "tags": [
+        "cors",
+        "browser",
+        "api",
+        "same-origin"
+      ],
+      "body": [
+        "CORS is a browser safety rule, not a network problem. If a request works from curl but the browser blocks it with 'No Access-Control-Allow-Origin', the server simply is not telling the browser that this origin is allowed. The API is reachable; the browser is protecting the user.",
+        "Fix it on the server by returning Access-Control-Allow-Origin for the specific trusted origin, and answer the preflight OPTIONS request for the methods and headers you use. Avoid the wildcard star on an authenticated API: it invites every site to call you from a victim's session, and it is not even permitted alongside credentials. Name the origins you trust."
+      ]
+    }
+  },
+  {
+    "id": "net-dns-split-horizon",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Remote worker",
+      "role": "Sales, on VPN"
+    },
+    "subject": "intranet.corp resolves to the wrong address on the VPN",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "concept": "dns",
+    "ticketBody": "In the office intranet.corp works fine. From home on the VPN it loads a stranger's server or times out. Same name, different answer depending on where I am. IT changed the DNS setup yesterday.",
+    "evidence": [
+      {
+        "label": "Resolution by location",
+        "lines": [
+          "In office: intranet.corp -> 10.50.0.10 (the real internal server), works",
+          "On VPN: intranet.corp -> a public IP that is not ours, fails or hits a stranger",
+          "Design is split-horizon: internal clients should get the private view, external should get the public view",
+          "Change log: VPN client DNS was repointed to a public resolver at 16:20 yesterday"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "dig",
+          "nslookup",
+          "resolve"
+        ],
+        "output": "From the VPN, dig intranet.corp is answered by a public resolver, so it returns the public (external) view instead of the private zone. Split-horizon DNS is meant to hand internal clients the internal answer. The VPN is no longer using the internal resolver, so it gets the wrong side of the split.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-split-horizon-dns",
+    "goal": "Make VPN clients resolve internal names to the internal addresses, like office clients do.",
+    "hint": "The same name gives two answers by design. On the VPN it is getting the external answer because it is asking the wrong resolver.",
+    "actions": [
+      {
+        "id": "point-vpn-internal-resolver",
+        "label": "Push the internal DNS resolver to VPN clients so they get the private (internal) view of the split-horizon zone",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 15,
+        "teach": "That is the fix. Split-horizon DNS deliberately serves internal clients a private answer and external clients a public one. Yesterday's change sent VPN clients to a public resolver, so they landed on the external view. Point VPN clients back at the internal resolver and the name resolves to 10.50.0.10 as it should. VPN users are internal clients."
+      },
+      {
+        "id": "hosts-file-vpn",
+        "label": "Have every remote user hard code intranet.corp in their local hosts file",
+        "correct": false,
+        "csat": -7,
+        "teach": "A hosts entry on every laptop rots the day the internal IP changes and does nothing for the next new hire. The resolver is the source of truth. Fix which resolver the VPN uses, do not patch each machine."
+      },
+      {
+        "id": "merge-zones-public",
+        "label": "Delete the split and publish the internal records in the public zone so everyone gets the same answer",
+        "correct": false,
+        "csat": -9,
+        "teach": "Publishing internal hostnames and private IPs in public DNS leaks your internal layout to the whole internet and still may not route. Split-horizon exists on purpose. Keep the split and make VPN clients ask the internal resolver."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-split-horizon-dns",
+      "title": "Split-horizon DNS: same name, two answers",
+      "tags": [
+        "dns",
+        "split-horizon",
+        "vpn",
+        "resolver"
+      ],
+      "body": [
+        "Split-horizon (split-view) DNS answers the same name differently depending on who is asking: internal clients get a private address, external clients get the public one. It only works if each client asks the resolver meant for its side. VPN users are internal clients and must use the internal resolver.",
+        "If a name resolves correctly in the office but wrongly over the VPN, the VPN clients are almost certainly pointed at a public resolver and are getting the external view. Fix it by pushing the internal resolver to VPN clients. Do not publish internal records in the public zone (it leaks your layout) and do not hard code hosts files (they rot on the next IP change)."
+      ]
+    }
+  },
+  {
+    "id": "net-lb-sticky",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "App team",
+      "role": "Web platform"
+    },
+    "subject": "Users get logged out at random after we scaled the app to two servers",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 44,
+    "xp": 36,
+    "concept": "load balancer",
+    "ticketBody": "We added a second app server behind the load balancer for capacity. Now users get randomly logged out mid-session or lose their cart. It worked fine on one server. Nothing else changed.",
+    "evidence": [
+      {
+        "label": "Session behavior",
+        "lines": [
+          "Login sessions are stored in each server's local memory, not a shared store",
+          "The load balancer uses round-robin, so each request can land on either server",
+          "A request that lands on the other server finds no session and treats the user as logged out",
+          "Single server worked only because every request hit the same memory"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "trace",
+          "session",
+          "lb"
+        ],
+        "output": "Requests alternate between server A and server B by round-robin. Sessions live in per-server memory, so when a user's next request hits the other server there is no session there and they appear logged out. The right long-term fix is a shared session store; session affinity (sticky sessions) restores correct behavior immediately by keeping each user on one server.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-lb-session-affinity",
+    "goal": "Stop users being logged out across the two servers without losing the capacity you added.",
+    "hint": "It broke the moment a second server joined and sessions live in local memory. A request hitting the other server has no session. What keeps a user pinned?",
+    "actions": [
+      {
+        "id": "enable-sticky-or-shared",
+        "label": "Enable session affinity (sticky sessions) on the load balancer so each user stays on one server, and plan a move to a shared session store",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 15,
+        "teach": "Correct. With per-server memory sessions, round-robin scatters a user across servers that do not know them, so they look logged out. Session affinity pins each user to one server and fixes it now while keeping both servers for capacity. The durable answer is a shared session store (so any server can serve any user), which you plan next."
+      },
+      {
+        "id": "remove-second-server",
+        "label": "Remove the second server and go back to one so sessions stay put",
+        "correct": false,
+        "csat": -7,
+        "teach": "That throws away the capacity you added and the reason you scaled out. The problem is not the second server, it is that sessions are not shared or pinned. Enable affinity or share the store, do not scale back down."
+      },
+      {
+        "id": "longer-timeout",
+        "label": "Just increase the session timeout so users stay logged in longer",
+        "correct": false,
+        "csat": -8,
+        "teach": "A longer timeout does nothing when the second server has no copy of the session at all: the user is dropped the instant a request lands there, not because a timer expired. Pin the user with affinity or share the session store."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-lb-session-affinity",
+      "title": "Sticky sessions and shared session stores behind a load balancer",
+      "tags": [
+        "load balancer",
+        "session affinity",
+        "sticky",
+        "scaling"
+      ],
+      "body": [
+        "When you put more than one app server behind a load balancer, requests from one user can land on different servers. If sessions live in each server's local memory, a request that reaches a server without that user's session looks like a logged-out user. This appears the moment you scale from one server to two.",
+        "Two fixes exist. Session affinity (sticky sessions) pins each user to one server and fixes the symptom immediately. The durable fix is a shared session store (such as a central cache or database) so any server can serve any user, which also survives a server failing. Removing the extra server or lengthening timeouts does not address that the session simply is not present on the other server."
+      ]
+    }
+  },
+  {
+    "id": "net-firewall-sg-order",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Backend team",
+      "role": "Services"
+    },
+    "subject": "New service in the private subnet cannot be reached, even though the security group allows it",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 46,
+    "xp": 38,
+    "concept": "firewall",
+    "ticketBody": "We deployed a service on port 8443 in the private subnet. The instance security group allows 8443 from the app subnet, but connections still time out. We are tempted to just open everything to get unblocked.",
+    "evidence": [
+      {
+        "label": "Layered firewall review",
+        "lines": [
+          "Security group on the instance: allows inbound 8443 from the app subnet (correct)",
+          "Security groups are stateful: a reply to an allowed inbound is automatically allowed back out",
+          "Subnet network ACL: allows inbound 8443, but has NO rule for the ephemeral return ports (1024-65535) outbound",
+          "Network ACLs are stateless: the return traffic needs its own explicit allow, and it is being denied"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "trace",
+          "acl",
+          "firewall",
+          "path"
+        ],
+        "output": "The packet clears the security group (inbound 8443 allowed, stateful). It also clears the subnet ACL inbound. But the reply leaves on an ephemeral port and the subnet network ACL is stateless with no outbound allow for 1024-65535, so the return traffic is dropped. The connection times out even though the security group looks right.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-firewall-sg-nacl",
+    "goal": "Get the service reachable by fixing the exact layer that is blocking, without opening everything.",
+    "hint": "The security group is fine and it is stateful. The other layer is stateless and is missing the return path. What does stateless filtering need that stateful does not?",
+    "actions": [
+      {
+        "id": "add-ephemeral-return-acl",
+        "label": "Add the missing outbound ephemeral-port (1024-65535) allow rule to the stateless subnet network ACL so return traffic is permitted",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 16,
+        "teach": "That is the precise fix. Security groups are stateful, so an allowed inbound reply returns automatically, which is why that layer looked correct. The subnet network ACL is stateless: it needs an explicit outbound allow for the ephemeral return ports. Add that one rule and the connection completes, with everything else still locked down."
+      },
+      {
+        "id": "allow-all-acl",
+        "label": "Open the network ACL to allow all traffic in and out to get unblocked fast",
+        "correct": false,
+        "csat": -10,
+        "teach": "Opening all traffic exposes the whole subnet to get one service working, and it hides which rule was actually missing. The gap is only the stateless outbound return path. Add the specific ephemeral-port allow. Never disable a firewall layer to unblock yourself."
+      },
+      {
+        "id": "widen-security-group",
+        "label": "Add an allow-all rule to the instance security group instead",
+        "correct": false,
+        "csat": -8,
+        "teach": "The security group was never the problem: it already allows 8443 and is stateful, so replies flow. Widening it fixes nothing and loosens the layer that was working. The stateless subnet ACL is missing the return-port rule. Fix that layer."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-firewall-sg-nacl",
+      "title": "Two firewall layers: stateful security groups vs stateless network ACLs",
+      "tags": [
+        "firewall",
+        "security group",
+        "network acl",
+        "stateful"
+      ],
+      "body": [
+        "Cloud traffic often passes two firewall layers. A security group sits on the instance and is stateful: if it allows an inbound connection, the reply is allowed back out automatically. A subnet network ACL is stateless: it evaluates every packet on its own, so return traffic on ephemeral ports (1024-65535) needs its own explicit allow rule or it is silently dropped.",
+        "When a security group looks correct but connections still time out, suspect the stateless layer missing the return path. Add the one specific rule the return traffic needs, on the exact ports, rather than opening the whole ACL. Least privilege still applies: fix the precise gap, never disable a firewall layer to get unblocked."
+      ]
+    }
+  },
+  {
+    "id": "net-cert-chain",
+    "channel": "ticket",
+    "priority": "P2",
+    "from": {
+      "name": "Partner integrations",
+      "role": "API consumers"
+    },
+    "subject": "Some clients reject our HTTPS cert as untrusted, but my browser accepts it",
+    "slaMinutes": 30,
+    "arriveAfter": 0,
+    "reward": 46,
+    "xp": 38,
+    "concept": "certificate",
+    "ticketBody": "We rotated the API certificate last night. It is not expired, and my desktop browser shows a valid padlock. But a partner's server-to-server client and one mobile app reject it as untrusted and cannot connect. Why only some?",
+    "evidence": [
+      {
+        "label": "Chain check",
+        "lines": [
+          "Leaf certificate: valid, not expired, correct hostname",
+          "Server is sending ONLY the leaf certificate, not the intermediate CA certificate",
+          "Desktop browsers happen to cache the intermediate from a past visit, so they build the chain and trust it",
+          "Strict clients with no cached intermediate cannot build the chain to the trusted root, so they reject it"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "openssl",
+          "chain",
+          "verify"
+        ],
+        "output": "The server presents only the leaf certificate. A complete chain is leaf -> intermediate CA -> trusted root. Browsers that cached the intermediate can still build the chain, so they look fine, which is misleading. Strict clients that do not cache it fail verification: unable to get local issuer certificate. The intermediate is missing from what the server sends.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-cert-chain",
+    "goal": "Make every client trust the certificate, not just the browsers that happened to cache the intermediate.",
+    "hint": "It is not expired and browsers accept it, but strict clients reject it. The chain from leaf to root is incomplete on the wire. What is the server not sending?",
+    "actions": [
+      {
+        "id": "install-full-chain",
+        "label": "Reinstall the certificate as the full chain (leaf plus the intermediate CA) so every client can build the path to the trusted root",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 16,
+        "teach": "That is the fix. The certificate was valid, but the server was sending only the leaf and omitting the intermediate CA. Browsers that had cached the intermediate hid the problem; strict clients could not build the chain to the root and rejected it. Serving the full chain (leaf plus intermediate) makes every client trust it. Test with a client that does not cache."
+      },
+      {
+        "id": "tell-partner-disable-verify",
+        "label": "Ask the partner to turn off certificate verification on their client",
+        "correct": false,
+        "csat": -11,
+        "teach": "Telling a partner to disable verification asks them to accept any certificate, including an attacker's, which defeats the point of TLS. The fault is on your side: you are not serving the intermediate. Fix the chain on your server, never ask clients to stop verifying."
+      },
+      {
+        "id": "reissue-again",
+        "label": "Reissue a brand new certificate and hope the next one works",
+        "correct": false,
+        "csat": -6,
+        "teach": "A new certificate will have the same problem if you install only the leaf again. The certificate is fine; the server configuration is missing the intermediate. Reinstall the existing cert as a full chain rather than churning new ones."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-cert-chain",
+      "title": "Untrusted certificate from a missing intermediate (incomplete chain)",
+      "tags": [
+        "tls",
+        "certificate",
+        "chain",
+        "intermediate"
+      ],
+      "body": [
+        "A TLS certificate is trusted by building a chain from the leaf certificate, through one or more intermediate CA certificates, up to a root the client already trusts. If the server sends only the leaf and omits the intermediate, some clients still work because they cached the intermediate from a past visit, while stricter clients fail with 'unable to get local issuer certificate'. The certificate is valid; the chain served on the wire is incomplete.",
+        "Fix it by installing the full chain (leaf plus intermediate) on the server so every client can build the path to the root without relying on a cache. Verify with a client that does not cache intermediates. Never ask a client to disable certificate verification: that would make it accept any certificate, including a forged one."
+      ]
+    }
+  },
+  {
+    "id": "net-iam-crossaccount-route",
+    "channel": "ticket",
+    "priority": "P1",
+    "from": {
+      "name": "Multiple services",
+      "role": "Production"
+    },
+    "subject": "All traffic to the partner's subnet is being black holed after a route change",
+    "slaMinutes": 15,
+    "arriveAfter": 0,
+    "reward": 52,
+    "xp": 42,
+    "concept": "routing",
+    "incident": {
+      "group": "route-blackhole",
+      "root": true
+    },
+    "ticketBody": "Since a routing change at 11:05, every service that talks to the partner network (10.100.0.0/16) times out. Traffic to everything else is fine. A change added a broad static route that overrides the specific one.",
+    "evidence": [
+      {
+        "label": "Route table",
+        "lines": [
+          "Working route (before): 10.100.0.0/16 -> peering connection to the partner (specific, correct)",
+          "Change at 11:05 added: 10.0.0.0/8 -> a decommissioned gateway (broad, wrong next hop)",
+          "Longest-prefix match still prefers /16, but the /16 entry was also removed in the same change",
+          "So 10.100.x now falls through to the /8 route and is sent to a dead gateway: black holed"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "aliases": [
+          "route",
+          "table",
+          "trace"
+        ],
+        "output": "Routers pick the most specific (longest-prefix) match. The specific 10.100.0.0/16 route to the partner peering was deleted at 11:05 and a broad 10.0.0.0/8 route to a decommissioned gateway was added. With the /16 gone, 10.100.x now matches only the /8 and is sent to a dead next hop, so it is black holed. Everything outside 10.0.0.0/8 is unaffected.",
+        "step": "diag"
+      }
+    ],
+    "kbArticleId": "kb-route-table-blackhole",
+    "goal": "Restore traffic to the partner subnet by fixing the route at the source. Find the single cause.",
+    "hint": "Only the partner /16 broke, and its specific route was removed so a broad /8 to a dead gateway now catches it. Routers prefer the most specific match. What do you put back?",
+    "actions": [
+      {
+        "id": "restore-specific-route",
+        "label": "Restore the specific 10.100.0.0/16 route to the partner peering connection, and remove the broad /8 route to the decommissioned gateway",
+        "correct": true,
+        "requires": [
+          "diag"
+        ],
+        "csat": 16,
+        "teach": "That is the incident. Routers use longest-prefix match, so the specific /16 to the partner peering always won until the change deleted it. With only the broad /8 to a dead gateway left, partner traffic was black holed. Restore the /16 to the peering and pull the wrong /8, and every dependent service recovers at once."
+      },
+      {
+        "id": "widen-mask-everything",
+        "label": "Point the broad 10.0.0.0/8 route at the partner peering so it catches the partner traffic too",
+        "correct": false,
+        "csat": -8,
+        "teach": "Sending all of 10.0.0.0/8 to the partner peering hijacks traffic meant for many other internal ranges and can black hole them instead. The fix is the specific route, not bending a broad one. Restore the /16 to the peering and delete the wrong /8."
+      },
+      {
+        "id": "reboot-routers",
+        "label": "Reboot the routers and hope routing rebuilds correctly",
+        "correct": false,
+        "csat": -7,
+        "teach": "The route table is misconfigured, not stuck, so a reboot loads the same wrong table and drops every live flow while it restarts. The specific route was deleted and a bad broad route added. Fix the table, do not bounce the routers."
+      }
+    ],
+    "track": "netops",
+    "kbArticle": {
+      "id": "kb-route-table-blackhole",
+      "title": "Longest-prefix match and route black holes",
+      "tags": [
+        "routing",
+        "route table",
+        "longest prefix",
+        "black hole"
+      ],
+      "body": [
+        "Routers forward using longest-prefix match: the most specific route wins. A specific route like 10.100.0.0/16 to a partner peering always beats a broad 10.0.0.0/8 route. If someone deletes the specific route, traffic falls through to the broad one; if that broad route points at a dead or wrong next hop, the traffic is black holed (silently dropped) while everything else keeps working.",
+        "When only one destination range breaks after a routing change, compare the route table before and after and restore the specific route to the correct next hop, then remove the broad route to the dead gateway. Do not repoint the broad route to fix one range: that hijacks every other range it covers. Rebooting routers reloads the same bad table and drops live flows."
+      ]
+    }
   }
 ]
