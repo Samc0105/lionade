@@ -102,6 +102,22 @@ export default function LearnPage() {
   );
   const missions: Mission[] = missionsData ?? [];
 
+  // Weak-spot review — how many previously-missed questions are DUE right now.
+  // Drives the "Review N weak spots" entry card. Fails soft to 0 (card hidden).
+  const { data: reviewData } = useSWR(
+    user?.id ? `weak-spot-review-count/${user.id}` : null,
+    async () => {
+      const res = await apiGet<{ dueCount: number; totalWeakSpots: number }>(
+        "/api/ninny/review?limit=1",
+      );
+      return res.ok && res.data
+        ? { dueCount: res.data.dueCount, totalWeakSpots: res.data.totalWeakSpots }
+        : { dueCount: 0, totalWeakSpots: 0 };
+    },
+    { keepPreviousData: true },
+  );
+  const dueWeakSpots = reviewData?.dueCount ?? 0;
+
   const recentActivity = quizHistory.slice(0, 5);
   const dailyGoal = 10;
   const goalRemaining = Math.max(0, dailyGoal - todayCount);
@@ -372,6 +388,39 @@ export default function LearnPage() {
                 <ArrowRight size={18} weight="bold" color="#4A90D9" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
+
+            {/* Review your weak spots — only shows when questions are DUE for
+                spaced-repetition review. Resurfaces previously-missed Ninny
+                questions until they're mastered. */}
+            {dueWeakSpots > 0 && (
+              <Link
+                href="/learn/review"
+                className="fluid-card-hover press-feedback group mt-3 block rounded-[10px] p-5"
+                style={{
+                  background: "linear-gradient(110deg, rgba(168,85,247,0.14) 0%, rgba(168,85,247,0.05) 55%, rgba(12,16,32,0.95) 100%)",
+                  border: "1px solid rgba(168,85,247,0.32)",
+                }}
+                aria-label={`Review your weak spots. ${dueWeakSpots} question${dueWeakSpots === 1 ? "" : "s"} due for review.`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.4)" }}>
+                    <Target size={22} weight="fill" color="#A855F7" aria-hidden="true" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bebas text-xl text-cream tracking-wider leading-none">REVIEW WEAK SPOTS</p>
+                      <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded" style={{ background: "rgba(168,85,247,0.18)", color: "#C79BFF", border: "1px solid rgba(168,85,247,0.35)" }}>
+                        {dueWeakSpots} due
+                      </span>
+                    </div>
+                    <p className="text-cream/65 text-xs mt-1.5">
+                      {dueWeakSpots} question{dueWeakSpots === 1 ? "" : "s"} you missed {dueWeakSpots === 1 ? "is" : "are"} ready to drill. Nail {dueWeakSpots === 1 ? "it" : "them"} to lock {dueWeakSpots === 1 ? "it" : "them"} in.
+                    </p>
+                  </div>
+                  <ArrowRight size={18} weight="bold" color="#A855F7" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            )}
 
             {/* Secondary actions — 5 clean rows, not cards */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
