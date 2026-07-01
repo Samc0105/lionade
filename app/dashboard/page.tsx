@@ -68,7 +68,7 @@ function getGreeting(): string {
 
 /* ── Circular stat widget ── */
 function CircleStat({ value, label, icon, color, size = 90 }: {
-  value: React.ReactNode; label: string; icon: React.ReactNode; color: string; size?: number;
+  value: React.ReactNode; label: React.ReactNode; icon: React.ReactNode; color: string; size?: number;
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5 group">
@@ -85,6 +85,18 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
       </div>
       <span className="text-cream/55 text-[9px] font-mono tracking-wider uppercase">{label}</span>
     </div>
+  );
+}
+
+/* Loading placeholder for a stat value/label. Replaces the old faint
+   text-cream/30 em-dash, which failed WCAG contrast and read as "broken/empty"
+   rather than "loading". Shimmer respects prefers-reduced-motion via motion-safe. */
+function StatSkeleton({ className = "h-5 w-9" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-block rounded bg-white/10 motion-safe:animate-pulse align-middle ${className}`}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -546,14 +558,14 @@ function DashboardContent() {
           <FeatureGate feature="dashboard.circular_stats" compact>
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <Link href="/wallet" aria-label="View your wallet and Fangs balance" className="press-feedback inline-block rounded-full">
-              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <span className="text-cream/30">{"—"}</span>} label={dailyProgressReady ? `+${todayCoins} today` : "— today"} color="#FFD700" />
+              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <StatSkeleton className="h-5 w-10" />} label={dailyProgressReady ? `+${todayCoins} today` : <StatSkeleton className="h-2.5 w-14" />} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${statsReady && streak >= 1 ? "streak-fire-glow" : ""}`}
                 style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: statsReady && streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
                 <div className="text-center">
                   <Fire size={16} weight="fill" color="#E67E22" className="mx-auto mb-0.5" aria-hidden="true" />
-                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp id="dash-streak" value={streak} duration={400} /> : <span className="text-cream/30">{"—"}</span>}</span>
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp id="dash-streak" value={streak} duration={400} /> : <StatSkeleton className="h-5 w-8" />}</span>
                 </div>
                 <div className="orbit-stat-dot absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
@@ -562,7 +574,7 @@ function DashboardContent() {
               <span className="text-cream/55 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
             <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
-            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={subjectsLoading ? <span className="text-cream/30">{"—"}</span> : <CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
+            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={subjectsLoading ? <StatSkeleton className="h-5 w-8" /> : <CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
             <Link href="/leaderboard" aria-label={eloRank ? `View leaderboard, your rank is number ${eloRank}` : "View leaderboard"} className="press-feedback inline-block rounded-full">
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
