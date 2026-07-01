@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-01: Quiz flywheel bridge + founder-flair on arena & social
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Quiz ↔ question-bank bridge** (`/api/quiz/questions` serves + grades approved community questions into the main quiz path) | ✅ shipped | ✅ SHARED-BACKEND (latent) — iOS quizzes would inherit the richer pool the moment they call the route; the serve path strips the answer (anti-cheat) and grades server-side. |
+| **Founder-flair on arena duel + social feed/search** (opponent & self cards, feed rows, search rows) | ✅ shipped | 🟡 **parity gap** — iOS arena/social render identities but no founder pill. Client-only port: the arena match payload + social feed/search would need the `flair` field (web adds it server-inline) or call `flair-batch`. |
+
+---
+
 ## 2026-06-30: Admin moderation + founder-flair + dormant USD store
 
 | Surface | Web | iOS |
