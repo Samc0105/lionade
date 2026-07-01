@@ -564,6 +564,24 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
     [hasData, items, todayKey],
   );
 
+  // Overdue assignments (past due, not done) + exams in the next day, computed
+  // from the agenda already fetched. Surfaces the most actionable items above
+  // the fold so nothing slips silently past its deadline.
+  const atRisk = useMemo(() => {
+    if (!hasData) return null;
+    const tomorrowKey = toKey(addDays(new Date(), 1));
+    const overdue = items.filter(
+      it => it.kind === "assignment" && it.date < todayKey && (it.status ?? "todo") !== "done",
+    );
+    const urgentExams = items.filter(
+      it => it.kind === "exam" && it.date >= todayKey && it.date <= tomorrowKey,
+    );
+    return overdue.length + urgentExams.length > 0 ? { overdue, urgentExams } : null;
+  }, [hasData, items, todayKey]);
+  // Session-only acknowledge: dismissing hides it until reload (overdue work is
+  // important enough that it should resurface on a fresh visit).
+  const [riskDismissed, setRiskDismissed] = useState(false);
+
   return (
     <section className="mb-10">
       {/* SR-only live region for optimistic status changes + toggle failures. */}
@@ -590,6 +608,7 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
         </button>
       </div>
 
+      {atRisk && !riskDismissed && <RiskBanner atRisk={atRisk} onDismiss={() => setRiskDismissed(true)} />}
       {crunch && <CrunchBanner crunch={crunch} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6 items-start">
@@ -706,6 +725,69 @@ function CrunchBanner({ crunch }: { crunch: CrunchWindow }) {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// At-risk banner: overdue assignments + imminent exams, surfaced above the
+// planner. Same visual language as CrunchBanner; dismissible (session-only).
+function RiskBanner({
+  atRisk, onDismiss,
+}: {
+  atRisk: { overdue: AgendaItem[]; urgentExams: AgendaItem[] };
+  onDismiss: () => void;
+}) {
+  const overdue = atRisk.overdue.length;
+  const exams = atRisk.urgentExams.length;
+  // Gold caution for a light load, red once it is piling up.
+  const hot = overdue + exams >= 3;
+  const accent = hot ? "#EF4444" : "#FFD700";
+
+  const parts: string[] = [];
+  if (overdue > 0) parts.push(`${overdue} ${overdue === 1 ? "assignment" : "assignments"} overdue`);
+  if (exams > 0) parts.push(`${exams} ${exams === 1 ? "exam" : "exams"} soon`);
+  const summary = parts.join(" · ");
+
+  // One concrete example so the banner is actionable rather than abstract.
+  const sample = atRisk.overdue[0] ?? atRisk.urgentExams[0];
+
+  return (
+    <div
+      className="mb-4 flex items-center gap-3 rounded-[12px] border px-3.5 py-2.5
+        motion-safe:animate-slide-up will-change-transform"
+      role="status"
+      style={{
+        borderColor: `${accent}45`,
+        background: `linear-gradient(135deg, ${accent}14 0%, rgba(255,255,255,0.02) 100%)`,
+      }}
+    >
+      <span
+        className="grid place-items-center w-7 h-7 rounded-full shrink-0"
+        style={{ background: `${accent}1F`, color: accent }}
+        aria-hidden="true"
+      >
+        <Warning size={15} weight="fill" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-syne text-[13px] leading-snug text-cream">
+          <span className="font-bold">Needs attention:</span> {summary}.
+        </p>
+        {sample && (
+          <p className="font-mono text-[9px] uppercase tracking-[0.22em] mt-0.5 truncate" style={{ color: accent }}>
+            {sample.title}{sample.className ? ` · ${sample.className}` : ""}
+          </p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        className="shrink-0 grid place-items-center w-8 h-8 rounded-full text-cream/40 hover:text-cream
+          hover:bg-white/[0.06] transition-colors
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+      >
+        <X size={13} weight="bold" aria-hidden="true" />
+      </button>
     </div>
   );
 }
