@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal, Scroll, UsersThree, BookOpen, Compass } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, Moon, Shuffle, Flask, Lightning, Trophy, GraduationCap, ListChecks, CheckCircle, Circle, Target, Medal, Scroll, UsersThree, BookOpen, Compass, Storefront } from "@phosphor-icons/react";
 import { TRACKS } from "@/lib/helpdesk/tracks";
 import { scenariosForTrack } from "@/lib/helpdesk/scenarios";
 import { clearedCount, totalCleared } from "@/lib/helpdesk/progress";
@@ -596,6 +596,32 @@ export default function TechHubHome() {
             <p className="text-cream/60 text-xs mt-1.5">Search every KB article you meet on the desk, grouped by concept. Study between shifts. No clock, no pressure.</p>
           </div>
           <ArrowRight size={16} weight="bold" color="#4A90D9" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+
+      {/* Cosmetics Shop (Idea 42): a gallery home for the cosmetics TechHub
+          already grants (desk themes, quest badges, track completion titles) and
+          a PREVIEW of a future paid only Fang sink. It lets players equip what
+          they own (a local preference) and previews where paid cosmetics are
+          headed, but it never grants or spends Fangs (the economy stays server
+          authoritative, and the migration is held). */}
+      <Link
+        href="/learn/techhub/shop"
+        className="group block rounded-2xl p-4 transition-colors"
+        style={{ background: "linear-gradient(110deg, rgba(255,215,0,0.16) 0%, rgba(168,85,247,0.07) 60%, rgba(12,16,32,0.96) 100%)", border: "1px solid rgba(255,215,0,0.32)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,215,0,0.14)", border: "1px solid rgba(255,215,0,0.4)" }}>
+            <Storefront size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-bebas text-lg text-cream tracking-wider leading-none">COSMETICS SHOP</p>
+              <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">preview</span>
+            </div>
+            <p className="text-cream/60 text-xs mt-1.5">Give your earned cosmetics a home. Equip desk themes, browse your titles and badges, and preview the Fangs shop. Nothing is spent.</p>
+          </div>
+          <ArrowRight size={16} weight="bold" color="#FFD700" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
         </div>
       </Link>
 
