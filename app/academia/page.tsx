@@ -480,6 +480,7 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
   // Day selected in the calendar (drives the agenda view). null = THIS WEEK.
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   // Politely announce optimistic status changes + toggle failures to SR users.
   const [announce, setAnnounce] = useState("");
 
@@ -595,17 +596,31 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
           PLANNER
         </h2>
-        <button
-          type="button"
-          onClick={() => setShowImport(true)}
-          className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em]
-            text-cream/65 hover:text-gold transition-colors rounded-full border border-white/[0.08]
-            hover:border-gold/40 px-3 py-2 min-h-[36px]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
-        >
-          <CalendarPlus size={12} weight="bold" aria-hidden="true" />
-          Import calendar
-        </button>
+        <div className="flex items-center gap-2">
+          {classes.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowQuickAdd(true)}
+              className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em]
+                text-navy bg-gold hover:bg-gold/90 transition-colors rounded-full px-3 py-2 min-h-[36px]
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              <Plus size={12} weight="bold" aria-hidden="true" />
+              Quick add
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowImport(true)}
+            className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em]
+              text-cream/65 hover:text-gold transition-colors rounded-full border border-white/[0.08]
+              hover:border-gold/40 px-3 py-2 min-h-[36px]
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+          >
+            <CalendarPlus size={12} weight="bold" aria-hidden="true" />
+            Import calendar
+          </button>
+        </div>
       </div>
 
       {atRisk && !riskDismissed && <RiskBanner atRisk={atRisk} onDismiss={() => setRiskDismissed(true)} />}
@@ -675,6 +690,13 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
         classes={classes.map(c => ({ id: c.id, name: c.name, color: c.color, emoji: c.emoji }))}
         onImported={refreshAgenda}
       />
+      {showQuickAdd && (
+        <QuickAddAssignmentModal
+          classes={classes}
+          onClose={() => setShowQuickAdd(false)}
+          onCreated={() => { setShowQuickAdd(false); refreshAgenda(); setAnnounce("Assignment added."); }}
+        />
+      )}
     </section>
   );
 }
@@ -1407,6 +1429,173 @@ function CreateTile({ onClick }: { onClick: () => void }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Create class modal — same shape as /classes/page so behavior stays parallel.
 // ─────────────────────────────────────────────────────────────────────────────
+// Quick-add assignment modal — a 3-field sheet (class, title, optional due
+// date) that POSTs to /api/classes/{id}/assignments and refreshes the agenda.
+// Mirrors CreateClassModal's dialog a11y (focus trap, Escape, scroll lock,
+// focus restore) and its in-flight submit guard.
+function QuickAddAssignmentModal({
+  classes, onClose, onCreated,
+}: {
+  classes: ClassSummary[];
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [classId, setClassId] = useState(classes[0]?.id ?? "");
+  const [title, setTitle] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    previouslyFocusedRef.current = (document.activeElement as HTMLElement) ?? null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key === "Tab" && panelRef.current) {
+        const focusables = panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      previouslyFocusedRef.current?.focus?.();
+    };
+  }, [onClose]);
+
+  const submit = async () => {
+    if (submitting) return;
+    if (!classId) { setError("Pick a class."); return; }
+    if (title.trim().length < 1) { setError("Give the assignment a title."); return; }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const r = await apiPost(`/api/classes/${classId}/assignments`, {
+        title: title.trim(),
+        due_date: dueDate || null,
+        status: "todo",
+      });
+      if (!r.ok) {
+        console.error("[academia:quick-add] failed", r.error);
+        setError("Couldn't add it. Try again.");
+        setSubmitting(false);
+        return;
+      }
+      onCreated();
+    } catch (e) {
+      console.error("[academia:quick-add] threw", e);
+      setError("Network's being weird. Try again.");
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quick-add-title"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div ref={panelRef} className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close dialog"
+          className="absolute top-2 right-2 text-cream/55 hover:text-cream grid place-items-center w-11 h-11 rounded-full hover:bg-white/[0.05]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 transition-colors"
+        >
+          <X size={16} weight="bold" aria-hidden="true" />
+        </button>
+
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-block w-5 h-px bg-gold/70" aria-hidden="true" />
+          <Plus size={13} className="text-gold" weight="bold" aria-hidden="true" />
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.32em] text-gold">
+            New assignment
+          </span>
+        </div>
+        <h3 id="quick-add-title" className="font-bebas text-[32px] tracking-wider text-cream leading-[0.95] mb-5 pr-10">
+          What&apos;s due?
+        </h3>
+
+        <div className="space-y-3">
+          <Field label="Class">
+            <select
+              autoFocus
+              value={classId}
+              onChange={e => setClassId(e.target.value)}
+              className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[14px] text-cream focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40"
+            >
+              {classes.map(c => (
+                <option key={c.id} value={c.id} className="bg-navy text-cream">
+                  {c.emoji ? `${c.emoji} ` : ""}{c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Assignment">
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); void submit(); } }}
+              placeholder="Problem set 4"
+              className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[14px] text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40"
+              maxLength={200}
+            />
+          </Field>
+
+          <Field label="Due date (optional)">
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="w-full rounded-md bg-white/[0.04] border border-white/[0.1] px-3 py-2.5 text-[14px] text-cream focus:outline-none focus:border-gold/60 focus-visible:ring-2 focus-visible:ring-gold/40 [color-scheme:dark]"
+            />
+          </Field>
+        </div>
+
+        {error && <p className="mt-3 font-mono text-[11px] text-[#EF4444]">{error}</p>}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55 hover:text-cream px-4 py-2.5 min-h-[44px] rounded-full transition-colors
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => void submit()}
+            disabled={submitting}
+            className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
+              disabled:opacity-40 disabled:cursor-not-allowed
+              font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 min-h-[44px]
+              motion-safe:transition-transform duration-200 motion-safe:active:scale-[0.97]
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+          >
+            {submitting ? "Adding…" : "Add assignment"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CreateClassModal({
   onClose, onCreated,
 }: {
