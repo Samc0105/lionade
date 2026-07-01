@@ -175,7 +175,12 @@ export async function GET(req: NextRequest) {
         kind: "assignment",
         date: a.due_date,
         title: a.title,
-        status: a.status as Status,
+        // Validate against the known set rather than blind-casting: a stray or
+        // legacy DB value would otherwise reach the client, where the status
+        // meta lookup has no fallback and would throw. Unknown/null -> "todo".
+        // typeof guard narrows a.status to string so this holds even if the
+        // column type is string | null.
+        status: typeof a.status === "string" && (VALID_STATUS as readonly string[]).includes(a.status) ? (a.status as Status) : "todo",
         classId: a.class_id,
         className: cls.name,
         classColor: cls.color,
