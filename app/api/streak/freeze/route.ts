@@ -33,8 +33,11 @@ import { requireAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
-export const STREAK_FREEZE_PRICE = 750;
-export const STREAK_FREEZE_CAP = 3;
+// NOT exported: Next.js App Router route files may only export route handlers
+// (GET/POST/...) + its config whitelist. Exporting these consts fails the
+// production `next build` route-type check (which tsc --noEmit does not run).
+const STREAK_FREEZE_PRICE = 750;
+const STREAK_FREEZE_CAP = 3;
 
 // Postgres "column does not exist" (migration not applied yet).
 const UNDEFINED_COLUMN = "42703";
