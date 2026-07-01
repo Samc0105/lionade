@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { setActiveSession } from "@/lib/presence";
+import { isArenaV2Enabled } from "@/lib/arena-v2/flag";
+import { findGhostForMatch } from "@/lib/arena-v2/ghost-matcher";
+
+// Arena V2: offer a ghost duel once a live opponent hasn't appeared this fast.
+const GHOST_AFTER_MS = 12000;
 
 // POST — Join the matchmaking queue
 export async function POST(req: NextRequest) {
@@ -107,6 +112,41 @@ export async function GET(req: NextRequest) {
       .maybeSingle();
 
     if (!opponent) {
+      // Arena V2 (gated, dormant until the flag is on): after a short wait with
+      // no live opponent, match a recorded GHOST so the arena is never empty.
+      // ELO-only, NO Fang stakes (wager forced to 0). Falls through to normal
+      // waiting if the flag is off, the wait is short, or no ghost is found.
+      if (isArenaV2Enabled() && waitMs > GHOST_AFTER_MS) {
+        const ghost = await findGhostForMatch({ userId, elo: myEntry.elo_rating });
+        if (ghost && Array.isArray(ghost.question_ids) && ghost.question_ids.length >= 5) {
+          const { data: ghostMatch, error: gErr } = await supabaseAdmin
+            .from("arena_matches")
+            .insert({
+              player1_id: userId,
+              player2_id: ghost.owner_user_id,
+              question_ids: ghost.question_ids,
+              wager: 0, // no Fang stakes on a ghost duel
+              status: "pending",
+              player1_elo_before: myEntry.elo_rating,
+              player2_elo_before: ghost.elo_at_recording,
+              is_async: true,
+              ghost_id: ghost.id,
+              is_trainer_match: ghost.is_trainer,
+              subject: ghost.subject,
+            })
+            .select()
+            .single();
+          if (!gErr && ghostMatch) {
+            await judgeQuestions(ghostMatch.id, ghost.question_ids);
+            await supabaseAdmin
+              .from("arena_queue")
+              .update({ status: "matched", match_id: ghostMatch.id })
+              .eq("id", myEntry.id);
+            void setActiveSession(userId, "arena_match", ghostMatch.id, "player1");
+            return NextResponse.json({ status: "matched", matchId: ghostMatch.id, isGhost: true });
+          }
+        }
+      }
       return NextResponse.json({ status: "waiting", eloRange, waitMs });
     }
 

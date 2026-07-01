@@ -22,6 +22,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (!match) return NextResponse.json({ error: "Match not found" }, { status: 404 });
+
+    // Arena V2 async (ghost) matches settle ELO-only through
+    // /api/arena/v2/complete and must NEVER hit this V1 path: it scores player2
+    // from arena_answers (a ghost writes none) and transfers the Fang wager,
+    // which would mint/void Fangs against an offline or system user. Guard it.
+    if (match.is_async) {
+      return NextResponse.json(
+        { error: "Async match uses /api/arena/v2/complete", isAsync: true },
+        { status: 409 },
+      );
+    }
+
     if (match.status === "completed") {
       return NextResponse.json({ alreadyCompleted: true, match });
     }
