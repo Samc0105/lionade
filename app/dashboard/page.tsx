@@ -23,6 +23,7 @@ import FluidReveal from "@/components/FluidReveal";
 import WidgetErrorBoundary from "@/components/WidgetErrorBoundary";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
+import StreakNudgeBanner from "@/components/StreakNudgeBanner";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
 import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -629,6 +630,9 @@ function DashboardContent() {
 
           {/* ═══ 3.4) Streak Revive — only renders when a 24h grace window is open ═══ */}
           <StreakReviveBanner />
+
+          {/* ═══ 3.42) Streak Nudge — live streak but no quiz yet today, afternoon+ ═══ */}
+          <StreakNudgeBanner streak={streak} dailyDone={dailyDone} ready={statsReady && dailyProgressReady} />
 
           {/* ═══ 3.45) Free → Pro upgrade nudge — only renders for free-tier users ═══ */}
           <ProUpgradeNudge />
