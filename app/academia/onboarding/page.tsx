@@ -145,7 +145,7 @@ function FormShell() {
   if (hydrating) {
     return (
       <div className="min-h-screen bg-navy text-cream flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+        <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent motion-safe:animate-spin" />
       </div>
     );
   }
@@ -332,7 +332,7 @@ function FormShell() {
               className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
                 disabled:opacity-40 disabled:cursor-not-allowed
                 font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5
-                transition-transform duration-200 active:scale-[0.97]"
+                motion-safe:transition-transform duration-200 motion-safe:active:scale-[0.97]"
             >
               {submitting
                 ? "Saving…"
@@ -362,7 +362,7 @@ function Step({
   children: React.ReactNode;
 }) {
   return (
-    <div className="animate-slide-up">
+    <div className="motion-safe:animate-slide-up">
       <h1 className="font-bebas text-[34px] sm:text-[40px] tracking-[0.04em] text-cream leading-[1.05] mb-2">
         {title}
       </h1>
@@ -393,7 +393,7 @@ function ChoiceCard({
       onClick={onClick}
       className={`
         w-full text-left rounded-[10px] border px-4 py-3
-        transition-all duration-150 active:scale-[0.99]
+        motion-safe:transition-all duration-150 motion-safe:active:scale-[0.99]
         ${selected
           ? "border-gold bg-gold/[0.08]"
           : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.18]"
