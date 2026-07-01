@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-01: Game-content expansion (100+ per bank + TechHub)
+
+| Surface | Web | iOS |
+|---|---|---|
+| **Game banks: 100+ verified items each** (Sabotage, Trivia, Bluff, Poker Face, Spectrum, Pin, Sketchy, Pardy) | ✅ shipped | ✅ SHARED-DATA — the banks live in `lib/` (competitive/party) + `packages`; iOS inherits any it reads. No iOS work unless a bank is iOS-only. |
+| **TechHub/LionDesk +24 tickets + phishing + KB** | ✅ shipped | 🚫 N/A — LionDesk is web-only by design. |
+
+---
+
 ## 2026-07-01: Referral loop + streak freeze + weak-spot review
 
 | Surface | Web | iOS |
