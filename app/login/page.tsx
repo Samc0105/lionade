@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import type { SignupExtra } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { captureRefFromUrl } from "@/lib/referral-client";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
 import {
@@ -150,6 +151,13 @@ export default function LoginPage() {
   // Local safety ceiling: even if AuthProvider is still resolving, show
   // the login form after 3s so visitors aren't staring at a blank spinner
   // when their session hasn't loaded.
+  // Referral capture: stash ?ref=CODE so it survives the signup / OAuth /
+  // email-verification round-trip. The actual claim fires on SIGNED_IN
+  // (lib/auth.tsx). Runs once on mount.
+  useEffect(() => {
+    captureRefFromUrl();
+  }, []);
+
   const [authExpired, setAuthExpired] = useState(false);
   useEffect(() => {
     if (!isLoading) return;

@@ -19,6 +19,7 @@ import EquippedFlair from "@/components/EquippedFlair";
 import Avatar from "@/components/Avatar";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 import PastLobbiesPanel from "@/components/social/PastLobbiesPanel";
+import ReferralCard from "@/components/social/ReferralCard";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -1033,6 +1034,10 @@ export default function SocialPage() {
             ) : (
             <FeatureGate feature="social.friend_list" compact>
             <>
+            {/* Referral growth loop — share code / link to earn Fangs. Self-hides
+                when the referral migration isn't applied. */}
+            <ReferralCard />
+
             {/* Pending Requests */}
             {pendingRequests.length > 0 && (
               <div className="px-4 py-3 border-b border-white/[0.06]">

@@ -5,6 +5,7 @@ import { supabase, readStoredSessionSync } from "@/lib/supabase";
 import { sanitizeEmail, sanitizePassword, sanitizeUsername, sanitizeText } from "@/lib/sanitize";
 import type { Session } from "@supabase/supabase-js";
 import { getLevelFromXp } from "@/lib/levels";
+import { claimStoredReferral } from "@/lib/referral-client";
 
 export interface AuthUser {
   id: string;
@@ -334,6 +335,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 60s dedupe collapses any overlap with the password-login path.
         if (event === "SIGNED_IN" && sess?.access_token) {
           recordLoginEvent(sess.access_token);
+          // Referral growth loop: if this browser arrived with ?ref=CODE
+          // (stashed by captureRefFromUrl on the entry surface), attach it now
+          // that we have an authenticated session. Fire-and-forget + one-shot
+          // (the helper clears the stash immediately); the server validates
+          // self-referral / one-per-user / freshness. Covers password signup,
+          // OAuth, and the email-verification return path uniformly.
+          claimStoredReferral(sess.access_token);
         }
 
         // If we already have the full profile for this user (e.g. this is a

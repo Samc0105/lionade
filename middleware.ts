@@ -626,10 +626,21 @@ const ROUTE_LIMITS: RouteLimit[] = [
       p === "/api/daily-drill/complete" ||
       p === "/api/spin/roll" ||
       p === "/api/login-bonus" ||
+      p === "/api/streak/freeze" ||
       /^\/api\/mastery\/sessions\/[^/]+\/complete$/.test(p),
     max: 60,
     windowMs: 60 * 1000,
     keyPrefix: "fin",
+  },
+
+  // Referral claim — a state-mutating, abuse-relevant write (binding attempts,
+  // code guessing). Tighter than the generic /api/ catch-all.
+  {
+    test: (p) => p === "/api/referral/claim",
+    method: "POST",
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "referral-claim",
   },
 
   // Arena routes — moderate (real-time gameplay)

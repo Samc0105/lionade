@@ -10,6 +10,7 @@ import { clearActiveSession } from "@/lib/presence";
 import { BOOSTER_ITEMS } from "@/lib/shop-catalog";
 import { getLevelFromXp } from "@/lib/levels";
 import { grantEarnedCosmetic } from "@/lib/cosmetic-grants";
+import { maybeRewardReferral } from "@/lib/referral";
 
 // ── Server-authoritative reward derivation ─────────────────────────────────
 // The base per-correct-answer reward (BEFORE the plan multiplier) used to be
@@ -423,6 +424,14 @@ export async function POST(req: NextRequest) {
     if (getLevelFromXp(profile.xp ?? 0) < 5 && getLevelFromXp(newXp) >= 5) {
       void grantEarnedCosmetic(supabaseAdmin, userId, "aura_solar", "level_5");
     }
+
+    // Referral growth loop — the referee's FIRST qualifying quiz completion is
+    // the reward trigger. maybeRewardReferral atomically latches the pending
+    // referral row to `rewarded` (so it fires exactly once, even across a retry
+    // or two parallel tabs) and grants BOTH sides via update_user_coins. It is
+    // fully fail-soft: any missing-migration / RPC error is swallowed inside
+    // the helper, so it can never block or fail this quiz save.
+    void maybeRewardReferral(userId);
 
     // 3b. Consecutive quiz bonus — award 50 fangs for every 3rd quiz completed within 60 minutes
     let bonusFangs = 0;
