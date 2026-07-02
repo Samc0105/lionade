@@ -129,7 +129,7 @@ export const BOOSTER_ITEMS: ShopItem[] = [
   { id: "boost_double_down", name: "Double Down", description: "Double Fangs AND XP on next quiz", type: "booster", rarity: "epic", price: 650, icon: "🎲", boosterEffect: "coin_xp_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 350, icon: "🍀", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 150, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
-  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 450, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
+  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50: eliminate two wrong answers once", type: "booster", rarity: "epic", price: 450, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 180, icon: "📈", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
   // 2026-06-02 — Mastery Hint Pack (5 hints). Dollar IAP via Stripe deferred to V2.
   { id: "boost_mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use in Mastery Mode sessions", type: "booster", rarity: "rare", price: 900, icon: "💡", boosterEffect: "mastery_hint", boosterValue: 5, boosterDuration: 5 },
