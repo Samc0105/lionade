@@ -254,3 +254,7 @@ For deep context, read:
 **Sam types something → Claude Code reads CLAUDE.md → identifies whether platform scope was specified → dispatches to the right VP(s) (defaulting to BOTH admin + vp-ios for product changes) → VPs run specialists → quality gates → unified reply.**
 
 If a response ever skips any of those steps, the workflow is broken — restart from "read CLAUDE.md."
+
+## Design references (Mobbin MCP)
+
+For UI design tasks (web + iOS), query the Mobbin MCP for real production references before generating layouts. Reference apps to prioritize: Duolingo (gamification patterns), Cash App (speed and feel), Linear (clean minimal), Notion (content-first). If the mobbin MCP server is not connected in the session, note it and proceed with the established design system instead of guessing at trends.
