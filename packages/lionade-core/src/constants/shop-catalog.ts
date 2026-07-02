@@ -121,12 +121,12 @@ export const COSMETIC_ITEMS: ShopItem[] = [
 ];
 
 export const BOOSTER_ITEMS: ShopItem[] = [
-  { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins earned on your next quiz", type: "booster", rarity: "rare", price: 300, icon: "💰", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
+  { id: "boost_coin_rush", name: "Fang Rush", description: "2x Fangs earned on your next quiz", type: "booster", rarity: "rare", price: 300, icon: "💰", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_xp_surge", name: "XP Surge", description: "2x XP earned on your next quiz", type: "booster", rarity: "rare", price: 300, icon: "⚡", boosterEffect: "xp_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 550, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 1 },
   // Double Down uses the combined coin_xp_multiplier effect so it applies BOTH
   // a coin AND an xp 2x multiplier without colliding with Coin Rush / XP Surge.
-  { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 650, icon: "🎲", boosterEffect: "coin_xp_multiplier", boosterValue: 2, boosterDuration: 1 },
+  { id: "boost_double_down", name: "Double Down", description: "Double Fangs AND XP on next quiz", type: "booster", rarity: "epic", price: 650, icon: "🎲", boosterEffect: "coin_xp_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 350, icon: "🍀", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 150, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
   { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 450, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
