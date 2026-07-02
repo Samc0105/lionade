@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-02: Post-build-26 polish stack (header / micro-animations / starfield)
+
+Three stacked branches off release/testflight-01, one consolidated review:
+fix/ios-header-polish (top-seam root cause fixed in CalmScreen via a real
+SafeAreaView; You title dropped per the identity-vs-content rule, gear floats),
+feat/ios-micro-animations (CountUp counters on Wallet/Study/You, standardized
+0.97 press feedback on the shared primitives, streak pop on increment, 250ms
+stack transitions, badge unlock celebration, Mastery breathing hero - all
+ReduceMotion-gated + interruptible; reviewer must-fix applied: animation
+caches now clear on sign-out so numbers never leak across accounts),
+feat/ios-study-starfield (static 100-star field, Study tab only, same
+generator/density as login). Simulator-verified with screenshots + video.
+NOT pushed, NOT built - rides the next batched build after tester feedback.
+
 ## 2026-07-02: TestFlight build 26 (release/testflight-01)
 
 All reconstruction + fix + feature branches integrated (10 merges, zero
