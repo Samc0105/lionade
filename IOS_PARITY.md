@@ -15,7 +15,9 @@ web migration `20260620150000_vocab_words_nullable_lang.sql` exists but was neve
 applied. The web insert route deliberately sends NULL for general banks (they have
 no language pair), so Postgres rejects every insert with 23502. Prod smoking gun:
 5 general banks, 0 words; 1 language bank, 5 words. **Fix = Sam applies the web
-migration** (iOS supplying fake langs would poison the data model). iOS shipped
+migration — APPLIED 2026-07-03 on Sam's go** (remote `20260703124706`; verified
+with a probe insert; general-bank saves now work on BOTH platforms, and the iOS
+known-issue copy was removed per its TODO in lionade-ios `f11ff1c`). iOS shipped
 what it owns: structured save-failure logging, per-case error copy (409 dupe /
 network / known-issue 500 gated on the exact server fingerprint with a removal
 TODO / capped passthrough), a proper InlineError state under Lock it in, Define
