@@ -20,10 +20,10 @@
  *   POST   /api/vocab/banks/[id]/clone      → { bankId, coinsAwarded }
  *
  * Shapes are typed against the live route handlers (app/api/vocab/*) and
- * mirror components/Vocab/types.ts where that file exists. NOTE: the streak
- * shape here is the SERVER truth (camelCase `bankId`/`bankName` per
- * app/api/vocab/streak/route.ts) — web's BankStreakPill currently declares
- * snake_case fields that do not match the route.
+ * mirror components/Vocab/types.ts where that file exists. The streak shape
+ * here is the SERVER truth (camelCase `bankId`/`bankName` per
+ * app/api/vocab/streak/route.ts); both platforms' BankStreakPill import it
+ * from this module (web fixed 2026-07-03, commit 90f2882).
  */
 
 import type { ApiClient, ApiResult } from "./http.js";

@@ -199,7 +199,9 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         body.target_lang = targetLang;
       } else {
         if (!termDefinition || termDefinition.trim().length === 0) {
-          toastError("Add a definition before saving.");
+          // Belt-and-suspenders (canSave already requires a definition);
+          // inline error for consistency with the saveError pattern.
+          setSaveError("Add a definition before saving.");
           return;
         }
         body.term = cleanedWord;
@@ -383,7 +385,13 @@ export default function AddWordForm({ bank, onSaved }: Props) {
           </p>
           <textarea
             value={termDefinition ?? ""}
-            onChange={e => setTermDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN * 2))}
+            onChange={e => {
+              setTermDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN * 2));
+              // A definition-caused save failure is fixed here, not in the
+              // term field — retire the stale error on edit (mirrors the
+              // term input's clear-on-edit).
+              if (saveError) setSaveError(null);
+            }}
             rows={3}
             maxLength={MAX_DEFINITION_LEN * 2}
             placeholder="Paste a definition here..."
@@ -403,7 +411,10 @@ export default function AddWordForm({ bank, onSaved }: Props) {
           <textarea
             id="vocab-self-def"
             value={userDefinition}
-            onChange={e => setUserDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN))}
+            onChange={e => {
+              setUserDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN));
+              if (saveError) setSaveError(null);
+            }}
             placeholder={isLanguageBank
               ? (sourceLang === "en"
                 ? "Describe la palabra con palabras simples..."
