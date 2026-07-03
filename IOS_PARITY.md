@@ -27,8 +27,14 @@ intentionally excludes party games per its own header comment) but reachable
 on iOS via the **Arcade** hub (`app/arcade.tsx` "SKETCHY SUBJECTS" → `/party`
 → `app/party/[code].tsx` mounts SketchView). So it is NOT missing and NOT a
 broken wire — it is a deliberate navigation split (calm Games tab vs Arcade).
-No fix attempted; awaiting Sam's direction on whether Sketchy should surface
-on the calm Games tab.
+**RESOLVED (Part 2b, Sam: "Surface Sketchy on the Games tab"):** added a
+third calm `ModeCard` to `app/(tabs)/games.tsx` (`feat/ios-games-sketchy`,
+commit `ff5ca6b`) — Roardle / Pardy / **Sketchy**. The card routes into the
+SAME create flow the Arcade ticket uses (`router.push({ pathname: "/party",
+params: { game: "sketch" } })`, the `PRESELECT_KEYS` contract), so no new
+game code — pure navigation surfacing of the already-working implementation.
+Kept Roardle as the one accent (Sketchy secondary/neutral). tsc clean;
+sim-verified the Games tab shows 3 cards and Sketchy opens the party lobby.
 
 ## 2026-07-03: iOS UX polish — centered modals + Study logo + Meet Ninny flow + freestyle sweep (feat/ios-polish-all)
 
