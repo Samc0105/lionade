@@ -7,6 +7,29 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03: iOS Fangs-icon consistency (chore/ios-fangs-icon)
+
+Ported web's canonical Fangs mark (`public/F.png` → iOS
+`assets/images/fangs.png`) into a reusable `components/ui/FangsIcon.tsx`
+(size prop), and swept iOS so EVERY Fang amount shows the same brand mark
+instead of the drifted gold `paw` Ionicon (or a text "F", or nothing).
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Fangs currency mark** (`FangsIcon`) | ✅ web renders `cdnUrl("/F.png")` in every Fang display | ✅ iOS now uses the SAME F.png mark — **closes a brand-parity drift** | 45 sites swapped across 19 files: Study/You/Shop balance (`FangBalance` glyph restored — an earlier calm pass had dropped it), Wallet hero (was a text "F"), quiz/blitz/arena/pardy/arcade payouts, shop prices, pact/referral/focus/streak reward chips, daily-drill/nudge/clock-in toasts, profile drawer. Sim-verified crisp at 12–40pt on Study, You, Wallet, Shop. Deliberately LEFT: the purple Ninny paw, the onboarding mascot, the golden-lion cosmetic frame icon (not currency). Text-treatment Fang displays (BountiesCard `+F`, DeltaChip "Fangs" label, two dual-state CTA icons) logged to `lionade-ios/docs/PARITY_TODO.md` as ios-design-hig calls. CalmStat untouched, so non-currency stats (streak/badges) stay glyph-less. |
+
+**Sketchy inventory (ticket Part 2a — investigation only, NO build):**
+Conclusion **(A) with a nuance**: "Sketchy Subjects" is FULLY implemented AND
+playable on BOTH web and iOS (shared Supabase backend; iOS `SketchView` +
+`SketchCanvas` Skia port ≈ 3,023 LOC). It is absent from the iOS **Games tab**
+(`app/(tabs)/games.tsx` — a hardcoded 2-card calm list, Roardle + Pardy, that
+intentionally excludes party games per its own header comment) but reachable
+on iOS via the **Arcade** hub (`app/arcade.tsx` "SKETCHY SUBJECTS" → `/party`
+→ `app/party/[code].tsx` mounts SketchView). So it is NOT missing and NOT a
+broken wire — it is a deliberate navigation split (calm Games tab vs Arcade).
+No fix attempted; awaiting Sam's direction on whether Sketchy should surface
+on the calm Games tab.
+
 ## 2026-07-03: iOS UX polish — centered modals + Study logo + Meet Ninny flow + freestyle sweep (feat/ios-polish-all)
 
 4-part CEO ticket, each part on its own branch, merged for verification onto
