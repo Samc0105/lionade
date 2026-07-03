@@ -50,7 +50,7 @@ import {
 } from "@/lib/focus-rooms/constants";
 import type { FocusRoomMember, FocusRoomRow } from "@/lib/focus-rooms/room-state";
 
-const ACCENT = "#2DD4BF";
+const ACCENT = "#38BDF8"; // focus sky - distinct from the library's teal
 
 interface Snapshot {
   room: FocusRoomRow;

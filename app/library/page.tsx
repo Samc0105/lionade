@@ -22,6 +22,7 @@ import BackButton from "@/components/BackButton";
 import { useAuth } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
+import { avatarFor } from "@/lib/avatar";
 import { cdnUrl } from "@/lib/cdn";
 import { SUBJECT_COLORS, SUBJECT_ICONS, DefaultSubjectIcon } from "@/lib/mockData";
 import {
@@ -90,10 +91,9 @@ type ModalState =
   | null;
 
 function avatarSrc(owner: LibrarySetSummary["owner"]): string {
-  return (
-    owner.avatarUrl ??
-    `https://api.dicebear.com/9.x/identicon/svg?seed=${encodeURIComponent(owner.username ?? owner.id)}`
-  );
+  // House helper - keeps the DiceBear fallback identical to the navbar,
+  // leaderboards, and social surfaces (reviewer minor).
+  return avatarFor(owner.username ?? owner.id, owner.avatarUrl);
 }
 
 function buildBrowseUrl(q: string, subject: string | null, offset: number): string {

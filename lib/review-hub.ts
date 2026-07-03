@@ -38,6 +38,14 @@ import {
 
 export type ReviewEventSource = "weak_spot" | "vocab" | "class_flashcard" | "study_set";
 
+/** Milliseconds until the earliest upcoming timestamp, or null. Shared by all
+ *  source adapters (was triplicated verbatim - reviewer minor). */
+function msUntil(nextAt: string | undefined | null): number | null {
+  if (!nextAt) return null;
+  const t = new Date(nextAt).getTime();
+  return Number.isNaN(t) ? null : Math.max(0, t - Date.now());
+}
+
 export interface HubWeakSpotItem {
   source: "weak_spot";
   id: string;
@@ -366,12 +374,7 @@ export async function fetchVocabQueue(
       },
     }));
 
-    let nextDueInMs: number | null = null;
-    const nextAt = upcoming.data?.[0]?.next_review_at as string | undefined;
-    if (nextAt) {
-      const t = new Date(nextAt).getTime();
-      if (!Number.isNaN(t)) nextDueInMs = Math.max(0, t - Date.now());
-    }
+    const nextDueInMs = msUntil(upcoming.data?.[0]?.next_review_at as string | undefined);
 
     return { ok: true, items, dueCount: due.count ?? items.length, nextDueInMs };
   } catch (err) {
@@ -442,12 +445,7 @@ export async function fetchClassCardQueue(
       },
     }));
 
-    let nextDueInMs: number | null = null;
-    const nextAt = upcoming.data?.[0]?.next_due_at as string | undefined;
-    if (nextAt) {
-      const t = new Date(nextAt).getTime();
-      if (!Number.isNaN(t)) nextDueInMs = Math.max(0, t - Date.now());
-    }
+    const nextDueInMs = msUntil(upcoming.data?.[0]?.next_due_at as string | undefined);
 
     return { ok: true, items, dueCount: due.count ?? items.length, nextDueInMs };
   } catch (err) {
@@ -537,12 +535,7 @@ export async function fetchStudySetQueue(
         : { ...base, kind: "set_flashcard" as const };
     });
 
-    let nextDueInMs: number | null = null;
-    const nextAt = upcoming.data?.[0]?.next_due_at as string | undefined;
-    if (nextAt) {
-      const t = new Date(nextAt).getTime();
-      if (!Number.isNaN(t)) nextDueInMs = Math.max(0, t - Date.now());
-    }
+    const nextDueInMs = msUntil(upcoming.data?.[0]?.next_due_at as string | undefined);
 
     return { ok: true, items, dueCount: due.count ?? items.length, nextDueInMs };
   } catch (err) {

@@ -139,6 +139,25 @@ export async function POST(
     );
   }
 
+  // Double-submit guard: a duplicate tip to the SAME set within 10 seconds is
+  // almost certainly a double-click, not intent - refuse it so a laggy button
+  // can't cost the user twice (reviewer minor). Deliberate repeat tips after
+  // the window still work.
+  const { data: recentTip } = await supabaseAdmin
+    .from("coin_transactions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("type", "set_tip_sent")
+    .eq("reference_id", setId)
+    .gte("created_at", new Date(Date.now() - 10_000).toISOString())
+    .limit(1);
+  if (recentTip && recentTip.length > 0) {
+    return NextResponse.json(
+      { error: "You just tipped this set. Give it a few seconds.", duplicate: true },
+      { status: 429 },
+    );
+  }
+
   const title = typeof set.title === "string" ? set.title.slice(0, 80) : "a study set";
 
   // ── 1) Debit tipper (cashable only — see header) ────────────────────────

@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (input.length > STUDY_SET_MAX_INPUT_BYTES) {
+  if (Buffer.byteLength(input, "utf8") > STUDY_SET_MAX_INPUT_BYTES) {
     return NextResponse.json(
       { error: "That paste is too long. Trim it under 20 KB and try again." },
       { status: 413 },

@@ -163,6 +163,15 @@ export async function POST(
     }
   }
 
+  // card_count is copied from the source row at insert time; make it match
+  // what was ACTUALLY copied (self-consistent even if the source count was
+  // stale or cards changed between the two reads).
+  await supabaseAdmin
+    .from(STUDY_SETS_TABLE)
+    .update({ card_count: freshCards.length })
+    .eq("id", newSetId)
+    .eq("user_id", userId);
+
   // ── Bump the source clone_count (CAS, best-effort, non-financial) ───────
   for (let attempt = 0; attempt < 2; attempt++) {
     const { data: fresh, error: readErr } = await supabaseAdmin

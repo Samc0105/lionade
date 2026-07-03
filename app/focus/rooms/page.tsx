@@ -36,11 +36,12 @@ import {
   FOCUS_ROOM_DURATIONS,
   FANGS_BY_DURATION,
   GROUP_BONUS_FANGS,
+  MAX_FOCUS_SESSIONS_PER_DAY,
   type FocusRoomDuration,
   type FocusRoomPrivacy,
 } from "@/lib/focus-rooms/constants";
 
-const ACCENT = "#2DD4BF";
+const ACCENT = "#38BDF8"; // focus sky - distinct from the library's teal
 
 interface ActiveRoomLite {
   code: string;
@@ -290,7 +291,7 @@ export default function FocusRoomsPage() {
               </div>
               <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40 mt-3 flex items-center gap-1.5">
                 <Timer size={10} weight="duotone" aria-hidden="true" />
-                Joining is free. No stakes. Cap: 6 focus payouts per day.
+                Joining is free. No stakes. Cap: {MAX_FOCUS_SESSIONS_PER_DAY} focus payouts per day.
               </p>
             </section>
           </div>
