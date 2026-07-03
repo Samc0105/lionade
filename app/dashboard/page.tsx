@@ -24,6 +24,7 @@ import WidgetErrorBoundary from "@/components/WidgetErrorBoundary";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
 import StreakFreezeWidget from "@/components/StreakFreezeWidget";
+import PactCard from "@/components/PactCard";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
 import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -621,6 +622,11 @@ function DashboardContent() {
 
           {/* ═══ 3.42) Streak Freeze — buy streak insurance; auto-hides when dormant ═══ */}
           <StreakFreezeWidget />
+
+          {/* ═══ 3.43) Streak Pacts — duo accountability streaks; auto-hides when dormant ═══ */}
+          <WidgetErrorBoundary label="streak-pacts">
+            <PactCard />
+          </WidgetErrorBoundary>
 
           {/* ═══ 3.45) Free → Pro upgrade nudge — only renders for free-tier users ═══ */}
           <ProUpgradeNudge />

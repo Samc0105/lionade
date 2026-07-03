@@ -20,6 +20,7 @@ import Avatar from "@/components/Avatar";
 import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 import PastLobbiesPanel from "@/components/social/PastLobbiesPanel";
 import ReferralCard from "@/components/social/ReferralCard";
+import PactsSection from "@/components/social/PactsSection";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -1037,6 +1038,11 @@ export default function SocialPage() {
             {/* Referral growth loop — share code / link to earn Fangs. Self-hides
                 when the referral migration isn't applied. */}
             <ReferralCard />
+
+            {/* Streak Pacts — duo accountability streaks. Invite from the
+                friends list, answer invites, manage active pacts. Self-hides
+                while the HELD migration is unapplied. */}
+            <PactsSection friends={friends} />
 
             {/* Pending Requests */}
             {pendingRequests.length > 0 && (
