@@ -4,6 +4,24 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-03 (night) - Manual prod deploy + referral incident + iOS wave-2 ports
+
+- PROD DEPLOY: Sam's direct push to main never triggered a Vercel build (the
+  Git integration did not fire; watch item). A manual `vercel deploy --prod`
+  shipped the 8 commits prod was missing (admin reporter fix, vocab fixes,
+  drift migration file, docs) and replaced a stale pre-migration lambda that
+  was consistently failing the profiles.referral_code read - /api/referral/me
+  now returns enabled:true in prod (was enabled:false).
+- Note: the drift catch-up migration + web Word Banks IA changelog entry lives
+  on the feat/web-vocab-ia branch (not yet merged) - see that branch's
+  docs commit 0037cba for the full record.
+- iOS (separate repo, not pushed): wave-2 ports on feat/ios-web-ports-2 -
+  Focus Rooms (live-verified against prod: real room created from the sim),
+  Community Library (browse/clone/report; tips + publishing stay web-only on
+  purpose), Streak Freeze (live purchase verified: 750 Fangs -> 1 of 3
+  banked), Referral card + claim sheet (focus-revalidation hardened). See
+  IOS_PARITY.md wave-2 rows.
+
 ## 2026-07-03 (later) - Migrations LIVE + vocab fixes + drift audit (+ iOS ports wave)
 
 - ALL SIX 20260702 web-feature migrations APPLIED to prod (Sam's go) and

@@ -7,6 +7,29 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03 (wave 2): iOS ports — Focus Rooms + Community Library + Streak Freeze + Referral (feat/ios-web-ports-2)
+
+Sam: "Keep working in features that we don't have on the iPhone." Four more
+web features ported by four parallel worktree builders, merged + entry-wired
+on `feat/ios-web-ports-2` (stacked on wave 1). tsc clean, consolidated
+ios-code-reviewer pass, NOT pushed — rides the next batched EAS build.
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Focus Rooms** (`app/focus/*`, `lib/hooks/use-focus-room.ts`, `components/focus/*`) | ✅ `/focus/rooms` suite | ✅ ported (commit `322946a`) | Full realtime (broadcast + postgres_changes on the party chassis) + 3s poll reconciler; countdown derives from server `ends_at` + measured skew; AppState-safe teardown/rebuild; busyRef guards on all mutations. LIVE-verified in the sim: created real prod room 4339, lobby + roster + share + host controls all rendered; left cleanly. Entry: Social footer row. BackButton parent corrected to Social (`811f518`). |
+| **Community Library** (`app/library.tsx` + `components/library/*`) | ✅ `/library` (browse/clone/tip/report + publish via study-sets) | ✅ ported browse/clone/report (commit `7f7c648`) | DELIBERATE iOS CUTS on the record: NO tips (Fang gifting stays web-only, App Store 3.1.1 risk minimization) and NO publishing from iOS. Clone is idempotent server-side (already-cloned = "Open my copy", not an error — contract surprise vs the ticket's assumed 409). "New" sort is client-side (web has no sort param — parity flag if web grows one). LIVE-verified: honest empty state (no public sets exist yet; publishing is web-only and copy says so). Entry: card in the Study Sets hub. |
+| **Streak Freeze** (`components/study/StreakFreezeChip.tsx` + `lib/hooks/use-streak-freezes.ts`) | ✅ StreakFreezeWidget on web | ✅ ported (commit `dd51cd2`) | Chip beside the Study streak stat + buy sheet; server-verbatim error copy; renders null while loading/unavailable. LIVE-verified end to end in the sim: bought a real freeze (4,498 → 3,748 Fangs, 1 of 3 banked, success line). Web parity delta ON PURPOSE: iOS lets the POST 402 and renders the server message rather than client-disabling on stale balance. |
+| **Referral loop** (`components/you/ReferralCard.tsx` + `ReferralClaimSheet.tsx`) | ✅ ReferralCard on /social | ✅ ported (commit `4967533` + `dda8ee0`) | You-tab card: code + copy + native Share sheet + stats; claim sheet is an iOS-only addition (native has no ?ref= URL capture; server owns all gates). Hardened with focus revalidation after today's incident (see below). Route + render gate individually verified; happy-path pixel render pends the first normally-focused session (the automated sim session's AppState stuck "inactive", which the app-wide SWR isVisible() config treats as pause-all-revalidation — pre-existing global behavior, not a port bug). |
+
+**PROD INCIDENT found + fixed during this wave:** /api/referral/me returned
+`enabled:false` on prod while the same code + DB worked locally. Root cause:
+the live Vercel deployment (built 10:14) predated the drift migration and
+Sam's later push NEVER TRIGGERED A VERCEL BUILD (auto-deploy did not fire on
+the direct push). A fresh `vercel deploy --prod` shipped current main (the 8
+commits prod was missing, incl. the admin reporter fix) and fixed the route
+(verified: enabled:true + code). WATCH ITEM for ops: pushes to main are not
+auto-deploying; check the Vercel Git integration settings.
+
 ## 2026-07-03: iOS ports wave — Review Hub + Ninny Study Sets + Streak Pacts (feat/ios-web-ports)
 
 Sam picked "3 things the web has, make it on iOS": the exact natural-order trio
