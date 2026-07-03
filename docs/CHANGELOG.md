@@ -4,6 +4,32 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-03 (later) - Migrations LIVE + vocab fixes + drift audit (+ iOS ports wave)
+
+- ALL SIX 20260702 web-feature migrations APPLIED to prod (Sam's go) and
+  verified: the five-feature batch below is out of fail-soft server-side.
+  Also applied earlier today: 20260620150000 vocab nullable-lang (general-bank
+  word saves fixed in prod, probe-verified). The features still need the
+  feat/web-new-features branch DEPLOYED before the routes exist publicly.
+- fix(vocab) 90f2882: BankStreakPill read snake_case off the camelCase streak
+  API so it always rendered zero (type now imported from @lionade/core);
+  zero-bank users can now reach Discover from the empty state ("or browse
+  what others made"); AddWordForm failures surface an inline role="alert"
+  error with per-case copy (409 duplicate / network / server text capped at
+  140 chars) plus structured console.error context.
+- fix(admin) 3316b54: library-reports queue GET selected reporter_id but the
+  migration + report route define/write "reporter" - the admin queue would
+  have silently self-hidden (42703 -> isMissingSchema catch) forever even
+  after the migration applied. Caught during the migration pre-flight.
+- Prod-schema drift audit (137 read-only agents, one per local migration
+  file): 118 applied / 12 partial / 7 never applied. Ranked report in
+  docs/audits/2026-07-03-schema-drift-audit.md. Critical: founder_grants
+  source/reference_id columns missing means Founding Scholar badge inserts
+  silently fail on every Stripe purchase. All fixes await Sam's go.
+- iOS (separate repo, not pushed): Word Banks nav restructure
+  (feat/ios-wordbanks-nav) + ports of Review Hub, Ninny Study Sets, and
+  Streak Pacts (feat/ios-web-ports). See IOS_PARITY.md 2026-07-03 rows.
+
 ## 2026-07-03 - Five-feature web batch (branch feat/web-new-features, NOT merged)
 
 All five Phase-1 proposals shipped with real Supabase wiring, one commit per

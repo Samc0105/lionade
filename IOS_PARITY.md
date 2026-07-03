@@ -7,6 +7,51 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03: iOS ports wave — Review Hub + Ninny Study Sets + Streak Pacts (feat/ios-web-ports)
+
+Sam picked "3 things the web has, make it on iOS": the exact natural-order trio
+the five-feature batch row below predicted. Built by three parallel builders in
+worktrees off the wordbanks stack, merged + entry-wired on `feat/ios-web-ports`
+(stack: fix/ios-wordbanks → feat/ios-wordbanks-nav → feat/ios-web-ports). All
+tsc-clean, ios-code-reviewer'd as one consolidated pass, NOT pushed — rides the
+next batched EAS build.
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Review Hub** (`app/learn/review.tsx` + `components/review/*`) | ✅ `/learn/review` + `/api/review/queue` | ✅ ported (commit `79b5276`) | One due queue over 4 SR sources, per-source grade dispatch (ninny grade / vocab review / class flashcard rating / study-set card review), 7-day retention pill, fail-soft degraded note. iOS mirrors web's HubItem type by hand (`components/review/types.ts` — flagged: shape changes must land in both). Entry: Study grid tile. |
+| **Ninny Study Sets** (`app/learn/sets/*` + `components/study-sets/*`) | ✅ `/learn/sets` suite | ✅ ported (commit `420ff65`) | Paste → generate (server 10/day cap, zero new AI spend class) → mandatory preview/trim → save; deck list w/ due chips; in-screen study session (flip flashcards + MCQ). Deliberate v1 cuts: detail-screen card/title PATCH editing + Library publishing stay web-only. Entry: Study grid tile. |
+| **Streak Pacts** (`app/pacts.tsx` + `components/pacts/*` + `lib/hooks/use-pacts.ts`) | ✅ `/api/pacts` + social-surface UI | ✅ ported (commit `1d87148`) | Invite/accept/decline/end, joint streak + both-sides today-status, 7/30 milestone Fangs (server-granted, milestonePending honest copy), 1/day nudge with contract-honest 400/429 reasons. No `pactsAPI` in @lionade/core yet — iOS calls routes directly; core graduation flagged for `ios-shared-core`. Entry: Social footer row. |
+
+**LIVE-DATA CAVEAT (both platforms):** today's migration run made the DB real,
+but the API routes for all three live on the UNDEPLOYED web branch
+`feat/web-new-features`. iOS screens render honest error states against prod
+until Sam merges + deploys that branch — then both platforms go live with zero
+further client work. Simulator smoke verified chrome + error states on all
+three.
+
+## 2026-07-03: iOS Word Banks nav restructure (feat/ios-wordbanks-nav) — WEB PARITY FLAG
+
+"Pick your file, then pick your mode" (commit `e24cbd5`): bank pill rail →
+one tappable bank title opening a BankSwitcherSheet (banks + New bank +
+Discover banks); Add/Review/List/Discover tab row → one Study | Edit
+CalmSegmented (Study = cards with a corner card/list toggle, absorbing
+Review + List; Edit = AddWordForm with the term list below it in one
+virtualized scroll, absorbing Add; Discover relocated into the switcher
+sheet). No capability lost; term "edit" is honestly confidence-cycle +
+delete (no term-text PATCH exists on either platform). Simulator-verified
+incl. a LIVE post-migration general-bank save (+30 Fangs). **Web
+`/learn/vocab` still runs the old pill-rail + 4-tab IA — if Sam wants the
+calmer IA on web too, that is a new web ticket; flagged, not assumed.**
+
+## 2026-07-03: Web vocab fixes (feat/web-new-features `90f2882`) — parity notes
+
+Web caught up to iOS on three vocab items: BankStreakPill now reads the
+camelCase API shape (was always-zero), zero-bank Discover escape hatch added
+(iOS shipped it first), and AddWordForm gained iOS-parity inline save-error
+surfacing (structured log + per-case copy + persistent role="alert" error).
+Both platforms now match on all three. Admin queue fix `3316b54` (reporter
+column) is web-only by definition.
+
 ## 2026-07-03: iOS Word Banks — save-error diagnosis + Add-tab restructure (fix/ios-wordbanks)
 
 **The save bug is a WEB-SIDE blocker, not an iOS bug.** General-bank word saves
