@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyRating, type FlashcardRating } from "@/lib/class-flashcards";
+import { logReviewEvent } from "@/lib/review-hub";
 
 /**
  * PATCH  /api/classes/[id]/flashcards/[cardId]  — record a review rating
@@ -82,6 +83,11 @@ export async function PATCH(req: NextRequest, { params }: RouteCtx) {
     console.error("[flashcards PATCH]", error?.message);
     return NextResponse.json({ error: "Couldn't update card." }, { status: 500 });
   }
+
+  // Retention log for the Review Hub stat. "again" is the only wrong grade
+  // (hard/good/easy all mean the card was recalled). Fire-and-forget
+  // semantics: never throws, no-ops until the HELD review_events table exists.
+  await logReviewEvent(userId, "class_flashcard", rating !== "again");
 
   return NextResponse.json({
     card: {

@@ -1,15 +1,25 @@
 "use client";
 
-// Review Your Weak Spots — spaced-repetition drill over the questions the user
-// has previously missed (ninny_wrong_answers). Server decides which items are
-// DUE and grades every answer server-side. On mastery an item stops resurfacing.
+// Review Hub — ONE spaced-repetition session over every review system:
+//   weak spots (missed Ninny questions), vocab words, class flashcards, and
+//   study set cards.
 //
-// Two item shapes:
-//   - mcq: reconstructed real 4-option question (options recovered from the
-//     source material). Graded on the chosen index server-side.
-//   - flashcard: question came from a mode with no recoverable option set; shown
-//     as a reveal card, honest self-grade ("I knew it" / "Missed it"). No Fangs
-//     are at stake anywhere in this mode, so self-grading can't be gamed.
+// The queue comes merged + interleaved from GET /api/review/queue. Grading is
+// DISPATCHED to each source's existing endpoint (the hub never re-implements
+// grading):
+//   weak_spot        -> POST  /api/ninny/review/grade   (server-side MCQ regrade)
+//   vocab            -> POST  /api/vocab/review/[id]    (may award Fangs)
+//   class_flashcard  -> PATCH /api/classes/[classId]/flashcards/[cardId]
+//   study_set        -> POST  /api/study-sets/cards/[cardId]/review
+//
+// Weak spots and study sets stay reward-free (self-grading can't be gamed).
+// Vocab keeps its existing +2 Fang correct-review grant, surfaced inline.
+//
+// Deep link tolerated: /learn/review?source=study_set&set=<id> filters the
+// session to one deck (the study-set detail page's "Review now" button).
+//
+// The 7-day retention stat comes from review_events (HELD migration
+// 20260702100000) and is hidden while the table is missing (retention7d null).
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -17,55 +27,58 @@ import { useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
 import { useAuth } from "@/lib/auth";
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+// Queue item shapes come from the server module itself, TYPE-ONLY so the
+// import is erased at build time (no supabaseAdmin reaches the client
+// bundle; same pattern as the focus page's room-state types).
+import type { HubItem } from "@/lib/review-hub";
 import {
   Target,
+  Translate,
+  Cards,
+  ChartLineUp,
   ArrowRight,
   CheckCircle,
   XCircle,
   Sparkle,
   ArrowClockwise,
   Eye,
+  Stack,
 } from "@phosphor-icons/react";
 
 const PURPLE = "#A855F7";
 
-interface ReviewMcqItem {
-  kind: "mcq";
-  id: string;
-  materialId: string;
-  materialTitle: string | null;
-  question: string;
-  options: string[];
-  correctIndex: number;
-  explanation?: string;
-  missCount: number;
-}
-interface ReviewFlashcardItem {
-  kind: "flashcard";
-  id: string;
-  materialId: string;
-  materialTitle: string | null;
-  question: string;
-  correctAnswer: string;
-  missCount: number;
-}
-type ReviewItem = ReviewMcqItem | ReviewFlashcardItem;
-
-interface ReviewResponse {
-  items: ReviewItem[];
-  dueCount: number;
-  totalWeakSpots: number;
+interface QueueResponse {
+  items: HubItem[];
+  total: number;
+  counts: { weak_spot: number; vocab: number; class_flashcard: number; study_set: number };
+  sources: {
+    weak_spot: { ok: boolean };
+    vocab: { ok: boolean };
+    class_flashcard: { ok: boolean };
+    study_set: { ok: boolean };
+  };
+  filtered: { source: string; set: string | null } | null;
+  retention7d: { total: number; correct: number } | null;
   nextDueInMs: number | null;
 }
 
-type Phase = "loading" | "empty" | "active" | "done";
+type Phase = "loading" | "error" | "empty" | "active" | "done";
+type ClassRating = "again" | "hard" | "good" | "easy";
 
-interface GradeResult {
+interface GradeOutcome {
   success: boolean;
   correct: boolean;
   mastered: boolean;
+  coinsAwarded: number;
 }
+
+const GRADE_FAILED: GradeOutcome = {
+  success: false,
+  correct: false,
+  mastered: false,
+  coinsAwarded: 0,
+};
 
 /* ── Countdown formatting for the "all caught up" state ───────── */
 function formatDuration(ms: number): string {
@@ -77,39 +90,78 @@ function formatDuration(ms: number): string {
   return `${days} day${days === 1 ? "" : "s"}`;
 }
 
-export default function ReviewPage() {
+/* ── Source presentation helpers ──────────────────────────────── */
+function sourceLabel(item: HubItem): string {
+  if (item.source === "weak_spot") return "weak spot";
+  if (item.source === "vocab") return "vocab";
+  if (item.source === "study_set") return "study set";
+  return "class card";
+}
+function sourceContext(item: HubItem): string | null {
+  if (item.source === "weak_spot") return item.meta.materialTitle;
+  if (item.source === "vocab") {
+    const { sourceLang, targetLang } = item.meta;
+    return sourceLang && targetLang ? `${sourceLang} to ${targetLang}` : null;
+  }
+  if (item.source === "study_set") return item.meta.setTitle;
+  return item.meta.className;
+}
+
+export default function ReviewHubPage() {
   const { user } = useAuth();
   const reduceMotion = useReducedMotion();
 
   const [phase, setPhase] = useState<Phase>("loading");
-  const [items, setItems] = useState<ReviewItem[]>([]);
-  const [meta, setMeta] = useState<{ dueCount: number; totalWeakSpots: number; nextDueInMs: number | null }>({
-    dueCount: 0,
-    totalWeakSpots: 0,
-    nextDueInMs: null,
-  });
+  const [items, setItems] = useState<HubItem[]>([]);
+  const [counts, setCounts] = useState({ weak_spot: 0, vocab: 0, class_flashcard: 0, study_set: 0 });
+  const [total, setTotal] = useState(0);
+  const [degraded, setDegraded] = useState(false);
+  const [filtered, setFiltered] = useState(false);
+  const [retention, setRetention] = useState<{ total: number; correct: number } | null>(null);
+  const [nextDueInMs, setNextDueInMs] = useState<number | null>(null);
 
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null); // mcq choice
-  const [revealed, setRevealed] = useState(false); // flashcard flip
+  const [revealed, setRevealed] = useState(false); // reveal-style cards
   const [grading, setGrading] = useState(false);
-  const [lastResult, setLastResult] = useState<GradeResult | null>(null);
+  const [lastResult, setLastResult] = useState<GradeOutcome | null>(null);
 
   // Session tally
   const [reviewed, setReviewed] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [masteredCount, setMasteredCount] = useState(0);
+  const [fangsEarned, setFangsEarned] = useState(0);
 
   const load = useCallback(async () => {
     setPhase("loading");
-    const res = await apiGet<ReviewResponse>("/api/ninny/review?limit=15");
+    // Tolerated deep-link filter: ?source=study_set&set=<id> narrows the
+    // session to one deck. Read from window (not useSearchParams) so this
+    // client page needs no Suspense boundary. Unknown values are ignored
+    // server-side, so a stale link still loads the full queue.
+    let query = "/api/review/queue?limit=30";
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const source = params.get("source");
+      const set = params.get("set");
+      if (source === "study_set") {
+        query += "&source=study_set";
+        if (set) query += `&set=${encodeURIComponent(set)}`;
+      }
+    }
+    const res = await apiGet<QueueResponse>(query);
     if (res.ok && res.data) {
       setItems(res.data.items);
-      setMeta({
-        dueCount: res.data.dueCount,
-        totalWeakSpots: res.data.totalWeakSpots,
-        nextDueInMs: res.data.nextDueInMs,
-      });
+      setCounts(res.data.counts);
+      setTotal(res.data.total);
+      setRetention(res.data.retention7d);
+      setNextDueInMs(res.data.nextDueInMs);
+      setFiltered(res.data.filtered != null);
+      setDegraded(
+        !res.data.sources.weak_spot.ok ||
+          !res.data.sources.vocab.ok ||
+          !res.data.sources.class_flashcard.ok ||
+          !res.data.sources.study_set.ok,
+      );
       setIndex(0);
       setSelected(null);
       setRevealed(false);
@@ -117,11 +169,20 @@ export default function ReviewPage() {
       setReviewed(0);
       setCorrectCount(0);
       setMasteredCount(0);
+      setFangsEarned(0);
       setPhase(res.data.items.length > 0 ? "active" : "empty");
     } else {
+      // The QUEUE FETCH ITSELF failed — this is not "nothing due". Rendering
+      // the empty state here would falsely tell someone with due cards that
+      // they're caught up, so show a real error with a retry instead.
       setItems([]);
-      setMeta({ dueCount: 0, totalWeakSpots: 0, nextDueInMs: null });
-      setPhase("empty");
+      setCounts({ weak_spot: 0, vocab: 0, class_flashcard: 0, study_set: 0 });
+      setTotal(0);
+      setRetention(null);
+      setNextDueInMs(null);
+      setFiltered(false);
+      setDegraded(false);
+      setPhase("error");
     }
   }, []);
 
@@ -131,38 +192,104 @@ export default function ReviewPage() {
 
   const current = items[index];
 
-  /* ── Grade the current item ─────────────────────────────────── */
-  const submitGrade = useCallback(
+  /* ── Grade dispatch — each source keeps its OWN endpoint ─────── */
+  const applyOutcome = useCallback((outcome: GradeOutcome) => {
+    setLastResult(outcome);
+    setReviewed((n) => n + 1);
+    if (outcome.success && outcome.correct) setCorrectCount((n) => n + 1);
+    if (outcome.success && outcome.mastered) setMasteredCount((n) => n + 1);
+    if (outcome.success && outcome.coinsAwarded > 0) {
+      setFangsEarned((n) => n + outcome.coinsAwarded);
+    }
+  }, []);
+
+  const gradeWeakSpot = useCallback(
     async (payload: { selectedIndex?: number; knewIt?: boolean }) => {
-      if (!current || grading) return;
+      if (!current || current.source !== "weak_spot" || grading) return;
       setGrading(true);
-      const res = await apiPost<GradeResult>("/api/ninny/review/grade", {
-        id: current.id,
-        ...payload,
+      const res = await apiPost<{ success: boolean; correct: boolean; mastered: boolean }>(
+        "/api/ninny/review/grade",
+        { id: current.id, ...payload },
+      );
+      setGrading(false);
+      applyOutcome(
+        res.ok && res.data
+          ? { success: true, correct: res.data.correct, mastered: res.data.mastered, coinsAwarded: 0 }
+          : GRADE_FAILED,
+      );
+    },
+    [current, grading, applyOutcome],
+  );
+
+  const gradeVocab = useCallback(
+    async (knewIt: boolean) => {
+      if (!current || current.source !== "vocab" || grading) return;
+      setGrading(true);
+      const res = await apiPost<{ coinsAwarded?: number }>(
+        `/api/vocab/review/${current.id}`,
+        { correct: knewIt },
+      );
+      setGrading(false);
+      applyOutcome(
+        res.ok
+          ? {
+              success: true,
+              correct: knewIt,
+              mastered: false,
+              coinsAwarded: res.data?.coinsAwarded ?? 0,
+            }
+          : GRADE_FAILED,
+      );
+    },
+    [current, grading, applyOutcome],
+  );
+
+  const gradeClassCard = useCallback(
+    async (rating: ClassRating) => {
+      if (!current || current.source !== "class_flashcard" || grading) return;
+      setGrading(true);
+      const res = await apiPatch(
+        `/api/classes/${current.meta.classId}/flashcards/${current.id}`,
+        { rating },
+      );
+      setGrading(false);
+      applyOutcome(
+        res.ok
+          ? { success: true, correct: rating !== "again", mastered: false, coinsAwarded: 0 }
+          : GRADE_FAILED,
+      );
+    },
+    [current, grading, applyOutcome],
+  );
+
+  const gradeStudySet = useCallback(
+    async (correct: boolean) => {
+      if (!current || current.source !== "study_set" || grading) return;
+      setGrading(true);
+      const res = await apiPost(`/api/study-sets/cards/${current.id}/review`, {
+        correct,
       });
       setGrading(false);
-      if (res.ok && res.data) {
-        setLastResult(res.data);
-        setReviewed((n) => n + 1);
-        if (res.data.correct) setCorrectCount((n) => n + 1);
-        if (res.data.mastered) setMasteredCount((n) => n + 1);
-      } else {
-        // Grade failed — surface a soft inline result so the flow isn't stuck.
-        setLastResult({ success: false, correct: false, mastered: false });
-      }
+      // Reward-free source (weak-spot precedent): coinsAwarded is always 0.
+      applyOutcome(
+        res.ok
+          ? { success: true, correct, mastered: false, coinsAwarded: 0 }
+          : GRADE_FAILED,
+      );
     },
-    [current, grading],
+    [current, grading, applyOutcome],
   );
 
   const handleSelectOption = (i: number) => {
     if (selected !== null || grading) return;
     setSelected(i);
-    void submitGrade({ selectedIndex: i });
+    void gradeWeakSpot({ selectedIndex: i });
   };
 
-  const handleSelfGrade = (knewIt: boolean) => {
-    if (lastResult || grading) return;
-    void submitGrade({ knewIt });
+  const handleSelectStudySetOption = (i: number) => {
+    if (!current || current.source !== "study_set" || selected !== null || grading) return;
+    setSelected(i);
+    void gradeStudySet(i === current.correctIndex);
   };
 
   const handleNext = () => {
@@ -177,7 +304,90 @@ export default function ReviewPage() {
     setLastResult(null);
   };
 
-  const progressPct = items.length > 0 ? ((index + (lastResult ? 1 : 0)) / items.length) * 100 : 0;
+  const progressPct =
+    items.length > 0 ? ((index + (lastResult ? 1 : 0)) / items.length) * 100 : 0;
+
+  const retentionPct =
+    retention && retention.total > 0
+      ? Math.round((retention.correct / retention.total) * 100)
+      : null;
+
+  const chips: { key: string; label: string; count: number; icon: JSX.Element }[] = [
+    {
+      key: "weak_spot",
+      label: "weak spots",
+      count: counts.weak_spot,
+      icon: <Target size={12} weight="fill" color={PURPLE} aria-hidden="true" />,
+    },
+    {
+      key: "vocab",
+      label: "vocab",
+      count: counts.vocab,
+      icon: <Translate size={12} weight="fill" color={PURPLE} aria-hidden="true" />,
+    },
+    {
+      key: "class_flashcard",
+      label: "class cards",
+      count: counts.class_flashcard,
+      icon: <Cards size={12} weight="fill" color={PURPLE} aria-hidden="true" />,
+    },
+    {
+      key: "study_set",
+      label: "study set cards",
+      count: counts.study_set,
+      icon: <Stack size={12} weight="fill" color={PURPLE} aria-hidden="true" />,
+    },
+  ].filter((c) => c.count > 0);
+
+  /* ── Shared button styles ─────────────────────────────────────── */
+  const selfGradeButtons = (onGrade: (knewIt: boolean) => void) => (
+    <div className="grid grid-cols-2 gap-2.5">
+      <button
+        type="button"
+        disabled={grading}
+        onClick={() => onGrade(false)}
+        className="rounded-xl border px-4 py-3.5 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110 disabled:opacity-60"
+        style={{ background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.4)", color: "#EEF4FF" }}
+      >
+        <XCircle size={16} weight="fill" aria-hidden="true" />
+        Missed it
+      </button>
+      <button
+        type="button"
+        disabled={grading}
+        onClick={() => onGrade(true)}
+        className="rounded-xl border px-4 py-3.5 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110 disabled:opacity-60"
+        style={{ background: "rgba(34,197,94,0.12)", borderColor: "rgba(34,197,94,0.45)", color: "#EEF4FF" }}
+      >
+        <CheckCircle size={16} weight="fill" aria-hidden="true" />
+        I knew it
+      </button>
+    </div>
+  );
+
+  const ratingButtons = (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {(
+        [
+          { rating: "again" as const, label: "Again", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.4)" },
+          { rating: "hard" as const, label: "Hard", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.4)" },
+          { rating: "good" as const, label: "Good", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.45)" },
+          { rating: "easy" as const, label: "Easy", bg: "rgba(74,144,217,0.12)", border: "rgba(74,144,217,0.45)" },
+        ]
+      ).map((b) => (
+        <button
+          key={b.rating}
+          type="button"
+          disabled={grading}
+          onClick={() => void gradeClassCard(b.rating)}
+          className="rounded-xl border px-3 py-3.5 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center transition-all active:scale-[0.99] hover:brightness-110 disabled:opacity-60"
+          style={{ background: b.bg, borderColor: b.border, color: "#EEF4FF" }}
+        >
+          {b.label}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <ProtectedRoute>
@@ -197,7 +407,7 @@ export default function ReviewPage() {
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
             {/* Header */}
-            <header className="mb-6 flex items-center justify-between animate-slide-up">
+            <header className="mb-4 flex items-center justify-between animate-slide-up">
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -207,7 +417,7 @@ export default function ReviewPage() {
                 </div>
                 <div>
                   <h1 className="font-bebas text-2xl sm:text-3xl text-cream tracking-[0.06em] leading-none">
-                    Review Weak Spots
+                    Review Hub
                   </h1>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55 mt-1">
                     spaced repetition
@@ -222,6 +432,56 @@ export default function ReviewPage() {
               </Link>
             </header>
 
+            {/* Source chips + retention */}
+            {phase !== "loading" && (chips.length > 0 || retentionPct !== null) && (
+              <div className="mb-5 flex flex-wrap items-center gap-2 animate-slide-up">
+                {chips.map((c) => (
+                  <span
+                    key={c.key}
+                    className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full"
+                    style={{ background: `${PURPLE}14`, border: `1px solid ${PURPLE}35`, color: "#C79BFF" }}
+                  >
+                    {c.icon}
+                    {c.count} {c.label}
+                  </span>
+                ))}
+                {retentionPct !== null && (
+                  <span
+                    className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ml-auto"
+                    style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ADE80" }}
+                    title="Share of reviews you got right in the last 7 days"
+                  >
+                    <ChartLineUp size={12} weight="fill" aria-hidden="true" />
+                    7-day retention {retentionPct}%
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Honest degraded-source note */}
+            {phase !== "loading" && degraded && (
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.15em] text-amber-400/80 animate-slide-up">
+                some review sources could not load right now
+              </p>
+            )}
+
+            {/* Deep-link filter note (study-set "Review now") */}
+            {phase !== "loading" && filtered && (
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream/50 animate-slide-up">
+                reviewing one study set ·{" "}
+                <button
+                  type="button"
+                  className="underline underline-offset-2 hover:text-cream/80 transition-colors uppercase tracking-[0.15em]"
+                  onClick={() => {
+                    window.history.replaceState(null, "", "/learn/review");
+                    void load();
+                  }}
+                >
+                  review everything instead
+                </button>
+              </p>
+            )}
+
             {/* LOADING */}
             {phase === "loading" && (
               <div className="space-y-3 animate-slide-up" aria-hidden="true">
@@ -232,7 +492,35 @@ export default function ReviewPage() {
               </div>
             )}
 
-            {/* EMPTY — nothing due (or no weak spots at all) */}
+            {/* ERROR — the queue fetch itself failed (distinct from empty) */}
+            {phase === "error" && (
+              <div className="text-center py-14 animate-slide-up">
+                <div
+                  className="w-16 h-16 rounded-full inline-flex items-center justify-center mb-5"
+                  style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.35)" }}
+                >
+                  <XCircle size={32} weight="fill" color="#F59E0B" aria-hidden="true" />
+                </div>
+                <p className="font-bebas text-2xl text-cream tracking-wide mb-2">
+                  Your queue could not load
+                </p>
+                <p className="text-cream/60 text-sm font-syne mb-6 max-w-sm mx-auto leading-relaxed">
+                  Something went wrong fetching your review queue. Your cards and
+                  their schedules are safe on the server.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void load()}
+                  className="inline-flex items-center gap-2 font-bebas text-base tracking-wider px-6 py-3 rounded-xl transition-all active:scale-[0.99] hover:brightness-110"
+                  style={{ background: `${PURPLE}25`, border: `1px solid ${PURPLE}60`, color: "#EEF4FF" }}
+                >
+                  <ArrowClockwise size={16} weight="bold" aria-hidden="true" />
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {/* EMPTY — nothing due (or nothing to review at all) */}
             {phase === "empty" && (
               <div className="text-center py-14 animate-slide-up">
                 <div
@@ -241,12 +529,12 @@ export default function ReviewPage() {
                 >
                   <CheckCircle size={32} weight="fill" color="#22C55E" aria-hidden="true" />
                 </div>
-                {meta.totalWeakSpots === 0 ? (
+                {total === 0 && nextDueInMs === null ? (
                   <>
                     <p className="font-bebas text-2xl text-cream tracking-wide mb-2">Nothing to review yet</p>
                     <p className="text-cream/60 text-sm font-syne mb-6 max-w-sm mx-auto leading-relaxed">
-                      When you miss questions in a Ninny study session, they land here so you can
-                      drill them until they stick.
+                      Missed Ninny questions, saved vocab words, class flashcards, and study
+                      set cards all land here so you can drill them until they stick.
                     </p>
                     <Link
                       href="/learn/ninny"
@@ -261,10 +549,9 @@ export default function ReviewPage() {
                   <>
                     <p className="font-bebas text-2xl text-cream tracking-wide mb-2">All caught up</p>
                     <p className="text-cream/60 text-sm font-syne mb-6 max-w-sm mx-auto leading-relaxed">
-                      You have {meta.totalWeakSpots} weak spot{meta.totalWeakSpots === 1 ? "" : "s"} on your
-                      radar, but none are due right now.
-                      {meta.nextDueInMs != null && (
-                        <> The next one comes back in about {formatDuration(meta.nextDueInMs)}.</>
+                      Nothing is due right now.
+                      {nextDueInMs != null && (
+                        <> The next card comes back in about {formatDuration(nextDueInMs)}.</>
                       )}
                     </p>
                     <Link
@@ -279,9 +566,9 @@ export default function ReviewPage() {
               </div>
             )}
 
-            {/* ACTIVE — the quiz loop */}
+            {/* ACTIVE — the session loop */}
             {phase === "active" && current && (
-              <div className="animate-slide-up" key={current.id}>
+              <div className="animate-slide-up" key={`${current.source}-${current.id}`}>
                 {/* Progress bar + counter */}
                 <div className="mb-5">
                   <div className="flex items-center justify-between mb-2">
@@ -289,7 +576,9 @@ export default function ReviewPage() {
                       {index + 1} / {items.length}
                     </p>
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: PURPLE }}>
-                      missed {current.missCount}×
+                      {current.source === "weak_spot"
+                        ? `missed ${current.meta.missCount}×`
+                        : sourceLabel(current)}
                     </p>
                   </div>
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -304,29 +593,35 @@ export default function ReviewPage() {
                   </div>
                 </div>
 
-                {/* Material tag */}
-                {current.materialTitle && (
+                {/* Context tag (material / lang pair / class name) */}
+                {sourceContext(current) && (
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 mb-2 truncate">
-                    {current.materialTitle}
+                    {sourceContext(current)}
                   </p>
                 )}
 
-                {/* Question card */}
+                {/* Question / word card */}
                 <div
                   className="rounded-2xl border p-5 sm:p-6 mb-4"
                   style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
                 >
+                  {current.source === "vocab" && (
+                    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/50 mb-1.5">
+                      what does this mean?
+                    </p>
+                  )}
                   <p className="font-syne text-cream text-lg leading-snug">{current.question}</p>
                 </div>
 
-                {/* ── MCQ options ── */}
-                {current.kind === "mcq" && (
+                {/* ── MCQ options (weak spot + study set mcq cards) ── */}
+                {((current.source === "weak_spot" && current.kind === "mcq") ||
+                  (current.source === "study_set" && current.kind === "set_mcq")) &&
+                  current.options && (
                   <div className="space-y-2.5">
                     {current.options.map((opt, i) => {
                       const isChosen = selected === i;
                       const isCorrect = i === current.correctIndex;
                       const answered = selected !== null;
-                      // Color states: after answering, correct=green, chosen-wrong=red.
                       let bg = "rgba(255,255,255,0.03)";
                       let border = "rgba(255,255,255,0.08)";
                       let text = "#EEF4FF";
@@ -334,11 +629,9 @@ export default function ReviewPage() {
                         if (isCorrect) {
                           bg = "rgba(34,197,94,0.12)";
                           border = "rgba(34,197,94,0.5)";
-                          text = "#EEF4FF";
                         } else if (isChosen) {
                           bg = "rgba(239,68,68,0.12)";
                           border = "rgba(239,68,68,0.5)";
-                          text = "#EEF4FF";
                         } else {
                           text = "rgba(238,244,255,0.4)";
                         }
@@ -348,7 +641,11 @@ export default function ReviewPage() {
                           key={i}
                           type="button"
                           disabled={answered || grading}
-                          onClick={() => handleSelectOption(i)}
+                          onClick={() =>
+                            current.source === "study_set"
+                              ? handleSelectStudySetOption(i)
+                              : handleSelectOption(i)
+                          }
                           className="w-full text-left rounded-xl border px-4 py-3.5 min-h-[52px] font-syne text-sm transition-all duration-200 disabled:cursor-default flex items-center gap-3 hover:brightness-110"
                           style={{ background: bg, borderColor: border, color: text }}
                         >
@@ -370,8 +667,11 @@ export default function ReviewPage() {
                   </div>
                 )}
 
-                {/* ── Flashcard reveal ── */}
-                {current.kind === "flashcard" && (
+                {/* ── Reveal-style cards (weak-spot flashcard / vocab / class card / study-set flashcard) ── */}
+                {((current.source === "weak_spot" && current.kind === "flashcard") ||
+                  current.source === "vocab" ||
+                  current.source === "class_flashcard" ||
+                  (current.source === "study_set" && current.kind === "set_flashcard")) && (
                   <div>
                     {!revealed ? (
                       <button
@@ -391,38 +691,27 @@ export default function ReviewPage() {
                         >
                           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-green-400/80 mb-1.5">answer</p>
                           <p className="font-syne text-cream text-base leading-snug">{current.correctAnswer}</p>
+                          {current.source === "vocab" && current.meta.userDefinition && (
+                            <p className="font-syne text-cream/60 text-sm leading-relaxed mt-2 italic">
+                              Your note: {current.meta.userDefinition}
+                            </p>
+                          )}
                         </div>
                         {!lastResult && (
-                          <div className="grid grid-cols-2 gap-2.5">
-                            <button
-                              type="button"
-                              disabled={grading}
-                              onClick={() => handleSelfGrade(false)}
-                              className="rounded-xl border px-4 py-3.5 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110 disabled:opacity-60"
-                              style={{ background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.4)", color: "#EEF4FF" }}
-                            >
-                              <XCircle size={16} weight="fill" aria-hidden="true" />
-                              Missed it
-                            </button>
-                            <button
-                              type="button"
-                              disabled={grading}
-                              onClick={() => handleSelfGrade(true)}
-                              className="rounded-xl border px-4 py-3.5 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110 disabled:opacity-60"
-                              style={{ background: "rgba(34,197,94,0.12)", borderColor: "rgba(34,197,94,0.45)", color: "#EEF4FF" }}
-                            >
-                              <CheckCircle size={16} weight="fill" aria-hidden="true" />
-                              I knew it
-                            </button>
-                          </div>
+                          <>
+                            {current.source === "weak_spot" && selfGradeButtons((knewIt) => void gradeWeakSpot({ knewIt }))}
+                            {current.source === "vocab" && selfGradeButtons((knewIt) => void gradeVocab(knewIt))}
+                            {current.source === "class_flashcard" && ratingButtons}
+                            {current.source === "study_set" && selfGradeButtons((knewIt) => void gradeStudySet(knewIt))}
+                          </>
                         )}
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Explanation (MCQ, after answering) */}
-                {current.kind === "mcq" && selected !== null && current.explanation && (
+                {/* Explanation (weak-spot MCQ, after answering) */}
+                {current.source === "weak_spot" && current.kind === "mcq" && selected !== null && current.explanation && (
                   <div
                     className="mt-4 rounded-xl border p-4 animate-slide-up"
                     style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
@@ -432,10 +721,25 @@ export default function ReviewPage() {
                   </div>
                 )}
 
+                {/* Explanation (study-set MCQ: the card back, after answering) */}
+                {current.source === "study_set" && current.kind === "set_mcq" && selected !== null && current.correctAnswer && (
+                  <div
+                    className="mt-4 rounded-xl border p-4 animate-slide-up"
+                    style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
+                  >
+                    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/50 mb-1.5">why</p>
+                    <p className="font-syne text-cream/75 text-sm leading-relaxed italic">{current.correctAnswer}</p>
+                  </div>
+                )}
+
                 {/* Result banner + Next */}
                 {lastResult && (
                   <div className="mt-5 animate-slide-up">
-                    {lastResult.mastered ? (
+                    {!lastResult.success ? (
+                      <p className="text-center mb-4 font-syne text-sm text-amber-400/80">
+                        That grade did not save. This card stays in your queue.
+                      </p>
+                    ) : lastResult.mastered ? (
                       <div className="flex items-center gap-2 justify-center mb-4 font-syne text-sm" style={{ color: "#FFD700" }}>
                         <Sparkle size={16} weight="fill" aria-hidden="true" />
                         Mastered. This one is retired from your review deck.
@@ -443,6 +747,11 @@ export default function ReviewPage() {
                     ) : lastResult.correct ? (
                       <p className="text-center mb-4 font-syne text-sm text-green-400/90">
                         Nice. You will see this again later, spaced further out.
+                        {lastResult.coinsAwarded > 0 && (
+                          <span className="block mt-1" style={{ color: "#FFD700" }}>
+                            +{lastResult.coinsAwarded} Fangs
+                          </span>
+                        )}
                       </p>
                     ) : (
                       <p className="text-center mb-4 font-syne text-sm text-red-400/80">
@@ -479,11 +788,17 @@ export default function ReviewPage() {
                 <p className="font-bebas text-5xl text-cream tracking-wider mb-1">
                   {correctCount} / {reviewed}
                 </p>
-                <p className="text-cream/60 text-sm font-syne mb-8">
+                <p className="text-cream/60 text-sm font-syne mb-2">
                   {masteredCount > 0
                     ? `You mastered ${masteredCount} weak spot${masteredCount === 1 ? "" : "s"} this round.`
                     : "Every rep makes the next one easier."}
                 </p>
+                {fangsEarned > 0 && (
+                  <p className="font-syne text-sm mb-8" style={{ color: "#FFD700" }}>
+                    +{fangsEarned} Fangs from vocab reviews
+                  </p>
+                )}
+                {fangsEarned === 0 && <div className="mb-8" />}
 
                 <div className="flex flex-col sm:flex-row gap-2.5 justify-center max-w-md mx-auto">
                   <button

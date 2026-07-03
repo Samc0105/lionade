@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
 import { sm2Advance } from "@/lib/vocab";
+import { logReviewEvent } from "@/lib/review-hub";
 
 /**
  * POST /api/vocab/review/[id]
@@ -100,6 +101,10 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
       { status: 409 },
     );
   }
+
+  // Retention log for the Review Hub stat — fire-and-forget semantics, never
+  // throws, silently no-ops until the HELD review_events table is applied.
+  await logReviewEvent(userId, "vocab", correct);
 
   // 3. Award +2 Fangs on correct answer (multiplier-aware, cashable).
   let coinsAwarded = 0;

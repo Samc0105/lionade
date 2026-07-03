@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { gradeReview, type WeakSpotRow } from "@/lib/weak-spot-review";
+import { logReviewEvent } from "@/lib/review-hub";
+import { isMissingSchema } from "@/lib/db/missing-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,14 @@ export const dynamic = "force-dynamic";
 
 const BASE_COLS = "id, user_id, material_id, question_text, correct_answer, miss_count, last_seen_at";
 const SR_COLS = `${BASE_COLS}, review_streak, review_interval_days`;
+const SM2_COLS = `${SR_COLS}, ease_factor, next_due_at`;
+
+// Which optional-column tier is live? Detected per request by stepping the
+// select down on a column error — mirrors lib/review-hub's read tiers.
+//   "sm2"     both HELD migrations applied (20260701120000 + 20260702100000)
+//   "leitner" only 20260701120000 applied
+//   "base"    neither applied
+type SrTier = "sm2" | "leitner" | "base";
 
 const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 
@@ -61,38 +71,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  // 1) Read the row (SR columns if present), scoped to the authed user.
-  let row: WeakSpotRow & { user_id: string };
-  let hasSrColumns = true;
+  // 1) Read the row (richest optional-column tier first), scoped to the
+  //    authed user. A column error steps down a tier; only a base-tier error
+  //    is a real failure.
+  let row: (WeakSpotRow & { user_id: string }) | null = null;
+  let tier: SrTier = "sm2";
   {
-    const rich = await supabaseAdmin
-      .from("ninny_wrong_answers")
-      .select(SR_COLS)
-      .eq("id", id)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (rich.error) {
-      hasSrColumns = false;
-      const base = await supabaseAdmin
+    const tiers: { tier: SrTier; cols: string }[] = [
+      { tier: "sm2", cols: SM2_COLS },
+      { tier: "leitner", cols: SR_COLS },
+      { tier: "base", cols: BASE_COLS },
+    ];
+    for (const t of tiers) {
+      const res = await supabaseAdmin
         .from("ninny_wrong_answers")
-        .select(BASE_COLS)
+        .select(t.cols)
         .eq("id", id)
         .eq("user_id", userId)
         .maybeSingle();
-      if (base.error) {
-        console.error("[ninny/review/grade] read:", base.error.message);
+      if (res.error) {
+        // Only a MISSING-SCHEMA error (held column migration) steps a tier
+        // down. Any other error (network blip, permissions, timeout) used to
+        // silently degrade the tier and drop this grade's SM-2 columns from
+        // the write — surface it as a real failure instead.
+        if (t.tier !== "base" && isMissingSchema(res.error)) {
+          continue; // held columns missing — try the next tier down
+        }
+        console.error("[ninny/review/grade] read:", res.error.message);
         return NextResponse.json({ error: "Failed to read weak spot" }, { status: 500 });
       }
-      if (!base.data) {
+      if (!res.data) {
         return NextResponse.json({ error: "Weak spot not found" }, { status: 404 });
       }
-      row = base.data as unknown as WeakSpotRow & { user_id: string };
-    } else {
-      if (!rich.data) {
-        return NextResponse.json({ error: "Weak spot not found" }, { status: 404 });
-      }
-      row = rich.data as unknown as WeakSpotRow & { user_id: string };
+      tier = t.tier;
+      row = res.data as unknown as WeakSpotRow & { user_id: string };
+      break;
+    }
+    if (!row) {
+      return NextResponse.json({ error: "Weak spot not found" }, { status: 404 });
     }
   }
 
@@ -151,9 +167,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 3) Advance the SR schedule.
+  // 3) Advance the SR schedule (SM-2: ease moves with the grade; at the
+  //    default ease this degrades exactly to the old Leitner intervals).
   const outcome = gradeReview(
-    { miss_count: row.miss_count ?? 1, review_streak: row.review_streak ?? 0 },
+    {
+      miss_count: row.miss_count ?? 1,
+      review_streak: row.review_streak ?? 0,
+      ease_factor: row.ease_factor ?? undefined,
+    },
     correct,
   );
 
@@ -168,6 +189,8 @@ export async function POST(req: NextRequest) {
       console.error("[ninny/review/grade] delete:", delErr.message);
       return NextResponse.json({ error: "Failed to update weak spot" }, { status: 500 });
     }
+    // Retention log — fail-soft no-op until the HELD review_events table exists.
+    await logReviewEvent(userId, "weak_spot", correct);
     return NextResponse.json({
       success: true,
       correct,
@@ -177,14 +200,18 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Not mastered — update state. Always safe columns; SR columns only if present.
+  // Not mastered — update state. Always safe columns; held columns per tier.
   const update: Record<string, unknown> = {
     miss_count: outcome.newMissCount,
     last_seen_at: outcome.lastSeenAtISO,
   };
-  if (hasSrColumns) {
+  if (tier === "leitner" || tier === "sm2") {
     update.review_streak = outcome.newReviewStreak;
     update.review_interval_days = outcome.nextIntervalDays;
+  }
+  if (tier === "sm2") {
+    update.ease_factor = outcome.newEaseFactor;
+    update.next_due_at = outcome.nextDueAtISO;
   }
 
   const { error: updErr } = await supabaseAdmin
@@ -197,6 +224,9 @@ export async function POST(req: NextRequest) {
     console.error("[ninny/review/grade] update:", updErr.message);
     return NextResponse.json({ error: "Failed to update weak spot" }, { status: 500 });
   }
+
+  // Retention log — fail-soft no-op until the HELD review_events table exists.
+  await logReviewEvent(userId, "weak_spot", correct);
 
   return NextResponse.json({
     success: true,
