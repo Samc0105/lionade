@@ -13,7 +13,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown, Terminal } from "@phosphor-icons/react";
+import { Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown, Terminal, UsersThree, Stack, Globe } from "@phosphor-icons/react";
 import { usePlan } from "@/lib/use-plan";
 import CountUp from "@/components/CountUp";
 
@@ -102,21 +102,18 @@ export default function LearnPage() {
   );
   const missions: Mission[] = missionsData ?? [];
 
-  // Weak-spot review — how many previously-missed questions are DUE right now.
-  // Drives the "Review N weak spots" entry card. Fails soft to 0 (card hidden).
+  // Review Hub — how many items across ALL spaced-repetition sources (weak
+  // spots + vocab words + class flashcards) are DUE right now. Drives the
+  // "Review Hub" entry card. Fails soft to 0 (card hidden).
   const { data: reviewData } = useSWR(
-    user?.id ? `weak-spot-review-count/${user.id}` : null,
+    user?.id ? `review-hub-count/${user.id}` : null,
     async () => {
-      const res = await apiGet<{ dueCount: number; totalWeakSpots: number }>(
-        "/api/ninny/review?limit=1",
-      );
-      return res.ok && res.data
-        ? { dueCount: res.data.dueCount, totalWeakSpots: res.data.totalWeakSpots }
-        : { dueCount: 0, totalWeakSpots: 0 };
+      const res = await apiGet<{ total: number }>("/api/review/queue?limit=1");
+      return res.ok && res.data ? { total: res.data.total } : { total: 0 };
     },
     { keepPreviousData: true },
   );
-  const dueWeakSpots = reviewData?.dueCount ?? 0;
+  const dueReviewItems = reviewData?.total ?? 0;
 
   const recentActivity = quizHistory.slice(0, 5);
   const dailyGoal = 10;
@@ -389,10 +386,10 @@ export default function LearnPage() {
               </div>
             </Link>
 
-            {/* Review your weak spots — only shows when questions are DUE for
-                spaced-repetition review. Resurfaces previously-missed Ninny
-                questions until they're mastered. */}
-            {dueWeakSpots > 0 && (
+            {/* Review Hub — only shows when items are DUE for spaced-repetition
+                review. One session over missed Ninny questions, vocab words, class
+                flashcards, and study-set cards (merged by /api/review/queue). */}
+            {dueReviewItems > 0 && (
               <Link
                 href="/learn/review"
                 className="fluid-card-hover press-feedback group mt-3 block rounded-[10px] p-5"
@@ -400,7 +397,7 @@ export default function LearnPage() {
                   background: "linear-gradient(110deg, rgba(168,85,247,0.14) 0%, rgba(168,85,247,0.05) 55%, rgba(12,16,32,0.95) 100%)",
                   border: "1px solid rgba(168,85,247,0.32)",
                 }}
-                aria-label={`Review your weak spots. ${dueWeakSpots} question${dueWeakSpots === 1 ? "" : "s"} due for review.`}
+                aria-label={`Review hub. ${dueReviewItems} item${dueReviewItems === 1 ? "" : "s"} due for review.`}
               >
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.4)" }}>
@@ -408,13 +405,13 @@ export default function LearnPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-bebas text-xl text-cream tracking-wider leading-none">REVIEW WEAK SPOTS</p>
+                      <p className="font-bebas text-xl text-cream tracking-wider leading-none">REVIEW HUB</p>
                       <span className="font-mono text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded" style={{ background: "rgba(168,85,247,0.18)", color: "#C79BFF", border: "1px solid rgba(168,85,247,0.35)" }}>
-                        {dueWeakSpots} due
+                        {dueReviewItems} due
                       </span>
                     </div>
                     <p className="text-cream/65 text-xs mt-1.5">
-                      {dueWeakSpots} question{dueWeakSpots === 1 ? "" : "s"} you missed {dueWeakSpots === 1 ? "is" : "are"} ready to drill. Nail {dueWeakSpots === 1 ? "it" : "them"} to lock {dueWeakSpots === 1 ? "it" : "them"} in.
+                      {dueReviewItems} item{dueReviewItems === 1 ? "" : "s"} from your weak spots, vocab, and class cards {dueReviewItems === 1 ? "is" : "are"} ready to drill. Clear the queue to lock {dueReviewItems === 1 ? "it" : "them"} in.
                     </p>
                   </div>
                   <ArrowRight size={18} weight="bold" color="#A855F7" aria-hidden="true" className="flex-shrink-0 group-hover:translate-x-1 transition-transform" />
@@ -434,6 +431,36 @@ export default function LearnPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-syne font-semibold text-sm text-cream leading-tight">Subjects</p>
                     <p className="text-cream/55 text-[10px] font-mono">7 learning paths</p>
+                  </div>
+                  <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
+                </Link>
+              </FeatureGate>
+
+              <FeatureGate feature="learn.sets" compact>
+                <Link
+                  href="/learn/sets"
+                  className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#FB923C]/30 transition-colors text-left"
+                  aria-label="Study sets, paste anything and get an instant deck"
+                >
+                  <Stack size={18} weight="duotone" color="#FB923C" aria-hidden="true" className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-syne font-semibold text-sm text-cream leading-tight">Study Sets</p>
+                    <p className="text-cream/55 text-[10px] font-mono">paste notes, get a deck</p>
+                  </div>
+                  <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
+                </Link>
+              </FeatureGate>
+
+              <FeatureGate feature="library" compact>
+                <Link
+                  href="/library"
+                  className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#2DD4BF]/30 transition-colors text-left"
+                  aria-label="Community library of shared study sets"
+                >
+                  <Globe size={18} weight="duotone" color="#2DD4BF" aria-hidden="true" className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-syne font-semibold text-sm text-cream leading-tight">Library</p>
+                    <p className="text-cream/55 text-[10px] font-mono">clone community decks</p>
                   </div>
                   <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
                 </Link>
@@ -489,6 +516,22 @@ export default function LearnPage() {
                 <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
               </Link>
             </div>
+
+            {/* Focus Rooms — bounded body-doubling. One quiet entry card. */}
+            <FeatureGate feature="focus_rooms" compact>
+              <Link
+                href="/focus/rooms"
+                className="group mt-2 flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#2DD4BF]/30 transition-colors text-left"
+                aria-label="Focus Rooms, lock in with friends on one shared timer"
+              >
+                <UsersThree size={18} weight="duotone" color="#2DD4BF" aria-hidden="true" className="flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Focus Rooms</p>
+                  <p className="text-cream/55 text-[10px] font-mono">lock in with friends · one shared timer · group bonus</p>
+                </div>
+                <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-[#2DD4BF] transition-colors" />
+              </Link>
+            </FeatureGate>
           </section>
 
           {/* ═══ 4. Two-column content area ═══ */}

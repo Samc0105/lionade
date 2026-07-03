@@ -39,6 +39,11 @@ export const FEATURE_CATALOG: FeatureNode[] = [
   { key: "learn.paths", label: "Learning paths", parentKey: "learn" },
   { key: "learn.recent_activity", label: "Recent activity", parentKey: "learn" },
 
+  { key: "focus_rooms", label: "Focus Rooms", parentKey: null },
+
+  { key: "library", label: "Community Library", parentKey: null },
+  { key: "learn.sets", label: "Study Sets", parentKey: "learn" },
+
   { key: "social", label: "Social hub", parentKey: null },
   { key: "social.circle_pulse", label: "Circle pulse", parentKey: "social" },
   { key: "social.showdown", label: "Weekly showdown", parentKey: "social" },

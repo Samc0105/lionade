@@ -627,10 +627,27 @@ const ROUTE_LIMITS: RouteLimit[] = [
       p === "/api/spin/roll" ||
       p === "/api/login-bonus" ||
       p === "/api/streak/freeze" ||
-      /^\/api\/mastery\/sessions\/[^/]+\/complete$/.test(p),
+      /^\/api\/mastery\/sessions\/[^/]+\/complete$/.test(p) ||
+      // 2026-07-02 web feature batch: focus-room completion pays Fangs,
+      // library tips move Fangs between users, and the pacts GET grants
+      // milestone Fangs via its lazy reconcile.
+      /^\/api\/focus-rooms\/[^/]+\/complete$/.test(p) ||
+      /^\/api\/library\/[^/]+\/tip$/.test(p) ||
+      p === "/api/pacts",
     max: 60,
     windowMs: 60 * 1000,
     keyPrefix: "fin",
+  },
+
+  // Study-set AI generation — a real AI spend surface (gpt-4o class). The
+  // route enforces a 10/day per-user cap; this is the burst-level defense in
+  // front of it (mirrors the ninny/generate treatment).
+  {
+    test: (p) => p === "/api/study-sets/generate",
+    method: "POST",
+    max: 6,
+    windowMs: 60 * 1000,
+    keyPrefix: "study-set-gen",
   },
 
   // Referral claim — a state-mutating, abuse-relevant write (binding attempts,

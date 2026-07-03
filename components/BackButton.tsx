@@ -23,6 +23,7 @@ const PARENT_PATHS: Record<string, string> = {
   "/learn/resume-coach": "/learn",
   "/learn/mastery": "/learn",
   "/academia": "/learn",
+  "/focus/rooms": "/learn",
   "/study-dna": "/dashboard",
   "/classes": "/dashboard",
   "/quiz": "/learn",
@@ -68,6 +69,7 @@ const PARENT_LABELS: Record<string, string> = {
   "/compete/arena": "Arena",
   "/games": "Games",
   "/games/party": "Party",
+  "/focus/rooms": "Focus Rooms",
   "/profile": "Profile",
   "/quiz": "Quiz",
   "/settings": "Settings",
@@ -91,6 +93,9 @@ function getParentPath(currentPath: string): string | null {
 
   // /games/party/[code] → /games/party
   if (/^\/games\/party\/[^/]+$/.test(currentPath)) return "/games/party";
+
+  // /focus/rooms/[code] → /focus/rooms
+  if (/^\/focus\/rooms\/[^/]+$/.test(currentPath)) return "/focus/rooms";
 
   // /compete/arena/[mode]/[matchId] → /compete/arena
   if (/^\/compete\/arena\/[^/]+\/[^/]+$/.test(currentPath)) return "/compete/arena";
