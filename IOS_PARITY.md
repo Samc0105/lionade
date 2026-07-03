@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03: Five-feature web batch (WEB-ONLY v1, deliberate)
+
+Unified Review Hub, Focus Rooms, Streak Pacts, Ninny Study Sets, and the
+Community Library shipped on feat/web-new-features (not merged). All five are
+WEB-ONLY v1 by design: iOS is stabilizing TestFlight build 26 and ports come
+after tester feedback. Natural iOS order when the time comes: Review Hub
+(the iOS weak-spot/vocab surfaces already exist), then Study Sets, then Pacts;
+Focus Rooms and the Library need the most new native surface.
+
 ## 2026-07-02: Post-build-26 polish stack (header / micro-animations / starfield)
 
 Three stacked branches off release/testflight-01, one consolidated review:

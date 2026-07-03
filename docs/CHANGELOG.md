@@ -4,6 +4,38 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-03 - Five-feature web batch (branch feat/web-new-features, NOT merged)
+
+All five Phase-1 proposals shipped with real Supabase wiring, one commit per
+feature, a consolidated 3-lens review (economy/security + correctness +
+design), and tsc + next build gates green. ALL SIX MIGRATIONS ARE HELD
+(20260702090000 ledger types + tip_spend RPC source, 100000 review-hub SM-2,
+110000 focus rooms, 120000 streak pacts, 130000 study sets, 140000 library
+addendum) - every feature fails soft with honest copy until Sam applies them,
+and 090000 must be applied AFTER the still-unapplied 20260618130000.
+
+- Unified Review Hub: one due queue over weak spots + vocab + class
+  flashcards + study-set cards; weak spots upgraded to true SM-2; 7-day
+  retention stat; per-source fail-soft. WHY: three SR systems existed with no
+  front door; retention is the product.
+- Focus Rooms: bounded 25/45/60 body-doubling sessions on the party-room
+  skeleton, shared countdown + presence, solo pay + a small group bonus under
+  the shared daily cap, upside-only. WHY: the 2026 study-with-me mechanic,
+  framed as a bounded tool with hard session ends.
+- Streak Pacts: duo streaks that tick only when BOTH friends study; 7/30-day
+  milestones pay both sides; daily nudge. WHY: the proven social-retention
+  glue Lionade's streaks lacked.
+- Ninny Study Sets: paste up to 20KB -> AI deck preview -> trim -> save;
+  cards feed the Hub scheduler. NEW AI SPEND SURFACE (gpt-4o class): 10/day
+  per-user cap + a 6/min middleware bucket + ai_call_log telemetry.
+- Community Library: moderated publishing, clone-with-fresh-SR, upside-only
+  tips via the new cashable-only tip_spend source (closes the laundering
+  vector), hardened reports + an admin resolve queue.
+
+Security review blockers fixed pre-commit: owner-JWT writes on study
+sets/cards removed (moderation bypass + card injection), post-publish edits
+auto-unpublish, float32 ease CHECK landmine defused in the held migrations.
+
 ## 2026-07-01
 
 - fix+feat: **back buttons everywhere + app-wide screen transitions** (web; commits `a55a2b4`, `eb03b2f`; no migration). Audited via a parallel workflow. **Back buttons:** the audit found the invisible-back-button bug class (page renders `<BackButton/>` but `getParentPath` returns null) on `/help`, `/security`, `/pricing`, `/account`, plus sub-pages with no back affordance at all. Fixed with a **fail-safe fallback** in `getParentPath` (derive the parent by stripping the last path segment when no map entry matches, with a `TOP_LEVEL` guard so hub pages never grow a stray button) so a route can never yield an invisible back button; still route-derived so it survives refresh / direct load. Backfilled the parent map + labels + dynamic-route regexes, rendered `<BackButton/>` once in the settings layout (covers all 8 sub-sections) and on `/learn/vocab` + `/classes`. **Screen transitions:** every route change now fades + slides up (~260ms, `--ease-out-expo`) — the existing SSR-safe `PageTransition` wrapper upgraded from its near-invisible 80ms opacity to a real enter with an INSTANT exit (so `mode="wait"` adds no delay); GPU-only, and reduced-motion users still get the plain synchronous swap (the proven hydration mounted-gate is untouched). Added `.lift` / `.press` / `.interactive` micro-interaction utility classes (palette-aligned, reduced-motion guarded). tsc clean; `next build` green. **iOS:** web navigation + web motion; iOS has its own nav + Reanimated motion. **Migration:** none.
