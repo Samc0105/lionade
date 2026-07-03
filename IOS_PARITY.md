@@ -7,6 +7,26 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03: iOS Word Banks — save-error diagnosis + Add-tab restructure (fix/ios-wordbanks)
+
+**The save bug is a WEB-SIDE blocker, not an iOS bug.** General-bank word saves
+fail in prod because `vocab_words.source_lang`/`target_lang` are still NOT NULL —
+web migration `20260620150000_vocab_words_nullable_lang.sql` exists but was never
+applied. The web insert route deliberately sends NULL for general banks (they have
+no language pair), so Postgres rejects every insert with 23502. Prod smoking gun:
+5 general banks, 0 words; 1 language bank, 5 words. **Fix = Sam applies the web
+migration** (iOS supplying fake langs would poison the data model). iOS shipped
+what it owns: structured save-failure logging, per-case error copy (409 dupe /
+network / known-issue 500 gated on the exact server fingerprint with a removal
+TODO / capped passthrough), a proper InlineError state under Lock it in, Define
+demoted to outline secondary, and the header zone regrouped (bank rail + streak
+pill + mode tabs + "ADDING TO" subtitle, hairline divider). Kept FROM AI badge,
+counters, helper text. ios-code-reviewer approved (should-fix + nit applied),
+tsc clean, simulator-verified incl. a live 23502 capture. Commit `47064e3`, NOT
+pushed — rides the next batched build. Web `/learn/vocab` AddWordForm hits the
+same 23502 until the migration runs; its error surfacing was not upgraded in
+this pass (iOS-only ticket) — parity note for a future web pass.
+
 ## 2026-07-03: Five-feature web batch (WEB-ONLY v1, deliberate)
 
 Unified Review Hub, Focus Rooms, Streak Pacts, Ninny Study Sets, and the
