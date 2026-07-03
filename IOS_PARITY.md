@@ -7,6 +7,27 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-03: iOS UX polish — centered modals + Study logo + Meet Ninny flow + freestyle sweep (feat/ios-polish-all)
+
+4-part CEO ticket, each part on its own branch, merged for verification onto
+`feat/ios-polish-all` (stack: web-ports-2 → modal-system → meet-ninny → freestyle
++ study-logo). tsc clean, one consolidated ios-code-reviewer pass, simulator
+walkthrough screenshotted. NOT pushed. VP0/Mobbin MCP was not connected; all
+design decisions followed Apple HIG native grammar + Duolingo (Part 3) per the
+ticket, noted at each site.
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Centered modal system** (`components/ui/CenteredModal.tsx`) | ✅ web uses dark-glass centered modals already | ✅ shipped — **iOS now matches web's centered grammar** | Every bottom sheet app-wide (24 consumers + security.tsx's pageSheet) converted to a centered floating card over a systemUltraThinMaterialDark blur + 40% dim: scale 0.92→1 + fade 220ms spring (Reduce-Motion instant), backdrop-tap + X dismiss, whole-card keyboard shift with a keyboard-aware height clamp, `locked` prop for in-flight async. `components/Sheet.tsx` + the @gorhom portal host RETIRED (package still installed, unimported — removal is an EAS-build change for later). Only OS-owned surfaces remain bottom-anchored (share sheet, photo/camera/document pickers, Alert, the 2 full-screen RN Modals). This CLOSES a web↔iOS presentation divergence (web was already centered). |
+| **Study tab lion emblem** (`components/study/StudyHeaderLogo.tsx`) | 🚫 web has its own top-nav branding | 🚫 N/A — iOS-native identity anchor | The login lion mark (not the wordmark) at 30pt, centered above the greeting, static/flat, Study tab ONLY. Reusable component. Native quiet-brand-mark convention; no web counterpart needed. |
+| **Meet Ninny 3-step flow** (`components/ninny/SetupFlow.tsx`) | 🟡 web's Ninny setup is a single screen | ✅ iOS split into a Duolingo-style flow — **iOS now LEADS** | One-question-per-screen (topic → difficulty → mode) with a 1-of-3 step indicator, back-preserves-state, slide/fade transitions. Screen 1 fits with no scroll; 6 suggestion chips cut to 3 (the range trio). ninny.tsx dropped 2609→1760 lines. FLAG: web could adopt the same stepped flow — logged as a potential web parity pass (web currently crams it on one screen). |
+| **Canonical NinnyOrb + polish** (`components/ninny/NinnyOrb.tsx`) | 🚫 web has its own Ninny iconography | 🚫 N/A — iOS visual consistency | Reusable purple-orb Ninny anchor, applied to the neutral Ninny moments (hero + generating). Themed-surface Ninny sites (Ninny's Notes blue card, Study-with-Ninny grid tile, Mastery "Teach me" blue pill) LOGGED to `lionade-ios/docs/PARITY_TODO.md` as a design call (a purple orb would clash) rather than force-fixed. Also: tab top-padding aligned (Games 12→8), verified ZERO function-form Pressables + ZERO user-facing "coins" strings app-wide. |
+
+**PARITY_TODO correction (ticket-requested):** the ticket asked to flag "Study
+Sets appears to exist on iOS but not web." It exists on BOTH — web shipped
+`/learn/sets` in the 2026-07-02 batch, deployed 2026-07-03; iOS ported against
+those live routes. No gap. Recorded in `lionade-ios/docs/PARITY_TODO.md`.
+
 ## 2026-07-03 (wave 2): iOS ports — Focus Rooms + Community Library + Streak Freeze + Referral (feat/ios-web-ports-2)
 
 Sam: "Keep working in features that we don't have on the iPhone." Four more
