@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
   const { data: reports, error } = await supabaseAdmin
     .from("library_reports")
-    .select("id, set_id, reporter_id, reason, status, created_at")
+    .select("id, set_id, reporter, reason, status, created_at")
     .eq("status", "open")
     .order("created_at", { ascending: true })
     .limit(100);
