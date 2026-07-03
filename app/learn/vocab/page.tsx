@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
-import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass, ArrowsClockwise } from "@phosphor-icons/react";
+import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass, ArrowsClockwise, CaretLeft } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import dynamic from "next/dynamic";
@@ -156,8 +156,8 @@ export default function VocabPage() {
   );
   const activeStreak: BankStreak | null = useMemo(() => {
     if (!activeBank) return null;
-    const found = streakData?.streaks?.find(s => s.bank_id === activeBank.id);
-    return found ?? { bank_id: activeBank.id, bank_name: activeBank.name, count: 0, lastDay: null };
+    const found = streakData?.streaks?.find(s => s.bankId === activeBank.id);
+    return found ?? { bankId: activeBank.id, bankName: activeBank.name, count: 0, lastDay: null, maxStreak: 0 };
   }, [streakData, activeBank]);
 
   // Error vs genuinely-empty: a fetch failure also resolves to banks=[] with
@@ -245,7 +245,28 @@ export default function VocabPage() {
           ) : banksFailed ? (
             <BanksErrorState onRetry={() => mutateBanks()} />
           ) : noBanks ? (
-            <EmptyBanksState onCreate={() => setShowCreateModal(true)} />
+            /* Zero banks: the tab row above only renders once a bank exists,
+               so Discover gets its own escape hatch here. Cloning a bank from
+               Discover mutates the bank list, which flips this branch over to
+               the full tabbed UI (with Discover still active). */
+            tab === "discover" ? (
+              <section className="animate-slide-up">
+                <button
+                  type="button"
+                  onClick={() => setTab("add")}
+                  className="mb-5 inline-flex items-center gap-1.5 font-syne text-xs font-bold text-cream/60 hover:text-cream transition-colors"
+                >
+                  <CaretLeft size={12} weight="bold" aria-hidden="true" />
+                  <span>Back</span>
+                </button>
+                <DiscoverTab onCloned={() => mutateBanks()} />
+              </section>
+            ) : (
+              <EmptyBanksState
+                onCreate={() => setShowCreateModal(true)}
+                onBrowse={() => setTab("discover")}
+              />
+            )
           ) : activeBank ? (
             <>
               {/* Bank selector */}
@@ -354,7 +375,7 @@ function BanksErrorState({ onRetry }: { onRetry: () => void }) {
 
 /* ── Empty state ───────────────────────────────────────────────────────── */
 
-function EmptyBanksState({ onCreate }: { onCreate: () => void }) {
+function EmptyBanksState({ onCreate, onBrowse }: { onCreate: () => void; onBrowse: () => void }) {
   return (
     <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-7 sm:p-10 text-center animate-slide-up">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/75 mb-2">
@@ -394,6 +415,14 @@ function EmptyBanksState({ onCreate }: { onCreate: () => void }) {
           </p>
         </button>
       </div>
+      <button
+        type="button"
+        onClick={onBrowse}
+        className="mt-6 inline-flex items-center gap-1.5 font-syne text-xs font-bold text-electric/80 hover:text-electric transition-colors"
+      >
+        <Compass size={14} weight="bold" aria-hidden="true" />
+        <span>or browse what others made</span>
+      </button>
     </div>
   );
 }

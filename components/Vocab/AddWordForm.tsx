@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Lightbulb, Translate, Books, Sparkle, Pencil } from "@phosphor-icons/react";
+import { ArrowRight, Lightbulb, Translate, Books, Sparkle, Pencil, Warning } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 import { toastSuccess, toastError } from "@/lib/toast";
 import { detectLanguage, type DetectionResult } from "@/lib/ml/language-detect";
@@ -66,6 +66,10 @@ export default function AddWordForm({ bank, onSaved }: Props) {
   const [busy, setBusy] = useState(false);
   const [userDefinition, setUserDefinition] = useState("");
   const [saving, setSaving] = useState(false);
+  // Persistent inline save-failure message under "Lock it in" (iOS parity —
+  // see lionade-ios components/vocab/AddWordForm.tsx). Cleared when the user
+  // edits the term, retries, looks up a new word, or switches banks.
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Reset everything when the active bank changes — the form belongs to the
   // bank, not to the page.
@@ -76,6 +80,7 @@ export default function AddWordForm({ bank, onSaved }: Props) {
     setDefineSource(null);
     setDefineFailed(false);
     setUserDefinition("");
+    setSaveError(null);
   }, [bank.id]);
 
   // Language detect on the self-definition (LANGUAGE banks only).
@@ -122,12 +127,14 @@ export default function AddWordForm({ bank, onSaved }: Props) {
     setDefineFailed(false);
     setUserDefinition("");
     setLangDetect(null);
+    setSaveError(null);
   };
 
   const handleAction = async () => {
     const cleaned = word.trim().slice(0, MAX_WORD_LEN);
     if (!cleaned || busy) return;
     setBusy(true);
+    setSaveError(null);
     setTranslation(null);
     setTermDefinition(null);
     setDefineSource(null);
@@ -178,6 +185,7 @@ export default function AddWordForm({ bank, onSaved }: Props) {
     const cleanedSelf = userDefinition.trim().slice(0, MAX_DEFINITION_LEN);
     if (!cleanedWord || !cleanedSelf) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const body: Record<string, unknown> = {
         bank_id: bank.id,
@@ -200,13 +208,38 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         // Wikipedia/AI fetch, defineSource is null — treat as manual.
         body.definition_source = defineSource ?? "manual";
       }
-      const { ok, data, error } = await apiPost<{ coinsAwarded: number }>(
+      const { ok, status, data, error } = await apiPost<{ coinsAwarded: number }>(
         "/api/vocab/words",
         body,
       );
       if (!ok || !data) {
-        console.error("[vocab:save-word] failed", error);
-        toastError("Couldn't save. Try again.");
+        // The route puts a human string in the body's `error` field; on
+        // failure the shared client keeps the parsed body in `data` and
+        // mirrors that string onto `error` (falling back to a synthetic
+        // "POST /path -> status" we never want to show users).
+        const parsed = data as { error?: unknown } | null;
+        const serverText =
+          typeof parsed?.error === "string" && parsed.error.trim().length > 0
+            ? parsed.error.trim()
+            : null;
+        console.error("[vocab] add-word save failed", {
+          route: "/api/vocab/words",
+          status,
+          serverError: serverText ?? error ?? null,
+          bankKind: bank.kind,
+          payloadKeys: Object.keys(body),
+        });
+        if (status === 409) {
+          setSaveError("Already in this bank.");
+        } else if (status === 0) {
+          setSaveError("Couldn't reach the server. Check your connection and try again.");
+        } else {
+          setSaveError(
+            serverText
+              ? `Couldn't save. Server said: ${serverText.slice(0, 140)}`
+              : "Couldn't save. Try again.",
+          );
+        }
         return;
       }
       const awarded = typeof data.coinsAwarded === "number" ? data.coinsAwarded : 0;
@@ -214,8 +247,12 @@ export default function AddWordForm({ bank, onSaved }: Props) {
       resetForm();
       onSaved?.();
     } catch (e: unknown) {
-      console.error("[vocab:save-word] threw", e);
-      toastError("Couldn't save. Try again.");
+      console.error("[vocab] add-word save threw", {
+        route: "/api/vocab/words",
+        bankKind: bank.kind,
+        error: e instanceof Error ? e.message : String(e),
+      });
+      setSaveError("Couldn't save. Try again.");
     } finally {
       setSaving(false);
     }
@@ -261,7 +298,12 @@ export default function AddWordForm({ bank, onSaved }: Props) {
             id="vocab-word-input"
             type="text"
             value={word}
-            onChange={e => setWord(e.target.value.slice(0, MAX_WORD_LEN))}
+            onChange={e => {
+              setWord(e.target.value.slice(0, MAX_WORD_LEN));
+              // Editing the term is the natural fix for a failed save
+              // (e.g. a duplicate) — retire the stale error.
+              if (saveError) setSaveError(null);
+            }}
             onBlur={e => setWord(e.target.value.trim())}
             onKeyDown={e => {
               if (e.key === "Enter" && canAction) {
@@ -403,6 +445,21 @@ export default function AddWordForm({ bank, onSaved }: Props) {
             <span>{saving ? "Saving..." : "Lock it in"}</span>
             {!saving && <ArrowRight size={16} weight="bold" aria-hidden="true" />}
           </button>
+
+          {/* Persistent save-failure state — sits with the action it belongs
+              to instead of vanishing in a toast. Same red-glass treatment as
+              ReviewQueue's fetch-error card. */}
+          {saveError && (
+            <div
+              role="alert"
+              className="mt-3 flex items-start gap-2 rounded-xl px-3.5 py-2.5 border border-red-400/30 bg-red-400/5 backdrop-blur animate-slide-up"
+            >
+              <Warning size={14} weight="fill" className="text-red-300 mt-0.5 shrink-0" aria-hidden="true" />
+              <p className="font-syne text-xs text-red-300 leading-snug">
+                {saveError}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

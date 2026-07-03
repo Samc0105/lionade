@@ -4,23 +4,24 @@
  * BankStreakPill — compact display for a per-bank vocab review streak.
  *
  * Replaces the old LanguageStreakPill (the language-only V1). Now scoped to a
- * bank_id since vocab data is sliced by Word Bank. Color comes from the bank's
+ * bank since vocab data is sliced by Word Bank. Color comes from the bank's
  * own color so each pill stays visually distinct on the page.
  *
  * Visual: small glass pill with the bank icon (or flame for general banks
- * with no custom icon), the count, and the bank name. When count === 0 it
- * renders a muted "start a streak today" prompt so the surface never feels empty.
+ * with no custom icon), the count, and the bank name. When count === 0 the
+ * pill renders muted (cream accent, no color glow) instead of lit.
+ *
+ * Data shape: the SERVER-TRUE camelCase BankStreak from @lionade/core
+ * (bankId / bankName — see app/api/vocab/streak/route.ts). The pill used to
+ * declare its own snake_case shape, which never matched the live route and
+ * pinned every pill to the zero state. Re-exported so consumers keep
+ * importing the type from here.
  */
 
 import { Fire } from "@phosphor-icons/react";
+import type { BankStreak } from "@lionade/core/api/vocab";
 
-export interface BankStreak {
-  bank_id: string;
-  bank_name: string;
-  count: number;
-  lastDay: string | null;
-  maxStreak?: number;
-}
+export type { BankStreak };
 
 interface Props {
   streak: BankStreak;
@@ -64,7 +65,7 @@ export default function BankStreakPill({ streak, color, icon, size = "md" }: Pro
           : "rgba(255,255,255,0.04)",
         borderColor: isActive ? `${color}55` : "rgba(255,255,255,0.08)",
       }}
-      aria-label={`${streak.count} day ${streak.bank_name} streak`}
+      aria-label={`${streak.count} day ${streak.bankName} streak`}
     >
       {icon ? (
         <span aria-hidden="true" style={{ fontSize: sizing.icon }}>{icon}</span>
@@ -86,7 +87,7 @@ export default function BankStreakPill({ streak, color, icon, size = "md" }: Pro
         <span
           className={`font-mono uppercase tracking-[0.2em] text-cream/65 ${sizing.labelText}`}
         >
-          day {streak.bank_name}
+          day {streak.bankName}
         </span>
       </div>
     </div>

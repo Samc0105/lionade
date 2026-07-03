@@ -79,8 +79,8 @@ export default function ReviewQueue({ bank }: Props) {
   // brand-new bank.
   const emptyStateUnresolved = dueQueueEmpty && allWordsData === undefined;
   const streak: BankStreak = useMemo(() => {
-    const found = streakData?.streaks?.find(s => s.bank_id === bank.id);
-    return found ?? { bank_id: bank.id, bank_name: bank.name, count: 0, lastDay: null };
+    const found = streakData?.streaks?.find(s => s.bankId === bank.id);
+    return found ?? { bankId: bank.id, bankName: bank.name, count: 0, lastDay: null, maxStreak: 0 };
   }, [streakData, bank.id, bank.name]);
 
   // Index into queue. We DON'T mutate the queue itself between answers — we
