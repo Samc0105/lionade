@@ -373,7 +373,7 @@ export default function CompetePage() {
                     Speed bonus for fast answers. Winner takes the wagered coins.
                   </p>
                   <p className="text-cream/55 text-xs mb-6 flex items-center justify-center gap-1">
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10 to 100 Fangs
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/compete/arena/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">

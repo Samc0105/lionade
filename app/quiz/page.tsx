@@ -793,7 +793,7 @@ export default function QuizPage() {
                     className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                     style={{ background: `${color}15`, border: `1px solid ${color}30`, color: difficulty === d ? color : `${color}80` }}
                   >
-                    {mult} coins
+                    {mult} Fangs
                   </span>
                 </button>
               ))}
