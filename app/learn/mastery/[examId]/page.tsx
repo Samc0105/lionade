@@ -5,7 +5,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
 import { CaretLeft, CaretUp, CaretDown, Clock, Sparkle, ShareNetwork } from "@phosphor-icons/react";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import dynamic from "next/dynamic";
 const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
@@ -720,7 +719,6 @@ export default function MasterySessionPage() {
   if (bootError) {
     return (
       <div className="min-h-screen bg-navy text-cream pt-12">
-        <Navbar />
         <div className="max-w-[720px] mx-auto px-6 py-24 text-center">
           <h1 className="font-bebas text-3xl tracking-wider mb-3">Couldn't load this session</h1>
           <p className="text-[14px] text-cream/70 mb-6">{bootError}</p>
@@ -747,7 +745,6 @@ export default function MasterySessionPage() {
     return (
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
-        <Navbar />
         <div className="max-w-[980px] mx-auto px-6 py-10">
           <div className="h-5 w-28 bg-white/[0.06] rounded-full mb-5 animate-pulse" />
           <div className="h-12 w-80 bg-white/[0.06] rounded-md mb-4 animate-pulse" />
@@ -836,7 +833,6 @@ export default function MasterySessionPage() {
     // need room for the fixed stats bar (~40 px).
     <div className="h-screen bg-navy text-cream overflow-x-hidden overflow-y-hidden flex flex-col pt-12 pb-14 md:pb-10">
       <SpaceBackground />
-      <Navbar />
 
       {/* Top bar — now a regular shrink-0 flex item. No more sticky overlap:
           the chat below can't scroll behind it because the chat has its own

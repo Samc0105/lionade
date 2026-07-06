@@ -10,7 +10,6 @@ import {
   ChatCircleText, GraduationCap, ListChecks, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import RevealText from "@/components/RevealText";
 import { apiDelete, apiPost, swrFetcher } from "@/lib/api-client";
@@ -205,7 +204,6 @@ export default function MasteryLandingPage() {
   return (
     <div className="min-h-screen bg-navy text-cream overflow-x-hidden">
       <SpaceBackground />
-      <Navbar />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-24">
         {/* Breadcrumb — returns to the class notebook if we entered from one,

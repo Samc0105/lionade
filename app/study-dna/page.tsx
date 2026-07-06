@@ -8,7 +8,6 @@ import {
   Target, BookOpen, Clock, Coin, Brain, Lightning, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { swrFetcher } from "@/lib/api-client";
 import dynamic from "next/dynamic";
@@ -85,7 +84,6 @@ export default function StudyDnaPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
-        <Navbar />
 
         <div className="relative z-10 max-w-[1080px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           <Link

@@ -9,7 +9,6 @@ import {
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
@@ -53,7 +52,6 @@ export default function ClassesIndexPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
-        <Navbar />
 
         <div className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           <BackButton />

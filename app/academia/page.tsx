@@ -11,7 +11,6 @@ import {
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import ImportCalendarSheet from "@/components/academia/ImportCalendarSheet";
 import { apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
@@ -164,7 +163,6 @@ export default function AcademiaPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
-        <Navbar />
 
         <FeatureGate feature="academia">
         <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-24">

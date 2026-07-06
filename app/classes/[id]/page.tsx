@@ -9,7 +9,6 @@ import {
   CheckCircle, ArrowRight, DotsThreeVertical, Trash, PencilSimple, X, ImageBroken,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { apiDelete, apiGet, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -121,7 +120,6 @@ export default function ClassNotebookPage() {
       <ProtectedRoute>
         <div className="min-h-screen bg-navy text-cream pt-12">
           <SpaceBackground />
-          <Navbar />
           <div className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
             <Link
               href="/classes"
@@ -182,7 +180,6 @@ export default function ClassNotebookPage() {
       <ProtectedRoute>
         <div className="min-h-screen bg-navy text-cream pt-12">
           <SpaceBackground />
-          <Navbar />
           <div className="max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
             <div className="h-5 w-24 bg-white/[0.06] rounded-full mb-5 animate-pulse" />
             <div className="h-12 w-72 bg-white/[0.06] rounded-md mb-3 animate-pulse" />
@@ -219,7 +216,6 @@ export default function ClassNotebookPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
-        <Navbar />
 
         <div
           className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-12"
