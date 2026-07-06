@@ -39,6 +39,7 @@ import {
   LIBRARY_REPORTS_TABLE,
 } from "@/lib/library/constants";
 import { extractCardText, type CardRow } from "@/lib/library/cards";
+import { awardBadges } from "@/lib/badges";
 
 const FLAGGED_COPY =
   "This set can't be published as written. Please review the title, description, and cards, then try again.";
@@ -196,6 +197,11 @@ export async function POST(
     console.error("[study-sets/publish] publish", pubErr.message);
     return NextResponse.json({ error: "Couldn't update the set." }, { status: 500 });
   }
+
+  // Set Builder badge — first Library publish. Awaited (a serverless lambda
+  // can freeze after the response, dropping a fire-and-forget write) but
+  // fail-soft: awardBadges never throws (lib/badges.ts).
+  await awardBadges(supabaseAdmin, userId, { firstStudySet: true });
 
   return NextResponse.json({ ok: true, isPublic: true, publishedAt });
 }

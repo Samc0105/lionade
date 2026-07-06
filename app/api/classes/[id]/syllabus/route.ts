@@ -241,23 +241,44 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
       // Extract text via pdf-parse v2.
       try {
-        // Dynamic import — pdf-parse pulls in pdfjs which is heavy at boot.
+        // Dynamic import — pdf-parse pulls in pdfjs which is heavy at boot,
+        // and it can throw at require() time (its DOMMatrix polyfill needs
+        // @napi-rs/canvas), so keeping the import inside the try makes a
+        // load failure catchable + loggable. Its worker + native files are
+        // force-included in the serverless bundle via
+        // experimental.outputFileTracingIncludes in next.config.js —
+        // without that, this block was runtime-dead on Vercel.
         const mod = await import("pdf-parse");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
         if (!PDFParse) {
-          return fail("parser_unavailable", "pdf-parse PDFParse export missing");
+          return fail(
+            "parser_unavailable",
+            `pdf-parse PDFParse export missing: ${JSON.stringify({ exports: Object.keys(mod ?? {}), bufBytes: buf.byteLength })}`,
+          );
         }
         const parser = new PDFParse({ data: buf });
-        const result = await parser.getText();
-        rawText = String(result?.text ?? "").replace(/\r\n/g, "\n");
+        try {
+          const result = await parser.getText();
+          rawText = String(result?.text ?? "").replace(/\r\n/g, "\n");
+        } finally {
+          // Free the pdfjs document — warm lambdas reuse the process.
+          await parser.destroy().catch(() => {});
+        }
       } catch (e) {
-        return fail("pdf_extract_failed", `pdf-parse: ${(e as Error).message}`);
+        const err = e as Error;
+        return fail(
+          "pdf_extract_failed",
+          `pdf-parse: ${JSON.stringify({ message: err?.message ?? "unknown", stack: err?.stack, bufBytes: buf.byteLength })}`,
+        );
       }
 
       rawText = rawText.slice(0, MAX_RAW_TEXT_CHARS).trim();
       if (rawText.length < 100) {
-        return fail("not_enough_text", `only ${rawText.length} chars extracted`);
+        return fail(
+          "not_enough_text",
+          `extracted text too short: ${JSON.stringify({ extractedChars: rawText.length, bufBytes: buf.byteLength })}`,
+        );
       }
     }
 
@@ -354,7 +375,11 @@ ${neutralizeTag(rawText, "syllabus")}
       examsCount: parsedExams.length,
     });
   } catch (e) {
-    return fail("unexpected", `unhandled: ${(e as Error).message}`);
+    const err = e as Error;
+    return fail(
+      "unexpected",
+      `unhandled: ${JSON.stringify({ message: err?.message ?? "unknown", stack: err?.stack })}`,
+    );
   }
 }
 

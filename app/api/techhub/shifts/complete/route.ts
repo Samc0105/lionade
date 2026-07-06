@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { shiftPayout, type Difficulty } from "@/lib/liondesk/engine";
+import { awardBadges } from "@/lib/badges";
 
 // ── Server-owned reward ceilings ───────────────────────────────────────────
 // The client NEVER decides the grant. It reports how a shift went; the server
@@ -167,6 +168,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Grant failed." }, { status: 500 });
     }
   }
+
+  // Desk Jockey badge — first banked shift clear. Only on `committed` (a row
+  // was actually inserted/advanced, so this was a real clear, not a racing
+  // loser). Awaited (a serverless lambda can freeze after the response,
+  // dropping a fire-and-forget write) but fail-soft: awardBadges never throws.
+  if (committed) await awardBadges(supabaseAdmin, userId, { firstShift: true });
 
   return NextResponse.json({ ok: true, bestScore, granted: committed ? delta : 0 });
 }

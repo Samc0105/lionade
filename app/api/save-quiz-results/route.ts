@@ -11,6 +11,7 @@ import { BOOSTER_ITEMS } from "@/lib/shop-catalog";
 import { getLevelFromXp } from "@/lib/levels";
 import { grantEarnedCosmetic } from "@/lib/cosmetic-grants";
 import { maybeRewardReferral } from "@/lib/referral";
+import { awardBadges } from "@/lib/badges";
 
 // ── Server-authoritative reward derivation ─────────────────────────────────
 // The base per-correct-answer reward (BEFORE the plan multiplier) used to be
@@ -765,6 +766,20 @@ export async function POST(req: NextRequest) {
           .upsert(toAward, { onConflict: "user_id,achievement_key", ignoreDuplicates: true });
         if (achErr) console.warn("[save-quiz-results] Step 6 achievements WARN:", achErr.message);
       }
+
+      // 6b. Badge awards (user_badges) — the shareable/public-profile catalog,
+      // distinct from the achievements table above. Same computed inputs, one
+      // idempotent upsert inside the helper (fail-soft; a missing badges table
+      // pre-migration is swallowed). Covers first_quiz, quizzes_10/50,
+      // perfect_quiz, streak_3/7/30, and the fangs_1000 balance badge.
+      // Math.max(newStreak, currentStreak) guards the tiny window where the
+      // Step 6 profile re-read races the Step 5 streak write.
+      await awardBadges(supabaseAdmin, userId, {
+        totalQuizzes,
+        perfectQuiz: correctAnswers === totalQuestions && totalQuestions === 10,
+        streak: Math.max(newStreak, currentStreak),
+        fangs: currentCoins,
+      });
     } catch (achException) {
       // Non-fatal — achievements table might not exist yet
       console.warn("[save-quiz-results] Step 6 WARN (non-fatal):", achException);

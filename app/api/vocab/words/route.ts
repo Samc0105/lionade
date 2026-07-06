@@ -5,6 +5,7 @@ import { assertFeatureLive } from "@/lib/feature-flags";
 import { recordFeatureError } from "@/lib/feature-health";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
 import { moderateText, logFlagged } from "@/lib/moderation-ugc";
+import { awardBadges } from "@/lib/badges";
 import {
   isSupportedLang,
   normalizeWord,
@@ -298,6 +299,17 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[vocab/words POST streak exception]", err);
   }
+
+  // 5b. Word Collector badge — fires once the lifetime saved-word count hits
+  //     10. Fire-and-forget (one head-count + an idempotent upsert inside
+  //     lib/badges.ts) so it never delays the save response.
+  void (async () => {
+    const { count } = await supabaseAdmin
+      .from("vocab_words")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    await awardBadges(supabaseAdmin, userId, { wordbankWords: count ?? 0 });
+  })().catch((err) => console.warn("[vocab/words POST badge WARN]", err));
 
   // 6. Final balance.
   const { data: profile } = await supabaseAdmin

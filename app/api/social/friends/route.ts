@@ -5,6 +5,7 @@ import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
 import { notifyUser, DEFAULT_PRIVACY_PREFS, type PrivacyPrefs } from "@/lib/db";
 import { fetchTopFounderFlairByUser } from "@/lib/cosmetics/founder-flair";
+import { awardBadges } from "@/lib/badges";
 
 // GET — List friends + pending requests
 //
@@ -177,24 +178,40 @@ export async function POST(req: NextRequest) {
   if (isDemoUser(userId)) return demoBlockedResponse();
 
   try {
-    const { friendUsername } = await req.json();
-    if (!friendUsername) {
-      return NextResponse.json({ error: "Missing friendUsername" }, { status: 400 });
+    const { friendUsername, friendId } = await req.json();
+    if (!friendUsername && !friendId) {
+      return NextResponse.json({ error: "Missing friendUsername or friendId" }, { status: 400 });
     }
 
-    // Sanitize username — strip ilike wildcards, validate shape
-    const cleanUsername = String(friendUsername).trim().replace(/[%_]/g, "");
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(cleanUsername)) {
-      return NextResponse.json({ error: "Invalid username" }, { status: 400 });
-    }
-
-    // Case-insensitive lookup (wildcards already stripped above). Pulls
-    // `preferences` in the same round trip so the privacy check below is free.
-    const { data: friend } = await supabaseAdmin
+    // Prefer id lookup when the client passes one (search results carry the
+    // profile id) — it sidesteps username-charset pitfalls entirely. Fall
+    // back to username for the manual-entry path. Pulls `preferences` in the
+    // same round trip so the privacy check below is free.
+    let friendQuery = supabaseAdmin
       .from("profiles")
-      .select("id, username, preferences")
-      .ilike("username", cleanUsername)
-      .single();
+      .select("id, username, preferences");
+
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof friendId === "string" && UUID_RE.test(friendId)) {
+      friendQuery = friendQuery.eq("id", friendId);
+    } else {
+      // Charset MUST match what username-creation paths actually allow:
+      // sanitizeUsername (signup, @lionade/core) permits [a-z0-9_] up to 30,
+      // the admin team provisioner permits dots and hyphens
+      // (^[a-z][a-z0-9.-]{2,30}$), and seeded accounts like trainer-ninny
+      // carry hyphens. Union: [a-z0-9._-], 3-31 chars. Underscore is BOTH a
+      // legal username char and an ilike wildcard, so escape wildcards in
+      // the query pattern instead of stripping them from the input (the old
+      // strip-then-validate mangled real underscore usernames into 400s).
+      const cleanUsername = String(friendUsername).trim().toLowerCase();
+      if (!/^[a-z0-9._-]{3,31}$/.test(cleanUsername)) {
+        return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+      }
+      const ilikePattern = cleanUsername.replace(/[\\%_]/g, ch => `\\${ch}`);
+      friendQuery = friendQuery.ilike("username", ilikePattern);
+    }
+
+    const { data: friend } = await friendQuery.single();
 
     if (!friend) return NextResponse.json({ error: "User not found" }, { status: 404 });
     if (friend.id === userId) return NextResponse.json({ error: "Cannot add yourself" }, { status: 400 });
@@ -228,15 +245,46 @@ export async function POST(req: NextRequest) {
       if (existing.status === "pending") return NextResponse.json({ error: "Request already pending" }, { status: 400 });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("friendships")
-      .insert({ user_id: userId, friend_id: friend.id, status: "pending" })
-      .select()
-      .single();
+    let friendship;
+    if (existing) {
+      // status === "declined" here (accepted/pending returned above). The
+      // declined row still occupies the UNIQUE(user_id, friend_id) slot, so a
+      // fresh insert would violate the constraint (this used to 500). Revive
+      // the row back to pending instead, re-pointing the direction at the new
+      // sender so PATCH accept/decline (which checks friend_id = me) works
+      // even when the original decliner is the one re-adding. created_at
+      // refreshes so the request sorts as new. The status guard on the update
+      // makes a concurrent accept/revive lose cleanly instead of clobbering.
+      const { data: revived, error: reviveError } = await supabaseAdmin
+        .from("friendships")
+        .update({
+          user_id: userId,
+          friend_id: friend.id,
+          status: "pending",
+          created_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id)
+        .eq("status", "declined")
+        .select()
+        .single();
 
-    if (error) {
-      console.error("[social/friends]", error.message);
-      return NextResponse.json({ error: "Couldn't load friends." }, { status: 500 });
+      if (reviveError) {
+        console.error("[social/friends]", reviveError.message);
+        return NextResponse.json({ error: "Couldn't send friend request." }, { status: 500 });
+      }
+      friendship = revived;
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from("friendships")
+        .insert({ user_id: userId, friend_id: friend.id, status: "pending" })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("[social/friends]", error.message);
+        return NextResponse.json({ error: "Couldn't send friend request." }, { status: 500 });
+      }
+      friendship = data;
     }
 
     // Create notification for the receiver (non-blocking). Routed through the
@@ -255,7 +303,7 @@ export async function POST(req: NextRequest) {
       related_user_id: userId,
     });
 
-    return NextResponse.json({ success: true, friendship: data });
+    return NextResponse.json({ success: true, friendship });
   } catch (e) {
     console.error("[social/friends POST]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -294,6 +342,12 @@ export async function PATCH(req: NextRequest) {
     // and gated on its OWN dedicated `friend_accepted` pref (no longer
     // piggybacking on friend_requests) plus quiet hours.
     if (action === "accept") {
+      // Pride Member badge for BOTH sides of the new friendship. Awaited (a
+      // serverless lambda can freeze after the response, dropping fire-and-
+      // forget writes) but fail-soft: awardBadges never throws (lib/badges.ts).
+      await awardBadges(supabaseAdmin, userId, { firstFriend: true });
+      await awardBadges(supabaseAdmin, friendship.user_id, { firstFriend: true });
+
       const { data: acceptorProfile } = await supabaseAdmin
         .from("profiles").select("username").eq("id", userId).single();
       await notifyUser({

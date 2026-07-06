@@ -13,7 +13,7 @@ import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import RevealText from "@/components/RevealText";
-import { apiPost, swrFetcher } from "@/lib/api-client";
+import { apiDelete, apiPost, swrFetcher } from "@/lib/api-client";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import PhotoImport from "@/components/PhotoImport";
 
@@ -78,6 +78,43 @@ export default function MasteryLandingPage() {
   const inputFieldId = useId();
   const inputErrorId = useId();
   const [limitHit, setLimitHit] = useState<null | { plan: string; limit: number; current: number; message: string }>(null);
+  const [archiving, setArchiving] = useState(false);
+
+  // "Archive an old one" targets the most harmless candidate: a mastered
+  // target first (it's finished), otherwise the least recently studied one.
+  const oldestExam = exams.length === 0 ? null : [...exams].sort((a, b) => {
+    const aDone = a.reachedMasteryAt ? 0 : 1;
+    const bDone = b.reachedMasteryAt ? 0 : 1;
+    if (aDone !== bDone) return aDone - bDone;
+    return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+  })[0];
+
+  const archiveOldest = async () => {
+    if (!oldestExam || archiving) return;
+    setArchiving(true);
+    const prev = data;
+    // Optimistic removal — the card disappears and a cap slot frees up
+    // immediately; the paywall closes so the user can retry Start session.
+    await mutateExams(
+      { exams: exams.filter(e => e.id !== oldestExam.id) },
+      { revalidate: false },
+    );
+    setLimitHit(null);
+    setError(null);
+    try {
+      const r = await apiDelete(`/api/mastery/exams/${oldestExam.id}`);
+      if (!r.ok) throw new Error(r.error ?? "archive failed");
+      // Confirm against the server so the list reflects reality.
+      void mutateExams();
+    } catch (e) {
+      console.error("[mastery:archive-exam] failed", e);
+      // Roll back the optimistic removal so no target silently vanishes.
+      await mutateExams(prev, { revalidate: false });
+      setError("Couldn't archive that target. Try again.");
+    } finally {
+      setArchiving(false);
+    }
+  };
 
   // Photo import (client-side OCR) drops its recognized text into the same
   // input the textarea feeds, so the existing parse flow handles it unchanged.
@@ -483,16 +520,26 @@ export default function MasteryLandingPage() {
         </div>{/* ── end 2-column grid ── */}
       </div>
 
-      {limitHit && <LimitPaywall state={limitHit} onClose={() => setLimitHit(null)} />}
+      {limitHit && (
+        <LimitPaywall
+          state={limitHit}
+          archiveTitle={oldestExam?.title ?? null}
+          onArchive={archiveOldest}
+          onClose={() => setLimitHit(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ── Limit-hit paywall ────────────────────────────────────────────────────────
 function LimitPaywall({
-  state, onClose,
+  state, archiveTitle, onArchive, onClose,
 }: {
   state: { plan: string; limit: number; current: number; message: string };
+  /** Title of the target that "Archive an old one" will hide (null = none). */
+  archiveTitle: string | null;
+  onArchive: () => void;
   onClose: () => void;
 }) {
   const isFree = state.plan === "free";
@@ -601,8 +648,9 @@ function LimitPaywall({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-full border border-white/[0.1] text-cream/75 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            onClick={onArchive}
+            disabled={!archiveTitle}
+            className="flex-1 min-h-[44px] rounded-full border border-white/[0.1] text-cream/75 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Archive an old one
           </button>
@@ -614,6 +662,11 @@ function LimitPaywall({
             Upgrade
           </button>
         </div>
+        {archiveTitle && (
+          <p className="mt-3 font-mono text-[9.5px] uppercase tracking-[0.2em] text-cream/45 text-center">
+            Archives your oldest target: {archiveTitle}
+          </p>
+        )}
       </div>
     </div>
   );

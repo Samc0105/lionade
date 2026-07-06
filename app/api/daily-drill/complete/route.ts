@@ -161,18 +161,26 @@ export async function POST(req: NextRequest) {
         p_source: "cashable",
       });
       if (creditErr) {
-        // Completion is already recorded (can't re-credit on retry); log loudly.
+        // Release the completion row so a retry can pay — the reward was never
+        // granted. Returning before the ledger insert keeps the dual ledger
+        // invariant (coin_transactions + balance move together or not at all).
+        await supabaseAdmin
+          .from("daily_drill_completions")
+          .delete()
+          .eq("user_id", userId)
+          .eq("drill_date", today);
         console.error("[daily-drill POST] credit:", creditErr.message);
-      } else {
-        await supabaseAdmin.from("coin_transactions").insert({
-          user_id: userId,
-          amount: coinsEarned,
-          type: "daily_drill",
-          description: perfect
-            ? `Daily Drill — perfect ${correctCount}/${total}`
-            : `Daily Drill — ${correctCount}/${total}`,
-        });
+        return NextResponse.json({ error: "Couldn't grant your Fangs. Please try again." }, { status: 500 });
       }
+      await supabaseAdmin.from("coin_transactions").insert({
+        user_id: userId,
+        amount: coinsEarned,
+        type: "daily_drill",
+        // No em-dash: this description renders verbatim in /wallet.
+        description: perfect
+          ? `Daily Drill: perfect ${correctCount}/${total}`
+          : `Daily Drill: ${correctCount}/${total}`,
+      });
     }
 
     // Drop the active_session pin — drill is done for today.

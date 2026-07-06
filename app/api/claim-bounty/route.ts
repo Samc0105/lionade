@@ -42,6 +42,12 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (!bounty) {
+      // Release the claim — nothing was granted, so don't strand the flag.
+      await supabaseAdmin
+        .from("user_bounties")
+        .update({ claimed: false })
+        .eq("user_id", userId)
+        .eq("bounty_id", bountyId);
       return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
     }
 
@@ -57,7 +63,16 @@ export async function POST(req: NextRequest) {
         p_source: "cashable",
       });
       if (creditErr) {
+        // Release the claim so a retry can pay — the reward was never granted.
+        // Returning here also skips the ledger insert below, keeping the dual
+        // ledger invariant (coin_transactions + balance move together or not at all).
+        await supabaseAdmin
+          .from("user_bounties")
+          .update({ claimed: false })
+          .eq("user_id", userId)
+          .eq("bounty_id", bountyId);
         console.error("[claim-bounty] credit:", creditErr.message);
+        return NextResponse.json({ error: "Claim failed. Please try again." }, { status: 500 });
       }
     }
 

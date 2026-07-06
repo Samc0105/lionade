@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
       .from("user_exams")
       .select("id, title, topic_hash, scope, target_date, ready_threshold, mastery_bkt_target, total_active_seconds, reached_mastery_at, updated_at")
       .eq("user_id", userId)
-      .eq("archived", false)
+      // NULL-safe: rows created before the archived column landed may carry
+      // NULL, and `.eq("archived", false)` would silently hide those.
+      .not("archived", "is", true)
       .order("updated_at", { ascending: false });
 
     if (examsErr) throw examsErr;
@@ -283,12 +285,13 @@ async function checkPlanLimit(userId: string): Promise<{
   const limit = PLAN_EXAM_LIMITS[plan];
 
   // Count only non-archived targets. Archived (auto-aged or manually hidden)
-  // doesn't count against the cap, matching user intuition.
+  // doesn't count against the cap, matching user intuition. NULL-safe so the
+  // cap count matches exactly what the list above shows.
   const { count } = await supabaseAdmin
     .from("user_exams")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
-    .eq("archived", false);
+    .not("archived", "is", true);
 
   const current = count ?? 0;
   return { plan, limit, current, overLimit: current >= limit };

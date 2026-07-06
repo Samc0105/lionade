@@ -4,11 +4,16 @@ import { requireAuth } from "@/lib/api-auth";
 import { displayPct, pPass, isPassReady, isMasteryReached } from "@/lib/mastery";
 
 /**
- * GET /api/mastery/exams/[id]
+ * GET    /api/mastery/exams/[id]
  *
  * Full exam detail for the Mastery Mode dashboard: title, every subtopic
  * with its weight + mastery snapshot, overall pPass + display %, and the
  * id of the active session if one exists (so the UI can jump straight in).
+ *
+ * DELETE /api/mastery/exams/[id]
+ *
+ * Soft archive — sets archived=true so the target drops out of the list
+ * (and out of the plan cap count) while keeping progress history queryable.
  */
 
 type RouteCtx = { params: { id: string } };
@@ -105,5 +110,45 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
   } catch (e) {
     console.error("[mastery/exams/:id GET]", e);
     return NextResponse.json({ error: "Couldn't load this target." }, { status: 500 });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE — soft archive
+// ─────────────────────────────────────────────────────────────────────────────
+export async function DELETE(req: NextRequest, { params }: RouteCtx) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+  const examId = params.id;
+
+  try {
+    // Ownership check first — a foreign or unknown id 404s (same shape as GET)
+    // instead of silently no-oping on the scoped update below.
+    const { data: exam } = await supabaseAdmin
+      .from("user_exams")
+      .select("id, user_id")
+      .eq("id", examId)
+      .single();
+
+    if (!exam || exam.user_id !== userId) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const { error } = await supabaseAdmin
+      .from("user_exams")
+      .update({ archived: true })
+      .eq("id", examId)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("[mastery/exams/:id DELETE]", error.message);
+      return NextResponse.json({ error: "Couldn't archive this target." }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[mastery/exams/:id DELETE]", e);
+    return NextResponse.json({ error: "Couldn't archive this target." }, { status: 500 });
   }
 }

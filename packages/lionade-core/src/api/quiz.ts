@@ -36,9 +36,19 @@ export interface QuizAnswerRow {
 export interface SaveQuizResultsPayload {
   subject: string;
   totalQuestions: number;
+  /**
+   * On the v2 path (deriveReward: true) this MUST be the RAW correct count —
+   * the server re-applies score_boost from the user's active boosters itself,
+   * so sending a boosted count would double-count the boost.
+   */
   correctAnswers: number;
-  coinsEarned: number;
-  xpEarned: number;
+  /**
+   * Client-computed reward — LEGACY path only. When deriveReward is true the
+   * server ignores these entirely and derives the reward itself, so v2
+   * clients omit them.
+   */
+  coinsEarned?: number;
+  xpEarned?: number;
   /** Per-question answers — optional; if omitted the server skips the user_answers insert. */
   answers?: QuizAnswerRow[];
   /**
@@ -47,6 +57,28 @@ export interface SaveQuizResultsPayload {
    * older clients stay compatible.
    */
   blitzMode?: boolean;
+  /**
+   * Idempotency key — a stable per-attempt UUID (dashed 8-4-4-4-12). A replay
+   * of the same attempt (network retry, double-submit) hits the partial
+   * UNIQUE (user_id, attempt_id) server-side and returns the prior result
+   * without re-crediting. Optional for backward compatibility.
+   */
+  attemptId?: string;
+  /**
+   * Drives the server's reward derivation (easy 1x / medium 1.5x / hard 2x)
+   * and the advanced_quiz bounty. Server defaults to "medium" when
+   * missing/invalid.
+   */
+  difficulty?: "easy" | "medium" | "hard";
+  /**
+   * v2 server-authoritative reward path. When true the server IGNORES
+   * coinsEarned/xpEarned, derives the reward from the validated correct
+   * count + difficulty + blitz + the user's active boosters, folds
+   * score_boost in itself, and consumes the reward-feeding boosters
+   * (coin/xp/coin_xp multipliers + score_boost) after the session insert.
+   * Clients must NOT PATCH-consume those boosters on this path.
+   */
+  deriveReward?: boolean;
 }
 
 // ── Response shape ────────────────────────────────────────────────────────
@@ -60,6 +92,22 @@ export interface StreakMilestone {
   bonus: number;
 }
 
+/**
+ * Authoritative reward echo — v2 clients (deriveReward) reconcile their
+ * optimistic display to these server numbers.
+ */
+export interface QuizRewardEcho {
+  /** Pre-plan-multiplier BASE Fangs this quiz earned (the display value). */
+  coinsEarned: number;
+  /** XP credited (the plan multiplier does not apply to XP). */
+  xpEarned: number;
+  /**
+   * Fangs ACTUALLY added to the wallet (post plan multiplier). Equals
+   * coinsEarned for free users.
+   */
+  coinsCredited: number;
+}
+
 export interface SaveQuizResultsResponse {
   success: true;
   sessionId: string;
@@ -69,6 +117,8 @@ export interface SaveQuizResultsResponse {
   bonusFangs: number;
   /** Streak milestone reward — null if no milestone was crossed this quiz. */
   streakMilestone: StreakMilestone | null;
+  /** Server-derived reward — optional so pre-echo deployments stay compatible. */
+  reward?: QuizRewardEcho;
 }
 
 // ── Methods ───────────────────────────────────────────────────────────────

@@ -123,26 +123,53 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Extract text (same pdf-parse v2 dance as classes/syllabus) ─────
+  // The import stays dynamic and INSIDE the try on purpose: pdf-parse v2
+  // can throw at require() time (its DOMMatrix polyfill needs
+  // @napi-rs/canvas), so this keeps a load failure catchable + loggable
+  // instead of crashing module init. The worker + native files it needs
+  // at runtime are force-included in the serverless bundle via
+  // experimental.outputFileTracingIncludes in next.config.js — without
+  // that, this block was runtime-dead on Vercel.
   let rawText = "";
   try {
     const mod = await import("pdf-parse");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
     if (!PDFParse) {
-      console.error("[coach/resume/analyze] pdf-parse PDFParse export missing");
+      console.error(
+        "[coach/resume/analyze] pdf-parse PDFParse export missing:",
+        JSON.stringify({ exports: Object.keys(mod ?? {}), bufBytes: buf.byteLength }),
+      );
       return NextResponse.json({ error: "Parser unavailable" }, { status: 500 });
     }
     const parser = new PDFParse({ data: buf });
-    const result = await parser.getText();
-    rawText = String(result?.text ?? "").replace(/\r\n/g, "\n").trim();
+    try {
+      const result = await parser.getText();
+      rawText = String(result?.text ?? "").replace(/\r\n/g, "\n").trim();
+    } finally {
+      // Free the pdfjs document — warm lambdas reuse the process.
+      await parser.destroy().catch(() => {});
+    }
   } catch (e) {
-    console.error("[coach/resume/analyze] pdf-parse failed:", (e as Error).message);
+    const err = e as Error;
+    console.error(
+      "[coach/resume/analyze] pdf-parse failed:",
+      JSON.stringify({
+        message: err?.message ?? "unknown",
+        stack: err?.stack,
+        bufBytes: buf.byteLength,
+      }),
+    );
     return NextResponse.json({ error: "Couldn't read that PDF" }, { status: 500 });
   }
 
   if (rawText.length < 100) {
+    console.error(
+      "[coach/resume/analyze] extracted text too short:",
+      JSON.stringify({ extractedChars: rawText.length, bufBytes: buf.byteLength }),
+    );
     return NextResponse.json(
-      { error: "Resume too short — extracted less than 100 characters of text." },
+      { error: "Resume too short. We extracted less than 100 characters of text." },
       { status: 400 },
     );
   }
