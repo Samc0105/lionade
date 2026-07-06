@@ -18,6 +18,38 @@ import { supabase } from "@/lib/supabase";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+/**
+ * Turn the analyze route's error response into a specific, actionable message.
+ * The route returns real reasons (scanned PDF, too large, too short, parser
+ * error), but this component used to collapse every one of them into a blind
+ * "try again" that left the user with no idea what to fix. Surfacing the actual
+ * cause is the fix. Copy is dash-free per the house style.
+ */
+function friendlyResumeError(
+  status: number,
+  body: { error?: unknown; message?: unknown },
+): string {
+  const code = typeof body?.error === "string" ? body.error.toLowerCase() : "";
+  const msg = typeof body?.message === "string" ? body.message : "";
+
+  if (status === 403) return msg || "Resume Coach is a Pro feature. Upgrade to unlock it.";
+  if (status === 413 || code.includes("too large"))
+    return "That PDF is over the 5 MB limit. Export or compress a smaller file and try again.";
+  if (code.includes("too short") || code.includes("less than 100"))
+    return "We could not pull any readable text from that PDF. If it is a scan or a photo, export a text based PDF (from Google Docs or Word) and upload that instead.";
+  if (code.includes("not a valid pdf") || code.includes("real pdf"))
+    return "That file is not a readable PDF. Export a fresh PDF and try again.";
+  if (code.includes("empty")) return "That file looks empty. Pick your resume PDF and try again.";
+  if (code.includes("no file") || code.includes("multipart"))
+    return "The upload did not go through. Refresh the page and try again.";
+  if (code.includes("read that pdf") || code.includes("parser"))
+    return "We could not read that PDF. Try re-exporting it as a standard PDF and upload again.";
+  if (status === 502 || code.includes("analysis") || code === "ai analysis failed")
+    return "Ninny had trouble reviewing that one. Give it another go in a moment.";
+  if (code.includes("save")) return "Something glitched while saving your review. Try again.";
+  return "Couldn't analyze that resume. Try again.";
+}
+
 interface Props {
   onAnalyzed: (sessionId: string, analysis: ResumeAnalysis) => void;
 }
@@ -88,8 +120,8 @@ export default function ResumeUpload({ onAnalyzed }: Props) {
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        console.error("[coach:resume-analyze] failed", body);
-        setError("Couldn't analyze that resume. Try again.");
+        console.error("[coach:resume-analyze] failed", res.status, body);
+        setError(friendlyResumeError(res.status, body));
         setBusy(false);
         return;
       }
