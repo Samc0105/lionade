@@ -38,6 +38,69 @@ function stepKeys(s: SimScenario): string[] {
   return Array.from(keys);
 }
 
+/**
+ * Canonicalize a typed command: lowercase, collapse every run of
+ * non-alphanumerics to a single space, trim. This makes matching forgiving of
+ * punctuation and spacing, so "clear-queue", "Clear  Queue" and "clear queue"
+ * are all the same command. Real players type the dash; don't wall them off.
+ */
+function canon(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/** True if `a` is an ordered subsequence of `b` (they typed a shorthand). */
+function isSubseq(a: string, b: string): boolean {
+  let i = 0;
+  for (let j = 0; j < b.length && i < a.length; j++) if (a[i] === b[j]) i += 1;
+  return i === a.length;
+}
+
+/** Levenshtein edit distance. Strings + command set are tiny, so DP is fine. */
+function editDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Best "did you mean" for an unrecognized command, or null if nothing's close.
+ * Ranks prefix matches first ("print" -> "printer status"), then shorthands
+ * ("cancel 7" -> "cancel job 7" as a subsequence), then near-typos within a
+ * length-scaled edit budget. `pool` is display strings; comparison is on canon.
+ */
+function suggestFor(nc: string, pool: string[]): string | null {
+  let best: string | null = null;
+  let bestRank = Infinity;
+  for (const cand of pool) {
+    const cc = canon(cand);
+    if (cc === nc) continue; // an exact match would have been recognized already
+    let rank: number;
+    if (cc.startsWith(nc) || nc.startsWith(cc)) rank = 0;
+    else if (isSubseq(nc, cc)) rank = 1;
+    else {
+      const d = editDistance(nc, cc);
+      rank = d <= Math.max(2, Math.floor(cc.length / 3)) ? 1 + d / 100 : Infinity;
+    }
+    if (rank < bestRank) {
+      bestRank = rank;
+      best = cand;
+    }
+  }
+  return bestRank < Infinity ? best : null;
+}
+
 interface HelpDeskSimProps {
   scenario: SimScenario;
   /** Already cleared in a prior session (lets us show the resolved state up front). */
@@ -67,6 +130,17 @@ export default function HelpDeskSim({
 
   const allSteps = useMemo(() => stepKeys(scenario), [scenario]);
 
+  // Consecutive unrecognized commands for THIS ticket. Drives escalating help
+  // so no one dead-ends in the terminal; any recognized command resets it.
+  const missStreak = useRef(0);
+
+  // Flat pool of every accepted command (+ built-ins) for "did you mean".
+  const suggestPool = useMemo<string[]>(() => {
+    const pool = ["help", "hint", "clear"];
+    for (const c of scenario.commands) for (const a of c.aliases) pool.push(a);
+    return pool;
+  }, [scenario]);
+
   // Reset the whole terminal when the scenario changes (next ticket / re-open).
   useEffect(() => {
     setLines(intro(scenario));
@@ -74,6 +148,7 @@ export default function HelpDeskSim({
     setSolved(false);
     setDoneSteps(new Set());
     firedResolve.current = false;
+    missStreak.current = 0;
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [scenario]);
 
@@ -99,14 +174,43 @@ export default function HelpDeskSim({
     }
   }
 
+  // Escalating rescue: reveal the exact next command(s) so a stuck player can
+  // always progress. If the fix's prerequisites are already confirmed, hand
+  // over the fix itself; otherwise reveal the investigation commands that
+  // unlock it. Nobody should have to guess their way out of a dead end.
+  function revealPath() {
+    const fix = scenario.commands.find((c) => c.resolvesTicket);
+    const needed = (fix?.requires ?? []).filter((r) => !doneSteps.has(r));
+    if (fix && needed.length === 0) {
+      push(
+        { tone: "warn", text: "Let's get you moving. You've dug in enough — here's the fix:" },
+        { tone: "info", text: `  ${fix.aliases[0]}` },
+      );
+      return;
+    }
+    const investigate = scenario.commands
+      .filter((c) => c.step && !c.resolvesTicket && needed.includes(c.step!))
+      .map((c) => c.aliases[0]);
+    const list =
+      investigate.length > 0
+        ? investigate
+        : scenario.commands.filter((c) => !c.resolvesTicket && c.tone !== "warn").map((c) => c.aliases[0]);
+    push(
+      { tone: "warn", text: "Let's get you moving. Run these to see what's happening, then the fix unlocks:" },
+      { tone: "info", text: "  " + Array.from(new Set(list)).join("   ·   ") },
+    );
+  }
+
   function run(raw: string) {
     const cmd = raw.trim();
     if (!cmd) return;
     push({ tone: "input", text: `${PROMPT} ${cmd}` });
-    const norm = cmd.toLowerCase();
+    // Canonicalize punctuation + spacing so "clear-queue" == "clear queue" and
+    // a stray dash never walls a player off from a command they clearly meant.
+    const nc = canon(cmd);
 
-    if (norm === "clear") { setLines(intro(scenario)); return; }
-    if (norm === "help") {
+    if (nc === "clear") { setLines(intro(scenario)); missStreak.current = 0; return; }
+    if (nc === "help") {
       const names = scenario.commands
         .filter((c) => !c.resolvesTicket && c.tone !== "warn")
         .map((c) => c.aliases[0]);
@@ -115,17 +219,34 @@ export default function HelpDeskSim({
         { tone: "info", text: "  " + names.join("   ·   ") },
         { tone: "sys", text: "  help · hint · clear" },
       );
+      missStreak.current = 0;
       return;
     }
-    if (norm === "hint") { push({ tone: "info", text: `💡 ${scenario.hint}` }); return; }
+    if (nc === "hint") { push({ tone: "info", text: `💡 ${scenario.hint}` }); missStreak.current = 0; return; }
 
     const match = scenario.commands.find((c) =>
-      c.aliases.some((a) => norm === a || norm.startsWith(a + " ")),
+      c.aliases.some((a) => {
+        const ca = canon(a);
+        return nc === ca || nc.startsWith(ca + " ");
+      }),
     );
     if (!match) {
-      push({ tone: "error", text: `command not recognized: "${cmd}". type \`help\`` });
+      missStreak.current += 1;
+      const guess = suggestFor(nc, suggestPool);
+      push({
+        tone: "error",
+        text: `command not recognized: "${cmd}".${guess ? ` did you mean \`${guess}\`?` : " type \`help\`"}`,
+      });
+      // No dead ends: a gentle hint at 2 misses, then reveal the real next
+      // command at 4 and every couple after, so nobody stays stuck.
+      if (missStreak.current === 2) {
+        push({ tone: "info", text: `💡 Stuck? ${scenario.hint}` });
+      } else if (missStreak.current >= 4 && missStreak.current % 2 === 0) {
+        revealPath();
+      }
       return;
     }
+    missStreak.current = 0;
 
     // Mark investigation step complete (a command can be both a step and a fix-blocker).
     if (match.step && !doneSteps.has(match.step)) {
