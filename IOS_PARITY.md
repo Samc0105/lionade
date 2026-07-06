@@ -7,13 +7,87 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
-## 2026-07-06: Wave-4/5 FINISH WAVE — polish + a11y cap on the parity sprint (two-golds RESOLVED · Daily Drill calm pass · safe share-card · Maestro CI · VoiceOver/Dynamic Type/live-region sweep) (feat/ios-web-parity-wave4 tip `3c56fdc`; HELD, batched) — ⚠️ still MERGED-BUT-UNVERIFIED ON DEVICE
+## 2026-07-06: ✅ VERIFICATION DEBT DISCHARGED — signed local Release build + full Maestro suite 6/6 on-sim; Build 28 NOW BUILDING on EAS (Sam's go) — plus two fresh web fixes with parity bearing (terminal no-dead-ends ❌ · resume-upload errors 🟡)
+
+**THE HEADLINE: the waves-3/4/5 MERGED-BUT-UNVERIFIED-ON-DEVICE debt — the
+dominant open item this file has carried since the 2026-07-05 wave-5 entry — is
+DISCHARGED 2026-07-06.** A local signed Release build (xcodebuild, ad-hoc
+signing) was installed on an iPhone 17 Pro simulator and the FULL Maestro suite
+passed **6/6**: `smoke` (demo login, all 4 tabs, membership card, TechHub hub +
+Career Tracks), `techhub-shift` (Games -> TechHub -> IT Support -> shift picker
+-> Clock in -> live LionDesk HUD with Tickets dock), `study-sets` (hub + deck
+detail), `library-share` (Community Library browse chrome), `resume-coach`
+(header + plan gate), `academia-setup` (deep link `lionade://academia` + hub).
+Screenshots verified visually: Study home (gold `#FFD700` Fangs, Daily Drill
+mounted) and the Games tab (Roardle / Pardy / Sketchy / TechHub cards). Every 🚨
+verification banner in the finish-wave / wave-5 / wave-4 / wave-3 entries below
+is re-headed DISCHARGED with a pointer here.
+
+**One honest caveat remains (do not over-read the green):** this was a
+SIMULATOR pass. The physical-device VoiceOver + Dynamic Type walkthrough is
+still the remaining nicety (the standing 2026-06-11 device-QA caveat), and a
+simulator run is not the TestFlight binary — build 28 itself still wants a
+quick TestFlight smoke once it processes.
+
+**Build 28 is NOW BUILDING on EAS** — the "PREPPED, gated on Sam's explicit go"
+status every entry below carries is SUPERSEDED. Sam gave the literal go
+("verify locally first, then build it"); `release/testflight-03` was
+fast-forwarded to the wave-4 tip `9cab1b4`, buildNumber auto-incremented
+27 -> 28, EAS build id `c219c314-badd-4469-a0e3-5e9b6c7c0d89`.
+
+**Two iOS-native items shipped getting the suite green (no parity row — logged for a complete record):**
+
+- **Auth fail-open — `405f290` (`lib/auth-context.tsx`).** `getSession()` reads
+  SecureStore (the Keychain) and had NO `.catch`, so ANY rejection — locked or
+  unavailable Keychain, a build missing the `keychain-access-groups`
+  entitlement, storage corruption — left `isLoading` true forever and hung the
+  app on an infinite blank spinner with no recovery. It now fails OPEN to the
+  signed-out state so RouteGuard routes to `/login`. Discovered BECAUSE of this
+  verification pass: the unsigned local build lacked the
+  `keychain-access-groups` entitlement and hung — a signed build works, but the
+  hardening protects real prod edge cases (Keychain locked at cold start,
+  storage corruption). iOS-native auth-shell hardening with no web counterpart;
+  also recorded in Deliberate No-Row Decisions.
+- **Maestro selectors fixed against the REAL runtime a11y tree — `9cab1b4`;
+  suite now 6/6 green and trustworthy as a regression harness.** First run
+  against a live build surfaced that Maestro text selectors are FULL-string
+  regexes and the app's cards/rows are accessibility-GROUPED (one element per
+  card, combined label) — so flows need full-label prefix-regex matching
+  (`Roardle.*` / `TechHub.*` / `IT Support.*` / `Clock in.*`); the
+  library-share subject chip's label is `Filter by All`, not `All`; the shift
+  CTA's a11y label is `Start a shift...` while its visible text says "Start
+  your shift"; the live demo account is PLATINUM, not the stale seeded-free
+  assumption (membership anchor now plan-agnostic); below-the-fold tiles need
+  `scrollUntilVisible`; the academia deep link is `lionade://academia` (the
+  `(tabs)` group is not a URL segment). Updates the Deliberate No-Row Maestro
+  entry below.
+
+**Two NEW web changes shipped 2026-07-06 that need parity consideration — real rows:**
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Helpdesk terminal no-dead-ends UX (forgiving matching + did-you-mean + escalating rescue)** — web `43e5482` (`components/helpdesk/HelpDeskSim.tsx`) | ✅ shipped 2026-07-06 | ❌ missing | Web fixed players getting stuck typing near-miss commands with no way out: punctuation/spacing-insensitive command canonicalization ("clear-queue" resolves to "clear queue" — a stray dash no longer walls you off), did-you-mean suggesting the closest accepted alias on an unrecognized command ("cancel 7" -> "cancel job 7"), and escalating rescue (a hint auto-surfaces at 2 consecutive misses; the actual next command is revealed at 4+). The iOS LionDesk terminals (`components/techhub/liondesk/TerminalPanel.tsx` + the embedded `MiniTerminal`, driven by the vendored engine) have NONE of this — an iOS player can still dead-end on a stray dash, and the gap hurts MORE on a phone keyboard (autocorrect + harder typing) than it did on web. **Port note: this is terminal-UX logic in the web COMPONENT layer, not the vendored scenario JSON — a JSON re-vendor alone will NOT pick it up; the matching / did-you-mean / rescue logic must be ported into the iOS terminal components.** Folds naturally into the next LionDesk wave. |
+| **Resume Coach upload-error surfacing (`friendlyResumeError`)** — web `577fdff` (`components/Coach/ResumeUpload.tsx`) | ✅ shipped 2026-07-06 | 🟡 partial | Web stopped collapsing every analyze failure into a blind "Couldn't analyze that resume. Try again." — `friendlyResumeError()` maps the route's REAL status/error to actionable copy per failure class (scan/image PDF -> "export a text based PDF and upload that instead", too large, too short, not-a-valid-PDF, parser error, AI failure). iOS DOES have an equivalent upload path (`components/Coach/ResumeUpload.tsx`, wired in wave 3) and already carries actionable copy for PICK-time failures (over 5 MB, not a PDF, signed out) plus verbatim server copy for 413/429 — but every OTHER analyze failure (the scan-PDF / too-short / parser / AI classes web just fixed) still collapses to the same blind "Couldn't analyze that resume. Try again." iOS should port the `friendlyResumeError` mapping — near-verbatim, same route, same error contract. 🟡 not ❌ because the pick-time + 413/429 copy already exists. |
+
+**Quality gates:** web `dev-frontend` (`43e5482` + `577fdff`) ->
+`quality-docs-writer` (flagged both to this tracker) -> iOS side: local
+xcodebuild Release + Maestro run (`ios-qa-tester` posture; `405f290` +
+`9cab1b4` fixes) -> `ios-build-eas` (build 28 queued on Sam's go) ->
+`ios-parity-tracker` (this entry + every 🚨 banner below re-headed DISCHARGED +
+the two new rows + the auth fail-open no-row). Gap priority for the next iOS
+wave: the terminal no-dead-ends port (❌, player-facing frustration) ahead of
+the resume-error mapping (🟡, S-sized copy port).
+
+## 2026-07-06: Wave-4/5 FINISH WAVE — polish + a11y cap on the parity sprint (two-golds RESOLVED · Daily Drill calm pass · safe share-card · Maestro CI · VoiceOver/Dynamic Type/live-region sweep) (feat/ios-web-parity-wave4 tip `3c56fdc`; HELD, batched) — ✅ verification debt DISCHARGED 2026-07-06 (see the entry above)
 
 Four commits (+ merge `3c56fdc`) on `feat/ios-web-parity-wave4`
 (`07cdb71` two-golds, `5f4d111` Daily Drill calm + safe share-card + Maestro CI,
 `747f2da` + merge `3c56fdc` a11y/perf sweep). Committed NOT pushed, NOT built;
-NOT on `release/testflight-03`. **Build 28 unchanged: still PREPPED, gated on
-Sam's explicit go.** This is the POLISH/A11Y CAP on the wave-4/wave-5 parity
+NOT on `release/testflight-03`. ~~**Build 28 unchanged: still PREPPED, gated on
+Sam's explicit go.**~~ **SUPERSEDED 2026-07-06: `release/testflight-03` was
+fast-forwarded to `9cab1b4` (this wave + the verification fixes) and build 28
+is NOW BUILDING on EAS — see the discharge entry above.** This is the
+POLISH/A11Y CAP on the wave-4/wave-5 parity
 sprint — mostly polish on ALREADY-PORTED features, not new features, so it
 reconciles the open decisions the wave-5 entry logged rather than opening new
 feature rows. It does five things: (1) RESOLVES the "two golds" token drift —
@@ -29,14 +103,18 @@ surfaces (accessibility parity on the ported screens, updates the a11y-parity
 posture). Canonical detail: `lionade-ios/docs/CHANGELOG.md` 2026-07-06
 (finish-wave entry).
 
-**🚨 VERIFICATION DEBT still open (loud):** this finish wave is polish/a11y on
-top of the still-unverified waves 3-5 — the simulator auth session was never
-recovered, so the whole stack remains MERGED-BUT-UNVERIFIED ON A DEVICE. Two of
-this wave's own deliverables are the levers to close it: the Maestro CI (item 4)
-runs the smoke + per-feature flows against a fresh build, and the a11y sweep
-(item 5) is exactly the pass that needs a VoiceOver + Dynamic Type device
-walkthrough to confirm. Until a device/simulator run happens, treat the finish
-wave as compile-and-review-clean but NOT known-to-work.
+**~~🚨 VERIFICATION DEBT still open (loud)~~ ✅ DISCHARGED 2026-07-06 (see the
+entry above):** the lever this wave shipped (the Maestro flows, item 4) did
+exactly its job — a local signed Release build on an iPhone 17 Pro simulator
+ran the FULL suite **6/6 green** (`smoke` / `techhub-shift` / `study-sets` /
+`library-share` / `resume-coach` / `academia-setup`), with screenshots verified
+visually (Study home with gold `#FFD700` Fangs + Daily Drill mounted; Games tab
+with all 4 mode cards). The whole waves-3/4/5 + finish-wave stack is now
+KNOWN-TO-WORK on-sim. Remaining nicety, on the record: this was a SIMULATOR
+pass — the a11y sweep (item 5) still wants its physical-device VoiceOver +
+Dynamic Type walkthrough (the standing 2026-06-11 device-QA caveat), and build
+28 wants a quick TestFlight smoke once processed (simulator ≠ the TestFlight
+binary).
 
 **Five finish-wave items — reconciliations, not new rows (each folds into an existing row/decision, cross-linked below):**
 
@@ -113,7 +191,7 @@ update + both two-golds open-decision RESOLUTIONS + the share-card gap-row updat
 the Deliberate No-Row Maestro entry). No web code changed — everything is a
 web -> iOS port polish or iOS-native infrastructure; nothing is owed back to web.
 
-## 2026-07-05: Web-to-iOS parity wave 5 + LionDesk wave 2 — surface Daily Drill/Missions/Bounties + full 5-shift helpdesk campaign + multi-track LionDesk + deep-screen DESIGN.md + shift-shell perf + Maestro E2E harness (feat/ios-web-parity-wave4; HELD, batched) — ⚠️ MERGED-BUT-UNVERIFIED ON DEVICE
+## 2026-07-05: Web-to-iOS parity wave 5 + LionDesk wave 2 — surface Daily Drill/Missions/Bounties + full 5-shift helpdesk campaign + multi-track LionDesk + deep-screen DESIGN.md + shift-shell perf + Maestro E2E harness (feat/ios-web-parity-wave4; HELD, batched) — ✅ verification debt DISCHARGED 2026-07-06 (see the entry at top)
 
 Seven primary commits (+ merge commits) on `feat/ios-web-parity-wave4`
 (`fcaf2d2..HEAD`: `3807f57` -> `56e8fc7` and the intervening feature commits).
@@ -130,24 +208,24 @@ to Arena/Profile/Badges/Wallet — iOS-native restyle, no row (web is the source
 (5) lands a Maestro E2E harness — iOS-native verification infrastructure, no row.
 Canonical detail: `lionade-ios/docs/CHANGELOG.md` 2026-07-05 (wave-5 entry).
 
-**🚨 VERIFICATION DEBT (loud, blocking-for-done) — the ENTIRE wave, plus waves
-3-4 beneath it, is MERGED-BUT-UNVERIFIED ON A DEVICE.** The simulator auth
-session was lost this session (the same loss that cost waves 3-4 their
-screenshot pass), so waves 3, 4, AND 5 all shipped tsc + review-clean but with
-ZERO on-device / on-simulator run — nothing in these three waves has actually
-been played on a device. This is the single most important open item across the
-batch. **The Maestro harness (item 5 below) is the deliberate lever to CLOSE it:
-`maestro test .maestro/smoke.yaml` (then `techhub-shift.yaml` + the 4 per-feature
-flows) against a fresh build once one is on a device/simulator.** Until that run
-happens, treat waves 3-5 as compile-and-review-clean but NOT known-to-work.
+**~~🚨 VERIFICATION DEBT (loud, blocking-for-done)~~ ✅ DISCHARGED 2026-07-06
+(see the entry at top).** The Maestro harness (item 5 below) was exactly the
+lever this banner predicted: a local signed Release build (xcodebuild, ad-hoc
+signing) on an iPhone 17 Pro simulator ran the FULL suite **6/6 green** —
+`smoke`, `techhub-shift` (clock-in to the live LionDesk HUD), `study-sets`,
+`library-share`, `resume-coach`, `academia-setup` — plus a visual screenshot
+pass (Study home, Games tab). Waves 3-5 are now KNOWN-TO-WORK on-sim, and
+build 28 is building from this stack. Honest residue: simulator pass only — the
+physical-device VoiceOver + Dynamic Type walkthrough (2026-06-11 caveat) and a
+TestFlight smoke of build 28 itself remain the niceties.
 
 **Three real parity rows (built-but-unmounted engagement surfaces, now mounted — zero AI / money risk):**
 
 | Surface | Web | iOS | Notes |
 |---|---|---|---|
-| **Daily Drill mounted on the Study home** — `2d27910` | ✅ web Daily Drill surface | ✅ mounted 2026-07-05 (wave 5); **calm pass DISCHARGED 2026-07-06 (finish wave `5f4d111`)** | The iOS Daily Drill was BUILT but unmounted (reachable from nowhere); it now has a real entry on the Study tab. **✅ Calm pass DONE (2026-07-06 finish wave, `5f4d111`):** `DailyDrillCard` migrated off arcade tokens to calm — `GlassCard` -> `CalmCard`, BebasNeue -> Inter, electric `#4A90D9` -> `calm.accent` `#33B1FF`, gold trophy -> `calm.accent`, VoiceOver props added — so it now matches the calm Study-tab design language instead of reading louder than it. The wave-5 "calm pass owed" follow-up is discharged. ⚠️ still merged-but-unverified on device (see the finish-wave + wave-5 verification-debt banners above). |
-| **Standalone `/missions` screen** — `2d27910` + `56e8fc7` | ✅ web Missions surface | ✅ shipped 2026-07-05 (wave 5) | A new standalone `/missions` screen with a **server-authoritative claim** (validated server-side, not client-trusted) and **offline last-good states** so it degrades gracefully when the network is down. ⚠️ merged-but-unverified on device. |
-| **Bounties card mounted** — `56e8fc7` | ✅ web Bounties surface | ✅ mounted 2026-07-05 (wave 5) | The built-but-unmounted Bounties surface now has a real entry. **Deliberately still DORMANT alongside these three: Daily Bet + Spin — the wager framing is an App Store 5.3 risk, so surfacing them is a policy call for Sam, not an oversight; recorded so the dormancy reads as deliberate, not missed.** ⚠️ merged-but-unverified on device. |
+| **Daily Drill mounted on the Study home** — `2d27910` | ✅ web Daily Drill surface | ✅ mounted 2026-07-05 (wave 5); **calm pass DISCHARGED 2026-07-06 (finish wave `5f4d111`)** | The iOS Daily Drill was BUILT but unmounted (reachable from nowhere); it now has a real entry on the Study tab. **✅ Calm pass DONE (2026-07-06 finish wave, `5f4d111`):** `DailyDrillCard` migrated off arcade tokens to calm — `GlassCard` -> `CalmCard`, BebasNeue -> Inter, electric `#4A90D9` -> `calm.accent` `#33B1FF`, gold trophy -> `calm.accent`, VoiceOver props added — so it now matches the calm Study-tab design language instead of reading louder than it. The wave-5 "calm pass owed" follow-up is discharged. **✅ verified on-sim 2026-07-06:** the Maestro-pass Study-home screenshot shows Daily Drill mounted + the gold `#FFD700` Fangs (see the discharge entry at top). |
+| **Standalone `/missions` screen** — `2d27910` + `56e8fc7` | ✅ web Missions surface | ✅ shipped 2026-07-05 (wave 5) | A new standalone `/missions` screen with a **server-authoritative claim** (validated server-side, not client-trusted) and **offline last-good states** so it degrades gracefully when the network is down. ✅ blanket verification debt discharged 2026-07-06 (build boots, all 4 tabs green on the Maestro pass) — honest note: no Missions-specific Maestro flow exists yet, so this surface rode the blanket pass, not a dedicated one. |
+| **Bounties card mounted** — `56e8fc7` | ✅ web Bounties surface | ✅ mounted 2026-07-05 (wave 5) | The built-but-unmounted Bounties surface now has a real entry. **Deliberately still DORMANT alongside these three: Daily Bet + Spin — the wager framing is an App Store 5.3 risk, so surfacing them is a policy call for Sam, not an oversight; recorded so the dormancy reads as deliberate, not missed.** ✅ blanket verification debt discharged 2026-07-06 (Maestro 6/6 + screenshot pass) — no Bounties-specific flow yet; rode the blanket pass. |
 
 **LionDesk wave 2 — folds into the wave-3 TechHub row (extended below):** wave 4
 brought the shift sim to iOS for ONE helpdesk track and DEFERRED the results
@@ -259,15 +337,18 @@ detail: `lionade-ios/docs/CHANGELOG.md` 2026-07-05 (wave-4 entry).
    achievements/themes).** The wave-3 TechHub row stays 🟡 to carry the
    phase-remaining scope.
 
-**🚨 PHASE-2 VERIFICATION CAVEAT (loud, on the record):** `tsc` clean, two
-review lenses (engine fidelity vs the vendored web source / RN + UX), ALL
-findings fixed pre-commit (incl. keyboard-avoidance on the terminals, the
-back-swipe lock, dead-code removal). **BUT the simulator auth session was lost
-earlier in the session, so this XL shipped tsc + review-clean with NO device /
-simulator run — no one has played the shift.** Sam MUST play it before phase 2
-is called done: clock in -> work a ticket across panels -> resolve -> grade.
-**Deferred engine-review nit to verify on that pass:** the status-strip
-"resolved N / M" DENOMINATOR may drift from web's live-items count.
+**~~🚨 PHASE-2 VERIFICATION CAVEAT (loud, on the record)~~ ✅ DISCHARGED
+2026-07-06 (see the entry at top):** `tsc` clean, two review lenses (engine
+fidelity vs the vendored web source / RN + UX), ALL findings fixed pre-commit
+(incl. keyboard-avoidance on the terminals, the back-swipe lock, dead-code
+removal). The `techhub-shift` Maestro flow now proves the path on a signed
+Release sim build: Games -> TechHub -> IT Support -> shift picker -> Clock in
+-> the LIVE LionDesk HUD with the Tickets dock. Small honest residue: the
+automated flow clocks in and reaches the live HUD — it does not resolve a
+ticket through to the GRADE screen, so Sam's full play-through (resolve ->
+grade) is still the nicety, and the deferred engine-review nit rides with it:
+the status-strip "resolved N / M" DENOMINATOR may drift from web's live-items
+count.
 
 **Quality gates:** `vp-ios` -> `dev-frontend` x3 (web P1 fix `18d3455` + iOS
 engine vendoring `8e91dbe` + phone-first shift UI `3e2a9e6`) -> `ios-qa-tester`
@@ -309,7 +390,7 @@ skip is a policy gate, not an effort gate.
 | **Community Library share-link deep link** — `b679bc1` | ✅ web share links to a set | ✅ ported 2026-07-05 | A shared-set link now deep-links into the iOS Library with the shared set PINNED; before this, share links had no iOS landing. Library TIPPING stays deliberately skipped (3.1.1 policy call — see the inventory outcome above); the 2026-07-03 wave-2 Library row's no-tips cut still stands. |
 | **Resume Coach wired to the live Pro-gated API + un-orphaned** — `0f8c1b6` | ✅ `/learn/resume-coach` (Pro, shipped 2026-06-04) | ✅ wired 2026-07-05 — **converts the 2026-06-06 no-row decision into a parity row, exactly as that entry predicted** | The iOS surface existed but was orphaned (no entry point, not wired to the live API); now wired to the live Pro-gated web endpoints + a real entry tile. **AI-COST FLAG: enables the existing OpenAI-backed endpoints (gpt-4o-mini) from iOS — SERVER-SIDE Pro gate, so only paying users can trigger spend; no new endpoints, no new spend class.** Sam-eyeball item: the tile + flow. |
 | **Word Banks per-bank manage panel in the bank switcher** — `401158c` | ✅ web per-bank management | ✅ ported 2026-07-05 | The inventory confirmed Word Banks CORE complete; bank MANAGEMENT was the one real gap — the iOS `BankSwitcherSheet` listed banks with no way to manage one. Each bank in the switcher now opens a manage panel. Standing reverse-flag re-confirmed: on Word Banks IA, web follows iOS via the unmerged `feat/web-vocab-ia`. |
-| **TechHub phase 1: vendored helpdesk engine + hub / track ladders / terminal (TRK 001-005)** — `bfd0794` + `4702071`; **+ phase 2 shift sim (`3e2a9e6` + `8e91dbe`) + P1 re-vendor (`6bfe4a2`)** | ✅ `/learn/techhub` (live) | 🟡 phase 1 shipped 2026-07-05; **phase 2 (helpdesk shift sim) shipped 2026-07-05 (wave 4)** — **supersedes the 2026-06-29 "web-only by design" no-row decision (scope change on the record)** | Engine vendored from web (zero-API, deterministic, Fangs PREVIEW-only — same framing as web). Screens as an Arcade-family surface: hub (5 track ticket cards, rank + cleared/total, tickets-resolved counter, web honesty note verbatim), track (career-ladder rail 8-9 rungs, rank-gated queue, netops honest empty state), portrait terminal (Fang PREVIEW pill + hint/reveal/abandon, bottom-sheet ticket + evidence, JetBrainsMono log w/ VoiceOver, confirm-gated fix chip, markCleared to AsyncStorage; reveal zeroes the preview everywhere; locked deep links show the gating math). Entry: 4th calm ModeCard on the Games tab. **DELIBERATE ACCENT DIVERGENCE: the SWE track accent is `#F59E0B` on iOS vs web's `#FFD700` — gold is the currency-only law on iOS, so a career track may not wear Fangs gold.** **PHASE 2 (wave 4, `feat/ios-web-parity-wave4`): the LionDesk SHIFT SIM reaches iOS for ONE helpdesk track (`shift1`), playable end to end (clock in -> work tickets across panels -> resolve -> grade).** Engine vendored VERBATIM (`8e91dbe`: engine/scoring/types/shift1, `campaignProgress` -> AsyncStorage). Phone-first UI (`3e2a9e6`, NOT the web desktop-OS windowed UX): full-takeover shift route (`app/techhub/[track]/shift.tsx`), reducer host + pause-on-background TICK loop, pinned SLA/CSAT status strip, bridge-pressure meter, bottom in-shift app-switcher dock (distinct electric pill = the phone-first replacement for web's windows), clock-in briefing, results grade screen; six desk panels (`ChannelList` Inbox/Tickets/Phone, `WorkView`, `Stockroom`, `KB`, `AD`) + embedded `MiniTerminal` in `WorkView`; new `app/techhub/_layout.tsx` locks back-swipe on the LIVE shift; "Start your shift" CTA on the track screen. **STILL 🟡 — DELIBERATE PHASED PORT, remaining scope deferred (NOT gaps): the results layer (manager debrief, fumble review, quick recall, replay scrubber), the other 3 tracks/shifts (soc/swe/redteam), and the whole meta layer (dailies/shop/exam/leaderboard/achievements/themes).** 🟡 until the remaining phases land or are descoped. **🚨 PHASE-2 VERIFICATION CAVEAT: NOT sim-verified — simulator auth session lost mid-session, so phase 2 shipped tsc + review-clean with NO device pass; Sam MUST play the shift before it is done (clock in -> work a ticket -> resolve -> grade). Deferred nit to verify on that pass: the status-strip "resolved N/M" denominator may drift from web's live-items count.** **✅ P1 helpdesk-scenarios bug RESOLVED (see the callout below): iOS now mirrors the FIXED web JSON (`6bfe4a2` re-vendors after web `18d3455`) — the "iOS mirrors the bug verbatim until the web fix lands" contract is discharged.** **LIONDESK WAVE 2 (2026-07-05, wave 5, `feat/ios-web-parity-wave4`): the phase-2 deferral is mostly DISCHARGED.** `095ad50` vendored the FULL 5-shift helpdesk campaign (shifts 2-5, a complete Intern-to-senior campaign) + built the rich RESULTS screen the phase-2 entry deferred (synthesized manager debrief, fumble review, quick recall, replay stepper); `2ad8b0d` added MULTI-TRACK breadth — all 8 SOC/SWE/redteam/netops shift files vendored, a per-track `campaigns.ts` manifest, the shift picker un-guarded to ALL 5 tracks — so LionDesk on iOS is now multi-track, matching web's track breadth. **STILL 🟡 — DELIBERATELY DEFERRED (not gaps): the meta layer only (dailies / shop / exam / leaderboard / achievements / themes).** 🟡 until the meta layer lands or is descoped. **🚨 WAVE-5 VERIFICATION DEBT: the campaign + multi-track + rich results are MERGED-BUT-UNVERIFIED ON DEVICE — the wave shipped tsc + review-clean with NO on-device / on-simulator run (simulator auth session lost this session). The `.maestro/techhub-shift.yaml` flow (shipped this wave) is the lever to close it: `maestro test` against a fresh build. Sam MUST play the shift before it is called done.** See the 2026-07-05 wave-5 entry near the top. |
+| **TechHub phase 1: vendored helpdesk engine + hub / track ladders / terminal (TRK 001-005)** — `bfd0794` + `4702071`; **+ phase 2 shift sim (`3e2a9e6` + `8e91dbe`) + P1 re-vendor (`6bfe4a2`)** | ✅ `/learn/techhub` (live) | 🟡 phase 1 shipped 2026-07-05; **phase 2 (helpdesk shift sim) shipped 2026-07-05 (wave 4)** — **supersedes the 2026-06-29 "web-only by design" no-row decision (scope change on the record)** | Engine vendored from web (zero-API, deterministic, Fangs PREVIEW-only — same framing as web). Screens as an Arcade-family surface: hub (5 track ticket cards, rank + cleared/total, tickets-resolved counter, web honesty note verbatim), track (career-ladder rail 8-9 rungs, rank-gated queue, netops honest empty state), portrait terminal (Fang PREVIEW pill + hint/reveal/abandon, bottom-sheet ticket + evidence, JetBrainsMono log w/ VoiceOver, confirm-gated fix chip, markCleared to AsyncStorage; reveal zeroes the preview everywhere; locked deep links show the gating math). Entry: 4th calm ModeCard on the Games tab. **DELIBERATE ACCENT DIVERGENCE: the SWE track accent is `#F59E0B` on iOS vs web's `#FFD700` — gold is the currency-only law on iOS, so a career track may not wear Fangs gold.** **PHASE 2 (wave 4, `feat/ios-web-parity-wave4`): the LionDesk SHIFT SIM reaches iOS for ONE helpdesk track (`shift1`), playable end to end (clock in -> work tickets across panels -> resolve -> grade).** Engine vendored VERBATIM (`8e91dbe`: engine/scoring/types/shift1, `campaignProgress` -> AsyncStorage). Phone-first UI (`3e2a9e6`, NOT the web desktop-OS windowed UX): full-takeover shift route (`app/techhub/[track]/shift.tsx`), reducer host + pause-on-background TICK loop, pinned SLA/CSAT status strip, bridge-pressure meter, bottom in-shift app-switcher dock (distinct electric pill = the phone-first replacement for web's windows), clock-in briefing, results grade screen; six desk panels (`ChannelList` Inbox/Tickets/Phone, `WorkView`, `Stockroom`, `KB`, `AD`) + embedded `MiniTerminal` in `WorkView`; new `app/techhub/_layout.tsx` locks back-swipe on the LIVE shift; "Start your shift" CTA on the track screen. **STILL 🟡 — DELIBERATE PHASED PORT, remaining scope deferred (NOT gaps): the results layer (manager debrief, fumble review, quick recall, replay scrubber), the other 3 tracks/shifts (soc/swe/redteam), and the whole meta layer (dailies/shop/exam/leaderboard/achievements/themes).** 🟡 until the remaining phases land or are descoped. **~~🚨 PHASE-2 VERIFICATION CAVEAT~~ ✅ DISCHARGED 2026-07-06: the `techhub-shift` Maestro flow passed on a signed Release sim build (Games -> TechHub -> IT Support -> shift picker -> Clock in -> live LionDesk HUD with the Tickets dock). Residue: the automated flow does not resolve-to-grade, so Sam's full play-through + the status-strip "resolved N/M" denominator nit remain the nicety.** **✅ P1 helpdesk-scenarios bug RESOLVED (see the callout below): iOS now mirrors the FIXED web JSON (`6bfe4a2` re-vendors after web `18d3455`) — the "iOS mirrors the bug verbatim until the web fix lands" contract is discharged.** **LIONDESK WAVE 2 (2026-07-05, wave 5, `feat/ios-web-parity-wave4`): the phase-2 deferral is mostly DISCHARGED.** `095ad50` vendored the FULL 5-shift helpdesk campaign (shifts 2-5, a complete Intern-to-senior campaign) + built the rich RESULTS screen the phase-2 entry deferred (synthesized manager debrief, fumble review, quick recall, replay stepper); `2ad8b0d` added MULTI-TRACK breadth — all 8 SOC/SWE/redteam/netops shift files vendored, a per-track `campaigns.ts` manifest, the shift picker un-guarded to ALL 5 tracks — so LionDesk on iOS is now multi-track, matching web's track breadth. **STILL 🟡 — DELIBERATELY DEFERRED (not gaps): the meta layer only (dailies / shop / exam / leaderboard / achievements / themes).** 🟡 until the meta layer lands or is descoped. **~~🚨 WAVE-5 VERIFICATION DEBT~~ ✅ DISCHARGED 2026-07-06: the `.maestro/techhub-shift.yaml` flow did its job — 6/6 suite green on a signed Release sim build, clock-in to the live LionDesk HUD verified (see the discharge entry at top). Sam's resolve-to-grade play-through on build 28 is the remaining nicety.** **NEW web drift 2026-07-06: web's terminal gained no-dead-ends UX (`43e5482` — forgiving matching, did-you-mean, escalating rescue) that the iOS terminals do NOT have — see the 2026-07-06 row at top (❌, component-layer logic, a JSON re-vendor will not pick it up).** See the 2026-07-05 wave-5 entry near the top. |
 
 **✅ RESOLVED 2026-07-05 (same day, wave 4) — P1 WEB BUG found during vendoring
 was LIVE ON WEB, now FIXED:** `lib/helpdesk/scenarios.generated.json` (web repo)
@@ -328,14 +409,18 @@ the "iOS mirrors the bug verbatim BY DESIGN until the web fix lands" contract is
 DISCHARGED. Reconciled in `WORKLOG.md` (2026-07-05) and the vault `Tech-Debt`
 note (both marked RESOLVED).
 
-**Verification caveat (on the record):** `tsc` + `eslint` clean throughout;
-three review lenses over the six ports (API contracts vs the ACTUAL web routes
-/ RN correctness / design + copy) + two TechHub lenses (engine fidelity / RN +
-UX), ALL findings fixed pre-commit. **BUT the simulator auth session was lost
-mid-wave, so the usual screenshot pass did NOT happen for wave 3.** Sam should
-sign in and eyeball: the Academia setup hero (fresh account), Study Sets
-edit/publish, the Resume Coach tile + flow, and TechHub hub -> track ->
-terminal.
+**~~Verification caveat (on the record)~~ ✅ DISCHARGED 2026-07-06 (see the
+entry at top):** `tsc` + `eslint` clean throughout; three review lenses over
+the six ports (API contracts vs the ACTUAL web routes / RN correctness /
+design + copy) + two TechHub lenses (engine fidelity / RN + UX), ALL findings
+fixed pre-commit. The missing screenshot pass is now covered: the four
+per-feature Maestro flows built for exactly these surfaces all passed on a
+signed Release sim build 2026-07-06 — `academia-setup` (deep link
+`lionade://academia` + hub), `study-sets` (hub + deck detail), `resume-coach`
+(header + plan gate), `library-share` (Community Library browse chrome) — plus
+`smoke` covering TechHub hub + Career Tracks. Simulator pass, not a physical
+device; Sam eyeballing the flows on the build-28 TestFlight binary is the
+remaining nicety.
 
 **Quality gates:** `ios-parity-tracker` (inventory) -> iOS build agents ->
 `ios-code-reviewer` x5 lenses (all findings fixed pre-commit) ->
@@ -665,7 +750,7 @@ on-device OCR (package awaits install; Scan fails soft), competitive/party
 | Surface | Web | iOS |
 |---|---|---|
 | **Game banks: 100+ verified items each** (Sabotage, Trivia, Bluff, Poker Face, Spectrum, Pin, Sketchy, Pardy) | ✅ shipped | ✅ SHARED-DATA — the banks live in `lib/` (competitive/party) + `packages`; iOS inherits any it reads. No iOS work unless a bank is iOS-only. |
-| **TechHub/LionDesk +24 tickets + phishing + KB** | ✅ shipped | 🟡 — TechHub phase 1 + the LionDesk shift sim are now on iOS. *(2026-07-05 update: TechHub phase 1 landed via the vendored engine — see the wave-3 entry; phase 2 brought the LionDesk shift sim to iOS for the helpdesk track — wave-4 entry; LionDesk wave 2 added the full 5-shift helpdesk campaign + rich results + all 5 tracks (SOC/SWE/redteam/netops) — wave-5 entry. The prior "LionDesk is web-only by design" framing is SUPERSEDED. Still 🟡: the meta layer (dailies/shop/exam/leaderboard/achievements/themes) is deliberately deferred, and the whole thing is merged-but-unverified on device pending the Maestro run.)* |
+| **TechHub/LionDesk +24 tickets + phishing + KB** | ✅ shipped | 🟡 — TechHub phase 1 + the LionDesk shift sim are now on iOS. *(2026-07-05 update: TechHub phase 1 landed via the vendored engine — see the wave-3 entry; phase 2 brought the LionDesk shift sim to iOS for the helpdesk track — wave-4 entry; LionDesk wave 2 added the full 5-shift helpdesk campaign + rich results + all 5 tracks (SOC/SWE/redteam/netops) — wave-5 entry. The prior "LionDesk is web-only by design" framing is SUPERSEDED. Still 🟡: the meta layer (dailies/shop/exam/leaderboard/achievements/themes) is deliberately deferred. ~~Merged-but-unverified on device pending the Maestro run~~ — ✅ verified on-sim 2026-07-06, Maestro 6/6 incl. `techhub-shift` clock-in to the live HUD; see the discharge entry at top. New 2026-07-06 drift: web's terminal no-dead-ends UX (`43e5482`) is ❌ on iOS — see the 2026-07-06 row at top.)* |
 
 ---
 
@@ -2957,7 +3042,9 @@ These are flagged for the WEB team — iOS shipped them first or better:
 
 These web changes intentionally have **no parity row** — recorded here so a future audit doesn't misread the absence as missed tracking:
 
-- **2026-07-06 — Maestro E2E CI (`.github/workflows/maestro-smoke.yml` + `.maestro/` flows) — iOS-only verification infra, no web counterpart (finish wave `5f4d111`).** 🚫 N/A. New GitHub Actions smoke workflow + Maestro flows (`smoke`, `techhub-shift`, `academia-setup`, `study-sets`, `resume-coach`, `library-share`) that drive the iOS accessibility tree by VISIBLE LABEL from the shared demo-login critical path (no real credentials, no test-IDs added to source). This is iOS TEST/VERIFICATION INFRASTRUCTURE, not a user-facing feature — **web has no equivalent test harness in this parity flow, so there is nothing to port and no feature row to open.** It extends the ad-hoc `.maestro/` harness the 2026-07-05 wave-5 entry shipped into a CI-runnable gate; it is the deliberate lever to start closing the wave-3/4/5 device-verification debt on every push. Recorded here + in the 2026-07-06 finish-wave entry at the top. (`ios-parity-tracker` via `vp-ios`.)
+- **2026-07-06 — iOS auth-context fail-open (`lib/auth-context.tsx`, commit `405f290`) — iOS-native auth-shell hardening, no web counterpart.** 🚫 N/A. `getSession()` reads SecureStore (the Keychain) and had NO `.catch`, so any rejection — locked/unavailable Keychain, a build missing the `keychain-access-groups` entitlement, storage corruption — left `isLoading` true forever and hung the app on an infinite blank spinner with no recovery path. It now fails OPEN to the signed-out state so RouteGuard routes to `/login`. Discovered during the 2026-07-06 local verification pass: the UNSIGNED local build lacked the `keychain-access-groups` entitlement and hung on launch — a signed build works fine, but the hardening protects real prod edge cases (Keychain locked at cold start, storage corruption). WHY no row: web's session lives in `localStorage` (synchronous, cannot reject this way) — the Keychain failure mode is iOS-native by construction, so there is nothing for web to match. Recorded here + in the 2026-07-06 discharge entry at the top. (`ios-parity-tracker` via `vp-ios`.)
+
+- **2026-07-06 — Maestro E2E CI (`.github/workflows/maestro-smoke.yml` + `.maestro/` flows) — iOS-only verification infra, no web counterpart (finish wave `5f4d111`).** 🚫 N/A. New GitHub Actions smoke workflow + Maestro flows (`smoke`, `techhub-shift`, `academia-setup`, `study-sets`, `resume-coach`, `library-share`) that drive the iOS accessibility tree by VISIBLE LABEL from the shared demo-login critical path (no real credentials, no test-IDs added to source). This is iOS TEST/VERIFICATION INFRASTRUCTURE, not a user-facing feature — **web has no equivalent test harness in this parity flow, so there is nothing to port and no feature row to open.** It extends the ad-hoc `.maestro/` harness the 2026-07-05 wave-5 entry shipped into a CI-runnable gate; it is the deliberate lever to start closing the wave-3/4/5 device-verification debt on every push. **UPDATE 2026-07-06 (`9cab1b4`): the lever WORKED — selectors were fixed against the REAL runtime a11y tree and the suite is now 6/6 green on a signed Release sim build, discharging the waves-3/4/5 verification debt (see the discharge entry at top).** What the first live run taught: Maestro text selectors are FULL-string regexes and the app's cards/rows are accessibility-GROUPED (one element per card, combined label), so flows match by full-label prefix regex (`Roardle.*` / `TechHub.*` / `IT Support.*` / `Clock in.*`); the library-share subject chip's label is `Filter by All`, not `All`; the shift CTA's a11y label is `Start a shift...` while its visible text says "Start your shift"; the live demo account is PLATINUM (the seeded-free membership assumption was stale — anchor now plan-agnostic); below-the-fold tiles need `scrollUntilVisible`; the academia deep link is `lionade://academia` (the `(tabs)` group is not a URL segment). The harness is now trustworthy as a regression gate. Recorded here + in the 2026-07-06 finish-wave entry at the top. (`ios-parity-tracker` via `vp-ios`.)
 
 - **2026-06-06 — UX hygiene sweep: replace raw validator toasts with friendly copy (web-only, no iOS port).** Last night's vocab bug (`d09047e`) surfaced because the client toast was wired to the raw server `error.message`, so users saw Zod validator output verbatim (e.g. `definition_source must be wikipedia, ai, or manual`). Same pattern audited across the web app and swept everywhere it leaked: 29 form-submit / mutation handlers across vocab (AddWordForm, BankSelector, CreateBankModal, BankPreviewModal, VocabList, ReviewQueue), party (page, [code], RoomLobby, BluffView × 3, PokerFaceView × 4), mastery (parse / create-exam / start-session), ninny (generate / unlock / delete / chat), classes (create + edit), academia (create class), settings (notif + privacy + visibility), settings/subscription (portal), shop (fang checkout + equip), social (nudge + challenge), profile (privacy + notifications + delete-account), account (portal), pricing (checkout), login (Google + Apple OAuth), Coach resume upload, syllabus upload, focus session claim, streak revive. **Pattern applied:** `setError(r.error ?? "friendly")` and `toastError(e instanceof Error ? e.message : "friendly")` (which let the raw server string run first and showed the friendly only as fallback) replaced with `console.error("[surface:action] failed", err); toastError("friendly")` so devs still see the real error in the browser console while users only ever see Gen-Z-toned calm copy ("Couldn't save. Try again.", "Couldn't open billing portal. Try again.", "Network's being weird. Try again.", etc.). **Preserved intentionally:** (a) `StreakReviveBanner` keeps `r.data?.message` because that's server-curated user copy (e.g. "Need 1500 Fangs"), not a raw validator string; (b) `BankSelector` keeps the explicit `error.toLowerCase().includes(...)` matching against the V3A profanity + 20-bank-cap server contract because those errors are intentionally shaped as user copy; (c) `RoomLobby.startGame` keeps `meta.title needs at least ${meta.minPlayers} players` because that string is built client-side from `GAME_META`, not from a server response. **iOS impact: none.** iOS has its own copywriter-owned toast strings via `react-native-toast-message` + per-screen error handling — the iOS surfaces don't share toast strings with the web app, so there's nothing to port. The `@lionade/core/api/http.ts` client (which both platforms consume) was NOT changed — `ApiResult.error` still carries the raw server string for any caller that wants to switch on a specific error code; this sweep just fixed the **client-side display of that field**. If iOS ever surfaces `ApiResult.error` directly in a toast it should adopt the same console.error + friendly-copy pattern, but the audit at 2026-06-06 confirmed iOS doesn't do this today. Commit `a85c20f`. Files: 29 (16 under `app/`, 13 under `components/`). Type-check clean. (`admin` → in-place pattern sweep → no separate spawn since this is a mechanical guard-rail; `quality-code-reviewer` style guard implied by Sam's spec — friendly copy, no em-dashes, no jargon, no field/column names, success-path untouched.)
 

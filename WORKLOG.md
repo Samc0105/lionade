@@ -4,6 +4,20 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-06 (second batch) - VERIFIED LOCALLY, THEN SHIPPED: Maestro 6/6 GREEN on a signed sim build (waves 3-5 verification debt DISCHARGED) + BUILD 28 BUILT + SUBMITTED to TestFlight + auth boot fail-open + web helpdesk no-dead-ends + Resume Coach error surfacing
+
+**The headline: build 28 (v1.0.0) is ON TESTFLIGHT** (EAS build `c219c314`, submission `7aaeffad`, buildNumber auto-incremented 27->28) — Sam's go was "verify locally first, then build it," and both halves happened this session. Contents: the 2026-07-04 Party batch + parity waves 3-5 + the finish wave + `405f290` + `9cab1b4`, shipped from `release/testflight-03` fast-forwarded to the wave4 tip.
+
+**Verification (the "verify locally" half):** built a signed Release sim build via raw `xcodebuild` (ad-hoc `CODE_SIGN_IDENTITY="-"`), installed on an iPhone 17 Pro sim, and ran the full Maestro suite **6/6 GREEN**: smoke, techhub-shift (complete LionDesk path through Clock-in to the live HUD), study-sets, library-share, resume-coach, academia-setup. Screenshots confirmed Study home (gold #FFD700 Fangs, Daily Drill) + Games tab. **The waves 3-5 MERGED-BUT-UNVERIFIED banner below is DISCHARGED.** Remaining nicety: a physical-device VoiceOver + Dynamic Type walkthrough + a quick TestFlight smoke of build 28 once Apple finishes processing.
+
+**Three local-build gotchas on the record (docs/CHANGELOG.md has the full story):** `CODE_SIGNING_ALLOWED=NO` strips the keychain entitlement -> SecureStore fails -> `getSession()` hangs -> infinite boot spinner that looks exactly like an app bug (fix: ad-hoc signing); `expo run:ios --device <sim-udid>` mis-routes to the physical-device path under Xcode 26.5 (drive xcodebuild directly); local Release builds need `SENTRY_DISABLE_AUTO_UPLOAD=true`.
+
+**Real fixes that fell out:** iOS `405f290` auth fail-open (getSession had no .catch — any Keychain rejection bricked boot forever) + `e3f91ef` retry-then-fail-open + Maestro assertion tightening (rides the NEXT build, not 28). iOS `9cab1b4` Maestro selectors reconciled to the real a11y tree (grouped labels are full-string-regex targets; the demo account is live Platinum, not seeded-free). WEB (from Sam's live testing mid-session): `43e5482` helpdesk terminal no-dead-ends (forgiving matching + did-you-mean + escalating rescue), `577fdff` Resume Coach real error surfacing (diagnosed via ai_call_log: zero analyze rows ever = the route dies in PDF extraction, key + plan are fine), `e87a1dc` review must-fixes (two-pass exact-then-prefix command matching — a shorter alias was shadowing later commands, worst case the bad-deploy rookie trap PAID OUT a resolve; + em-dash purge). **Web fixes are committed but NOT deployed to prod (Sam hasn't said deploy; `vercel deploy --prod` is manual).**
+
+**Parity rows added:** web helpdesk no-dead-ends -> iOS ❌ (must be ported into TerminalPanel, will NOT arrive via re-vendor); Resume Coach error mapping -> iOS 🟡. **Open Sam threads:** deploy web fixes to prod? Review Hub "make your guess" active-recall step (fork: True/False buttons vs self-graded commit-then-reveal).
+
+---
+
 ## 2026-07-06 (finish wave) - Wave-4/5 polish + a11y cap: two-golds RESOLVED, DailyDrill calm pass, crash-safe share-card, Maestro CI, VoiceOver + Dynamic Type sweep (committed, NOT pushed; build 28 still PREPPED, pending Sam's go) — verification-on-device debt still the dominant open item
 
 **Repo:** `~/Desktop/lionade-ios`. **Branch: `feat/ios-web-parity-wave4` — committed, NOT pushed, NOT built, NOT on TestFlight.** Build 28 status unchanged (still PREPPED on `release/testflight-03`, gated on Sam's explicit go). Four iOS commits (`07cdb71`, `5f4d111`, `747f2da`, merge `3c56fdc`) + doc commits. This is the polish/a11y cap on the wave-5 batch below — it discharges several of that entry's "open decisions / deferrals," it does NOT open new feature work.
