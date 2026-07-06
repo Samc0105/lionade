@@ -111,7 +111,10 @@ async function fetchStreakInfo(userId: string): Promise<StreakInfo> {
       .from("active_boosters")
       .select("id")
       .eq("user_id", userId)
-      .eq("booster_effect", "streak_shield")
+      // The live column is boost_type (migration 039 + activate-booster
+      // writes); the legacy booster_effect name 400s on prod, so this shield
+      // check silently failed on every dashboard load.
+      .eq("boost_type", "streak_shield")
       .limit(1),
   ]);
 
