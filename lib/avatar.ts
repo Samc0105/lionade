@@ -12,5 +12,5 @@ export function avatarFor(
 ): string {
   if (avatarUrl) return avatarUrl;
   const seed = username && username.trim().length > 0 ? username : "user";
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=4A90D9`;
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=4A90D9&scale=80&translateY=6`;
 }

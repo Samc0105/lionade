@@ -680,7 +680,7 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
 // A neutral DiceBear seed is the avatar fallback when the buyer's own avatar
 // url isn't handy (logged-out / pre-load). Same DiceBear shape as lib/auth.
 const NEUTRAL_PREVIEW_AVATAR =
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lionade&backgroundColor=4A90D9";
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lionade&backgroundColor=4A90D9&scale=80&translateY=6";
 
 // Resolve the AnimatedUsername effect for a `name_fx_*` SKU id (the page's
 // existing id -> effect map). Anything unmapped degrades to "none".
@@ -1509,7 +1509,7 @@ export default function ShopPage() {
   // frame/aura/name cards show what the item looks like on THEM. Memoized so
   // the DiceBear fallback url is stable across renders (avatar-stability rule).
   const previewAvatarUrl = useMemo(
-    () => user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username ?? "Lionade"}&backgroundColor=4A90D9`,
+    () => user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username ?? "Lionade"}&backgroundColor=4A90D9&scale=80&translateY=6`,
     [user?.avatar, user?.username],
   );
   const previewUsername = user?.username ?? "YourName";

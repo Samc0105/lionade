@@ -814,7 +814,7 @@ const AVATAR_BG_SWATCHES = [
 function buildAvatarUrl(seed: string, bg: string) {
   return `https://api.dicebear.com/7.x/${DICEBEAR_STYLE}/svg?seed=${encodeURIComponent(
     seed,
-  )}&backgroundColor=${bg}`;
+  )}&backgroundColor=${bg}&scale=80&translateY=6`;
 }
 
 function randomSeed() {
