@@ -322,7 +322,7 @@
         "aliases": ["quarantine and report q-4471", "quarantine q-4471", "quarantine and warn", "report phishing q-4471", "quarantine report warn", "contain and report"],
         "output": "Resolving q-4471...\n  [1/4] Message quarantined org-wide. 1 copy pulled, future copies from 1ionade-it.com blocked.\n  [2/4] Reported to threat intel: lookalike domains 1ionade-it.com + 1ionade-it-verify.com submitted for blocklist.\n  [3/4] Reply sent to m.okafor: confirmed phishing, thanked her for reporting, reminded her to check the sender domain and hover links before clicking.\n  [4/4] Case closed: phishing, contained pre-click, no credentials exposed.\nClean resolution. You read the auth failures, spotted the homoglyph sender and link, contained the threat, and closed the loop with the human.",
         "tone": "success",
-        "requires": ["headers q-4471", "url-detonate q-4471"],
+        "requires": ["Read the raw authentication headers for the reported message.", "Detonate the embedded link in the sandbox to see where 'verify here' really goes."],
         "resolvesTicket": true
       }
     ]
@@ -629,7 +629,7 @@
         "tone": "success",
         "resolvesTicket": true,
         "step": "Guard the optional access at the source so a missing address cannot throw.",
-        "requires": ["read stack trace", "open orders.service.ts"]
+        "requires": ["Read the stack trace to the exact line and column.", "Open the file at the crashing line."]
       },
       {
         "aliases": ["wrap in try catch", "add try catch", "catch the error", "swallow the error", "try catch line 42"],
@@ -1178,19 +1178,19 @@
         "aliases": ["cat banner", "read banner", "http_banner", "view banner", "banner"],
         "output": "--- GET https://acme-lab.internal/admin ---\n<title>ACME Router Admin v1.2</title>\n<div class=login-banner>ACME Router Admin v1.2  default login admin/admin</div>\n<!-- TODO before ship: change factory password, ACME-118 (still open) -->\n[note] Panel reachable with no source-IP restriction and no VPN gate.\n\nThe app is literally printing its factory username and password on the login page. That is a finding on its own; now prove the creds still authenticate before you write it up.",
         "tone": "info",
-        "step": "investigate"
+        "step": "investigate-banner"
       },
       {
         "aliases": ["cat proxy log", "read proxy log", "proxy_login", "view login log", "login log"],
         "output": "12:04:01  user=labtester pass=Spring2026!  -> 401 invalid credentials\n12:04:17  user=admin     pass=password     -> 401 invalid credentials\n12:04:25  user=admin     pass=admin        -> 302 -> /admin/dashboard  \"Welcome, admin (factory account)\"\n[finding] Vendor default pair admin/admin authenticates to the dashboard.\n[finding] No lockout after 3 failed attempts; no MFA on success.\n\nConfirmed. admin/admin is live on an unrestricted panel. This is a real default-credential finding, not a false positive.",
         "tone": "info",
-        "step": "investigate"
+        "step": "investigate-proxy-log"
       },
       {
         "aliases": ["cat config", "read config", "admin_auth", "view auth config", "inspect config"],
         "output": "account.admin.enabled        = true\naccount.admin.password_hash  = 21232f297a57a5a743894a0e4a801fc3  # md5('admin'), published factory password\naccount.admin.is_factory     = true     # never rotated since image flashed\naccount.admin.must_change_pw = false\npanel.bind_address           = 0.0.0.0   # reachable from anywhere\npanel.allow_cidr             = 0.0.0.0/0  # no IP restriction\npanel.require_vpn            = false\npanel.lockout_threshold      = 0          # lockout disabled\n\nThere it is in config: a factory account whose stored hash is md5('admin'), never forced to change, bound to everything, with no IP gate and no lockout. The fix has to touch the account, the password, AND the reachability.",
         "tone": "info",
-        "step": "investigate"
+        "step": "investigate-config"
       },
       {
         "aliases": ["check scope", "scope", "am i in scope", "rules of engagement", "roe"],
@@ -1228,7 +1228,7 @@
         "tone": "success",
         "step": "resolve",
         "resolvesTicket": true,
-        "requires": ["cat banner", "cat proxy log", "cat config"]
+        "requires": ["investigate-banner", "investigate-proxy-log", "investigate-config"]
       }
     ]
   },
