@@ -4,6 +4,24 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-06 (reliability wave) - CEO FEATURE FREEZE: works-when-tapped audit (344 interactions, 26 breaks) + cross-platform fix wave + live click-verification + SHOP PURCHASES REPAIRED (they had NEVER worked on prod) + avatar alignment (all on main, 3 migrations APPLIED to prod, web deploy still Sam-gated)
+
+**The headline: Sam called a feature freeze ("make everything that exists work when tapped"), and the wave surfaced + fixed real production breakage, including shop purchases, which had NEVER worked on prod.** Everything below is verified live and committed on **main**. **NOT yet deployed to web prod (the ONE deploy is Sam-gated), EXCEPT the three DB migrations, which ARE applied to prod** - so the DB-side fixes (shop, avatars, badges backend) are already live for prod and iOS build 28 with no deploy needed.
+
+**Works-when-tapped audit + fix wave (web `70565e2` + iOS `1295358`):** 344 interactions audited, 26 confirmed breaks, then the fixes: bounties hook, recent-quizzes, quiz deriveReward + attemptId + a double-tap latch, claim-bounty/daily-drill rollback on credit failure, friends username charset + revive, mastery archive endpoint, the badges backend (migration `20260706120000` APPLIED: 12-badge catalog + 17 retro-awards; award wiring in save-quiz-results/friends/publish/shifts/vocab), and the resume-coach pdf-parse root cause on Vercel tracing (DOMMatrix/@napi-rs + pdfjs fake worker; `next.config.js` outputFileTracingIncludes).
+
+**Interactive click-verification (the "verified live" half):** on web, a demo account drove the full quiz loop with a LIVE badge award proven on the badges page (First Blood), daily claim (+10, dual ledger), review-hub grade (+2), spin (200), helpdesk clear-queue resolves (+40), party room create/close over realtime, and shop affordability gating. On iOS, Maestro ran 6/6 driving demo login, the full Academia funnel, and LionDesk clock-in through to the live HUD. Live-found fixes along the way: streak-shield legacy-column 400 (`3f2061a`), double navbar on 7 surfaces (`f12cc18`, `171a672`), leftover "coins" strings corrected to Fangs (`f5b6fed`).
+
+**Sam's two live reports, both fixed + verified (`fcfa6e0`):**
+- **(a) SHOP PURCHASES HAD NEVER WORKED ON PROD.** `user_inventory` was an ancient uuid scaffold; every buy went debit -> insert-fail -> auto-refund -> 500, and the table had ZERO rows ever. Rebuilt via migration `20260706180000` (APPLIED); first successful purchase verified end to end (debit 622 -> 472 + inventory row + ledger entry). The fix is DB-side, so prod AND iOS build 28 work immediately.
+- **(b) Avatars misaligned in their circles.** avataaars renders top-anchored; `scale=80&translateY=6` verified visually. Stored avatar URLs migrated (`20260706190000` APPLIED, so iOS is fixed too) + five web avatar generators updated.
+
+**IN FLIGHT as this entry is written (results land in a later entry):** a systematic schema-drift hunt - every web DB touchpoint checked against the live prod schema; drift is the class behind five of tonight's bugs - plus seven more fix lanes: shop drops duplicate key, spend-RPC iap clamp migration, resume machine error codes, friends dupe revive, favicon/hydration dev noise, achievements wiring investigation, learning-paths honest empty state.
+
+**Still user-gated:** the ONE web deploy (Sam approves after verification; `vercel deploy --prod` is manual), Ninny send + IAP + the learning-paths retire-vs-seed decisions, EAS build 29.
+
+---
+
 ## 2026-07-06 (second batch) - VERIFIED LOCALLY, THEN SHIPPED: Maestro 6/6 GREEN on a signed sim build (waves 3-5 verification debt DISCHARGED) + BUILD 28 BUILT + SUBMITTED to TestFlight + auth boot fail-open + web helpdesk no-dead-ends + Resume Coach error surfacing
 
 **The headline: build 28 (v1.0.0) is ON TESTFLIGHT** (EAS build `c219c314`, submission `7aaeffad`, buildNumber auto-incremented 27->28) — Sam's go was "verify locally first, then build it," and both halves happened this session. Contents: the 2026-07-04 Party batch + parity waves 3-5 + the finish wave + `405f290` + `9cab1b4`, shipped from `release/testflight-03` fast-forwarded to the wave4 tip.

@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
  * GET /api/shop/trending — returns the top 3 most-purchased SKU ids over the
  * last 7 days, sorted by purchase count desc.
  *
- * Source of truth: `purchase_history` (item_id + created_at). We tried
+ * Source of truth: `purchase_history` (item_id + purchased_at). We tried
  * `coin_transactions` first but it only logs `description` strings, not ids
  * — `purchase_history` is the structured table the purchase route writes to.
  *
@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest) {
     const { data: rows, error } = await supabaseAdmin
       .from("purchase_history")
       .select("item_id")
-      .gte("created_at", sevenDaysAgo);
+      .gte("purchased_at", sevenDaysAgo);
 
     if (error) {
       // Table may not exist yet OR be empty — treat as early-days, not a 500.

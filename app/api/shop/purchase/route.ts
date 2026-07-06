@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       itemId: row.item_id,
       quantity: row.quantity ?? 1,
       equipped: row.equipped ?? false,
-      acquiredAt: row.created_at ?? row.acquired_at ?? null,
+      acquiredAt: row.purchased_at ?? null,
     })),
   });
 }
@@ -229,18 +229,22 @@ export async function POST(req: NextRequest) {
       });
     } catch { /* non-fatal */ }
 
-    // 5. Purchase history
-    try {
-      await supabaseAdmin.from("purchase_history").insert({
-        user_id: userId,
-        item_id: itemId,
-        item_name: item.name,
-        item_type: item.type,
-        rarity: item.rarity,
-        price,
-        quantity,
-      });
-    } catch { /* purchase_history may not exist yet */ }
+    // 5. Purchase history — structured audit trail, sole data source for
+    // /api/shop/trending. Prod schema is (user_id, item_id, quantity,
+    // total_cost, purchased_at): name/type/rarity are derivable from the
+    // server-trusted catalog via item_id, so we don't denormalize them.
+    // Non-fatal (the purchase already succeeded) but MUST be surfaced —
+    // supabase-js resolves with { error } instead of throwing, so a bare
+    // try/catch silently swallows the failure.
+    const { error: historyErr } = await supabaseAdmin.from("purchase_history").insert({
+      user_id: userId,
+      item_id: itemId,
+      quantity,
+      total_cost: price,
+    });
+    if (historyErr) {
+      console.error("[shop/purchase] purchase_history insert:", historyErr.message);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

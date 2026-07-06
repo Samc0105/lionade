@@ -1650,7 +1650,20 @@ export default function ShopPage() {
   // Drops + Trending render a plain Buy button with no coming-soon gate, so
   // exclude server-blocked items from those pools (voice_ninny_classic +
   // boost_mastery_hint_pack). allItems itself stays complete for inventory.
-  const purchasablePool: ShopItem[] = allItems.filter((i) => !i.comingSoon);
+  // Also dedupe by id: allItems concatenates catalogs that re-list the same
+  // SKUs (FEATURED_ITEMS repeats frame_golden_lion/boost_coin_rush/name_aurora
+  // from COSMETIC_ITEMS + BOOSTER_ITEMS; NEW_SKUS repeats
+  // boost_streak_shield_3pack). Without the dedupe a twice-listed SKU renders
+  // twice in the sampled sections (seen live 2026-07-06: name_aurora appeared
+  // 2x in Today's Drops with a duplicate React key). First occurrence wins.
+  const purchasablePool: ShopItem[] = (() => {
+    const seen = new Set<string>();
+    return allItems.filter((i) => {
+      if (i.comingSoon || seen.has(i.id)) return false;
+      seen.add(i.id);
+      return true;
+    });
+  })();
 
   // ── Today's Drops (deterministic-by-UTC-date, rotates daily) ──
   // Pool = every Fang-priced SKU on the page. The helper filters out founder
@@ -1665,8 +1678,19 @@ export default function ShopPage() {
     // local objects to preserve Icon/iconColor for rendering.
     const pool = purchasablePool as unknown as CoreShopItem[];
     const picked = pickTodaysDrops(pool, new Date(), 5);
-    const pickedIds = new Set(picked.map((p) => p.id));
-    return purchasablePool.filter((i) => pickedIds.has(i.id));
+    // Map picked ids back to at most ONE local item each. purchasablePool is
+    // already deduped by id, but a Map keeps this collision-proof even if a
+    // future catalog concat reintroduces duplicate ids upstream.
+    const byId = new Map(purchasablePool.map((i) => [i.id, i] as const));
+    const uniquePicked: ShopItem[] = [];
+    const pickedSeen = new Set<string>();
+    for (const p of picked) {
+      if (pickedSeen.has(p.id)) continue;
+      pickedSeen.add(p.id);
+      const local = byId.get(p.id);
+      if (local) uniquePicked.push(local);
+    }
+    return uniquePicked;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [utcDateKey]);
 
@@ -1680,7 +1704,9 @@ export default function ShopPage() {
   );
   const trendingIds: string[] = trendingData?.ok ? (trendingData.data?.trending ?? []) : [];
   const trendingItems: ShopItem[] = useMemo(() => {
-    const live = trendingIds
+    // Dedupe ids defensively: a repeated id in the server response would
+    // otherwise render the same card twice (same flaw Today's Drops had).
+    const live = Array.from(new Set(trendingIds))
       .map((id) => purchasablePool.find((i) => i.id === id))
       .filter((i): i is ShopItem => !!i);
     if (live.length >= 3) return live.slice(0, 3);
@@ -1851,13 +1877,13 @@ export default function ShopPage() {
             </div>
             {/* Horizontal scroll on mobile, grid on desktop. */}
             <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-3 sm:pb-0 scrollbar-hide shop-grid-stagger">
-              {todaysDrops.map((item) => {
+              {todaysDrops.map((item, idx) => {
                 const r = RARITY_COLORS[item.rarity];
                 const Icon = item.Icon;
                 const owned = ownedIds.has(item.id);
                 const canAfford = affords(item.price);
                 return (
-                  <div key={item.id}
+                  <div key={`drop-${item.id}-${idx}`}
                     className={`fluid-card-hover shop-card relative group rounded-2xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden flex-shrink-0 w-[68vw] sm:w-auto`}
                     style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(16px)" }}>
                     <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
@@ -1918,7 +1944,7 @@ export default function ShopPage() {
                 const owned = ownedIds.has(item.id);
                 const canAfford = affords(item.price);
                 return (
-                  <div key={item.id}
+                  <div key={`trend-${item.id}-${idx}`}
                     className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden`}
                     style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
                     <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />

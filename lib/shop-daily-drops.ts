@@ -14,8 +14,11 @@
  * Algorithm:
  *   1. Seed from today's UTC date (YYYY-MM-DD → integer)
  *   2. Filter pool to drop-eligible SKUs (priced, non-founder, non-earned)
- *   3. Stable shuffle by hash(seed + sku.id)
- *   4. Slice first N
+ *   3. Dedupe by SKU id (catalogs like FEATURED_ITEMS re-list existing SKUs,
+ *      so a concatenated pool can carry the same id twice; duplicate ids hash
+ *      to the same sort key, land adjacent, and would both make the slice)
+ *   4. Stable shuffle by hash(seed + sku.id)
+ *   5. Slice first N
  */
 
 import type { ShopItem } from "@lionade/core/constants/shop-catalog";
@@ -74,7 +77,16 @@ export function todaysDrops(
   count: number = DEFAULT_DROP_COUNT,
 ): ShopItem[] {
   const seed = utcDateSeed(date);
-  const pool = allSkus.filter(isDropEligible);
+  const eligible = allSkus.filter(isDropEligible);
+  // Dedupe by id, first occurrence wins. Duplicate ids share an identical
+  // hash key, so without this a twice-listed SKU can occupy two drop slots
+  // (seen live 2026-07-06: name_aurora rendered twice in Today's Drops).
+  const seen = new Set<string>();
+  const pool = eligible.filter((s) => {
+    if (seen.has(s.id)) return false;
+    seen.add(s.id);
+    return true;
+  });
   // Stable shuffle: assign each SKU a (seed + id) hash, then sort by it.
   const keyed = pool.map((s) => ({ s, key: hash(`${seed}|${s.id}`) }));
   keyed.sort((a, b) => a.key - b.key);

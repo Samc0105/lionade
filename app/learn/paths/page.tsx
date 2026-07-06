@@ -2,6 +2,7 @@
 
 import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -109,6 +110,22 @@ export default function SubjectSelectorPage() {
     [subjectsData, subjectsError],
   );
 
+  // Honest empty state (2026-07-06): prod's learning_paths table currently has
+  // zero rows, so every subject card read "0/0 stages" and clicked through to
+  // a dead stage map. When the load SUCCEEDS with zero stages across ALL
+  // subjects, render the full-page coming-soon state below instead of the dead
+  // grid. Loading (data undefined) keeps the skeleton; fetch errors keep the
+  // static-cards + retry-banner path (subjects falls back to [] on error, so
+  // gate on !subjectsError to avoid masking an outage as "coming soon"). The
+  // moment any subject has stages, the normal grid renders as before.
+  const pathsEmpty = useMemo(
+    () =>
+      !subjectsError &&
+      subjectsData !== undefined &&
+      subjectsData.reduce((sum, s) => sum + (s.total_stages ?? 0), 0) === 0,
+    [subjectsData, subjectsError],
+  );
+
   // Roll the raw progress rows into the per-subject { completed, stars } map the
   // cards + summary read. Identical reduction to the old loadProgress body.
   const progressMap = useMemo<Record<string, { completed: number; stars: number }>>(() => {
@@ -151,6 +168,55 @@ export default function SubjectSelectorPage() {
     return { totalStages, completedStages, totalStars, pct };
   }, [subjects, progressMap]);
 
+  // All hooks above this line — the early return keeps hook order stable.
+  if (pathsEmpty) {
+    return (
+      <ProtectedRoute>
+        <div className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ isolation: "isolate" }}>
+          <AmbientOrbs
+            orbs={[
+              { color: "#FFD700", pos: "top-[16%] left-[14%]", size: 480, opacity: 0.04 },
+              { color: "#4A90D9", pos: "bottom-[18%] right-[12%]", size: 460, opacity: 0.04 },
+            ]}
+          />
+
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <BackButton />
+
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <div className="w-full max-w-lg text-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-10 sm:p-12 animate-slide-up">
+                <span
+                  className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl"
+                  style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)" }}
+                >
+                  <Path size={32} weight="bold" color="#FFD700" aria-hidden="true" />
+                </span>
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-3">
+                  coming soon
+                </p>
+                <h1 className="font-bebas text-5xl text-cream tracking-[0.08em] leading-none">
+                  LEARNING PATHS
+                </h1>
+                <p className="text-cream/55 text-sm sm:text-base font-syne leading-relaxed mt-4">
+                  Learning Paths are being built. Structured stage-by-stage subject mastery is on the way.
+                </p>
+                <p className="text-cream/35 text-xs font-syne leading-relaxed mt-2">
+                  Clear stages, earn stars, and master whole subjects one step at a time.
+                </p>
+                <Link
+                  href="/learn"
+                  className="btn-gold inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full font-syne font-bold text-sm uppercase tracking-[0.15em]"
+                >
+                  Back to Learn
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
       <div className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ isolation: "isolate" }}>
@@ -187,7 +253,7 @@ export default function SubjectSelectorPage() {
                   <span className="text-cream/80 tabular-nums">{summary.completedStages}</span>
                   <span className="text-cream/40">/</span>
                   <span className="text-cream/80 tabular-nums">{summary.totalStages}</span>
-                  <span className="ml-1.5 text-cream/40">stages cleared</span>
+                  <span className="text-cream/40">{" "}stages cleared</span>
                 </span>
                 {summary.totalStars > 0 && (
                   <>
@@ -318,7 +384,8 @@ export default function SubjectSelectorPage() {
                             <span className="text-cream/85 tabular-nums">{prog.completed}</span>
                             <span className="text-cream/35">/</span>
                             <span className="text-cream/85 tabular-nums">{total}</span>
-                            <span className="ml-1 text-cream/40">stages</span>
+                            {/* Literal space, not just margin, so the text reads "0/12 stages" */}
+                            <span className="text-cream/40">{" "}stages</span>
                           </span>
                           {prog.stars > 0 && (
                             <span className="inline-flex items-center gap-1 text-gold/85">

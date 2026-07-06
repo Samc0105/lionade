@@ -13,6 +13,7 @@
     "lint:migrations": "bash scripts/check-migration-rls.sh",
     "seed:questions": "npx tsx scripts/seed-questions.ts",
     "validate:shifts": "npx tsx scripts/validate-shifts.ts",
+    "check:scenarios": "npx tsx scripts/check-scenario-aliases.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "core:typecheck": "npm --workspace @lionade/core run typecheck",

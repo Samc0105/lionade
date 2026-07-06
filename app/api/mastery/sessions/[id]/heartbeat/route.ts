@@ -62,23 +62,32 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
           last_active_at: nowIso,
         })
         .eq("id", sessionId),
-      // Rolling per-exam total so the landing page shows "Time to master"
+      // Rolling per-exam total so the landing page shows "Time to master".
+      // NOTE: PostgREST errors RESOLVE with { error } — they do not reject —
+      // so the fallback must live in the fulfilled handler, gated on error.
+      // Covers the window until migration 20260706210000 (which creates the
+      // RPC) is applied; afterwards this is a pure atomic increment.
       supabaseAdmin.rpc("increment_user_exam_active", {
         p_user_exam_id: session.user_exam_id,
         p_seconds: delta,
-      }).then(() => {}, async () => {
-        // RPC may not exist yet — fall back to a read-modify-write UPDATE.
-        const { data: exam } = await supabaseAdmin
+      }).then(async ({ error: rpcErr }) => {
+        if (!rpcErr) return;
+        console.error("[mastery/sessions/:id/heartbeat] increment_user_exam_active:", rpcErr.message);
+        // Fallback: read-modify-write on user_exams.total_active_seconds.
+        const { data: exam, error: readErr } = await supabaseAdmin
           .from("user_exams")
           .select("total_active_seconds")
           .eq("id", session.user_exam_id)
           .single();
-        if (exam) {
-          await supabaseAdmin
-            .from("user_exams")
-            .update({ total_active_seconds: (exam.total_active_seconds ?? 0) + delta })
-            .eq("id", session.user_exam_id);
+        if (readErr || !exam) {
+          if (readErr) console.error("[mastery/sessions/:id/heartbeat] fallback read:", readErr.message);
+          return;
         }
+        const { error: updErr } = await supabaseAdmin
+          .from("user_exams")
+          .update({ total_active_seconds: (exam.total_active_seconds ?? 0) + delta })
+          .eq("id", session.user_exam_id);
+        if (updErr) console.error("[mastery/sessions/:id/heartbeat] fallback update:", updErr.message);
       }),
     ]);
 

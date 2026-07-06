@@ -116,7 +116,7 @@ export async function getOrGenerateTeachingPanel(args: {
   // Cache check
   const { data: existing } = await supabaseAdmin
     .from("mastery_teaching_panels")
-    .select("id, content_hash, panel_order, title, tldr, bullets, mnemonic, common_pitfall")
+    .select("id, content_hash, panel_order, title, tldr, bullets, mnemonic, common_pitfall, times_served")
     .eq("content_hash", args.contentHash)
     .eq("status", "approved")
     .order("panel_order")
@@ -134,12 +134,18 @@ export async function getOrGenerateTeachingPanel(args: {
       mnemonic: row.mnemonic,
       commonPitfall: row.common_pitfall,
     };
-    // Best-effort increment of times_served (fire-and-forget).
+    // Best-effort bump of times_served (panel-popularity telemetry).
+    // Read-modify-write on the value we just selected — no counter RPC
+    // exists in prod. Fire-and-forget so telemetry never blocks a cache
+    // hit, but failures are logged, not swallowed. Concurrent hits can
+    // lose a count; acceptable for popularity telemetry.
     void supabaseAdmin
       .from("mastery_teaching_panels")
-      .update({ times_served: (row as { times_served?: number }).times_served ? undefined : undefined })
-      .eq("id", row.id);
-    void supabaseAdmin.rpc("increment", { row_id: row.id }).then(() => {}, () => {}); // no-op if rpc doesn't exist
+      .update({ times_served: ((row as { times_served?: number | null }).times_served ?? 0) + 1 })
+      .eq("id", row.id)
+      .then(({ error: bumpErr }) => {
+        if (bumpErr) console.error("[mastery-content] times_served bump:", bumpErr.message);
+      });
     return { panel, costMicroUsd: 0, cacheHit: true };
   }
 

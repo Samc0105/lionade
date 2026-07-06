@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "pro_required",
+        code: "pro_required",
         message: "Resume Coach is a Pro feature. Upgrade to unlock.",
         upgradeHref: "/pricing",
       },
@@ -92,26 +93,38 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Multipart parse ───────────────────────────────────────────────
+  // Every error response carries a stable machine `code` alongside the
+  // prose `error`. The client maps copy off `code` — never edit these
+  // code values, only the prose.
   let form: FormData;
   try {
     form = await req.formData();
   } catch {
-    return NextResponse.json({ error: "Invalid multipart body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid multipart body", code: "bad_multipart" },
+      { status: 400 },
+    );
   }
   const file = form.get("file");
   if (!file || typeof file === "string") {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    return NextResponse.json(
+      { error: "No file uploaded", code: "no_file" },
+      { status: 400 },
+    );
   }
   const blob = file as File;
 
   // Size check on the actual bytes (don't trust client-supplied size)
   const buf = Buffer.from(await blob.arrayBuffer());
   if (buf.byteLength === 0) {
-    return NextResponse.json({ error: "Empty file" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Empty file", code: "empty_file" },
+      { status: 400 },
+    );
   }
   if (buf.byteLength > MAX_FILE_SIZE_BYTES) {
     return NextResponse.json(
-      { error: "File too large (max 5 MB)" },
+      { error: "File too large (max 5 MB)", code: "too_large" },
       { status: 413 },
     );
   }
@@ -119,7 +132,10 @@ export async function POST(req: NextRequest) {
   // would happily try to pdf-parse a renamed .exe / .docx and burn time
   // for nothing.
   if (buf.byteLength < 5 || buf.subarray(0, 4).toString() !== "%PDF") {
-    return NextResponse.json({ error: "Not a valid PDF" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Not a valid PDF", code: "not_pdf" },
+      { status: 400 },
+    );
   }
 
   // ── Extract text (same pdf-parse v2 dance as classes/syllabus) ─────
@@ -140,7 +156,10 @@ export async function POST(req: NextRequest) {
         "[coach/resume/analyze] pdf-parse PDFParse export missing:",
         JSON.stringify({ exports: Object.keys(mod ?? {}), bufBytes: buf.byteLength }),
       );
-      return NextResponse.json({ error: "Parser unavailable" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Parser unavailable", code: "parser_unavailable" },
+        { status: 500 },
+      );
     }
     const parser = new PDFParse({ data: buf });
     try {
@@ -160,7 +179,10 @@ export async function POST(req: NextRequest) {
         bufBytes: buf.byteLength,
       }),
     );
-    return NextResponse.json({ error: "Couldn't read that PDF" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Couldn't read that PDF", code: "parse_failed" },
+      { status: 500 },
+    );
   }
 
   if (rawText.length < 100) {
@@ -169,7 +191,7 @@ export async function POST(req: NextRequest) {
       JSON.stringify({ extractedChars: rawText.length, bufBytes: buf.byteLength }),
     );
     return NextResponse.json(
-      { error: "Resume too short. We extracted less than 100 characters of text." },
+      { error: "Resume too short. We extracted less than 100 characters of text.", code: "too_short" },
       { status: 400 },
     );
   }
@@ -218,7 +240,10 @@ ${truncated}
     costMicroUsd = raw.costMicroUsd;
   } catch (e) {
     console.error("[coach/resume/analyze] AI failed:", (e as Error).message);
-    return NextResponse.json({ error: "AI analysis failed" }, { status: 502 });
+    return NextResponse.json(
+      { error: "AI analysis failed", code: "ai_failed" },
+      { status: 502 },
+    );
   }
 
   if (
@@ -227,7 +252,7 @@ ${truncated}
     parsed.questions.length < 3
   ) {
     return NextResponse.json(
-      { error: "AI returned insufficient analysis — try a longer resume." },
+      { error: "AI returned insufficient analysis. Try a longer resume.", code: "insufficient_analysis" },
       { status: 502 },
     );
   }
@@ -244,7 +269,10 @@ ${truncated}
     .single();
   if (insertErr || !row) {
     console.error("[coach/resume/analyze] insert failed:", insertErr?.message);
-    return NextResponse.json({ error: "Couldn't save session" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Couldn't save session", code: "save_failed" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({

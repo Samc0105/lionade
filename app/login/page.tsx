@@ -165,6 +165,16 @@ export default function LoginPage() {
     return () => clearTimeout(t);
   }, [isLoading]);
 
+  // Hydration gate. Several of this page's inputs seed synchronously on the
+  // client but not on the server: `user`/`isLoading` (localStorage session in
+  // lib/auth.tsx), `tab` (?signup= query), `showVerifiedBanner` (URL hash).
+  // The SSR pass always renders the initial spinner (isLoading is true
+  // server-side), so gating that same spinner on `mounted` guarantees the
+  // first client render is byte-identical to the server HTML; the real
+  // branch (redirect spinner / form) renders one effect-tick later.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // Hard 10s ceiling on post-login redirect. If navigation hasn't moved
   // us off /login by then, we surface an error and unlock the form so the
   // user can try again — instead of silently resetting and re-prompting.
@@ -286,8 +296,10 @@ export default function LoginPage() {
   }
 
   // Initial auth check — capped at 3s via `authExpired` so the login form
-  // always renders even if the provider is stuck resolving.
-  if (isLoading && !authExpired) return (
+  // always renders even if the provider is stuck resolving. `!mounted`
+  // holds this spinner through the first client render (hydration gate,
+  // see above) — it matches the SSR output exactly.
+  if ((!mounted || isLoading) && !authExpired) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
     </div>

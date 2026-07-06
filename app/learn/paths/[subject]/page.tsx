@@ -356,7 +356,7 @@ export default function RoadMapPage() {
                       <span className="text-cream/85 tabular-nums">{completedCount}</span>
                       <span className="text-cream/35">/</span>
                       <span className="text-cream/85 tabular-nums">{totalCount}</span>
-                      <span className="ml-1.5 text-cream/40">stages cleared</span>
+                      <span className="text-cream/40">{" "}stages cleared</span>
                     </span>
                     {totalStars > 0 && (
                       <>

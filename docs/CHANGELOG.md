@@ -4,6 +4,52 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-06 - Reliability wave: works-when-tapped audit + fixes, shop purchases repaired (never worked on prod), avatar alignment (on main, NOT deployed; 3 migrations APPLIED)
+
+CEO directive: feature freeze, "make everything that exists work when
+tapped." All commits are on main and verified live; NOT yet deployed to
+prod (the one web deploy is Sam-gated) EXCEPT the three DB migrations,
+which ARE applied to prod, so the DB-side fixes are already live for prod
+and iOS build 28.
+
+- Works-when-tapped audit: 344 interactions, 26 confirmed breaks, then the
+  fix wave (web 70565e2 + iOS 1295358): bounties hook, recent-quizzes,
+  quiz deriveReward + attemptId + double-tap latch, claim-bounty/daily-drill
+  rollback on credit failure, friends username charset + revive, mastery
+  archive endpoint, badges backend (migration 20260706120000 APPLIED:
+  12-badge catalog, 17 retro-awards; award wiring in
+  save-quiz-results/friends/publish/shifts/vocab), resume-coach pdf-parse
+  Vercel tracing root cause (DOMMatrix/@napi-rs + pdfjs fake worker,
+  next.config.js outputFileTracingIncludes).
+- Interactive click-verification (web, demo account): full quiz loop with a
+  LIVE badge award proven on the badges page (First Blood), daily claim
+  (+10, dual ledger), review-hub grade (+2), spin (200), helpdesk
+  clear-queue resolves (+40), party room create/close over realtime, shop
+  affordability gating. iOS: Maestro 6/6 driving demo login, the full
+  Academia funnel, LionDesk clock-in to the live HUD.
+- Live-found fixes: streak-shield legacy column 400 (3f2061a), double
+  navbar on 7 surfaces (f12cc18, 171a672), leftover "coins" strings
+  corrected to Fangs (f5b6fed).
+- Sam report (a), fixed + verified (fcfa6e0): SHOP PURCHASES HAD NEVER
+  WORKED ON PROD. user_inventory was an ancient uuid scaffold; every buy
+  went debit -> insert-fail -> auto-refund -> 500; zero rows ever written.
+  Rebuilt via migration 20260706180000 (APPLIED); first successful purchase
+  verified (debit 622 -> 472 + inventory row + ledger entry). Fix is
+  DB-side, so prod + iOS build 28 work immediately, no deploy needed.
+- Sam report (b), fixed + verified (fcfa6e0): avatars misaligned in their
+  circles. avataaars renders top-anchored; scale=80&translateY=6 verified
+  visually. Stored avatar URLs migrated (20260706190000 APPLIED, fixes iOS
+  too); five web avatar generators updated.
+- IN FLIGHT (results land in a later entry): a systematic schema-drift hunt
+  (every web DB touchpoint vs the live prod schema; drift is the class
+  behind five of tonight's bugs) + seven fix lanes: shop drops duplicate
+  key, spend-RPC iap clamp migration, resume machine error codes, friends
+  dupe revive, favicon/hydration dev noise, achievements wiring
+  investigation, learning-paths honest empty state.
+- Still user-gated: the ONE web deploy (Sam approves after verification),
+  Ninny send + IAP + the learning-paths retire-vs-seed decisions, EAS
+  build 29.
+
 ## 2026-07-03 (night) - Manual prod deploy + referral incident + iOS wave-2 ports
 
 - PROD DEPLOY: Sam's direct push to main never triggered a Vercel build (the

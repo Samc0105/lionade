@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
   const [inventoryRes, founderRes, earnedRes, profileRes] = await Promise.all([
     supabaseAdmin
       .from("user_inventory")
-      .select("item_id, item_type, created_at, acquired_at")
+      .select("item_id, item_type, purchased_at")
       .eq("user_id", userId),
     supabaseAdmin
       .from("founder_grants")
@@ -122,8 +122,7 @@ export async function GET(req: NextRequest) {
   for (const row of (inventoryRes.data ?? []) as Array<{
     item_id: string;
     item_type: string | null;
-    created_at: string | null;
-    acquired_at: string | null;
+    purchased_at: string | null;
   }>) {
     if (typeof row.item_id !== "string") continue;
     if (byId.has(row.item_id)) continue;
@@ -131,7 +130,7 @@ export async function GET(req: NextRequest) {
       id: row.item_id,
       type: row.item_type ?? null,
       source: "purchased",
-      acquiredAt: row.created_at ?? row.acquired_at ?? null,
+      acquiredAt: row.purchased_at ?? null,
     });
   }
 

@@ -7,6 +7,55 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-06: RELIABILITY WAVE (CEO feature freeze: make everything work when tapped) · P0 shop purchases NEVER worked on prod, now FIXED both platforms · avatar circle-fit migration fixes iOS instantly (but iOS generators need the params, new row) · badges backend LIVE on iOS with zero iOS code · schema-drift sweep IN FLIGHT
+
+**CEO directive 2026-07-06: feature freeze. The mandate is reliability, not new
+surface area; every item below is a "tapped it and it did not work" class fix.**
+The unifying discovery: the bug class behind items 1-4 is SCHEMA DRIFT (code
+written against columns/shapes the live prod DB never had, failing silently or
+500ing), and a systematic hunt for the rest of that class is in flight (item 5).
+Because iOS reads the SAME prod schema and routes, most of these fixes land on
+iOS the instant the migration applies, with zero iOS code change. That is the
+Strategy C payoff working exactly as designed, and it is worth saying loudly.
+
+**Parity rows (cross-platform impact per item):**
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Shop purchases (P0: NEVER worked on prod)** · migration `20260706180000` (applied) + web `fcfa6e0` | ✅ fixed + verified 2026-07-06 | ✅ fixed same instant, zero iOS code change | Prod `user_inventory` was an ancient scaffold (uuid `item_id`, no `item_type`/`rarity` columns) that never matched what the code writes: every purchase debited Fangs, failed the insert, auto-refunded, and 500'd. Zero rows ever existed in prod; the feature had NEVER completed a purchase for any user on any platform. Table REBUILT via migration `20260706180000` (applied); first successful purchase verified end to end on web (`fcfa6e0`). iOS build 28 buys through the SAME prod route, so the iOS shop went from always-broken to working with no iOS work at all. Server-side fix, shared route: no port needed, row closed on both sides at once. |
+| **Avatar circle fit (DiceBear avataaars head clipping)** · migration `20260706190000` (applied) + web generator updates (ride next deploy) | 🟡 stored URLs fixed; generators ride next deploy | 🟡 stored URLs fixed instantly; iOS-side GENERATORS still emit unfixed URLs (dedicated row below) | DiceBear avataaars renders top-anchored, so every circular crop clipped the head on both platforms. Stored `avatar_urls` migrated in place with `scale=80&translateY=6` (`20260706190000`, applied): every avatar READ from `profiles.avatar_url` is fixed on iOS instantly, same stored URL, no binary change. Web URL generators updated, riding the next deploy. The remaining gap is iOS's OWN avataaars generators, which would re-introduce clipped heads on every avatar saved from iOS: see the next row. |
+| **iOS DiceBear avataaars generators need `scale=80&translateY=6`** (action item for `vp-ios`) | ✅ web generators updated (next deploy) | ❌ missing | Grep-verified in `lionade-ios` 2026-07-06: iOS builds fresh avataaars URLs in `app/onboarding.tsx` (~L298), `app/edit-profile.tsx` (`generateDicebearUrl`, ~L118), and `components/settings-calm/account/AvatarCard.tsx` (~L46), plus static fallback constants in `app/shop.tsx` (~L58) and `components/Shop/ShopCard.tsx` (~L48). None carry `scale=80&translateY=6`, so any avatar saved or previewed from iOS re-introduces the clipped head that migration `20260706190000` just purged from stored data. Cleanest port: append the params in `lib/avatar-url.ts` (the central SVG->PNG rewriter every iOS render path already goes through) so LEGACY reads are belt-and-suspenders too, AND in the three generators so newly WRITTEN urls are correct for web readers as well. `app/arena.tsx` (~L196) uses the `adventurer` style fallback, which is not top-anchored like avataaars; likely exempt, verify visually during the port. Small, mechanical, high leverage: without it the migration's fix erodes with every iOS avatar save. |
+| **Badges backend (catalog + seed + retro-backfill)** · migration applied; web award wiring rides next deploy | 🟡 backend live; award wiring in web routes rides next deploy | ✅ LIVE already (reads same tables) | Badges tables created, seeded, and retro-backfilled via migration (applied). iOS badges screens read the SAME tables, so the catalog is already live on iOS: verified on sim, catalog renders, 0/12 earned. Web's award wiring (the routes that grant badges on qualifying actions) rides the next deploy; once it lands, earned badges appear on both platforms with no iOS change. Same shared-backend pattern as the shop row: iOS went from empty screen to live feature for free. |
+
+**Smaller reliability fixes in the same wave (web-only or already-logged iOS items, brief):**
+
+- **Bounty Board iOS column fix + web streak-shield column fix - `3f2061a`.**
+  Same schema-drift class as the rows above (code referencing columns prod
+  disagreed with); the Bounty Board side unblocks the iOS surface, the
+  streak-shield side is web. Both fixed in one commit, no further port needed.
+- **Double-navbar fix x7 web surfaces - `f12cc18`, `171a672`.** Seven web pages
+  rendered duplicated navbar chrome. Web-only layout bug; iOS has its own
+  native tab shell with no counterpart. No row needed beyond this note.
+- **coins -> Fangs copy - `f5b6fed`.** Web string sweep enforcing the standing
+  currency-naming rule ("Fangs", never coins/tokens/points). Web-only strings;
+  iOS copy is audited separately by `ios-docs-writer`.
+
+**IN FLIGHT (logged so the next reader knows more is coming):** a SYSTEMATIC
+SCHEMA-DRIFT SWEEP is diffing every web DB touchpoint against the live prod
+schema, hunting the rest of the bug class behind items 1-4. Results land later
+today (2026-07-06). Expect follow-up rows here for anything it catches: iOS
+reads the same prod schema, so every drift find is cross-platform by default
+until proven web-only. This is the same failure family as the long-standing
+`daily_target` vs `daily_target_minutes` column bug already on the
+reconciliation roster.
+
+**Quality gates:** migrations `20260706180000` + `20260706190000` applied to
+prod -> web `fcfa6e0` purchase verified end to end -> iOS badges catalog
+verified on sim -> `ios-parity-tracker` (this entry). Priority flag to
+`vp-ios`: the avataaars-generator params row (❌) is the only iOS code work
+this wave produced; it is S-sized and should ride the next iOS batch so iOS
+avatar saves stop undoing the migration.
+
 ## 2026-07-06: ✅ VERIFICATION DEBT DISCHARGED — signed local Release build + full Maestro suite 6/6 on-sim; Build 28 NOW BUILDING on EAS (Sam's go) — plus two fresh web fixes with parity bearing (terminal no-dead-ends ❌ · resume-upload errors 🟡)
 
 **THE HEADLINE: the waves-3/4/5 MERGED-BUT-UNVERIFIED-ON-DEVICE debt — the

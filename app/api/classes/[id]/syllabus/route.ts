@@ -81,7 +81,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
     .eq("id", classId)
     .single();
   if (!cls || cls.user_id !== userId) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Not found", code: "not_found" }, { status: 404 });
   }
 
   const { data, error } = await supabaseAdmin
@@ -95,7 +95,10 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
 
   if (error) {
     console.error("[classes/:id/syllabus GET]", error.message);
-    return NextResponse.json({ error: "Couldn't load syllabus." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Couldn't load syllabus.", code: "load_failed" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
@@ -133,9 +136,14 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   const classId = params.id;
 
   // ── 1. Validate body ────────────────────────────────────────────────────────
+  // Every error response carries a stable machine `code` alongside the prose
+  // `error` (same convention as coach/resume/analyze). The parse-failure codes
+  // are the exact reason strings written to class_syllabi.parse_error.
   let body: PostBody;
   try { body = await req.json(); }
-  catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
+  catch {
+    return NextResponse.json({ error: "Invalid JSON", code: "bad_json" }, { status: 400 });
+  }
 
   // Two input modes: a PDF uploaded to Storage (storagePath), or text OCR'd
   // from a photo on the client (rawText). The photo path skips the download +
@@ -149,7 +157,10 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
   if (isPhotoMode) {
     if (photoText.length > MAX_RAW_TEXT_CHARS + 2000) {
-      return NextResponse.json({ error: "That text is too long." }, { status: 413 });
+      return NextResponse.json(
+        { error: "That text is too long.", code: "file_too_large" },
+        { status: 413 },
+      );
     }
     if (!filename) filename = "Photographed syllabus";
   } else {
@@ -157,15 +168,24 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     fileSizeBytes = Math.floor(Number(body.fileSizeBytes) || 0);
 
     if (!storagePath || !filename) {
-      return NextResponse.json({ error: "Missing storagePath or filename." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing storagePath or filename.", code: "missing_fields" },
+        { status: 400 },
+      );
     }
     if (fileSizeBytes <= 0 || fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-      return NextResponse.json({ error: "File must be between 1 byte and 5 MB." }, { status: 413 });
+      return NextResponse.json(
+        { error: "File must be between 1 byte and 5 MB.", code: "file_too_large" },
+        { status: 413 },
+      );
     }
     // Path discipline: must be inside this user's namespace, this class's folder.
     const expectedPrefix = `${userId}/${classId}/`;
     if (!storagePath.startsWith(expectedPrefix) || !storagePath.toLowerCase().endsWith(".pdf")) {
-      return NextResponse.json({ error: "Bad storage path." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Bad storage path.", code: "bad_storage_path" },
+        { status: 400 },
+      );
     }
   }
 
@@ -176,7 +196,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     .eq("id", classId)
     .single();
   if (clsErr || !cls || cls.user_id !== userId || cls.archived) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Not found", code: "not_found" }, { status: 404 });
   }
 
   // ── 3. Insert the row ──────────────────────────────────────────────────────
@@ -195,18 +215,26 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
   if (insertErr || !row) {
     console.error("[classes/:id/syllabus POST insert]", insertErr?.message);
-    return NextResponse.json({ error: "Couldn't record syllabus upload." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Couldn't record syllabus upload.", code: "save_failed" },
+      { status: 500 },
+    );
   }
   const syllabusId = row.id as string;
 
   // Helper to flip the row to failed and return a 500 with a generic message.
+  // The short reason code is mirrored into the response `code` so the client
+  // can map copy without matching prose.
   const fail = async (reason: string, logMessage: string) => {
     console.error("[classes/:id/syllabus POST]", logMessage);
     await supabaseAdmin
       .from("class_syllabi")
       .update({ status: "failed", parse_error: reason.slice(0, 200) })
       .eq("id", syllabusId);
-    return NextResponse.json({ error: "Couldn't parse syllabus." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Couldn't parse syllabus.", code: reason.slice(0, 40) },
+      { status: 500 },
+    );
   };
 
   try {

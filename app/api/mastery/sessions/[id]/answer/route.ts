@@ -337,29 +337,64 @@ function shapeMessage(m: {
 }
 
 /**
- * Bump the daily streak counter on the profile, matching the pattern used
- * by /api/ninny/complete. Best-effort — failure here shouldn't fail the
- * answer. The streak is preserved by `daily_questions_completed` ≥ 10.
+ * Bump the daily questions counter + streak on the profile, mirroring the
+ * write pattern used by /api/ninny/complete (the live prod columns are
+ * `streak`, `max_streak`, `last_activity_at`, `daily_questions_completed`,
+ * `daily_reset_date` — this function previously wrote the nonexistent
+ * `daily_questions_date`/`current_streak` and 400'd silently). Best-effort —
+ * failure here shouldn't fail the answer — but every failure is LOGGED so
+ * schema drift surfaces instead of silently dropping daily-activity credit.
  */
 async function bumpDailyStreakCounter(userId: string): Promise<void> {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const { data: profile } = await supabaseAdmin
+    const todayUTC = new Date().toISOString().slice(0, 10);
+    const nowISO = new Date().toISOString();
+    const { data: profile, error: fetchErr } = await supabaseAdmin
       .from("profiles")
-      .select("daily_questions_completed, daily_questions_date, last_activity_date, current_streak")
+      .select("daily_questions_completed, daily_reset_date, streak, max_streak, last_activity_at")
       .eq("id", userId)
       .single();
-    if (!profile) return;
+    if (fetchErr || !profile) {
+      console.error("[mastery/answer] bumpDailyStreak fetch:", fetchErr?.message ?? "profile not found");
+      return;
+    }
 
-    const needReset = profile.daily_questions_date !== today;
-    const count = needReset ? 1 : (profile.daily_questions_completed ?? 0) + 1;
+    // Daily questions counter (capped at 10) — clamp the stored value first
+    // in case it was ever written uncapped, matching /api/ninny/complete.
+    let count = profile.daily_questions_completed ?? 0;
+    if (profile.daily_reset_date !== todayUTC) count = 0;
+    count = Math.min(Math.min(count, 10) + 1, 10);
 
-    const update: Record<string, unknown> = {
-      daily_questions_completed: count,
-      daily_questions_date: today,
-      last_activity_date: today,
-    };
-    await supabaseAdmin.from("profiles").update(update).eq("id", userId);
+    // Streak math — UTC-calendar based, same as /api/ninny/complete.
+    let newStreak = profile.streak ?? 0;
+    const lastActivityAt = profile.last_activity_at as string | null;
+    if (lastActivityAt) {
+      const lastDayUTC = new Date(lastActivityAt).toISOString().split("T")[0];
+      if (lastDayUTC !== todayUTC) {
+        const daysDiff = Math.floor(
+          (new Date(todayUTC + "T00:00:00Z").getTime() -
+            new Date(lastDayUTC + "T00:00:00Z").getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+        newStreak = daysDiff === 1 ? (profile.streak ?? 0) + 1 : 1;
+      }
+    } else if ((profile.streak ?? 0) === 0) {
+      newStreak = 1;
+    }
+
+    const { error: updateErr } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        streak: newStreak,
+        max_streak: Math.max(newStreak, profile.max_streak ?? 0),
+        last_activity_at: nowISO,
+        daily_questions_completed: count,
+        daily_reset_date: todayUTC,
+      })
+      .eq("id", userId);
+    if (updateErr) {
+      console.error("[mastery/answer] bumpDailyStreak update:", updateErr.message);
+    }
   } catch (e) {
     console.error("[mastery/answer] bumpDailyStreak:", (e as Error).message);
   }

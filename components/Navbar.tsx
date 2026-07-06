@@ -996,8 +996,17 @@ export default function Navbar() {
                 </>
               )}
 
-              {/* Not logged in — show on /home and other non-login pages, hide on coming soon (has its own top bar) */}
-              {!user && !isLogin && !isComingSoon && (
+              {/* Not logged in — show on /home and other non-login pages, hide on coming soon (has its own top bar).
+                  Hydration: `!mounted ||` keeps this block in BOTH the SSR pass
+                  (user is always null server-side) and the first client render
+                  (where useAuth may have already seeded `user` from
+                  localStorage). Without it, a logged-in visitor's first client
+                  render drops this div while the server HTML still contains it
+                  — the "Did not expect server HTML to contain a div in div"
+                  warning. Post-mount it swaps in the same commit as showAppNav,
+                  so logged-out visitors keep their SSR'd Log In CTA with no
+                  pop-in. */}
+              {(!mounted || !user) && !isLogin && !isComingSoon && (
                 <div className="flex items-center gap-2">
                   <Link href="/login"
                     className="hidden sm:block btn-outline text-sm py-1.5 px-4">

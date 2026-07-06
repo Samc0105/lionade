@@ -157,21 +157,28 @@ export async function grantEarnedCosmetic(
 /**
  * Fire-and-forget grant of a Mastery medal for a specific exam. The medal id
  * is generated server-side as `medal_mastery_subject_<exam_id>` inside the
- * RPC; we only pass user + exam.
+ * RPC. The deployed signature is grant_mastery_medal(p_user_id, p_exam_id,
+ * p_exam_name) with NO default on p_exam_name — the exam title is
+ * snapshotted into earned_cosmetics.metadata so the profile UI can label the
+ * medal without joining a possibly renamed/deleted user_exams row. Omitting
+ * p_exam_name makes PostgREST fail with PGRST202 (no function match), so
+ * `examName` is required here.
  *
- * NOT YET wired into a route. The Mastery session-complete site must call
- * this after verifying the final score >= 95%. Out of scope for this wave —
- * flagged in the vault entry under "wiring pending".
+ * NOT YET wired into a route. The live >=95% grant in
+ * app/api/mastery/sessions/[id]/complete/route.ts calls the RPC directly
+ * with the same three params — keep the two call shapes in sync.
  */
 export async function grantMasteryMedal(
   client: SupabaseClient,
   userId: string,
   examId: string,
+  examName: string,
 ): Promise<void> {
   try {
     const { error } = await client.rpc("grant_mastery_medal", {
       p_user_id: userId,
       p_exam_id: examId,
+      p_exam_name: examName,
     });
     if (error) {
       console.error("[cosmetic-grants] grant_mastery_medal", error.message);

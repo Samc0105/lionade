@@ -232,29 +232,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if friendship already exists
-    const { data: existing } = await supabaseAdmin
+    // Check if friendship already exists. Fetch EVERY row for the pair, in
+    // BOTH directions — legacy data (pre-unique-constraint) can hold one row
+    // per direction, and deciding off a single arbitrary `.limit(1)` row is
+    // what used to drive the revive into UNIQUE(user_id, friend_id) 500s.
+    const { data: existingRows, error: existingError } = await supabaseAdmin
       .from("friendships")
-      .select("id, status")
-      .or(`and(user_id.eq.${userId},friend_id.eq.${friend.id}),and(user_id.eq.${friend.id},friend_id.eq.${userId})`)
-      .limit(1)
-      .maybeSingle();
+      .select("id, status, user_id, friend_id")
+      .or(`and(user_id.eq.${userId},friend_id.eq.${friend.id}),and(user_id.eq.${friend.id},friend_id.eq.${userId})`);
 
-    if (existing) {
-      if (existing.status === "accepted") return NextResponse.json({ error: "Already friends" }, { status: 400 });
-      if (existing.status === "pending") return NextResponse.json({ error: "Request already pending" }, { status: 400 });
+    if (existingError) {
+      console.error("[social/friends]", existingError.message);
+      return NextResponse.json({ error: "Couldn't send friend request." }, { status: 500 });
+    }
+
+    const pairRows = existingRows ?? [];
+    if (pairRows.some(r => r.status === "accepted")) {
+      return NextResponse.json({ error: "Already friends" }, { status: 400 });
+    }
+    if (pairRows.some(r => r.status === "pending")) {
+      return NextResponse.json({ error: "Request already pending" }, { status: 400 });
     }
 
     let friendship;
-    if (existing) {
-      // status === "declined" here (accepted/pending returned above). The
-      // declined row still occupies the UNIQUE(user_id, friend_id) slot, so a
-      // fresh insert would violate the constraint (this used to 500). Revive
-      // the row back to pending instead, re-pointing the direction at the new
+    if (pairRows.length > 0) {
+      // Every remaining row is "declined" (accepted/pending returned above).
+      // A declined row still occupies the UNIQUE(user_id, friend_id) slot, so
+      // a fresh insert would violate the constraint (this used to 500). Revive
+      // a row back to pending instead, re-pointing the direction at the new
       // sender so PATCH accept/decline (which checks friend_id = me) works
-      // even when the original decliner is the one re-adding. created_at
-      // refreshes so the request sorts as new. The status guard on the update
-      // makes a concurrent accept/revive lose cleanly instead of clobbering.
+      // even when the original decliner is the one re-adding.
+      const forward = pairRows.find(r => r.user_id === userId && r.friend_id === friend.id);
+      const reverse = pairRows.find(r => r.user_id === friend.id && r.friend_id === userId);
+
+      // Legacy duplicates: declined rows in BOTH directions. Re-pointing the
+      // reverse row would collide with the forward row's UNIQUE slot (the
+      // remaining revive 500), so delete the stale reverse row first and
+      // revive the forward one. Fail-soft on the delete: reviving the forward
+      // row keeps its own (user_id, friend_id) key, so it can't trip the
+      // constraint even if the stale row lingers.
+      if (forward && reverse) {
+        const { error: staleError } = await supabaseAdmin
+          .from("friendships")
+          .delete()
+          .eq("id", reverse.id)
+          .eq("status", "declined");
+        if (staleError) console.error("[social/friends]", staleError.message);
+      }
+
+      const target = (forward ?? reverse)!;
+      // created_at refreshes so the request sorts as new. The status guard on
+      // the update makes a concurrent accept/revive lose cleanly instead of
+      // clobbering; maybeSingle treats "0 rows matched" as a race, not a crash.
       const { data: revived, error: reviveError } = await supabaseAdmin
         .from("friendships")
         .update({
@@ -263,14 +292,25 @@ export async function POST(req: NextRequest) {
           status: "pending",
           created_at: new Date().toISOString(),
         })
-        .eq("id", existing.id)
+        .eq("id", target.id)
         .eq("status", "declined")
         .select()
-        .single();
+        .maybeSingle();
 
       if (reviveError) {
+        // 23505 = a concurrent request already occupies the pair's slot, i.e.
+        // a live request effectively exists. Answer like a duplicate tap
+        // would, never a raw 500.
+        if (reviveError.code === "23505") {
+          return NextResponse.json({ error: "Request already pending" }, { status: 400 });
+        }
         console.error("[social/friends]", reviveError.message);
         return NextResponse.json({ error: "Couldn't send friend request." }, { status: 500 });
+      }
+      if (!revived) {
+        // Status guard matched 0 rows: a concurrent accept/revive won the
+        // race. Same story — report the duplicate, don't 500.
+        return NextResponse.json({ error: "Request already pending" }, { status: 400 });
       }
       friendship = revived;
     } else {
@@ -281,6 +321,11 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (error) {
+        // Same race shielding as the revive path: a concurrent insert for the
+        // pair means a request already exists — that's a duplicate, not a 500.
+        if (error.code === "23505") {
+          return NextResponse.json({ error: "Request already pending" }, { status: 400 });
+        }
         console.error("[social/friends]", error.message);
         return NextResponse.json({ error: "Couldn't send friend request." }, { status: 500 });
       }
