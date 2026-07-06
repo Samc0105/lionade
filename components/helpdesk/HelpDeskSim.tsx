@@ -183,7 +183,7 @@ export default function HelpDeskSim({
     const needed = (fix?.requires ?? []).filter((r) => !doneSteps.has(r));
     if (fix && needed.length === 0) {
       push(
-        { tone: "warn", text: "Let's get you moving. You've dug in enough — here's the fix:" },
+        { tone: "warn", text: "Let's get you moving. You've dug in enough. Here's the fix:" },
         { tone: "info", text: `  ${fix.aliases[0]}` },
       );
       return;
@@ -224,12 +224,33 @@ export default function HelpDeskSim({
     }
     if (nc === "hint") { push({ tone: "info", text: `💡 ${scenario.hint}` }); missStreak.current = 0; return; }
 
-    const match = scenario.commands.find((c) =>
-      c.aliases.some((a) => {
-        const ca = canon(a);
-        return nc === ca || nc.startsWith(ca + " ");
-      }),
-    );
+    // Two-pass matching. An EXACT alias match anywhere in the command list
+    // always wins before any prefix match — otherwise a later command's exact
+    // alias (e.g. the "rollback migration" rookie trap) gets captured by an
+    // earlier command's shorter prefix alias ("rollback"), making traps and
+    // steps unreachable (and in one scenario, paying out a resolve for the
+    // trap). Within the prefix pass the LONGEST matching alias wins, so
+    // "inspect order 8844 --verbose" routes to "inspect order 8844", not
+    // "inspect order".
+    let match: SimCommand | undefined;
+    for (const c of scenario.commands) {
+      if (c.aliases.some((a) => canon(a) === nc)) {
+        match = c;
+        break;
+      }
+    }
+    if (!match) {
+      let bestLen = -1;
+      for (const c of scenario.commands) {
+        for (const a of c.aliases) {
+          const ca = canon(a);
+          if (nc.startsWith(ca + " ") && ca.length > bestLen) {
+            bestLen = ca.length;
+            match = c;
+          }
+        }
+      }
+    }
     if (!match) {
       missStreak.current += 1;
       const guess = suggestFor(nc, suggestPool);

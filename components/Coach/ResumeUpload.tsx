@@ -36,7 +36,9 @@ function friendlyResumeError(
   if (status === 413 || code.includes("too large"))
     return "That PDF is over the 5 MB limit. Export or compress a smaller file and try again.";
   if (code.includes("too short") || code.includes("less than 100"))
-    return "We could not pull any readable text from that PDF. If it is a scan or a photo, export a text based PDF (from Google Docs or Word) and upload that instead.";
+    return "We could not pull any readable text from that PDF. If it is a scan or a photo, export a text-based PDF (from Google Docs or Word) and upload that instead.";
+  if (code.includes("insufficient"))
+    return "That resume is a bit thin for a full review. Add more detail (bullets, roles, outcomes) and upload again.";
   if (code.includes("not a valid pdf") || code.includes("real pdf"))
     return "That file is not a readable PDF. Export a fresh PDF and try again.";
   if (code.includes("empty")) return "That file looks empty. Pick your resume PDF and try again.";
