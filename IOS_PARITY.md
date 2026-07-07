@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-07: Games tab visual redesign — iOS CATCHES UP to the web Arcade look (vibrant per-game tickets)
+
+CEO showed the calm iOS Games-tab cards next to the web Arcade and asked for the vibrant/animated web look. `app/(tabs)/games.tsx` rebuilt (`feat/ios-zero-backend`, NOT built; `ios-design-hig`-clean after 3 fixes).
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Games tab / Arcade card design** | ✅ vibrant per-game neon tickets (Arcade page) | ✅ redesigned to match (`829ae83`, `5ce6de4`) | Flat calm cards → arcade tickets in the iOS DeckTicket/TrackTicket chrome: per-game accent (Roardle sky, Pardy AMBER not gold [gold=currency-only on iOS], Sketchy pink, TechHub green), bold accent title, colored action pill, lot-plate/perforation, corner glow, FadeInDown + PressableScale. iOS-specific divergence: gold→amber for Pardy (currency rule). |
+
+---
+
 ## 2026-07-07: TechHub progression — iOS CATCHES UP on the meta layer (career XP + play streak) + campaign-tracks footer bug fix
 
 CEO "continue iOS only, no-backend." iOS TechHub was a phase-1 port with no meta layer — the sim computed `result.xp`/streak data and discarded it. Ported the pure-localStorage web meta modules to iOS (`feat/ios-zero-backend`, NOT built; `ios-code-reviewer`-clean after 2 fixes). Reduces web→iOS drift.
