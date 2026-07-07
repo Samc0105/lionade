@@ -824,16 +824,26 @@ export default function SocialPage() {
   // ── Accept / Decline ───────────────────────────────────────
   const handleRequest = useCallback(async (friendshipId: string, action: "accept" | "decline") => {
     if (!user?.id) return;
-    await apiPatch("/api/social/friends", { friendshipId, action });
+    const res = await apiPatch("/api/social/friends", { friendshipId, action });
+    if (!res.ok) {
+      toastError(res.error ?? "Couldn't update that request. Try again.");
+      return;
+    }
+    toastSuccess(action === "accept" ? "Friend added." : "Request declined.");
     loadFriends();
   }, [user?.id, loadFriends]);
 
   // ── Cancel outgoing request ───────────────────────────
   const cancelRequest = useCallback(async (friendshipId: string) => {
     if (!user?.id) return;
-    await apiDelete(`/api/social/friends?id=${friendshipId}`);
+    const res = await apiDelete(`/api/social/friends?id=${friendshipId}`);
+    if (!res.ok) {
+      toastError(res.error ?? "Couldn't cancel that request. Try again.");
+      loadFriends();
+      return;
+    }
     setOutgoingRequests(prev => prev.filter(r => r.friendshipId !== friendshipId));
-  }, [user?.id]);
+  }, [user?.id, loadFriends]);
 
   // ── Merge messages + arena events for timeline ─────────────
   const timeline = useMemo(() => {
@@ -991,6 +1001,13 @@ export default function SocialPage() {
                     <button
                       key={n.id}
                       onClick={() => {
+                        // Mark read on tap (optimistic revalidate), then route
+                        // if there's a destination. Previously an unread notif
+                        // with no action_url did nothing at all on click.
+                        if (!n.read) {
+                          void apiPatch("/api/notifications", { id: n.id, read: true })
+                            .then(() => mutateSocialNotifs());
+                        }
                         if (n.action_url) {
                           router.push(n.action_url);
                         }

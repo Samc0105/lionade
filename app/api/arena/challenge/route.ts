@@ -18,9 +18,13 @@ export async function POST(req: NextRequest) {
     const validWagers = [10, 25, 50, 100];
     const safeWager = validWagers.includes(wager) ? wager : 10;
 
-    // Sanitize username — escape ilike wildcards to prevent enumeration
-    const cleanUsername = String(challengedUsername).trim().toLowerCase().replace(/[%_]/g, "");
-    if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
+    // Normalize + validate against the real username charset. This lookup uses
+    // .eq() (exact match, no wildcard injection risk), so we must NOT strip
+    // "%_" — doing that dropped underscores from valid usernames and, with the
+    // old [a-z0-9_] regex, rejected hyphenated names like "trainer-ninny"
+    // entirely (the same trap fixed in the friends route).
+    const cleanUsername = String(challengedUsername).trim().toLowerCase();
+    if (!/^[a-z0-9._-]{3,31}$/.test(cleanUsername)) {
       return NextResponse.json({ error: "Invalid username" }, { status: 400 });
     }
 

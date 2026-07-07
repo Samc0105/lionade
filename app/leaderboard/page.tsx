@@ -56,6 +56,9 @@ export default function LeaderboardPage() {
   // Self cosmetics — prefer live self values over the row when I appear in a list.
   const myCosmetics = useEquippedCosmetics();
   const [filter, setFilter] = useState<Filter>("duel");
+  // Bumped by the error card's "Try again" — setFilter(filter) was a no-op
+  // (same value = no re-render = no refetch), so the retry button did nothing.
+  const [reloadKey, setReloadKey] = useState(0);
   // `entries === null` means "not resolved yet" → render skeletons, never an
   // empty/zero board (no flash-of-empty). `[]` is a genuine empty board.
   const [entries, setEntries] = useState<LbEntry[] | null>(null);
@@ -114,7 +117,7 @@ export default function LeaderboardPage() {
       }).catch(() => { if (active) { setEntries([]); setLoadError(true); } });
     }
     return () => { active = false; };
-  }, [filter]);
+  }, [filter, reloadKey]);
 
   const rows = entries ?? [];
   const topThree = rows.slice(0, 3);
@@ -314,7 +317,7 @@ export default function LeaderboardPage() {
               <p className="font-bebas text-3xl text-cream tracking-wider mb-2">Could not load the board</p>
               <p className="text-cream/60 text-sm mb-6">Something went wrong fetching the rankings. Try again.</p>
               <button
-                onClick={() => setFilter(filter)}
+                onClick={() => setReloadKey((k) => k + 1)}
                 className="btn-gold px-8 py-3 inline-flex items-center gap-2 min-h-[44px]
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
