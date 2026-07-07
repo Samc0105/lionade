@@ -15,6 +15,9 @@ This is the handoff note between machines. When you pull on another computer and
 
 **iOS (committed on `release/testflight-03`, NOT built - awaits literal "build it" for build 29):**
 - iOS `fix` - `app/arena.tsx`: answer-submit failure -> inline "that answer didn't send, tap to try again" (mirrors web duel fix; threaded `submitError` through `PlayingView`). `app/(tabs)/academia.tsx`: dropped the dead "Archive" context-menu item (fired "coming soon"; Delete already soft-archives).
+- iOS `fix` (async-state) - `app/badges.tsx` (P1), `app/(tabs)/academia.tsx` Recent Notes (P1), `app/profile.tsx` RecentActivityList (P2): each dropped its hook's `error` channel, so a failed fetch on a cold cache showed "No badges/notes/quizzes yet". Added ErrorState/retry branches (mirror `mastery.tsx`/`RecentActivityCard`).
+
+**FOUR audits ran this session** (web dead-button, iOS dead-button, web async-state, iOS async-state), each tracing every element/fetch to real logic. Both platforms very well-hardened; every real finding fixed. Cross-platform bug classes: arena answer-submit silent-fail (web+iOS) and failed-fetch-shows-empty (7 surfaces total: 4 web + 3 iOS).
 
 **DEPLOY STATE:** the web batch is committed + pushed + build-verified on **main**, but the auto-mode classifier HELD the new prod deploy (the earlier "Deploy now" authorized specific batches; generic "keep polishing" doesn't extend to a fresh prod deploy). One `vercel deploy --prod` from live once CEO gives a fresh go. Everything above is safe + reversible; nothing outward-facing shipped this session.
 
