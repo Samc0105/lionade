@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-07: RELIABILITY BATCH DEPLOYED + 3 CEO-picked next-things (Review Hub active-recall, Resume Coach fixed for real via unpdf, competitive honest error states) · both prod deploys LIVE
+
+The [[Daily/2026-07-06]] reliability wave went LIVE on getlionade.com (deploy 1), then three CEO-selected next-things shipped (deploy 2). Cross-platform impact per item below. The unifying theme repeats the Strategy-C payoff: server-side fixes on shared routes land on iOS for free; only pure-UI additions need a port.
+
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| **Resume Coach + syllabus PDF extraction: `pdf-parse` → `unpdf`** · web `213ba94` (deployed) | ✅ fixed + deployed 2026-07-07 | ✅ fixed same instant, zero iOS code change | The extraction ran server-side in the web API route (`/api/coach/resume/analyze`, `/api/classes/[id]/syllabus`) that iOS Resume Coach was wired to on 2026-07-05 (see 2026-07-05 wave-3 row). `pdf-parse` v2 was runtime-dead in prod (needed `@napi-rs/canvas` + a fake pdfjs worker traced through non-literal specifiers Vercel can't follow), so every iOS resume upload died before the AI call too. Swapped to `unpdf` (serverless pdf.js, no canvas/worker/native deps). iOS calls the SAME route, so iOS Resume Coach + syllabus import go from always-failing to working with no iOS work. Shared backend, row closed both sides at once. |
+| **Review Hub "make your guess" active-recall step** · web (deployed, `app/learn/review/page.tsx`) | ✅ shipped 2026-07-07 | ❌ missing (needs port) | Web reveal-style cards now show an optional guess box before the answer; the typed guess sits next to the truth on reveal for honest self-grading. Pure client UX, zero API, no schema change. iOS HAS Review Hub (ported 2026-07-03, `79b5276`, `app/learn/review.tsx`) with the same reveal-style cards, so this is a clean, mechanical port: add a guess `useState` + a `TextInput` before the reveal button + a "your guess" panel on reveal, reset on advance. Small, high-recall-value. Deferred to the next EAS batch (web-only session). |
+| **Competitive honest error states (Sabotage/Zoom/Spectrum)** · web (deployed, `components/competitive/*`) | ✅ shipped 2026-07-07 | 🚫 N/A | The competitive PvP arena is NOT in the iOS v1 App Store release (see [[project-ios-reconstruction]] — competitive deferred past v1). No iOS counterpart to drift against; revisit if/when the PvP suite ports to iOS. |
+
+---
+
 ## 2026-07-06: RELIABILITY WAVE (CEO feature freeze: make everything work when tapped) · P0 shop purchases NEVER worked on prod, now FIXED both platforms · avatar circle-fit migration fixes iOS instantly (but iOS generators need the params, new row) · badges backend LIVE on iOS with zero iOS code · schema-drift sweep IN FLIGHT
 
 **CEO directive 2026-07-06: feature freeze. The mandate is reliability, not new

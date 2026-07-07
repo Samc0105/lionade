@@ -4,6 +4,22 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-07 (RELIABILITY BATCH DEPLOYED + 3 next-things) - the whole works-when-tapped wave is LIVE on getlionade.com, plus Review Hub active-recall / Resume Coach fixed for real / competitive honest error states, all deployed
+
+**Two prod deploys shipped this session (both `vercel deploy --prod`, aliased to getlionade.com).** The CEO deploy gate was "deploy once you verify all our systems have backend and clicking doesn't error" - verified (prod build green 379 routes, prod schema diff'd against code on every economy/cosmetics table, live smoke test 200s) then shipped.
+
+- **Deploy 1 (commit `c1da0b8`, main pushed):** the entire ~15-commit CEO-feature-freeze reliability batch from 2026-07-06 (schema-drift wave, shop `user_inventory` rebuild, avatar circle-fit, badges backend, ~50 dead-button fixes) PLUS the arena FIND MATCH queue-join error state (`c1da0b8`). This is the batch that was "on main, NOT deployed" in the two entries below - it is now LIVE.
+- **Deploy 2 (commit `213ba94`, main pushed):** the 3 CEO-picked next-things -
+  - **Review Hub "make your guess"** (`app/learn/review/page.tsx`) - optional active-recall guess box before the flashcard reveal; guess shown next to the answer for honest self-grading. Zero API. **iOS port pending** (iOS has Review Hub; mechanical port, IOS_PARITY row added).
+  - **Resume Coach fixed FOR REAL** - swapped fragile `pdf-parse` v2 (needed `@napi-rs/canvas` + fake pdfjs worker force-traced into the lambda; was runtime-dead in prod, died before the AI call) for **`unpdf`** (serverless pdf.js, no canvas/worker/native deps). Deleted the `outputFileTracingIncludes` hack + `serverComponentsExternalPackages` from `next.config.js`. Same fix restores the **syllabus parser**. **iOS Resume Coach + syllabus get this for FREE** (shared server route). `npm i unpdf` (1.6.2), verified API via Context7.
+  - **Competitive honest error states** (`components/competitive/{sabotage,zoom,spectrum}`) - a failed `/answer` POST now shows "connection issue · didn't count · +0" instead of mislabeling a network blip as a miss (mirrors PinScreen's existing `scoreFailed` card); still advances to keep both players in lockstep. Competitive is not in iOS v1, so 🚫 N/A there.
+
+**Verified discrepancy (flagged + memory corrected):** TechHub whole-shift completion is a LIVE Fangs faucet now - the held `techhub_shift_completions` migration (`20260626120000`) was applied since the notes said "preview-only." The table exists on prod; the grant route is SAFE (server-authoritative, per-shift ceiling clamp, best-score top-up, double-pay-safe via optimistic concurrency - bounded to each shift's ceiling once, not infinite). Per-ticket resolves stay practice-only (CEO decision).
+
+**Docs:** IOS_PARITY 2026-07-07 section added (3 rows); vault `Daily/2026-07-07.md` written (Obsidian REST API was down, wrote the file directly); `project-techhub-liondesk` memory corrected. iOS build 29 still NOT built (awaits literal "build it"; rides the Review-Hub-guess port + the dead-button iOS tail).
+
+---
+
 ## 2026-07-06 (dead-button hunt) - CEO directive "no button not working": audited EVERY interactive element on both platforms (2301 traced), fixing dead/fake/broken/misleading ones - P0s + main-path P1s done, long tail tracked
 
 **Two systematic audits ran (web + iOS), each tracing every button/link/handler/Pressable to a real action against a ground-truth route list.** Web: 1346 elements, 68 findings. iOS: 955 tap targets, 42 findings. The fix + heal + review sub-agents hit a hard usage cap mid-run (resets 2026-07-12), so the FIXES were applied partly by the sub-agents before they died and partly BY HAND in the main loop afterward. Everything committed is tsc-clean; web also passed `next build` (needs `NODE_OPTIONS=--max-old-space-size=6144` - the default OOMs and fake-fails on /api/academia/agenda).
