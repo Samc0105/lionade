@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-07: TechHub progression — iOS CATCHES UP on the meta layer (career XP + play streak) + campaign-tracks footer bug fix
+
+CEO "continue iOS only, no-backend." iOS TechHub was a phase-1 port with no meta layer — the sim computed `result.xp`/streak data and discarded it. Ported the pure-localStorage web meta modules to iOS (`feat/ios-zero-backend`, NOT built; `ios-code-reviewer`-clean after 2 fixes). Reduces web→iOS drift.
+
+| Feature | Web | iOS | Notes |
+|---|---|---|---|
+| **TechHub Career XP + rank ladder** | ✅ (`lib/liondesk/stats.ts` careerXp + CAREER_TITLES) | ✅ ported (`1c67135`, not built) | New `lib/liondesk/careerStats.ts` mirrors the campaignProgress async-cache pattern; XP formula + 11 titles vendored verbatim so it round-trips. Level bar on the TechHub hub. XP pass-gated (>= PASS_SCORE) to match web `if(cleared)`. Achievements + run-history (also in web stats.ts) NOT yet ported — next wave. |
+| **TechHub daily play streak** | ✅ (`lib/liondesk/playstreak.ts`) | ✅ ported (`0079c53`) | New iOS `lib/liondesk/playstreak.ts`, day math + milestones verbatim; folds into the hub career-bar footer. |
+| **TechHub campaign-tracks footer** | 🚫 (web hub differs) | ✅ fixed (`4b8b10d`) | iOS-only bug: soc/swe/redteam/netops (no single-tickets, 2 campaign shifts each) all wrongly showed "tickets coming." Footer now counts campaign shifts for campaign-only tracks. |
+
+---
+
 ## 2026-07-07: iOS-AHEAD zero-backend games depth (Roardle Share/Practice/Stats/Hard-mode + Pardy best score) — reverse-drift, back-port opportunities
 
 CEO directive "continue iOS only, develop/fix features with no backend." Built on `feat/ios-zero-backend` (NOT built; rides the next EAS batch). All pure-client (AsyncStorage / bundled content), grant no Fangs, `ios-code-reviewer`-clean. These put iOS AHEAD of web — logged so web can back-port if desired.
