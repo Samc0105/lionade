@@ -1437,6 +1437,10 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  // When the authoritative GET fails, hydrated never flips and Save stays
+  // disabled forever with no explanation. Track the error + a retry key.
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Optimistic cache pre-paint, then authoritative GET from the server.
   useEffect(() => {
@@ -1453,11 +1457,13 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
     } catch { /* ignore corrupt cache */ }
 
     let cancelled = false;
+    setLoadError(false);
     apiGet<{
       profile_visibility: "public" | "private";
       privacy: { show_on_leaderboard: boolean; show_streak: boolean; show_coins: boolean; duel_from: "everyone"|"nobody" };
     }>("/api/user/preferences").then(res => {
-      if (cancelled || !res.ok || !res.data) return;
+      if (cancelled) return;
+      if (!res.ok || !res.data) { setLoadError(true); return; }
       const { profile_visibility, privacy } = res.data;
       setVisibility(profile_visibility === "private" ? "private" : "public");
       setOnLeaderboard(privacy.show_on_leaderboard);
@@ -1467,7 +1473,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
       setHydrated(true);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   const save = async () => {
     setSaving(true);
@@ -1568,6 +1574,13 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
       </Card>
 
       {saved && <SaveToast msg="Privacy settings saved!" />}
+      {loadError && !hydrated && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-red-400/30 bg-red-400/[0.06] mb-2">
+          <p className="text-cream/70 text-xs">Couldn't load your saved privacy settings.</p>
+          <button onClick={() => setReloadKey((k) => k + 1)}
+            className="text-electric text-xs font-bold hover:underline shrink-0">Retry</button>
+        </div>
+      )}
       <button onClick={save} disabled={saving || !hydrated}
         className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
@@ -1963,6 +1976,10 @@ function NotificationsSection() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  // On load failure, hydrated never flips and Save stays disabled with no
+  // explanation. Track the error + a retry key.
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     try {
@@ -1970,12 +1987,14 @@ function NotificationsSection() {
       if (raw) setPrefs({ ...NOTIF_DEFAULTS, ...JSON.parse(raw) });
     } catch { /* ignore */ }
     let cancelled = false;
+    setLoadError(false);
     apiGet<{ notifications: {
       daily_reminder: boolean; duel_challenges: boolean; weekly_report: boolean;
       badge_unlocked: boolean; streak_alert: boolean; new_features: boolean;
       marketing: boolean; leaderboard_updates: boolean;
     } }>("/api/user/preferences").then(res => {
-      if (cancelled || !res.ok || !res.data) return;
+      if (cancelled) return;
+      if (!res.ok || !res.data) { setLoadError(true); return; }
       const n = res.data.notifications;
       setPrefs({
         dailyReminder:  n.daily_reminder,
@@ -1989,7 +2008,7 @@ function NotificationsSection() {
       setHydrated(true);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   const toggle = (key: keyof NotifPrefsLocal) =>
     setPrefs(p => ({ ...p, [key]: !p[key] }));
@@ -2047,6 +2066,13 @@ function NotificationsSection() {
       </Card>
 
       {saved && <SaveToast msg="Notification preferences saved!" />}
+      {loadError && !hydrated && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-red-400/30 bg-red-400/[0.06] mb-2">
+          <p className="text-cream/70 text-xs">Couldn't load your notification settings.</p>
+          <button onClick={() => setReloadKey((k) => k + 1)}
+            className="text-electric text-xs font-bold hover:underline shrink-0">Retry</button>
+        </div>
+      )}
       <button onClick={save} disabled={saving || !hydrated}
         className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
