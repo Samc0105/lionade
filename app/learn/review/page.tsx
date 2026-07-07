@@ -132,6 +132,10 @@ export default function ReviewHubPage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [masteredCount, setMasteredCount] = useState(0);
   const [fangsEarned, setFangsEarned] = useState(0);
+  // Active-recall accuracy: of the cards where you actually TYPED a guess before
+  // revealing, how many you then self-graded correct. Pure session stat, no API.
+  const [guessAttempts, setGuessAttempts] = useState(0);
+  const [guessHits, setGuessHits] = useState(0);
 
   const load = useCallback(async () => {
     setPhase("loading");
@@ -172,6 +176,8 @@ export default function ReviewHubPage() {
       setCorrectCount(0);
       setMasteredCount(0);
       setFangsEarned(0);
+      setGuessAttempts(0);
+      setGuessHits(0);
       setPhase(res.data.items.length > 0 ? "active" : "empty");
     } else {
       // The QUEUE FETCH ITSELF failed — this is not "nothing due". Rendering
@@ -203,7 +209,13 @@ export default function ReviewHubPage() {
     if (outcome.success && outcome.coinsAwarded > 0) {
       setFangsEarned((n) => n + outcome.coinsAwarded);
     }
-  }, []);
+    // Recall-accuracy tally: only counts cards where a guess was actually typed
+    // (the guess box only renders for reveal-style cards; MCQ cards leave it "").
+    if (outcome.success && guess.trim()) {
+      setGuessAttempts((n) => n + 1);
+      if (outcome.correct) setGuessHits((n) => n + 1);
+    }
+  }, [guess]);
 
   const gradeWeakSpot = useCallback(
     async (payload: { selectedIndex?: number; knewIt?: boolean }) => {
@@ -823,6 +835,12 @@ export default function ReviewHubPage() {
                     ? `You mastered ${masteredCount} weak spot${masteredCount === 1 ? "" : "s"} this round.`
                     : "Every rep makes the next one easier."}
                 </p>
+                {/* Active-recall accuracy — only when you actually committed guesses. */}
+                {guessAttempts > 0 && (
+                  <p className="font-syne text-sm mb-2" style={{ color: "#C79BFF" }}>
+                    {Math.round((guessHits / guessAttempts) * 100)}% recall &middot; you nailed {guessHits} of {guessAttempts} guess{guessAttempts === 1 ? "" : "es"} before the reveal
+                  </p>
+                )}
                 {fangsEarned > 0 && (
                   <p className="font-syne text-sm mb-8" style={{ color: "#FFD700" }}>
                     +{fangsEarned} Fangs from vocab reviews
