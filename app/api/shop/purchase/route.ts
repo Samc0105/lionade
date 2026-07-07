@@ -113,7 +113,14 @@ export async function POST(req: NextRequest) {
 
     const isBooster = item.type === "booster";
     const quantity = isBooster ? requestedQuantity : 1;
-    const price = item.price * quantity;
+    // Bulk discount: the shop's "Buy x5" button advertises "save 10%" and
+    // displays Math.floor(price * 5 * 0.9). The server MUST charge that same
+    // amount or the user is debited more than the button showed. Apply the
+    // 10% off for booster bundles of 5 or more (mirrors BoosterCard.bulkPrice).
+    const price =
+      isBooster && quantity >= 5
+        ? Math.floor(item.price * quantity * 0.9)
+        : item.price * quantity;
 
     // 1. For cosmetics, check if already owned BEFORE debiting
     if (!isBooster) {

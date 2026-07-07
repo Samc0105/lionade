@@ -1759,10 +1759,11 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
         setDeleting(false);
         return;
       }
-      toastSuccess("Your account has been deleted.");
-      // Sign out + bounce to landing. The server has already wiped the
-      // auth row, so the client session below is just for clean state.
-      try { await logout(); } catch { /* ignore — auth row is gone */ }
+      toastSuccess("Deletion scheduled. You have 24 hours to cancel from Settings.");
+      // Sign the user out and bounce to landing. The account row survives the
+      // grace window (the reaper hard-deletes after 24h), so signing back in
+      // before then lets them cancel from Settings, Danger Zone.
+      try { await logout(); } catch { /* ignore */ }
       router.push("/");
     } catch (e: any) {
       console.error("[profile:delete-account] threw", e);
@@ -1787,8 +1788,8 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
           </div>
           <h3 id="delete-account-title" className="font-bebas text-2xl text-red-400 tracking-wider">DELETE ACCOUNT</h3>
         </div>
-        <p className="text-cream/80 text-sm mb-2">This permanently removes your account, profile, friends, quiz history, and any Fangs you have on hand.</p>
-        <p className="text-cream/60 text-xs mb-5">This cannot be undone. If you want to come back later you will need to sign up again.</p>
+        <p className="text-cream/80 text-sm mb-2">This schedules your account for deletion in 24 hours. After that your profile, friends, quiz history, and any Fangs you have on hand are permanently removed.</p>
+        <p className="text-cream/60 text-xs mb-5">You have a 24 hour grace window. Sign back in and cancel from Settings, Danger Zone before then to keep your account.</p>
 
         <label htmlFor="delete-confirm-email" className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-1.5">
           Type your email to confirm
