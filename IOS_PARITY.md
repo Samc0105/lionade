@@ -14,6 +14,7 @@ CEO showed the calm iOS Games-tab cards next to the web Arcade and asked for the
 | Surface | Web | iOS | Notes |
 |---|---|---|---|
 | **Games tab / Arcade card design** | ✅ vibrant per-game neon tickets (Arcade page) | ✅ redesigned to match (`829ae83`, `5ce6de4`) | Flat calm cards → arcade tickets in the iOS DeckTicket/TrackTicket chrome: per-game accent (Roardle sky, Pardy AMBER not gold [gold=currency-only on iOS], Sketchy pink, TechHub green), bold accent title, colored action pill, lot-plate/perforation, corner glow, FadeInDown + PressableScale. iOS-specific divergence: gold→amber for Pardy (currency rule). |
+| **Colored identity icons (Study grid + You/Social rows)** | ✅ web uses colorful section accents | ✅ added (`178bacd`, `7843d94`) | CEO "add color to the icons." Study quick-access grid: 9 tiles each with an identity accent (icon + tinted disc + press glow). You tab: every Yours/Settings row icon colored via `CalmRow.iconColor` (iOS-Settings style). Social: 3 quick-action rows. Gold omitted (currency-only). Cosmetic tints, non-text contrast ≥3:1 on dark. |
 
 ---
 
