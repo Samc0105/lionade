@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-07-07: iOS-AHEAD zero-backend games depth (Roardle Share/Practice/Stats/Hard-mode + Pardy best score) — reverse-drift, back-port opportunities
+
+CEO directive "continue iOS only, develop/fix features with no backend." Built on `feat/ios-zero-backend` (NOT built; rides the next EAS batch). All pure-client (AsyncStorage / bundled content), grant no Fangs, `ios-code-reviewer`-clean. These put iOS AHEAD of web — logged so web can back-port if desired.
+
+| Feature | Web | iOS | Notes |
+|---|---|---|---|
+| **Roardle: Share result** | ❌ (no standalone web Roardle screen; only the shared `@lionade/core` scorer) | ✅ built (`f7b3514`, not built) | Wires the long-dead `roardleShareSummary()` to RN Share. Classic Wordle-style shareable grid string. Web back-port would need a web Roardle surface first. |
+| **Roardle: Practice mode** | ❌ | ✅ built (`f7b3514`) | Unlimited random puzzles from the same bundled bank; no daily lock / Fangs / streak, only lifetime win% counts. `mode` flag threaded through onEnter so practice never reaches the reward path. |
+| **Roardle: lifetime stats card** | ❌ | ✅ built (`f7b3514`) | Played / win rate / avg guesses (totalTries/won), all local. |
+| **Roardle: Hard mode** | ❌ | ✅ built (`65a76af`) | Persisted toggle; revealed greens must hold position, revealed present letters must be reused. Setup-only so it can't be flipped mid-round. |
+| **Pardy: local best score** | ❌ (web Pardy has no per-deck best) | ✅ built (`8a85328`, new `lib/pardy-stats.ts`) | Per-deck best in AsyncStorage; GameOver celebrates a new best (haptic) + picker shows a trophy chip. Grants nothing; does NOT touch the server-authoritative answer grading. |
+
+---
+
 ## 2026-07-07: RELIABILITY BATCH DEPLOYED + 3 CEO-picked next-things (Review Hub active-recall, Resume Coach fixed for real via unpdf, competitive honest error states) · both prod deploys LIVE
 
 The [[Daily/2026-07-06]] reliability wave went LIVE on getlionade.com (deploy 1), then three CEO-selected next-things shipped (deploy 2). Cross-platform impact per item below. The unifying theme repeats the Strategy-C payoff: server-side fixes on shared routes land on iOS for free; only pure-UI additions need a port.
