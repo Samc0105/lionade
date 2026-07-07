@@ -192,7 +192,7 @@ export default function SpectrumScreen({
             </p>
           )}
           {revealed && submitFailed && (
-            <p className="ca-pop-in text-sm sm:text-base mt-3 text-red-300">
+            <p role="alert" className="ca-pop-in text-sm sm:text-base mt-3 text-red-300">
               Connection issue &middot; that round didn&apos;t count &middot; +0 pts
             </p>
           )}

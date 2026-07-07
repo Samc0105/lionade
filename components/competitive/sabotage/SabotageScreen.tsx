@@ -377,7 +377,7 @@ export default function SabotageScreen({
         {/* Honest "network failure" note — the pick reached no server, so it's
             not a real miss. Sits between the question and the options grid. */}
         {answered !== null && submitFailed && (
-          <p className="ca-pop-in text-center text-sm text-red-300 -mt-1 mb-1">
+          <p role="alert" className="ca-pop-in text-center text-sm text-red-300 -mt-1 mb-1">
             Connection issue &middot; that pick didn&apos;t count &middot; +0 this round
           </p>
         )}

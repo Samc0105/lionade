@@ -1100,7 +1100,7 @@ function ArenaPage() {
                   </div>
 
                   {challengeError && (
-                    <p className="text-red-400 text-sm text-center mb-4">{challengeError}</p>
+                    <p role="alert" className="text-red-400 text-sm text-center mb-4">{challengeError}</p>
                   )}
 
                   <div className="flex items-center justify-center gap-2 mb-6 text-cream/40 text-sm">

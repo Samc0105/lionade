@@ -216,7 +216,7 @@ export default function ZoomScreen({
             </div>
           )}
           {feedback === "error" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#EF4444]/15 backdrop-blur-sm text-center px-4">
+            <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center bg-[#EF4444]/15 backdrop-blur-sm text-center px-4">
               <span className="font-bebas text-2xl sm:text-4xl text-red-300 tracking-widest">DIDN&apos;T COUNT</span>
               <span className="text-cream/60 text-xs sm:text-sm mt-1">Connection issue &middot; +0 this round</span>
             </div>
