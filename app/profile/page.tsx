@@ -1579,10 +1579,10 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-2">YOUR DATA</h3>
-        <p className="text-cream/55 text-sm mb-4">Download a copy of everything Lionade has stored about you</p>
+        <p className="text-cream/55 text-sm mb-4">Download a snapshot of your profile and recent activity. For a full account export, use Settings, Data and Usage.</p>
         <button onClick={downloadData}
           className="px-6 py-2.5 rounded-xl border border-electric/40 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
-          <span className="inline-flex items-center gap-2">Download My Data (JSON)</span>
+          <span className="inline-flex items-center gap-2">Download Snapshot (JSON)</span>
         </button>
       </Card>
     </div>
