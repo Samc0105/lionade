@@ -99,6 +99,10 @@ export default function SabotageScreen({
   const [glitchKey, setGlitchKey] = useState(0); // bumps when a decoy lands -> single glitch
   const [fangKey, setFangKey] = useState(0);     // bumps on a correct answer -> coin burst + score pulse
   const [answerFx, setAnswerFx] = useState<"" | "correct" | "wrong">(""); // flash on the picked option
+  // True when the /answer POST failed (network): the pick was never graded, so
+  // we say "didn't count" instead of flashing a misleading wrong. The round
+  // still advances so both duelists stay in lockstep.
+  const [submitFailed, setSubmitFailed] = useState(false);
   const [projectiles, setProjectiles] = useState<{ id: number; kind: SabotageAttackKind }[]>([]);
   const projIdRef = useRef(0);
   const [started, setStarted] = useState(false); // false until the 3-2-1-GO countdown finishes
@@ -193,6 +197,7 @@ export default function SabotageScreen({
     setAnswered(null);
     setCorrectIdx(null);
     setAnswerFx("");
+    setSubmitFailed(false);
     setEffects([]);
     if (roundIdx + 1 >= rounds.length) {
       setFinished(true);
@@ -213,6 +218,7 @@ export default function SabotageScreen({
       );
       const correct = ok && !!data?.isCorrect;
       if (ok && data) setCorrectIdx(data.reveal.correct_index);
+      if (!ok) setSubmitFailed(true); // network failure — not a real miss
       setAnswerFx(correct ? "correct" : "wrong"); // juice-only flash on the picked option
       if (correct) {
         setScore((s) => { myScoreRef.current = s + 1; return s + 1; });
@@ -367,6 +373,14 @@ export default function SabotageScreen({
             </div>
           )}
         </div>
+
+        {/* Honest "network failure" note — the pick reached no server, so it's
+            not a real miss. Sits between the question and the options grid. */}
+        {answered !== null && submitFailed && (
+          <p className="ca-pop-in text-center text-sm text-red-300 -mt-1 mb-1">
+            Connection issue &middot; that pick didn&apos;t count &middot; +0 this round
+          </p>
+        )}
 
         {/* options */}
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 ${hasEffect("blur") ? "blur-md pointer-events-none" : ""}`}>

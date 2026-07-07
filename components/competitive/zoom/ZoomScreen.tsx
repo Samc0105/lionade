@@ -41,7 +41,8 @@ export default function ZoomScreen({
   const [oppScore, setOppScore] = useState(0);
   const [guess, setGuess] = useState("");
   const [locked, setLocked] = useState(false);
-  const [feedback, setFeedback] = useState<"" | "correct" | "wrong" | "close">("");
+  // "error" = the /answer POST failed (network), distinct from an honest miss.
+  const [feedback, setFeedback] = useState<"" | "correct" | "wrong" | "close" | "error">("");
   // Round 1's un-blur reveal clock is anchored to the server's match.starts_at
   // so both clients reveal the image in lockstep (no clock-skew head start).
   // Pre-migration rows have starts_at === null → fall back to local Date.now().
@@ -122,6 +123,14 @@ export default function ZoomScreen({
         advanceTimerRef.current = null;
         advance();
       }, 1300);
+    } else if (!ok) {
+      // The /answer POST failed outright (network) — NOT a miss. Say so
+      // honestly and still advance so both players stay in lockstep.
+      setFeedback("error");
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
+        advance();
+      }, 1500);
     } else {
       // Wrong (or alias/close not accepted) — Zoom locks the round on a miss.
       setFeedback("wrong");
@@ -204,6 +213,12 @@ export default function ZoomScreen({
               <span className="font-bebas text-2xl sm:text-4xl text-[#EF4444] tracking-widest">
                 {feedback === "close" ? "SO CLOSE" : "LOCKED OUT"}
               </span>
+            </div>
+          )}
+          {feedback === "error" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#EF4444]/15 backdrop-blur-sm text-center px-4">
+              <span className="font-bebas text-2xl sm:text-4xl text-red-300 tracking-widest">DIDN&apos;T COUNT</span>
+              <span className="text-cream/60 text-xs sm:text-sm mt-1">Connection issue &middot; +0 this round</span>
             </div>
           )}
         </div>

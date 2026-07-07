@@ -49,6 +49,11 @@ export default function SpectrumScreen({
   const [revealed, setRevealed] = useState(false);
   const [lastPts, setLastPts] = useState(0);
   const [trueValue, setTrueValue] = useState<number | null>(null);
+  // True when the /answer POST failed: the round is ungraded (server never
+  // scored the estimate), so we show an honest "didn't count" note instead of
+  // a silent blank reveal. The round still advances so both players stay in
+  // lockstep — a live match can't pause for one side's network blip.
+  const [submitFailed, setSubmitFailed] = useState(false);
   const [finished, setFinished] = useState(false);
   const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const myScoreRef = useRef(0);
@@ -82,7 +87,7 @@ export default function SpectrumScreen({
     // Guard a stale deferred fire: bail if the match already finished while
     // this advance was queued.
     if (finished) return;
-    setRevealed(false); setPct(50); setLastPts(0); setTrueValue(null);
+    setRevealed(false); setPct(50); setLastPts(0); setTrueValue(null); setSubmitFailed(false);
     if (idx + 1 >= rounds.length) {
       setFinished(true);
       send({ type: COMPETITIVE_EVENTS.FINISHED });
@@ -100,6 +105,7 @@ export default function SpectrumScreen({
     );
     const pts = ok && data ? data.points : 0;
     if (ok && data) setTrueValue(data.reveal.true_value);
+    else setSubmitFailed(true);
     setLastPts(pts);
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
@@ -183,6 +189,11 @@ export default function SpectrumScreen({
             <p className="ca-pop-in text-sm sm:text-base mt-3" style={{ color: closeness.color }}>
               True value: <span className="font-bebas text-lg sm:text-xl text-[#50C878]">{fmt(trueValue)} {round.unit}</span>
               {" "}&middot; <span style={{ color: closeness.color }}>{closeness.label}</span> &middot; +{lastPts} pts
+            </p>
+          )}
+          {revealed && submitFailed && (
+            <p className="ca-pop-in text-sm sm:text-base mt-3 text-red-300">
+              Connection issue &middot; that round didn&apos;t count &middot; +0 pts
             </p>
           )}
         </div>
