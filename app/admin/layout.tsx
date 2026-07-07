@@ -17,7 +17,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAdminRole } from "@/lib/use-admin-role";
-import { ChartBar, Users, ListMagnifyingGlass, ShieldCheck, ShieldWarning, UsersThree, Vault, Flag, Stack } from "@phosphor-icons/react";
+import { ChartBar, Users, ListMagnifyingGlass, ShieldCheck, ShieldWarning, UsersThree, Vault, Flag, Stack, Heartbeat } from "@phosphor-icons/react";
 import { CARD_BG, RoleBadge } from "@/components/admin/shared";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           { href: "/admin/security", label: "Security", Icon: ShieldWarning, exact: false },
           { href: "/admin/team", label: "Team", Icon: UsersThree, exact: false },
           { href: "/admin/features", label: "Features", Icon: Flag, exact: false },
+          { href: "/admin/health", label: "Systems Health", Icon: Heartbeat, exact: false },
           { href: "/admin/question-bank", label: "Question Bank", Icon: Stack, exact: false },
           { href: "/admin/vault", label: "Vault", Icon: Vault, exact: false },
         ]
