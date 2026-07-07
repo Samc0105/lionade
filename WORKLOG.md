@@ -4,6 +4,18 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-07 (DEPLOY + BUILD) - web batch DEPLOYED LIVE to getlionade.com (verified) + iOS build 29 FAILED on deployment target, fixed, rebuilding as build 30
+
+**CEO said "deploy and build." Both executed.**
+
+**WEB: DEPLOYED LIVE + VERIFIED.** `vercel deploy --prod` shipped the whole autonomous-polish batch (Systems Health panel, Quiz Duel failure handlers, async-state fixes, Review Hub recall-accuracy, a11y) to getlionade.com. Verified live: the brand-new `/api/admin/health` route returns 401 (proves new code is serving), `vercel inspect` = ● Ready, and a full smoke test of `/ /pricing /learn/review /learn/sets /library /social /compete/arena /compete/arena/duel /dashboard` all 200. NOTE: the local `vercel` CLI printed a transient "Error: Not authorized" mid-stream and my poller misparsed the non-TTY `vercel ls` output as "unknown" - both were false alarms; the deploy completed fine server-side.
+
+**iOS: BUILD 29 FAILED → FIXED → BUILD 30 building.** Build 29 (`613e7229`) errored in ~90s during pod install: `EAS_BUILD_HIGHER_MINIMUM_DEPLOYMENT_TARGET_ERROR` - a transitive CocoaPods dep drifted to requiring iOS >15.1 (SDK 54's default). **This strongly implies build 28 (2026-07-06, "in flight") ALSO failed the same way and never shipped - so build 27 (2026-07-03) was the last build actually on TestFlight, and build 30 is the first to carry everything since.** Fix: added `expo-build-properties` plugin pinning `ios.deploymentTarget: "16.0"` (commit `41dd302`; verified via `expo config --type introspect` → Podfile.properties.json). Build 30 (`30b48634`, commit 41dd302) is building on EAS with auto-submit to TestFlight scheduled (submission `023d2edd`). iOS 16+ is ~universal in 2026, no meaningful device loss.
+
+**Prod is now live with the full autonomous-polish batch.** Awaiting build 30 completion to confirm TestFlight.
+
+---
+
 ## 2026-07-07 (autonomous polish, web + iOS) - 3 next-things built + two-platform audit fixes; web batch STAGED on main (deploy classifier-held, NOT live), iOS committed not built
 
 **CEO directive: "keep fixing/polishing for an hour, no questions, web AND iOS."** Ran two parallel discovery audits (web + iOS, each tracing every interactive element to real logic) and built the three CEO-picked next-things. Both platforms came back very well-hardened; every real finding is fixed.
