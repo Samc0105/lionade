@@ -1320,7 +1320,11 @@ function PersonalizationSection({ user }: SharedProps) {
       updatePreferences(user.id, updates).then(() => {
         setSaved(true);
         setTimeout(() => setSaved(false), 1500);
-      }).catch(() => {});
+      }).catch(() => {
+        // The change is applied locally already; tell the user the SERVER
+        // save didn't land so they know it may not persist across devices.
+        toastError("Couldn't save that preference to your account. It's applied here for now.");
+      });
     }
   };
 

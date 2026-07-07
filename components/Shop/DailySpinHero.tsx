@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
@@ -191,7 +192,18 @@ export default function DailySpinHero() {
               <span className="text-red-400">2 ways to lose</span>.
             </p>
 
-            {status?.canSpin ? (
+            {!user ? (
+              // Signed-out visitors have never spun, so the cooldown lock below
+              // would be a lie. Send them to sign in instead.
+              <Link
+                href="/login?next=/shop"
+                aria-label="Sign in to spin the wheel"
+                className="group inline-flex items-center justify-center gap-2 min-h-[44px] px-7 py-3.5 rounded-full font-bold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 motion-safe:active:scale-[0.98] transition-all shadow-lg shadow-gold/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+              >
+                <Sparkle size={16} weight="fill" aria-hidden="true" />
+                Sign in to spin
+              </Link>
+            ) : status?.canSpin ? (
               <button
                 type="button"
                 onClick={handleSpin}
