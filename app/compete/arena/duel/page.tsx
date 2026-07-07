@@ -517,13 +517,30 @@ function ArenaPage() {
     });
 
     if (!apiRes.ok || !apiRes.data) {
-      // Don't strand the player on a dead tap: unlock, clear the selection, and
-      // tell them to tap again. The timer keeps running (fair to both sides); a
-      // timeout still records a no-answer, same as before.
       console.error("Answer submission error:", apiRes.error);
       answerLocked.current = false;
       setSelected(null);
-      setSubmitError(idx === -1 ? null : "That answer didn't send. Check your connection and tap again.");
+      if (idx === -1) {
+        // The TIMEOUT auto-submit also failed. Never strand the player on a
+        // dead question with the clock at 0 (no error shown, no auto-advance).
+        // Record a client-side no-answer — identical to a successful timeout,
+        // 0 pts — and advance. /complete recomputes the official result from
+        // persisted rows server-side, so this local record only drives the UI.
+        const noAnswer: AnswerResult = {
+          isCorrect: false,
+          correctAnswer: -1,
+          explanation: null,
+          pointsEarned: 0,
+          bothAnswered: false,
+          opponentAnswer: null,
+        };
+        setAnswerResult(noAnswer);
+        recordAndAdvance(noAnswer, responseTimeMs);
+        return;
+      }
+      // A manual tap failed: unlock + tell them to tap again. The timer is
+      // still running (fair to both sides), so a retry is the right nudge.
+      setSubmitError("That answer didn't send. Check your connection and tap again.");
       return;
     }
     const result = apiRes.data;
