@@ -194,6 +194,9 @@ function ArenaPage() {
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [opponentAnswered, setOpponentAnswered] = useState(false);
   const [questionRecords, setQuestionRecords] = useState<QuestionRecord[]>([]);
+  // Answer-submit failure (POST /api/arena/answer failed): the tile unlocks so
+  // the player can retry, but we say so instead of a dead, non-responsive tap.
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [myTotalPoints, setMyTotalPoints] = useState(0);
   const [opTotalPoints, setOpTotalPoints] = useState(0);
   const [myCorrectCount, setMyCorrectCount] = useState(0);
@@ -272,11 +275,19 @@ function ArenaPage() {
   const startMatchmaking = useCallback(async () => {
     if (!user?.id) return;
 
+    setQueueError(null);
     setPhase("matchmaking");
     setSearchTime(0);
 
-    // Join queue
-    await apiPost("/api/arena/queue", { wager });
+    // Join queue. If the join itself is rejected (e.g. a stale client Fang
+    // balance the server won't honor), surface it in the lobby instead of 60s
+    // of fake "searching" that dead-ends on "No opponents".
+    const joinRes = await apiPost("/api/arena/queue", { wager });
+    if (!joinRes.ok) {
+      setQueueError(joinRes.error ?? "Couldn't join the queue. Try again.");
+      setPhase("lobby");
+      return;
+    }
 
     // Poll for match. `elapsed` is a local captured by the interval closure
     // (NOT read back from state) so it can't go stale between ticks.
@@ -494,6 +505,7 @@ function ArenaPage() {
     if (answerLocked.current || !matchId || !user?.id || !questions[currentQ]) return;
     answerLocked.current = true;
     setSelected(idx);
+    setSubmitError(null);
 
     const responseTimeMs = Date.now() - questionStartTime.current;
 
@@ -505,8 +517,13 @@ function ArenaPage() {
     });
 
     if (!apiRes.ok || !apiRes.data) {
+      // Don't strand the player on a dead tap: unlock, clear the selection, and
+      // tell them to tap again. The timer keeps running (fair to both sides); a
+      // timeout still records a no-answer, same as before.
       console.error("Answer submission error:", apiRes.error);
       answerLocked.current = false;
+      setSelected(null);
+      setSubmitError(idx === -1 ? null : "That answer didn't send. Check your connection and tap again.");
       return;
     }
     const result = apiRes.data;
@@ -614,6 +631,7 @@ function ArenaPage() {
         setCurrentQ(nextQ);
         setSelected(null);
         setAnswerResult(null);
+        setSubmitError(null);
         setWaitingForOpponent(false);
         setOpponentAnswered(false);
         answerLocked.current = false;
@@ -629,13 +647,16 @@ function ArenaPage() {
     const res = await apiPost<any>("/api/arena/complete", { matchId });
     if (res.ok && res.data) {
       setMatchResult(res.data);
+      setPhase("results");
+      if (user?.id) mutateUserStats(user.id);
+      mutateStats?.();
     } else {
+      // NEVER paint results from optimistic local scores on a wagered surface —
+      // the official winner, Fang transfer, and ELO all come from /complete.
+      // Hold in settle_failed with a retry so the outcome is never fabricated.
       console.error("Complete match error:", res.error);
+      setPhase("settle_failed");
     }
-    setPhase("results");
-
-    if (user?.id) mutateUserStats(user.id);
-    mutateStats?.();
   }, [matchId, user?.id, mutateStats]);
 
   // ── Challenge friend ───────────────────────────────────────
@@ -683,6 +704,7 @@ function ArenaPage() {
 
   const acceptChallenge = useCallback(async (challengeId: string) => {
     if (!user?.id) return;
+    setIncomingError(null);
     const res = await apiPatch<{ matchId: string }>("/api/arena/challenge", {
       challengeId,
       action: "accept",
@@ -690,6 +712,11 @@ function ArenaPage() {
     if (res.ok && res.data?.matchId) {
       setMatchId(res.data.matchId);
       loadMatch(res.data.matchId);
+    } else {
+      // The challenge likely expired between polls — say so. Leave the card in
+      // place (the 4s poll reconciles the list against the server) so the error
+      // renders in context instead of a dead Accept button vanishing silently.
+      setIncomingError(res.error ?? "That challenge is no longer available.");
     }
   }, [user?.id, loadMatch]);
 
@@ -709,6 +736,7 @@ function ArenaPage() {
     setCurrentQ(0);
     setSelected(null);
     setAnswerResult(null);
+    setSubmitError(null);
     setWaitingForOpponent(false);
     setOpponentAnswered(false);
     setQuestionRecords([]);
@@ -920,6 +948,11 @@ function ArenaPage() {
                   </span>
                 </button>
               </div>
+              {queueError && (
+                <p className="text-red-400 text-sm text-center mt-4 font-semibold" role="alert">
+                  {queueError}
+                </p>
+              )}
             </div>
 
             {/* ═══ INCOMING CHALLENGES ═══ */}
@@ -928,6 +961,9 @@ function ArenaPage() {
                 <p className="font-bebas text-lg text-cream/50 tracking-[0.15em] mb-3">
                   <Sword size={20} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> INCOMING CHALLENGES
                 </p>
+                {incomingError && (
+                  <p className="text-red-400 text-sm mb-3" role="alert">{incomingError}</p>
+                )}
                 <div className="space-y-3">
                   {incomingChallenges.map(c => (
                     <div key={c.id} className="rounded-xl p-4 flex items-center gap-4"
@@ -1397,6 +1433,13 @@ function ArenaPage() {
               </div>
             )}
 
+            {/* Answer-submit failure — the tile is tappable again. */}
+            {submitError && !answerResult && (
+              <p className="text-center mb-4 text-red-300 font-syne text-sm" role="alert">
+                {submitError}
+              </p>
+            )}
+
             {/* Answer Options */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {q.options.map((opt, i) => {
@@ -1477,6 +1520,54 @@ function ArenaPage() {
                 className="btn-gold w-full py-3 rounded-xl">
                 Back to Arena
               </button>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PHASE: SETTLE FAILED — the match played out but POST /complete failed. We
+  // refuse to fabricate a win/loss/ELO on a wagered surface from optimistic
+  // local scores, so we hold here for a retry. Fangs + ELO stay untouched.
+  // ═══════════════════════════════════════════════════════════
+  if (phase === "settle_failed") {
+    return (
+      <ProtectedRoute>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
+          <div className="max-w-md w-full animate-slide-up">
+            <div className="rounded-2xl p-8 text-center"
+              style={{
+                background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
+                border: "1px solid rgba(255,215,0,0.2)",
+                boxShadow: "0 0 30px rgba(255,215,0,0.06)",
+              }}>
+              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
+                style={{ background: "rgba(255,215,0,0.1)", border: "2px solid rgba(255,215,0,0.3)" }}>
+                <Trophy size={28} weight="fill" color="#FFD700" aria-hidden="true" />
+              </div>
+
+              <h2 className="font-bebas text-4xl text-cream tracking-wider mb-3">
+                SCORING THE MATCH
+              </h2>
+              <p className="text-cream/50 text-sm font-syne leading-relaxed mb-2">
+                You both finished, but we couldn&apos;t reach the server to settle the result. Your Fangs and ELO are untouched until it goes through.
+              </p>
+              <p className="text-cream/35 text-xs font-syne mb-8">
+                Nothing was won or lost yet. Tap retry to finalize the outcome.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button onClick={completeMatch}
+                  className="btn-gold flex-1 py-3 rounded-xl">
+                  Retry
+                </button>
+                <button onClick={() => { resetArena(); router.push("/compete/arena"); }}
+                  className="btn-outline flex-1 py-3 rounded-xl">
+                  Back to Arena
+                </button>
+              </div>
             </div>
           </div>
         </div>
