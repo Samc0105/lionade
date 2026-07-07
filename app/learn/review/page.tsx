@@ -123,6 +123,7 @@ export default function ReviewHubPage() {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null); // mcq choice
   const [revealed, setRevealed] = useState(false); // reveal-style cards
+  const [guess, setGuess] = useState(""); // optional typed recall attempt before reveal (active recall)
   const [grading, setGrading] = useState(false);
   const [lastResult, setLastResult] = useState<GradeOutcome | null>(null);
 
@@ -165,6 +166,7 @@ export default function ReviewHubPage() {
       setIndex(0);
       setSelected(null);
       setRevealed(false);
+      setGuess("");
       setLastResult(null);
       setReviewed(0);
       setCorrectCount(0);
@@ -301,6 +303,7 @@ export default function ReviewHubPage() {
     setIndex(next);
     setSelected(null);
     setRevealed(false);
+    setGuess("");
     setLastResult(null);
   };
 
@@ -674,17 +677,44 @@ export default function ReviewHubPage() {
                   (current.source === "study_set" && current.kind === "set_flashcard")) && (
                   <div>
                     {!revealed ? (
-                      <button
-                        type="button"
-                        onClick={() => setRevealed(true)}
-                        className="w-full rounded-xl border px-4 py-4 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110"
-                        style={{ background: `${PURPLE}18`, borderColor: `${PURPLE}45`, color: "#EEF4FF" }}
-                      >
-                        <Eye size={18} weight="fill" aria-hidden="true" />
-                        Reveal answer
-                      </button>
+                      <div className="space-y-2.5">
+                        {/* Active recall: commit a guess BEFORE the reveal. Optional
+                            (empty is fine), but typing it first turns a passive peek
+                            into a real retrieval attempt — the whole point of the deck. */}
+                        <label htmlFor="recall-guess" className="sr-only">
+                          Type your answer before revealing
+                        </label>
+                        <textarea
+                          id="recall-guess"
+                          value={guess}
+                          onChange={(e) => setGuess(e.target.value)}
+                          placeholder="Make your guess first, then reveal…"
+                          rows={2}
+                          className="w-full resize-none rounded-xl border px-4 py-3 font-syne text-sm text-cream placeholder:text-cream/35 focus:outline-none transition-colors"
+                          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setRevealed(true)}
+                          className="w-full rounded-xl border px-4 py-4 min-h-[52px] font-bebas text-base tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] hover:brightness-110"
+                          style={{ background: `${PURPLE}18`, borderColor: `${PURPLE}45`, color: "#EEF4FF" }}
+                        >
+                          <Eye size={18} weight="fill" aria-hidden="true" />
+                          {guess.trim() ? "Check my answer" : "Reveal answer"}
+                        </button>
+                      </div>
                     ) : (
                       <div className="animate-slide-up">
+                        {/* Your guess, side by side with the truth, so you grade honestly. */}
+                        {guess.trim() && (
+                          <div
+                            className="rounded-2xl border p-4 mb-3"
+                            style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}
+                          >
+                            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/45 mb-1.5">your guess</p>
+                            <p className="font-syne text-cream/85 text-base leading-snug whitespace-pre-wrap">{guess.trim()}</p>
+                          </div>
+                        )}
                         <div
                           className="rounded-2xl border p-5 mb-4"
                           style={{ background: "rgba(34,197,94,0.08)", borderColor: "rgba(34,197,94,0.35)" }}
