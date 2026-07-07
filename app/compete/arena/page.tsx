@@ -44,7 +44,10 @@ const MODES: ModeCard[] = [
 type SearchState =
   | { phase: "idle" }
   | { phase: "searching"; mode: CompetitiveMode; since: number }
-  | { phase: "none"; mode: CompetitiveMode };
+  | { phase: "none"; mode: CompetitiveMode }
+  // Distinct from "none" (a real, honest no-opponents timeout): the queue-join
+  // request itself failed (server/network), so retrying is the right nudge.
+  | { phase: "error"; mode: CompetitiveMode };
 
 // Which 2v2 entry path the player has chosen. Only relevant when format is 2v2.
 //   - "solo": no code, auto-pair into a random duo (queue with partyCode null)
@@ -129,6 +132,13 @@ export default function CompetitiveArenaPage() {
       );
       if (ok && data?.status === "matched" && data.matchId) {
         goToMatch(mode, data.matchId);
+        return;
+      }
+      if (!ok) {
+        // The queue-join failed outright — don't sit on a "searching" spinner
+        // (or later show the misleading "no opponents"); surface it as an error.
+        searchingRef.current = false;
+        setSearch({ phase: "error", mode });
         return;
       }
       // Poll for a match.
@@ -392,6 +402,7 @@ export default function CompetitiveArenaPage() {
             {MODES.map((m, i) => {
               const busy = search.phase === "searching" && search.mode === m.mode;
               const dead = search.phase === "none" && search.mode === m.mode;
+              const errored = search.phase === "error" && search.mode === m.mode;
               return (
                 <div
                   key={m.mode}
@@ -426,7 +437,7 @@ export default function CompetitiveArenaPage() {
                     </p>
                     <p className="text-cream/55 text-sm leading-relaxed mb-5 min-h-[60px]">{m.blurb}</p>
 
-                    {!busy && !dead && (
+                    {!busy && !dead && !errored && (
                       <button
                         onClick={() => startSearch(m.mode)}
                         disabled={findMatchBlocked}
@@ -471,6 +482,22 @@ export default function CompetitiveArenaPage() {
                           style={{ color: m.accent }}
                         >
                           RETRY
+                        </button>
+                      </div>
+                    )}
+
+                    {errored && (
+                      <div className="flex flex-col gap-2">
+                        <div className="text-center py-2.5 rounded-xl border border-red-500/20 bg-red-500/[0.05]">
+                          <p className="text-cream/70 text-sm">Couldn&apos;t reach matchmaking.</p>
+                          <p className="text-cream/40 text-xs mt-0.5">Check your connection and try again.</p>
+                        </div>
+                        <button
+                          onClick={() => startSearch(m.mode)}
+                          className="text-xs font-bebas tracking-wider py-1.5 rounded-lg"
+                          style={{ color: m.accent }}
+                        >
+                          TRY AGAIN
                         </button>
                       </div>
                     )}
