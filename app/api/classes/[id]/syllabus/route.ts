@@ -267,37 +267,22 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         return fail("not_a_pdf", "missing %PDF header");
       }
 
-      // Extract text via pdf-parse v2.
+      // Extract text via unpdf — a serverless build of pdf.js with no
+      // canvas / worker / native-binary deps, so it bundles cleanly on
+      // Vercel. The old pdf-parse v2 path needed @napi-rs/canvas (DOMMatrix
+      // polyfill) + a fake worker force-traced into the lambda; both loaded
+      // through non-literal specifiers, so this block was runtime-dead in
+      // prod. Dynamic import keeps a load failure catchable + loggable.
       try {
-        // Dynamic import — pdf-parse pulls in pdfjs which is heavy at boot,
-        // and it can throw at require() time (its DOMMatrix polyfill needs
-        // @napi-rs/canvas), so keeping the import inside the try makes a
-        // load failure catchable + loggable. Its worker + native files are
-        // force-included in the serverless bundle via
-        // experimental.outputFileTracingIncludes in next.config.js —
-        // without that, this block was runtime-dead on Vercel.
-        const mod = await import("pdf-parse");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
-        if (!PDFParse) {
-          return fail(
-            "parser_unavailable",
-            `pdf-parse PDFParse export missing: ${JSON.stringify({ exports: Object.keys(mod ?? {}), bufBytes: buf.byteLength })}`,
-          );
-        }
-        const parser = new PDFParse({ data: buf });
-        try {
-          const result = await parser.getText();
-          rawText = String(result?.text ?? "").replace(/\r\n/g, "\n");
-        } finally {
-          // Free the pdfjs document — warm lambdas reuse the process.
-          await parser.destroy().catch(() => {});
-        }
+        const { extractText, getDocumentProxy } = await import("unpdf");
+        const pdf = await getDocumentProxy(new Uint8Array(buf));
+        const { text } = await extractText(pdf, { mergePages: true });
+        rawText = String(text ?? "").replace(/\r\n/g, "\n");
       } catch (e) {
         const err = e as Error;
         return fail(
           "pdf_extract_failed",
-          `pdf-parse: ${JSON.stringify({ message: err?.message ?? "unknown", stack: err?.stack, bufBytes: buf.byteLength })}`,
+          `unpdf: ${JSON.stringify({ message: err?.message ?? "unknown", stack: err?.stack, bufBytes: buf.byteLength })}`,
         );
       }
 

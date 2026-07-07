@@ -4,31 +4,6 @@
 // Do NOT duplicate them here — duplicate CSP headers can cause
 // browsers to block styles/scripts in dev mode.
 
-// Runtime files pdf-parse v2 needs but that Vercel's static file tracer
-// cannot discover (see experimental.outputFileTracingIncludes below).
-// dist/pdf-parse/web is the 12 MB browser build and is deliberately
-// NOT included.
-const PDF_PARSE_TRACING_INCLUDES = [
-  // CJS entry (what require("pdf-parse") resolves to) + its co-located
-  // pdf.worker.mjs, which is loaded at parse time via a non-literal
-  // dynamic import (`import(this.workerSrc)`) that tracing can't follow.
-  "./node_modules/pdf-parse/dist/pdf-parse/cjs/**/*",
-  // ESM entry + worker, in case the import condition is used instead.
-  "./node_modules/pdf-parse/dist/pdf-parse/esm/**/*",
-  "./node_modules/pdf-parse/dist/node/**/*",
-  "./node_modules/pdf-parse/dist/worker/**/*",
-  // The ESM build imports pdfjs-dist externally (the CJS build inlines it).
-  "./node_modules/pdfjs-dist/legacy/build/pdf.mjs",
-  "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
-  // Native canvas binding — pdf-parse's CJS bundle loads it through
-  // createRequire() at require() time to polyfill DOMMatrix. Untraced =
-  // "ReferenceError: DOMMatrix is not defined" before any parsing runs.
-  // The platform wildcard picks up @napi-rs/canvas-linux-x64-gnu on
-  // Vercel build machines (only the host-matching binding is installed).
-  "./node_modules/@napi-rs/canvas/**/*",
-  "./node_modules/@napi-rs/canvas-*/**/*",
-];
-
 const nextConfig = {
   // Compile @lionade/core from its TypeScript source on the fly.
   // No build step needed for the shared package — Next.js transpiles it
@@ -61,31 +36,10 @@ const nextConfig = {
       { source: "/duel", destination: "/compete/arena", permanent: false },
     ];
   },
-  // pdf-parse pulls in pdfjs-dist, which calls Object.defineProperty on its
-  // own module namespace at runtime. Webpack freezes ESM namespaces, so the
-  // bundled version throws "Object.defineProperty called on non-object" on
-  // first use. Marking it external tells Next.js to require() it at runtime
-  // from node_modules instead of bundling, which restores a writable
-  // namespace and lets the syllabus parser work.
-  experimental: {
-    serverComponentsExternalPackages: ["pdf-parse"],
-    // Because pdf-parse is external (above), Vercel's node-file-trace must
-    // copy its runtime files into the serverless bundle — but two of its
-    // loads happen through dynamic, non-literal specifiers that static
-    // tracing cannot see. Result before this fix: BOTH PDF routes were
-    // runtime-dead in prod, before the AI call ever ran:
-    //   1. Missing @napi-rs/canvas → require("pdf-parse") itself throws
-    //      "ReferenceError: DOMMatrix is not defined".
-    //   2. Missing dist/pdf-parse/cjs/pdf.worker.mjs → parsing throws
-    //      'Setting up fake worker failed: Cannot find module "…"'.
-    // Keys are matched with picomatch (contains:true) against the
-    // normalized route path. `[id]` would parse as a character class, so
-    // the dynamic segment uses a `*` wildcard instead.
-    outputFileTracingIncludes: {
-      "/api/coach/resume/analyze": PDF_PARSE_TRACING_INCLUDES,
-      "/api/classes/*/syllabus": PDF_PARSE_TRACING_INCLUDES,
-    },
-  },
+  // PDF text extraction runs through `unpdf` (a serverless build of pdf.js
+  // with no canvas / worker / native-binary deps), so it bundles cleanly and
+  // needs none of the pdf-parse external-package + file-tracing workarounds
+  // that used to live here.
   // @lionade/core is consumed as raw TypeScript source (see transpilePackages
   // above) and uses NodeNext-style ".js" import specifiers that actually
   // resolve to ".ts" files. TypeScript ("moduleResolution: bundler")

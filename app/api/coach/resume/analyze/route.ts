@@ -138,41 +138,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Extract text (same pdf-parse v2 dance as classes/syllabus) ─────
-  // The import stays dynamic and INSIDE the try on purpose: pdf-parse v2
-  // can throw at require() time (its DOMMatrix polyfill needs
-  // @napi-rs/canvas), so this keeps a load failure catchable + loggable
-  // instead of crashing module init. The worker + native files it needs
-  // at runtime are force-included in the serverless bundle via
-  // experimental.outputFileTracingIncludes in next.config.js — without
-  // that, this block was runtime-dead on Vercel.
+  // ── Extract text (unpdf) ───────────────────────────────────────────
+  // unpdf ships a serverless build of pdf.js with NO canvas, worker, or
+  // native-binary dependencies, so it bundles cleanly on Vercel. The old
+  // pdf-parse v2 path needed @napi-rs/canvas (DOMMatrix polyfill) plus a
+  // fake worker force-traced into the lambda via outputFileTracingIncludes
+  // — both loaded through non-literal dynamic specifiers, so the route was
+  // runtime-dead in prod before the AI call ever ran. The import stays
+  // dynamic + inside the try so any load failure is catchable + loggable.
   let rawText = "";
   try {
-    const mod = await import("pdf-parse");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
-    if (!PDFParse) {
-      console.error(
-        "[coach/resume/analyze] pdf-parse PDFParse export missing:",
-        JSON.stringify({ exports: Object.keys(mod ?? {}), bufBytes: buf.byteLength }),
-      );
-      return NextResponse.json(
-        { error: "Parser unavailable", code: "parser_unavailable" },
-        { status: 500 },
-      );
-    }
-    const parser = new PDFParse({ data: buf });
-    try {
-      const result = await parser.getText();
-      rawText = String(result?.text ?? "").replace(/\r\n/g, "\n").trim();
-    } finally {
-      // Free the pdfjs document — warm lambdas reuse the process.
-      await parser.destroy().catch(() => {});
-    }
+    const { extractText, getDocumentProxy } = await import("unpdf");
+    const pdf = await getDocumentProxy(new Uint8Array(buf));
+    const { text } = await extractText(pdf, { mergePages: true });
+    rawText = String(text ?? "").replace(/\r\n/g, "\n").trim();
   } catch (e) {
     const err = e as Error;
     console.error(
-      "[coach/resume/analyze] pdf-parse failed:",
+      "[coach/resume/analyze] unpdf extract failed:",
       JSON.stringify({
         message: err?.message ?? "unknown",
         stack: err?.stack,
