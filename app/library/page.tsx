@@ -247,11 +247,15 @@ export default function LibraryPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const { data: firstPage, isLoading } = useSWR(
+  const { data: firstPage, error: browseError, isLoading, mutate: mutateBrowse } = useSWR(
     user?.id ? `library/${q}/${subject ?? "all"}/${user.id}` : null,
     async () => {
       const res = await apiGet<BrowseResponse>(buildBrowseUrl(q, subject, 0));
-      return res.ok && res.data ? res.data : { sets: [] };
+      // THROW on failure instead of collapsing to an empty result — a failed
+      // browse must not render "no sets found" (that reads as "the library is
+      // empty" when the fetch just broke).
+      if (!res.ok) throw new Error(res.error ?? "Couldn't load the library");
+      return res.data ?? { sets: [] };
     },
     { keepPreviousData: true, revalidateOnFocus: true },
   );
@@ -388,8 +392,11 @@ export default function LibraryPage() {
     setModal({ kind: "report", set });
   }, []);
 
-  const showSkeletons = isLoading && baseSets.length === 0 && !unavailable;
-  const showEmpty = !isLoading && !unavailable && allSets.length === 0 && !pinnedSet;
+  // Only an error when we have nothing cached to show (keepPreviousData keeps
+  // the last-good grid on a revalidation failure).
+  const loadError = !!browseError && firstPage === undefined;
+  const showSkeletons = isLoading && baseSets.length === 0 && !unavailable && !loadError;
+  const showEmpty = !isLoading && !unavailable && !loadError && allSets.length === 0 && !pinnedSet;
 
   return (
     <ProtectedRoute>
@@ -513,6 +520,21 @@ export default function LibraryPage() {
                 <p className="font-syne text-sm text-cream/60 max-w-sm mx-auto leading-relaxed">
                   {firstPage?.message ?? "The community library isn't live yet. Check back soon."}
                 </p>
+              </div>
+            ) : loadError ? (
+              <div className="card p-10 text-center animate-slide-up">
+                <BookBookmark size={36} weight="duotone" color={ACCENT} className="mx-auto mb-3" aria-hidden="true" />
+                <p className="font-bebas text-2xl text-cream tracking-wide mb-2">Couldn&apos;t load the library</p>
+                <p className="font-syne text-sm text-cream/60 max-w-sm mx-auto leading-relaxed mb-4">
+                  Something went wrong fetching community sets. Nothing is missing.
+                </p>
+                <button
+                  onClick={() => mutateBrowse()}
+                  className="font-bebas tracking-wider text-sm px-5 py-2 rounded-lg transition-colors"
+                  style={{ background: `${ACCENT}20`, border: `1px solid ${ACCENT}55`, color: ACCENT }}
+                >
+                  Try again
+                </button>
               </div>
             ) : showSkeletons ? (
               <div className="grid gap-4 sm:grid-cols-2" aria-busy="true" aria-label="Loading the library">

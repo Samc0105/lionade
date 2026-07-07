@@ -486,7 +486,14 @@ export default function SocialPage() {
   // True once the feed/circle payload exists in the SWR cache OR the
   // sessionStorage seed restored a prior snapshot. Empty states only render
   // after this flips true.
-  const feedHydrated = feedData !== undefined || feedSeeded;
+  // Gate on SUCCESS, not mere presence: a FAILED feed fetch still populates
+  // feedData (the fetcher doesn't throw), which used to flip feedHydrated true
+  // and render "board's empty" on a network error. keepPreviousData + the seed
+  // keep any prior feed; a cold failure now holds the skeleton + refresh button.
+  const feedHydrated = (feedData?.ok ?? false) || feedSeeded;
+  // Friends fetch failed with nothing cached to show → offer a retry instead of
+  // an infinite skeleton (friendsHydrated only latches true on success).
+  const friendsLoadFailed = !!friendsData && !friendsData.ok && !friendsHydrated;
   const loadFeed = useCallback(async () => {
     await mutateFeed();
   }, [mutateFeed]);
@@ -1112,7 +1119,7 @@ export default function SocialPage() {
             <div className="flex-1 overflow-y-auto">
               {/* Initial fetch in flight (no cache restore yet) — skeleton rows,
                   never the "Build your circle" empty copy. */}
-              {!friendsHydrated && filteredFriends.length === 0 && (
+              {!friendsHydrated && !friendsLoadFailed && filteredFriends.length === 0 && (
                 <div aria-hidden="true">
                   {[0, 1, 2].map(i => (
                     <div key={i} className="px-4 py-3 flex items-center gap-3">
@@ -1123,6 +1130,17 @@ export default function SocialPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              {friendsLoadFailed && filteredFriends.length === 0 && (
+                <div className="px-4 py-12 text-center flex flex-col items-center gap-3">
+                  <p className="text-cream/60 text-sm">Couldn&apos;t load your friends.</p>
+                  <button
+                    onClick={() => { void mutateFriends(); }}
+                    className="font-bebas tracking-wider text-sm px-5 py-2 rounded-lg bg-gold/15 border border-gold/35 text-gold transition-colors hover:bg-gold/25"
+                  >
+                    Try again
+                  </button>
                 </div>
               )}
               {friendsHydrated && filteredFriends.length === 0 && (

@@ -56,11 +56,15 @@ export default function StudySetsPage() {
   // Reduced motion: the local @media rules below disable the entrance
   // animation and the skeleton shimmer entirely.
 
-  const { data, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     user?.id ? `study-sets/${user.id}` : null,
     async () => {
       const res = await apiGet<ListResponse>("/api/study-sets");
-      return res.ok && res.data ? res.data : { sets: [], notReady: false };
+      // THROW on failure (don't collapse to an empty deck list) so a failed
+      // fetch can't masquerade as "No decks yet" — a user WITH saved decks would
+      // otherwise think they vanished on any transient API blip.
+      if (!res.ok) throw new Error(res.error ?? "Couldn't load your decks");
+      return res.data ?? { sets: [], notReady: false };
     },
     { keepPreviousData: true, revalidateOnFocus: true },
   );
@@ -68,6 +72,9 @@ export default function StudySetsPage() {
   const sets = data?.sets ?? [];
   const notReady = data?.notReady === true;
   const loading = data === undefined && isLoading;
+  // Only surface the error state when we have NOTHING to show; keepPreviousData
+  // means a revalidation error still leaves the last-good decks on screen.
+  const loadError = !!error && data === undefined;
 
   return (
     <ProtectedRoute>
@@ -183,6 +190,19 @@ export default function StudySetsPage() {
                       <span className="skeleton-shimmer rounded h-3 w-1/3 block" />
                     </div>
                   ))}
+                </div>
+              ) : loadError ? (
+                <div className="py-10 border-y border-white/[0.04] text-center">
+                  <Cards size={28} weight="duotone" color={ORANGE} aria-hidden="true" className="mx-auto mb-3" />
+                  <p className="text-cream/70 text-sm mb-1">Couldn&apos;t load your decks.</p>
+                  <p className="text-cream/50 text-xs mb-4">Your decks are safe on the server.</p>
+                  <button
+                    onClick={() => mutate()}
+                    className="font-bebas tracking-wider text-sm px-5 py-2 rounded-lg transition-colors"
+                    style={{ background: `${ORANGE}20`, border: `1px solid ${ORANGE}55`, color: ORANGE }}
+                  >
+                    Try again
+                  </button>
                 </div>
               ) : sets.length === 0 ? (
                 <div className="py-10 border-y border-white/[0.04] text-center">
