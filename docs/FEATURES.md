@@ -215,3 +215,14 @@
 
 ## Bounties & Bets (iOS)
 - **Daily Bet relocated to Dashboard** (web parity — web does not host Daily Bet on Compete. The card now sits inside the Today section between Bounties and the Progress label, returning to its pre-2026-05-13 home) — 2026-05-23
+
+## Academia / Notes (iOS)
+- **Written / Photos segmented Notes view** (the class-detail Notes card splits into a Written / Photos control; a note is a "photo note" only when it's a pure board-snap with no typed text, classified via `parseNoteBody` — the same image tokens `NoteBody` renders — so no `note_type` column was added and the split is derived, not stored. Tabs appear only once a class has photos; text-only classes keep the plain list; per-tab empty states; the effective tab is derived `hasPhotos ? noteTab : "written"` so vanishing photos can't strand the user) — 2026-07-07
+- **Quick Capture — snap now, file later (iOS-ahead of web)** (a top-of-Academia camera card takes one tap to camera to an on-device Unfiled inbox with zero decisions at capture time; a live "N unfiled" chip. The photo is copied into `documentDirectory` (`expo-file-system` v19) with an AsyncStorage manifest — no server table — using an async-cache-with-sync-readers + listener-Set store behind `useSyncExternalStore`. A new "Unfiled" screen (route `note-inbox`) shows a 2-col thumbnail grid; tap opens a native ActionSheet to file to a class, let Ninny file it, or discard; filing reuses the existing `uploadNoteImage` → `classesAPI.quickNote` path then drops the local copy. Trade-off: unfiled shots don't sync across devices until filed. Web has PhotoNoteCard capture inside a class but no snap-now-file-later inbox — iOS leads here) — 2026-07-07
+- **Photo-note chip in recent notes** (`RecentNoteRow` shows a "Photo" chip for photo-only notes — was a bland `[photo]` string — and keeps text + a small camera glyph for mixed notes; capture-flow accent is amber `#F59E0B`, gold stays currency-only) — 2026-07-07
+
+## Games (iOS)
+- **Roardle Wordle-standard feedback colors** (the tiles/keys moved from an unreadable calm-blue ramp — correct/present/absent near-indistinguishable — to vibrant Wordle-standard feedback: correct green `#22C55E`, present amber `#F59E0B`, absent slate `#33373F`, all with dark high-contrast foreground; currency gold `#FFD700` deliberately avoided) — 2026-07-07
+
+## Quiz (iOS)
+- **Quiz results answer review** (web-parity catch-up — a `QuizReviewItem[]` threaded through the playing→results state machine, a subject-colored "Review answers" button on results, and a full-screen `QuizReview` modal showing each question with the user's pick vs the correct answer green/red plus the explanation) — 2026-07-07
