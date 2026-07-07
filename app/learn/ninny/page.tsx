@@ -828,8 +828,11 @@ function NinnyPageInner() {
       );
       if (!res.ok) {
         // Surface the error so the user knows the penalty didn't apply
-        // — still let them exit (don't trap them in the quiz).
+        // — still let them exit (don't trap them in the quiz). The confirm
+        // modal promised a Fang charge, so say plainly that it didn't land.
         console.warn("[ninny] abandon failed:", res.error);
+        preserveErrorOnModePickerRef.current = true;
+        setError("You exited the session, but the Fang penalty couldn't be applied this time. Your balance is unchanged.");
       }
       refreshMeta();
     }

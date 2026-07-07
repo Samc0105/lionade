@@ -20,6 +20,7 @@ import Avatar from "@/components/Avatar";
 import { useEquippedCosmetics } from "@/lib/use-username-effect";
 import { usePlan } from "@/lib/use-plan";
 import { emitPartyInvite, fromNotificationRow } from "@/lib/party/invite-bus";
+import { toastError } from "@/lib/toast";
 import {
   Bell,
   Users,
@@ -316,12 +317,14 @@ export default function Navbar() {
     });
     const res = await apiPatch("/api/notifications", { id, read: nextRead });
     if (!res.ok) {
-      // Revert optimistic update.
+      // Revert optimistic update — and SAY so, or the flip-back reads as a
+      // haunted UI rather than a failed request.
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: !nextRead } : n));
       setUnreadCount(prev => {
         if (prev === null) return prev;
         return nextRead ? prev + 1 : Math.max(0, prev - 1);
       });
+      toastError("Couldn't update that notification. Try again.");
     }
   }, []);
 
@@ -333,8 +336,10 @@ export default function Navbar() {
     setUnreadCount(0);
     const res = await apiPatch("/api/notifications", { all: true });
     if (!res.ok) {
-      // Best-effort revert: re-fetch so the cache reflects server truth.
+      // Best-effort revert: re-fetch so the cache reflects server truth, and
+      // tell the user why the unread badge is about to reappear.
       void loadNotifications();
+      toastError("Couldn't mark notifications read. Try again.");
     }
   }, [unreadCount, loadNotifications]);
 

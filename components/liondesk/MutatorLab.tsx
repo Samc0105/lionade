@@ -46,6 +46,9 @@ export default function MutatorLab() {
   const [runKey, setRunKey] = useState(0);
   const [copied, setCopied] = useState(false);
   const [codeInput, setCodeInput] = useState("");
+  // Inline rejection notice for "Load code" — decodeCombo returns null on a
+  // typo or truncated paste, and a silent no-op reads as a dead button.
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [newAch, setNewAch] = useState<string[]>([]);
   // One-line summary of what the adaptive generator decided for the current run,
   // shown in the playing view. Null for every non-adaptive launch.
@@ -97,7 +100,11 @@ export default function MutatorLab() {
     if (!raw) return;
     const code = raw.includes("combo=") ? raw.split("combo=")[1].split("&")[0] : raw;
     const c = decodeCombo(code);
-    if (c) { setTrack(c.track ?? "any"); setCount(c.count); setEnabled(c.modifierIds); setCodeInput(""); }
+    if (c) {
+      setTrack(c.track ?? "any"); setCount(c.count); setEnabled(c.modifierIds); setCodeInput(""); setCodeError(null);
+    } else {
+      setCodeError("That code did not decode. Check you copied the whole link.");
+    }
   }
 
   /* ── playing ── */
@@ -215,9 +222,14 @@ export default function MutatorLab() {
           <button onClick={doSave} disabled={!name.trim()} className="px-3 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40 inline-flex items-center gap-1.5"><FloppyDisk size={14} weight="fill" /> Save</button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input value={codeInput} onChange={(e) => setCodeInput(e.target.value)} placeholder="paste a shared combo code or link..." className="flex-1 bg-black/20 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none" />
-          <button onClick={loadFromCode} disabled={!codeInput.trim()} className="px-3 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40">Load code</button>
+        <div>
+          <div className="flex items-center gap-2">
+            <input value={codeInput} onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }} placeholder="paste a shared combo code or link..." className="flex-1 bg-black/20 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/30 focus:outline-none" />
+            <button onClick={loadFromCode} disabled={!codeInput.trim()} className="px-3 py-2 rounded-lg border border-white/15 text-cream/75 text-sm hover:bg-white/[0.06] disabled:opacity-40">Load code</button>
+          </div>
+          {codeError && (
+            <p role="alert" className="mt-1.5 font-mono text-[11px] text-red-300/90">{codeError}</p>
+          )}
         </div>
       </div>
 

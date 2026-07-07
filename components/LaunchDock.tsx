@@ -259,7 +259,10 @@ export default function LaunchDock() {
               gap: ITEM_GAP - 28,
             }}
           >
-            {ITEMS.map((item) => {
+            {/* Buttons stack UPWARD from the trigger (ITEMS[0] closest to the
+                bottom), but this column lays out top-to-bottom — reverse the
+                array so each label sits beside its own button. */}
+            {[...ITEMS].reverse().map((item) => {
               const isActive = activePanel === item.key;
               return (
                 <span

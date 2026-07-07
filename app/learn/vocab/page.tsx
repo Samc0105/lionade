@@ -90,22 +90,24 @@ export default function VocabPage() {
   );
 
   // SWR-powered bank list — single source of truth for what banks the user owns.
-  const { data: banksData, error: banksError, isLoading: banksLoading, mutate: mutateBanks } = useSWR<{ banks: VocabBank[] }>(
+  const { data: banksData, error: banksError, isLoading: banksLoading, isValidating: banksValidating, mutate: mutateBanks } = useSWR<{ banks: VocabBank[] }>(
     "/api/vocab/banks",
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
   );
   const banks = useMemo(() => banksData?.banks ?? [], [banksData]);
 
-  // Resolve the active bank from URL. If URL has no `bank`, fall back to
-  // localStorage. If localStorage is empty too, pick the first bank in the
-  // list. Whenever the resolved slug differs from the URL, push it back via
-  // router.replace so deep-links + history stay clean (replace, not push, so
-  // back-button still leaves the page on the first try).
+  // Resolve the active bank from URL — by slug OR by id (the clone flow
+  // navigates with the new bank's id before its slug is known client-side).
+  // If URL has no `bank`, fall back to localStorage. If localStorage is empty
+  // too, pick the first bank in the list. Whenever the resolved slug differs
+  // from the URL, push it back via router.replace so deep-links + history stay
+  // clean (replace, not push, so back-button still leaves the page on the
+  // first try).
   const activeBank: VocabBank | null = useMemo(() => {
     if (banks.length === 0) return null;
     if (urlBank) {
-      const found = banks.find(b => b.slug === urlBank);
+      const found = banks.find(b => b.slug === urlBank || b.id === urlBank);
       if (found) return found;
     }
     return banks[0];
@@ -114,13 +116,24 @@ export default function VocabPage() {
   // Sync URL + localStorage when activeBank settles.
   useEffect(() => {
     if (!activeBank) return;
+    // Post-clone race guard: right after a clone we land on ?bank=<new id>
+    // while the banks list is still refetching. Don't canonicalize (which
+    // would clobber the URL with the stale first bank) until the refetch
+    // settles and the new bank can actually resolve.
+    if (
+      urlBank &&
+      banksValidating &&
+      !banks.some(b => b.slug === urlBank || b.id === urlBank)
+    ) {
+      return;
+    }
     if (urlBank !== activeBank.slug) {
       router.replace(`/learn/vocab?bank=${encodeURIComponent(activeBank.slug)}`, { scroll: false });
     }
     try {
       window.localStorage.setItem(ACTIVE_BANK_KEY, activeBank.slug);
     } catch { /* localStorage unavailable */ }
-  }, [activeBank, urlBank, router]);
+  }, [activeBank, urlBank, router, banks, banksValidating]);
 
   // First-load fallback: if URL has no `bank` and we haven't fetched banks
   // yet, peek at localStorage so the page can pre-route to the user's last

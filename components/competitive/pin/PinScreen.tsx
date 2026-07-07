@@ -48,6 +48,10 @@ export default function PinScreen({
   const [revealed, setRevealed] = useState(false);
   const [lastDist, setLastDist] = useState(0);
   const [lastPts, setLastPts] = useState(0);
+  // True when the /answer POST failed: the round is ungraded, so the km/pts
+  // panel would lie ("0 km away" reads as a bullseye). Gates an honest
+  // failure card instead.
+  const [scoreFailed, setScoreFailed] = useState(false);
   const [truePoint, setTruePoint] = useState<{ lat: number; lng: number } | null>(null);
   const [finished, setFinished] = useState(false);
   const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
@@ -80,7 +84,7 @@ export default function PinScreen({
     // Guard a stale deferred fire: bail if the match already finished while
     // this advance was queued.
     if (finished) return;
-    setGuess(null); setRevealed(false); setLastDist(0); setLastPts(0); setTruePoint(null);
+    setGuess(null); setRevealed(false); setLastDist(0); setLastPts(0); setTruePoint(null); setScoreFailed(false);
     if (idx + 1 >= rounds.length) {
       setFinished(true);
       send({ type: COMPETITIVE_EVENTS.FINISHED });
@@ -99,6 +103,7 @@ export default function PinScreen({
     const pts = ok && data ? data.points : 0;
     const dist = ok && data ? data.reveal.distance_km : 0;
     if (ok && data) setTruePoint({ lat: data.reveal.true_lat, lng: data.reveal.true_lng });
+    else setScoreFailed(true);
     setLastDist(dist); setLastPts(pts);
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
@@ -164,7 +169,13 @@ export default function PinScreen({
       {/* Floating action / result over the bottom of the map */}
       <div className="absolute bottom-4 left-0 right-0 z-[500] px-3 sm:px-6">
         <div className="w-full max-w-md mx-auto">
-          {revealed ? (
+          {revealed && scoreFailed ? (
+            <div className="ca-pop-in text-center rounded-xl px-4 py-3 backdrop-blur-md"
+              style={{ background: "rgba(24,6,8,0.72)", border: "1px solid rgba(239,68,68,0.35)" }}>
+              <p className="font-bebas text-lg tracking-wider text-red-300">ROUND DIDN&apos;T SCORE</p>
+              <p className="text-cream/50 text-xs mt-0.5">Connection issue. +0 pts this round.</p>
+            </div>
+          ) : revealed ? (
             <div className="ca-pop-in text-center rounded-xl px-4 py-3 backdrop-blur-md"
               style={{ background: "rgba(6,12,24,0.72)", border: "1px solid rgba(80,200,120,0.3)" }}>
               <p className="text-cream/70">

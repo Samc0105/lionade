@@ -174,6 +174,10 @@ function DrillModal({
   const [answers, setAnswers] = useState<Array<{ questionId: string; selectedIndex: number; wasCorrect: boolean }>>([]);
   const [done, setDone] = useState<{ score: number; total: number; coinsEarned: number; perfect: boolean } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Final submit failed (network blip / server error). The run is NOT scored
+  // yet — correctness lives server-side, so we can't show local results.
+  // Renders an explicit retry state instead of fabricated 0/N numbers.
+  const [submitError, setSubmitError] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; correctIndex: number } | null>(null);
   const reducedMotion = useReducedMotion();
@@ -260,34 +264,6 @@ function DrillModal({
     return () => { cancelled = true; };
   }, []);
 
-  const submitFinal = async (allAnswers: typeof answers) => {
-    if (submitting) return;
-    setSubmitting(true);
-    try {
-      type R = { score: number; total: number; coinsEarned: number; alreadyCompleted: boolean; perfect?: boolean };
-      const r = await apiPost<R>("/api/daily-drill/complete", {
-        results: allAnswers.map(a => ({ questionId: a.questionId, wasCorrect: a.wasCorrect })),
-      });
-      if (r.ok && r.data) {
-        setDone({
-          score: r.data.score,
-          total: r.data.total,
-          coinsEarned: r.data.coinsEarned,
-          perfect: !!r.data.perfect,
-        });
-      } else {
-        // Fallback: still show local results.
-        const localScore = allAnswers.filter(a => a.wasCorrect).length;
-        setDone({ score: localScore, total: allAnswers.length, coinsEarned: 0, perfect: localScore === allAnswers.length });
-      }
-    } catch {
-      const localScore = allAnswers.filter(a => a.wasCorrect).length;
-      setDone({ score: localScore, total: allAnswers.length, coinsEarned: 0, perfect: localScore === allAnswers.length });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const onPick = (i: number) => {
     if (picked !== null || !q) return;
     setPicked(i);
@@ -335,6 +311,7 @@ function DrillModal({
   const submitFinalSelected = async (allPicks: typeof answers) => {
     if (submitting) return;
     setSubmitting(true);
+    setSubmitError(false);
     try {
       // Send selectedIndex to server so it can compute correctness.
       type R = { score: number; total: number; coinsEarned: number; alreadyCompleted: boolean; perfect?: boolean };
@@ -349,17 +326,16 @@ function DrillModal({
           perfect: !!r.data.perfect,
         });
       } else {
-        // Fallback: never strand the user on the final question. Show local
-        // results so they always reach the results screen even if /complete
-        // failed. selectedIndex carries no client-side correctness, so the
-        // local score is a 0-floor; the server is canonical when it succeeds.
-        const localScore = allPicks.filter(a => a.wasCorrect).length;
-        setDone({ score: localScore, total: allPicks.length, coinsEarned: 0, perfect: localScore === allPicks.length });
+        // Correctness is server-side only (wasCorrect is a client placeholder),
+        // so a failed /complete has NO honest local score to show. Surface the
+        // failure and offer a retry — /complete is idempotent per day, so
+        // re-posting the same picks is safe.
+        console.error("[DailyDrill submit] failed", r.error);
+        setSubmitError(true);
       }
     } catch (e) {
       console.error("[DailyDrill submit]", e);
-      const localScore = allPicks.filter(a => a.wasCorrect).length;
-      setDone({ score: localScore, total: allPicks.length, coinsEarned: 0, perfect: localScore === allPicks.length });
+      setSubmitError(true);
     } finally {
       setSubmitting(false);
     }
@@ -383,7 +359,7 @@ function DrillModal({
           <X size={14} weight="bold" />
         </button>
 
-        {!done && q && (
+        {!done && !submitError && q && (
           <>
             <div className="flex items-center gap-2 mb-3">
               <Lightning size={14} className="text-electric" weight="fill" />
@@ -465,6 +441,40 @@ function DrillModal({
               })}
             </div>
           </>
+        )}
+
+        {!done && submitError && (
+          <div className="text-center py-4 animate-slide-up">
+            <div className="flex justify-center mb-3">
+              <XCircle size={42} weight="fill" className="text-[#EF4444]" />
+            </div>
+            <h3 className="font-bebas text-[30px] tracking-wider text-cream leading-none mb-2">
+              THAT DIDN&apos;T SEND
+            </h3>
+            <p className="text-cream/60 text-[13.5px] leading-relaxed max-w-sm mx-auto mb-5">
+              Your answers didn&apos;t reach the server, so this run hasn&apos;t been
+              scored or paid out yet. Retry to submit the same run.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => onClose(false)}
+                className="rounded-full border border-white/15 text-cream/70 hover:text-cream hover:bg-white/[0.05]
+                  font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => void submitFinalSelected(answers)}
+                disabled={submitting}
+                className="rounded-full bg-electric text-navy hover:bg-electric/90 disabled:opacity-50
+                  font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-colors font-bold"
+              >
+                {submitting ? "Retrying..." : "Retry"}
+              </button>
+            </div>
+          </div>
         )}
 
         {done && (

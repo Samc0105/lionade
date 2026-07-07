@@ -549,7 +549,7 @@ export default function DemoPage() {
 
             {/* CTA */}
             <Link
-              href="/login?tab=signup"
+              href="/login?signup=true"
               className="block w-full py-4 rounded-xl font-bold text-base text-center transition-all duration-200 active:scale-[0.98]"
               style={{
                 background:

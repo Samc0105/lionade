@@ -23,6 +23,10 @@ interface QuizCardProps {
   coinReward: number;
   onSelect: (answerIndex: number, timeLeft: number) => void;
   result: { correctIndex: number; explanation: string | null } | null;
+  /** Bumped by the parent when the server answer-check failed — unfreezes
+      the card (clears selected/waiting, resumes the timer) so the user can
+      tap the option again. */
+  failSignal?: number;
 }
 
 export default function QuizCard({
@@ -33,6 +37,7 @@ export default function QuizCard({
   coinReward,
   onSelect,
   result,
+  failSignal = 0,
 }: QuizCardProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -51,6 +56,15 @@ export default function QuizCard({
     setShowCoin(false);
     setAdvanceTimer(null);
   }, [question.id, timeLimit]);
+
+  // Server answer-check failed — the tap never resolved. Clear the frozen
+  // selected/waiting state so the options re-enable and the timer resumes;
+  // the parent surfaces the error toast.
+  useEffect(() => {
+    if (!failSignal) return;
+    setSelected(null);
+    setWaiting(false);
+  }, [failSignal]);
 
   // Show correct/incorrect animation when result arrives
   useEffect(() => {

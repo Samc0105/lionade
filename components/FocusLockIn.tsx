@@ -40,7 +40,10 @@ const PRESETS = [
 type Phase =
   | { kind: "idle" }
   | { kind: "running"; duration: number; startedAt: number }
-  | { kind: "completed"; duration: number; coinsEarned: number };
+  // The timer hit zero but the claim request failed (network drop, expired
+  // session, 500). The finished session is retryable — never fake a reason.
+  | { kind: "claimFailed"; duration: number }
+  | { kind: "completed"; duration: number; coinsEarned: number; capHit: boolean };
 
 export default function FocusLockIn() {
   const { user } = useAuth();
@@ -61,6 +64,35 @@ export default function FocusLockIn() {
   // hydration mismatch. Defer auth-driven render until after mount.
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+
+  // Claim the finished session's reward. Called at timer zero AND by the
+  // retry button in the claim-failed modal, so an HTTP hiccup never eats a
+  // 25-60 minute session.
+  const claimSession = async (duration: number) => {
+    try {
+      type R = { ok: boolean; coinsEarned: number; reason?: string; message?: string };
+      const r = await apiPost<R>("/api/focus-session", { durationMinutes: duration });
+      if (!r.ok) {
+        // HTTP/network failure — the server never ruled on the session.
+        // Surface the real failure and keep a retry path; do NOT render the
+        // completion modal's "cap hit" copy for a claim that never landed.
+        toastError(r.error ?? "Couldn't claim that session.");
+        setPhase({ kind: "claimFailed", duration });
+      } else if (!r.data?.ok) {
+        // Server ruled: no bonus (e.g. daily cap). Honest zero-state.
+        if (r.data?.message) toastError(r.data.message);
+        setPhase({ kind: "completed", duration, coinsEarned: 0, capHit: r.data?.reason === "daily_cap" });
+      } else {
+        setPhase({ kind: "completed", duration, coinsEarned: r.data.coinsEarned, capHit: false });
+      }
+      if (user?.id) mutateUserStats(user.id);
+    } catch (e) {
+      console.error("[focus:complete] threw", e);
+      toastError("Couldn't claim that session.");
+      setPhase({ kind: "claimFailed", duration });
+    }
+    setOpen(true);
+  };
 
   if (!mounted || !user?.id) return null;
 
@@ -89,23 +121,15 @@ export default function FocusLockIn() {
           visible={true}
           onMinimize={() => setOpen(false)}
           onAbort={() => { setPhase({ kind: "idle" }); setOpen(false); }}
-          onComplete={async () => {
-            // Hit the server to claim the reward, then transition to
-            // the completed phase so the celebration modal renders.
-            try {
-              type R = { ok: boolean; coinsEarned: number; reason?: string; message?: string };
-              const r = await apiPost<R>("/api/focus-session", { durationMinutes: phase.duration });
-              const coinsEarned = r.ok && r.data?.ok ? r.data.coinsEarned : 0;
-              if (r.ok && !r.data?.ok && r.data?.message) toastError(r.data.message);
-              setPhase({ kind: "completed", duration: phase.duration, coinsEarned });
-              if (user?.id) mutateUserStats(user.id);
-            } catch (e) {
-              console.error("[focus:complete] threw", e);
-              toastError("Couldn't claim that session. Try again.");
-              setPhase({ kind: "idle" });
-            }
-            setOpen(true);
-          }}
+          onComplete={() => claimSession(phase.duration)}
+        />
+      )}
+
+      {phase.kind === "claimFailed" && (
+        <ClaimFailedModal
+          duration={phase.duration}
+          onRetry={() => claimSession(phase.duration)}
+          onClose={() => { setPhase({ kind: "idle" }); setOpen(false); }}
         />
       )}
 
@@ -113,6 +137,7 @@ export default function FocusLockIn() {
         <CompletionModal
           duration={phase.duration}
           coinsEarned={phase.coinsEarned}
+          capHit={phase.capHit}
           onClose={() => { setPhase({ kind: "idle" }); setOpen(false); }}
         />
       )}
@@ -330,13 +355,81 @@ function RunningTimer({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Claim-failed modal — the timer finished but the reward claim didn't land.
+// Honest state with a retry, so a network blip can't silently eat the bonus.
+// ─────────────────────────────────────────────────────────────────────────────
+function ClaimFailedModal({
+  duration, onRetry, onClose,
+}: {
+  duration: number;
+  onRetry: () => Promise<void>;
+  onClose: () => void;
+}) {
+  const [retrying, setRetrying] = useState(false);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Focus session claim failed"
+    >
+      <div
+        className="relative rounded-[18px] border border-electric/40 bg-gradient-to-br from-navy to-[#0a0f1d]
+          px-8 py-7 shadow-2xl shadow-electric/20 animate-slide-up
+          flex flex-col items-center text-center min-w-[280px] max-w-sm"
+      >
+        <Lightning size={36} weight="fill" className="text-electric mb-3" />
+        <h3 className="font-bebas text-[32px] tracking-wider text-cream leading-none mb-1">
+          SESSION DONE, CLAIM STUCK
+        </h3>
+        <p className="text-cream/60 text-[13px] mb-5 leading-relaxed">
+          You finished the {duration} minutes, but we couldn&apos;t reach the
+          server to claim your Fang bonus. Retry when your connection is back.
+        </p>
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={retrying}
+            className="rounded-full border border-white/[0.15] text-cream/70 hover:text-cream hover:border-white/[0.3]
+              font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-colors disabled:opacity-50"
+          >
+            Dismiss
+          </button>
+          <button
+            type="button"
+            onClick={async () => {
+              if (retrying) return;
+              setRetrying(true);
+              try { await onRetry(); } finally { setRetrying(false); }
+            }}
+            disabled={retrying}
+            aria-busy={retrying}
+            className="rounded-full bg-electric text-white hover:bg-electric/90
+              font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-colors disabled:opacity-60"
+          >
+            {retrying ? "Retrying..." : "Retry claim"}
+          </button>
+        </div>
+        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/30 mt-3">
+          Dismissing skips the bonus for this session
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Completion modal — Fang chest reveal.
 // ─────────────────────────────────────────────────────────────────────────────
 function CompletionModal({
-  duration, coinsEarned, onClose,
+  duration, coinsEarned, capHit, onClose,
 }: {
   duration: number;
   coinsEarned: number;
+  /** True only when the server actually responded with the daily-cap reason. */
+  capHit: boolean;
   onClose: () => void;
 }) {
   const [confettiOn, setConfettiOn] = useState(false);
@@ -384,7 +477,9 @@ function CompletionModal({
           </div>
         ) : (
           <p className="text-cream/50 text-[12px] mb-4">
-            (Daily session cap hit. Bonus skipped, but the focus still counts.)
+            {capHit
+              ? "(Daily session cap hit. Bonus skipped, but the focus still counts.)"
+              : "(No bonus this time, but the focus still counts.)"}
           </p>
         )}
 

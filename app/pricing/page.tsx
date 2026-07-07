@@ -196,7 +196,14 @@ export default function PricingPage() {
         : await apiPost<{ url: string }>("/api/stripe/checkout", { tier, cycle });
       if (!res.ok || !res.data?.url) {
         console.error("[pricing:checkout] failed", res.error);
-        toastError("Couldn't open checkout. Try again.");
+        // "Plan unavailable" means this plan's Stripe price isn't configured
+        // yet, so retrying can never succeed. Say that honestly instead of
+        // telling the user to hammer a button that will 500 forever.
+        toastError(
+          res.error === "Plan unavailable"
+            ? "Checkout for this plan isn't open yet. We're finishing billing setup, so check back soon."
+            : "Couldn't open checkout. Try again.",
+        );
         setPendingTier(null);
         return;
       }

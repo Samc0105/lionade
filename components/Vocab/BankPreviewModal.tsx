@@ -8,9 +8,12 @@
  * five terms so the user can sanity-check the bank's quality before paying 25
  * Fangs to clone. Two CTAs at the bottom: Cancel + Clone to my collection.
  *
- * On clone success we close the modal, fire a success toast ("Cloned to your
- * collection. +25 Fangs."), and `router.push` to /learn/vocab?bank=<new slug>
- * so the user lands inside their freshly-cloned bank.
+ * On clone success we close the modal, fire a success toast (with the Fang
+ * amount the server ACTUALLY credited — coinsAwarded can be 0 on a credit
+ * hiccup or boosted by a multiplier), and `router.push` to
+ * /learn/vocab?bank=<new bank id>. /learn/vocab resolves ?bank= by slug OR id,
+ * then canonicalizes the URL to the slug, so the user lands inside their
+ * freshly-cloned bank.
  *
  * Word + clone counts in the header are rendered straight from the bank
  * summary fields the server computes (`word_count`, `clone_count`) — the
@@ -74,22 +77,30 @@ export default function BankPreviewModal({ summary, open, onClose, onCloned }: P
     if (!bank || cloning) return;
     setCloning(true);
     try {
-      const { ok, data: cloneData, error: cloneErr } = await apiPost<{ bank_id: string; bank?: { slug?: string } }>(
+      // Route contract (app/api/vocab/banks/[id]/clone/route.ts):
+      // { bankId: string, coinsAwarded: number }. coinsAwarded is what the
+      // server actually credited — 0 when the Fang credit failed (non-fatal
+      // to the clone), possibly more than the base 25 with a multiplier.
+      const { ok, data: cloneData, error: cloneErr } = await apiPost<{ bankId: string; coinsAwarded: number }>(
         `/api/vocab/banks/${bank.id}/clone`,
         {},
       );
-      if (!ok || !cloneData) {
+      if (!ok || !cloneData?.bankId) {
         console.error("[vocab:clone-bank] failed", cloneErr);
         toastError("Couldn't clone that bank. Try again.");
         return;
       }
-      toastSuccess(`Cloned to your collection. +${CLONE_FANG_COST} Fangs.`);
+      const awarded = cloneData.coinsAwarded ?? 0;
+      toastSuccess(
+        awarded > 0
+          ? `Cloned to your collection. +${awarded} Fangs.`
+          : "Cloned to your collection.",
+      );
       onCloned?.();
       onClose();
-      // Server's clone response may include the new bank's slug for a cleaner
-      // URL; fall back to id-keyed nav since /learn/vocab resolves either.
-      const target = cloneData.bank?.slug ?? cloneData.bank_id;
-      router.push(`/learn/vocab?bank=${encodeURIComponent(target)}`);
+      // Navigate by the new bank's id — /learn/vocab resolves ?bank= by slug
+      // or id and then canonicalizes the URL to the slug.
+      router.push(`/learn/vocab?bank=${encodeURIComponent(cloneData.bankId)}`);
     } catch (e: unknown) {
       console.error("[vocab:clone-bank] threw", e);
       toastError("Couldn't clone that bank. Try again.");

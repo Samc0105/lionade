@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { FileText, Lock, X, Sparkle } from "@phosphor-icons/react";
 import { supabase } from "@/lib/supabase";
+import { PLAN_PRICING } from "@/lib/mastery-plan";
 import type { StudySheetInput } from "@/components/Mastery/studySheetPdf";
 
 /**
@@ -225,7 +227,7 @@ function Paywall({ onClose }: { onClose: () => void }) {
         </ul>
 
         <div className="flex items-baseline gap-2 mb-5">
-          <span className="font-bebas text-[36px] tracking-wider text-gold leading-none tabular-nums">$4.99</span>
+          <span className="font-bebas text-[36px] tracking-wider text-gold leading-none tabular-nums">${PLAN_PRICING.pro.monthly}</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">/ month</span>
         </div>
 
@@ -237,17 +239,14 @@ function Paywall({ onClose }: { onClose: () => void }) {
           >
             Maybe later
           </button>
-          <button
-            type="button"
+          <Link
+            href="/pricing"
             onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors inline-flex items-center justify-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Upgrade to Pro
-          </button>
+          </Link>
         </div>
-        <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55 text-center mt-4">
-          Billing isn&apos;t live yet · reach out to upgrade today
-        </p>
       </div>
     </div>
   );

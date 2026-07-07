@@ -9,7 +9,7 @@ import {
   CaretLeft, NotePencil, Warning, X, Lock,
   ChatCircleText, GraduationCap, ListChecks, ArrowsClockwise,
 } from "@phosphor-icons/react";
-import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
+import { PLAN_EXAM_LIMITS, PLAN_PRICING } from "@/lib/mastery-plan";
 import SpaceBackground from "@/components/SpaceBackground";
 import RevealText from "@/components/RevealText";
 import { apiDelete, apiPost, swrFetcher } from "@/lib/api-client";
@@ -185,10 +185,13 @@ export default function MasteryLandingPage() {
         `/api/mastery/exams/${create.data.examId}/sessions`, {},
       );
       if (!session.ok || !session.data?.sessionId) {
+        // The exam row already exists at this point, so staying here with a
+        // "Try again" is a trap: retrying re-runs the create, handing paid
+        // users a duplicate target and locking free users (cap 1) into the
+        // limit paywall because the first exam already holds their slot.
+        // The exam page resolves a session idempotently on mount and has
+        // its own retry UI, so land there and let it recover.
         console.error("[mastery:start-session] failed", session.error);
-        setError("Couldn't start a session. Try again.");
-        setCreating(false);
-        return;
       }
       router.push(
         classIdContext
@@ -631,7 +634,7 @@ function LimitPaywall({
               <span className="font-mono text-[10px] uppercase tracking-[0.25em]">
                 pro · {nextLimit} targets
               </span>
-              <span className="font-bebas text-[14px] tracking-wider">$4.99 / mo</span>
+              <span className="font-bebas text-[14px] tracking-wider">${PLAN_PRICING.pro.monthly} / mo</span>
             </div>
           )}
           {state.plan === "pro" && (
@@ -652,13 +655,12 @@ function LimitPaywall({
           >
             Archive an old one
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+          <Link
+            href="/pricing"
+            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Upgrade
-          </button>
+          </Link>
         </div>
         {archiveTitle && (
           <p className="mt-3 font-mono text-[9.5px] uppercase tracking-[0.2em] text-cream/45 text-center">

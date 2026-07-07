@@ -180,7 +180,7 @@ function Hero() {
 
       <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
         <Link
-          href="/login?tab=signup"
+          href="/login?signup=true"
           className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm transition-all duration-200 active:scale-[0.98]"
           style={{
             background:
@@ -781,7 +781,7 @@ function CtaStripe() {
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/login?tab=signup"
+              href="/login?signup=true"
               className="group inline-flex items-center gap-2 px-9 py-4 rounded-xl font-bold text-base transition-all duration-200 active:scale-[0.98]"
               style={{
                 background:

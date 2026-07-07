@@ -171,6 +171,17 @@ interface AnswerRecord {
   explanation: string | null;
 }
 
+interface SaveQuizPayload {
+  attemptId: string;
+  subject: Subject;
+  totalQuestions: number;
+  correctAnswers: number;
+  deriveReward: boolean;
+  difficulty: Difficulty;
+  blitzMode: boolean;
+  answers: { questionId: string; selected: number; isCorrect: boolean; timeLeft: number }[];
+}
+
 interface SubjectStatEntry {
   subject: string;
   questionsAnswered: number;
@@ -280,6 +291,18 @@ export default function QuizPage() {
   const [showMistakes, setShowMistakes] = useState(false);
   const [bonusFangs, setBonusFangs] = useState(0);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; bonus: number } | null>(null);
+
+  // Reward-save failure surface. When /api/save-quiz-results fails, the
+  // optimistic Fang/XP tiles are NOT in the wallet — we keep the payload
+  // (same attemptId, so the server dedups) and offer an explicit retry on
+  // the results screen instead of failing silently.
+  const [saveFailed, setSaveFailed] = useState(false);
+  const [retryingSave, setRetryingSave] = useState(false);
+  const pendingSaveRef = useRef<SaveQuizPayload | null>(null);
+
+  // Bumped when the server answer-check throws so QuizCard can unfreeze
+  // its selected/waiting state and let the user tap again.
+  const [checkFailNonce, setCheckFailNonce] = useState(0);
 
   // Boosters
   interface ActiveBooster { id: string; item_id: string; booster_effect: string; booster_value: number; uses_remaining: number }
@@ -456,43 +479,59 @@ export default function QuizPage() {
     setTotalCoins(coins);
     setTotalXp(xp);
 
-    // Stable idempotency key for this attempt — a network retry of this submit
-    // reuses it so the server dedups instead of double-crediting.
-    const attemptId = crypto.randomUUID();
+    // Stable idempotency key for this attempt — a retry of this submit
+    // reuses the whole payload (same attemptId) so the server dedups
+    // instead of double-crediting.
+    const payload: SaveQuizPayload = {
+      attemptId: crypto.randomUUID(),
+      subject: subject!,
+      totalQuestions: questions.length,
+      // Send the RAW correct count (NOT correctCount, which folds in
+      // score_boost). The server derives coins/xp over the raw correct
+      // answers and re-applies score_boost itself from the user's active
+      // boosters, so sending the boosted count here would double-count the
+      // boost. The server stores the boosted count for the session row.
+      correctAnswers: finalAnswers.filter((a) => a.correct).length,
+      // deriveReward: the server ignores any client coinsEarned/xpEarned and
+      // computes the authoritative reward from the validated correct count +
+      // difficulty + blitz + the user's active boosters (read pre-consume).
+      deriveReward: true,
+      // difficulty + blitzMode drive the server's reward derivation AND the
+      // blitz_score / advanced_quiz bounties.
+      difficulty,
+      blitzMode,
+      answers: finalAnswers.map((a) => ({
+        questionId: a.questionId,
+        selected: a.selected,
+        isCorrect: a.correct,
+        timeLeft: a.timeLeft,
+      })),
+    };
+    pendingSaveRef.current = payload;
+    await submitResults(payload);
+
+    // Clear refresh-resume state — the quiz is done. Fire-and-forget;
+    // re-saves elsewhere are gated by phase === "quiz" so they won't
+    // resurrect the row after this.
+    void apiPost("/api/quiz/state", { game_type: "quiz", state: null });
+
+    setPhase("results");
+  }
+
+  // POST the finished quiz to the server. Shared by finishQuiz and the
+  // results-screen retry; on failure we flag saveFailed so the results
+  // screen shows an honest "reward not saved" banner instead of implying
+  // the wallet was credited.
+  async function submitResults(payload: SaveQuizPayload): Promise<boolean> {
     const res = await apiPost<{
       success: boolean;
       bonusFangs?: number;
       reward?: { coinsEarned: number; xpEarned: number; coinsCredited: number };
-    }>(
-      "/api/save-quiz-results",
-      {
-        attemptId,
-        subject: subject!,
-        totalQuestions: questions.length,
-        // Send the RAW correct count (NOT correctCount, which folds in
-        // score_boost). The server derives coins/xp over the raw correct
-        // answers and re-applies score_boost itself from the user's active
-        // boosters, so sending the boosted count here would double-count the
-        // boost. The server stores the boosted count for the session row.
-        correctAnswers: finalAnswers.filter((a) => a.correct).length,
-        // deriveReward: the server ignores any client coinsEarned/xpEarned and
-        // computes the authoritative reward from the validated correct count +
-        // difficulty + blitz + the user's active boosters (read pre-consume).
-        deriveReward: true,
-        // difficulty + blitzMode drive the server's reward derivation AND the
-        // blitz_score / advanced_quiz bounties.
-        difficulty,
-        blitzMode,
-        answers: finalAnswers.map((a) => ({
-          questionId: a.questionId,
-          selected: a.selected,
-          isCorrect: a.correct,
-          timeLeft: a.timeLeft,
-        })),
-      },
-    );
+    }>("/api/save-quiz-results", payload);
 
     if (res.ok && res.data?.success) {
+      pendingSaveRef.current = null;
+      setSaveFailed(false);
       // Reconcile the displayed reward to the server's authoritative numbers.
       // coinsEarned is the pre-plan-multiplier base (what this quiz "earned");
       // the post-multiplier wallet credit is reward.coinsCredited and is
@@ -513,14 +552,22 @@ export default function QuizPage() {
       }
       setBonusFangs(res.data.bonusFangs ?? 0);
       setStreakMilestone((res.data as { streakMilestone?: { days: number; bonus: number } | null }).streakMilestone ?? null);
+      return true;
     }
 
-    // Clear refresh-resume state — the quiz is done. Fire-and-forget;
-    // re-saves elsewhere are gated by phase === "quiz" so they won't
-    // resurrect the row after this.
-    void apiPost("/api/quiz/state", { game_type: "quiz", state: null });
+    setSaveFailed(true);
+    return false;
+  }
 
-    setPhase("results");
+  // Results-screen "Retry save" — replays the exact payload (same attemptId,
+  // server-side idempotent) so a flaky first attempt can't double-credit.
+  async function retrySave() {
+    const payload = pendingSaveRef.current;
+    if (!payload || retryingSave) return;
+    setRetryingSave(true);
+    const ok = await submitResults(payload);
+    setRetryingSave(false);
+    if (!ok) toastError("Still couldn't save your reward. Check your connection and retry.");
   }
 
   const startQuiz = async (s: Subject, topicName?: string) => {
@@ -605,6 +652,10 @@ export default function QuizPage() {
         }, delay);
       } catch (err) {
         console.error("Failed to check answer", err);
+        // QuizCard is frozen in its waiting state (timer paused, options
+        // disabled) — unfreeze it and tell the user to retry the tap.
+        setCheckFailNonce((n) => n + 1);
+        toastError("Couldn't check that answer. Tap it again.");
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -626,6 +677,9 @@ export default function QuizPage() {
     setCurrentResult(null);
     setShowMistakes(false);
     setBonusFangs(0);
+    setStreakMilestone(null);
+    setSaveFailed(false);
+    pendingSaveRef.current = null;
   };
 
   const correctCount = answers.filter((a) => a.correct).length;
@@ -1122,6 +1176,7 @@ export default function QuizPage() {
             coinReward={currentCoinReward}
             onSelect={handleSelect}
             result={currentResult}
+            failSignal={checkFailNonce}
           />
         </div>
 
@@ -1148,6 +1203,10 @@ export default function QuizPage() {
       router={router}
       bonusFangs={bonusFangs}
       streakMilestone={streakMilestone}
+      saveFailed={saveFailed}
+      retryingSave={retryingSave}
+      onRetrySave={retrySave}
+      onNewQuiz={restartQuiz}
     />;
   }
 
@@ -1162,7 +1221,7 @@ export default function QuizPage() {
 function ResultsScreen({
   answers, totalCoins, totalXp, accuracy, correctCount, wrongCount,
   subject, blitzMode, showMistakes, setShowMistakes, router, bonusFangs,
-  streakMilestone,
+  streakMilestone, saveFailed, retryingSave, onRetrySave, onNewQuiz,
 }: {
   answers: AnswerRecord[];
   totalCoins: number;
@@ -1177,6 +1236,10 @@ function ResultsScreen({
   router: ReturnType<typeof useRouter>;
   bonusFangs: number;
   streakMilestone: { days: number; bonus: number } | null;
+  saveFailed: boolean;
+  retryingSave: boolean;
+  onRetrySave: () => void;
+  onNewQuiz: () => void;
 }) {
   const getRank = (acc: number) => {
     if (acc === 100) return { label: "PERFECT",       icon: "\u{1F48E}", color: "#FFD700", illustration: "rank-perfect" };
@@ -1300,6 +1363,37 @@ function ResultsScreen({
           </p>
         </div>
 
+        {/* Reward-save failure banner — the POST to /api/save-quiz-results
+            failed, so the Fang/XP tiles below are NOT in the wallet yet.
+            Retry replays the same attemptId (server dedups). */}
+        {saveFailed && (
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-4 animate-slide-up"
+            style={{
+              background: "linear-gradient(135deg, rgba(231,76,60,0.16) 0%, rgba(231,76,60,0.08) 100%)",
+              border: "1px solid rgba(231,76,60,0.45)",
+              boxShadow: "0 0 30px rgba(231,76,60,0.15)",
+            }}
+          >
+            <div className="text-left">
+              <p className="font-bebas text-lg text-[#E74C3C] tracking-wider leading-none">REWARD NOT SAVED</p>
+              <p className="text-cream/60 text-xs mt-1">
+                Your Fangs and XP from this quiz have not reached your wallet yet. Retry to claim them.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onRetrySave}
+              disabled={retryingSave}
+              className="ml-auto px-4 py-2 rounded-xl font-bebas tracking-wider text-sm text-navy transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              style={{ background: "linear-gradient(135deg, #FFD700 0%, #EAB308 100%)" }}
+            >
+              {retryingSave ? "RETRYING..." : "RETRY SAVE"}
+            </button>
+          </div>
+        )}
+
         {/* Streak milestone banner — uses tier illustration matching the streak length */}
         {streakMilestone && (() => {
           const tier =
@@ -1379,27 +1473,34 @@ function ResultsScreen({
             { Icon: Lightning, label: "XP", value: animXp, accent: "#4A90D9", isCoin: false },
           ].map((s) => {
             const SIcon = s.Icon;
+            // Fang + XP tiles are unconfirmed while the save is failed —
+            // dim them and label them honestly so nobody reads a wallet
+            // credit that never landed.
+            const unconfirmed = saveFailed && (s.label === "Fangs" || s.label === "XP");
             return (
               <div
                 key={s.label}
                 className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-visible"
                 style={{
                   background: "rgba(255,255,255,0.04)",
-                  border: `1px solid ${s.isCoin && coinGlow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.10)"}`,
-                  boxShadow: s.isCoin && coinGlow
+                  border: `1px solid ${s.isCoin && coinGlow && !unconfirmed ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.10)"}`,
+                  boxShadow: s.isCoin && coinGlow && !unconfirmed
                     ? "0 0 30px rgba(255,215,0,0.15), 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"
                     : "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
                   transition: "border-color 0.6s, box-shadow 0.6s",
+                  opacity: unconfirmed ? 0.55 : 1,
                 }}
               >
-                {/* Coin burst particles */}
-                {s.isCoin && showBurst && <CoinBurst count={totalCoins} />}
+                {/* Coin burst particles — suppressed when the reward save failed */}
+                {s.isCoin && showBurst && !saveFailed && <CoinBurst count={totalCoins} />}
 
                 <SIcon size={28} weight="fill" color={s.accent} className="mx-auto mb-2" aria-hidden="true" />
                 <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>
                   {s.isCoin ? `+${s.value}` : s.value}
                 </p>
-                <p className="text-cream/55 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
+                <p className="text-cream/55 text-[11px] uppercase tracking-wider mt-1.5">
+                  {unconfirmed ? `${s.label} (not saved)` : s.label}
+                </p>
               </div>
             );
           })}
@@ -1446,7 +1547,7 @@ function ResultsScreen({
         {/* Glass Buttons */}
         <div className="flex flex-col gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
           <button
-            onClick={() => router.push("/learn")}
+            onClick={onNewQuiz}
             className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
             style={{
               background: "var(--bg-card)",

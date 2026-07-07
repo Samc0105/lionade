@@ -18,7 +18,9 @@ function escapeHtml(input: string): string {
     .replace(/'/g, "&#039;");
 }
 
-// Whitelist to prevent header/subject injection via the category field
+// Whitelist to prevent header/subject injection via the category field.
+// Must cover every option in CATEGORIES at app/contact/page.tsx:10 — a
+// client-selectable category missing here 400s the whole form submit.
 const ALLOWED_CATEGORIES = new Set([
   "bug",
   "feature",
@@ -28,6 +30,9 @@ const ALLOWED_CATEGORIES = new Set([
   "Feature Request",
   "General Question",
   "General",
+  "Account Issue",
+  "Partnership",
+  "Other",
 ]);
 
 export async function POST(req: NextRequest) {

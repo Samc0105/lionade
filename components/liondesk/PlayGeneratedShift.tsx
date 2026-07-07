@@ -53,15 +53,34 @@ function postBoardScore(mode: DailyMode, score: number): void {
 // - chaos: 3-4 stacked modifiers, rerolls.
 // - default: a random Surprise Shift, rerolls.
 // Generated after mount so the RNG / date never run during SSR.
+// Copy-button feedback: "copied" flips the label to a success read, "failed"
+// to an honest failure read (clipboard missing in a non-secure context, or the
+// write was rejected). Silence on failure would let the user paste nothing.
+type CopyFlash = "idle" | "copied" | "failed";
+
 export default function PlayGeneratedShift({ daily = false, chaos = false, weekly = false, comboCode, sharedCode }: Props) {
   const [shift, setShift] = useState<Shift | null>(null);
   const [runKey, setRunKey] = useState(0);
   const [newAch, setNewAch] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<CopyFlash>("idle");
   // Idea 29: the recipient's own finished result, captured on completion so a
   // challenge link can embed it and the you versus them comparison can render.
   const [result, setResult] = useState<ShiftResult | null>(null);
-  const [challengeCopied, setChallengeCopied] = useState(false);
+  const [challengeCopied, setChallengeCopied] = useState<CopyFlash>("idle");
+
+  // Shared copy path for both share buttons: always flash an outcome, success
+  // or failure, then settle back to the resting label.
+  function copyToClipboard(url: string, set: (v: CopyFlash) => void) {
+    const flash = (v: Exclude<CopyFlash, "idle">) => {
+      set(v);
+      setTimeout(() => set("idle"), 1800);
+    };
+    if (!navigator.clipboard?.writeText) {
+      flash("failed");
+      return;
+    }
+    navigator.clipboard.writeText(url).then(() => flash("copied")).catch(() => flash("failed"));
+  }
 
   // The sharer's embedded score and grade, if this run was opened from a beat my
   // desk challenge link (Idea 29). Null for a plain seed, combo, daily, or
@@ -145,9 +164,7 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
     }
     if (!code) return;
     const url = `${window.location.origin}/learn/techhub/surprise?seed=${code}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }).catch(() => {});
-    }
+    copyToClipboard(url, setCopied);
   }
 
   // Idea 29: copy a beat my desk challenge link. It rebuilds the exact shift just
@@ -173,15 +190,13 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
     const code = encodeCombo(data);
     if (!code) return;
     const url = `${window.location.origin}/learn/techhub/surprise?seed=${code}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => { setChallengeCopied(true); setTimeout(() => setChallengeCopied(false), 1800); }).catch(() => {});
-    }
+    copyToClipboard(url, setChallengeCopied);
   }
 
   useEffect(() => {
     setShift(makeShift());
-    setCopied(false);
-    setChallengeCopied(false);
+    setCopied("idle");
+    setChallengeCopied("idle");
     setResult(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daily, chaos, weekly, comboCode, sharedCode]);
@@ -189,8 +204,8 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
   function reroll() {
     setShift(makeShift());
     setRunKey((k) => k + 1);
-    setCopied(false);
-    setChallengeCopied(false);
+    setCopied("idle");
+    setChallengeCopied("idle");
     setResult(null);
   }
 
@@ -230,14 +245,14 @@ export default function PlayGeneratedShift({ daily = false, chaos = false, weekl
           onClick={shareShift}
           className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#A855F7]/45 text-[#C9A2F2] text-[11px] hover:bg-[#A855F7]/10 transition-colors"
         >
-          <ShareNetwork size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{copied ? "Link copied" : "Copy link"}</span>
+          <ShareNetwork size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{copied === "copied" ? "Link copied" : copied === "failed" ? "Couldn't copy" : "Copy link"}</span>
         </button>
         {result && (
           <button
             onClick={challengeFriend}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gold/45 text-gold text-[11px] hover:bg-gold/10 transition-colors"
           >
-            <Sword size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{challengeCopied ? "Challenge copied" : "Challenge a friend"}</span>
+            <Sword size={13} weight="fill" aria-hidden="true" /> <span aria-live="polite">{challengeCopied === "copied" ? "Challenge copied" : challengeCopied === "failed" ? "Couldn't copy" : "Challenge a friend"}</span>
           </button>
         )}
         <p className="w-full font-mono text-[10px] text-cream/40 leading-relaxed">

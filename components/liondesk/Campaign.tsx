@@ -6,6 +6,7 @@ import type { Track } from "@/lib/helpdesk/types";
 import { getTrack } from "@/lib/helpdesk/tracks";
 import { shiftsForTrack } from "@/lib/liondesk/shifts";
 import { getAllRecords, recordShift, gradeFor, PASS_SCORE, type ShiftRecord } from "@/lib/liondesk/campaignProgress";
+import { isSeasonalShiftId } from "@/lib/liondesk/seasonal";
 import { apiPost } from "@/lib/api-client";
 import { recordShiftResult } from "@/lib/liondesk/stats";
 import { recordShiftConcepts } from "@/lib/liondesk/conceptMastery";
@@ -133,8 +134,15 @@ export default function Campaign({ track, initialShiftId }: { track: Track; init
           const done = mounted && (rec?.bestScore ?? 0) >= PASS_SCORE;
           // Prerequisite-based unlock: a shift opens only when every lower-order
           // shift is individually cleared, so an out-of-order daily (Shift of the
-          // Day) bonus never inflates the ladder.
-          const unlocked = mounted ? shifts.every((o) => o.order >= s.order || clearedSet.has(o.id)) : s.order === 0;
+          // Day) bonus never inflates the ladder. SEASONAL shifts are exempt:
+          // they sit at order 90+ purely to stay out of the regular ladder's
+          // prerequisites, and shiftsForTrack only surfaces them while their
+          // calendar window is open — the hub's special card already deep-links
+          // everyone in, so the list row must match (open while the window is,
+          // replayable after a hub clear, never gated behind the full ladder).
+          const unlocked = mounted
+            ? isSeasonalShiftId(s.id) || shifts.every((o) => o.order >= s.order || clearedSet.has(o.id))
+            : s.order === 0;
           const grade = rec ? gradeFor(rec.bestScore) : null;
           const need = shifts.filter((o) => o.order < s.order && !clearedSet.has(o.id)).length;
           return (

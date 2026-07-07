@@ -865,13 +865,13 @@ function DailyPlanCard({ classId, color }: { classId: string; color: string }) {
     if (regenerating) return;
     setRegenerating(true);
     try {
-      const res = await fetch(`/api/classes/${classId}/plan?regenerate=1`, {
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (res.ok) {
-        const json = await res.json();
-        await mutate(json, { revalidate: false });
+      // apiGet never throws (returns {ok:false} on network errors) and
+      // attaches auth like every other mutation on this page.
+      const res = await apiGet<{ plan: PlanShape }>(`/api/classes/${classId}/plan?regenerate=1`);
+      if (res.ok && res.data) {
+        await mutate(res.data, { revalidate: false });
+      } else {
+        toastError(res.error || "Couldn't refresh the plan. Try again.");
       }
     } finally {
       setRegenerating(false);

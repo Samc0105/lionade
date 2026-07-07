@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import { MagnifyingGlass, Trash, ClockCounterClockwise } from "@phosphor-icons/react";
+import { MagnifyingGlass, Trash, ClockCounterClockwise, ArrowClockwise } from "@phosphor-icons/react";
 import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import ConfirmModal from "@/components/ConfirmModal";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -88,7 +88,7 @@ interface LookupResult {
 }
 
 export default function VocabList({ bank }: Props) {
-  const { data, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
+  const { data, error, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
     `/api/vocab/words?bank_id=${encodeURIComponent(bank.id)}`,
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
@@ -367,6 +367,24 @@ export default function VocabList({ bank }: Props) {
               <div className="h-5 w-14 rounded-full bg-white/[0.04]" />
             </div>
           ))}
+        </div>
+      ) : error && !data ? (
+        /* Fetch failed with nothing cached — without this branch the chain
+           falls through to "No entries yet", which tells a user with a full
+           bank that their words are gone. Same red-glass retry treatment as
+           ReviewQueue's error state. */
+        <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-10 text-center">
+          <p className="font-syne text-sm text-red-300 mb-3">
+            Couldn&apos;t load this bank. Your words are safe.
+          </p>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+          >
+            <ArrowClockwise size={12} weight="bold" aria-hidden="true" />
+            Retry
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] p-10 text-center">

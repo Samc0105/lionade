@@ -294,6 +294,11 @@ function DashboardContent() {
   // the Confetti component via `key` and fires a fresh burst even if the
   // previous burst hasn't finished yet.
   const [celebrateKey, setCelebrateKey] = useState(0);
+  // In-flight claim guard (mirrors placingBet). The claim routes are atomic
+  // server-side, so without this a double-click's second POST 400s and the
+  // user sees a success toast chased by an error toast for a claim that
+  // actually worked. Holds the mission/bounty id currently claiming.
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   // Daily login bonus is now claimed via the Clock In button in the
   // navbar (24h rolling cooldown + history popover). No auto-claim here.
@@ -301,29 +306,41 @@ function DashboardContent() {
   if (!user) return null; // ProtectedRoute handles redirect
 
   const claimBounty = async (bountyId: string) => {
-    const bounty = bounties.find(b => b.id === bountyId);
-    const res = await apiPost<{ coinsAwarded?: number }>("/api/claim-bounty", { bountyId });
-    if (res.ok) {
-      setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
-      await refreshUser();
-      const reward = bounty?.coin_reward ?? res.data?.coinsAwarded ?? 0;
-      toastSuccess(reward > 0 ? `Bounty claimed. +${reward} Fangs` : "Bounty claimed");
-      setCelebrateKey(k => k + 1);
-    } else {
-      toastError("Couldn't claim bounty. Please try again.");
+    if (claimingId) return;
+    setClaimingId(bountyId);
+    try {
+      const bounty = bounties.find(b => b.id === bountyId);
+      const res = await apiPost<{ coinsAwarded?: number }>("/api/claim-bounty", { bountyId });
+      if (res.ok) {
+        setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
+        await refreshUser();
+        const reward = bounty?.coin_reward ?? res.data?.coinsAwarded ?? 0;
+        toastSuccess(reward > 0 ? `Bounty claimed. +${reward} Fangs` : "Bounty claimed");
+        setCelebrateKey(k => k + 1);
+      } else {
+        toastError("Couldn't claim bounty. Please try again.");
+      }
+    } finally {
+      setClaimingId(null);
     }
   };
 
   const claimMission = async (missionId: string) => {
-    const mission = dailyMissions.find(m => m.id === missionId);
-    const res = await apiPost("/api/missions/claim", { missionId });
-    if (res.ok) {
-      setDailyMissions(prev => prev.map(m => m.id === missionId ? { ...m, claimed: true } : m));
-      await refreshUser();
-      toastSuccess(mission ? `${mission.title}. +${mission.coinReward} Fangs` : "Mission claimed");
-      setCelebrateKey(k => k + 1);
-    } else {
-      toastError("Couldn't claim mission. Please try again.");
+    if (claimingId) return;
+    setClaimingId(missionId);
+    try {
+      const mission = dailyMissions.find(m => m.id === missionId);
+      const res = await apiPost("/api/missions/claim", { missionId });
+      if (res.ok) {
+        setDailyMissions(prev => prev.map(m => m.id === missionId ? { ...m, claimed: true } : m));
+        await refreshUser();
+        toastSuccess(mission ? `${mission.title}. +${mission.coinReward} Fangs` : "Mission claimed");
+        setCelebrateKey(k => k + 1);
+      } else {
+        toastError("Couldn't claim mission. Please try again.");
+      }
+    } finally {
+      setClaimingId(null);
     }
   };
 
@@ -720,10 +737,11 @@ function DashboardContent() {
                     {/* Claim button */}
                     {mission.completed && !mission.claimed && (
                       <button type="button" onClick={() => claimMission(mission.id)}
+                        disabled={claimingId !== null}
                         aria-label={`Claim ${mission.title} reward: ${mission.coinReward} Fangs and ${mission.xpReward} XP`}
-                        className="w-full py-1.5 rounded-full text-[11px] font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
+                        className="w-full py-1.5 rounded-full text-[11px] font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow disabled:opacity-60 disabled:cursor-not-allowed"
                         style={{ background: `linear-gradient(90deg, ${mission.color}, ${mission.color}CC)` }}>
-                        Claim Reward
+                        {claimingId === mission.id ? "Claiming..." : "Claim Reward"}
                       </button>
                     )}
                     {mission.claimed && (
@@ -1096,10 +1114,11 @@ function DashboardContent() {
                         </div>
                         {completed && !claimed && (
                           <button type="button" onClick={() => claimBounty(bounty.id)}
+                            disabled={claimingId !== null}
                             aria-label={`Claim ${bounty.title} reward: ${bounty.coin_reward} Fangs and ${bounty.xp_reward} XP`}
-                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
+                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.3)" }}>
-                            Claim Reward
+                            {claimingId === bounty.id ? "Claiming..." : "Claim Reward"}
                           </button>
                         )}
                       </div>
@@ -1144,10 +1163,11 @@ function DashboardContent() {
                         </div>
                         {completed && !claimed && (
                           <button type="button" onClick={() => claimBounty(bounty.id)}
+                            disabled={claimingId !== null}
                             aria-label={`Claim ${bounty.title} reward: ${bounty.coin_reward} Fangs and ${bounty.xp_reward} XP`}
-                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow"
+                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)" }}>
-                            Claim Reward
+                            {claimingId === bounty.id ? "Claiming..." : "Claim Reward"}
                           </button>
                         )}
                       </div>

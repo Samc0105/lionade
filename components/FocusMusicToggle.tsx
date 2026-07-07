@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MusicNotes, X, Pause, Play, ArrowsClockwise } from "@phosphor-icons/react";
+import { MusicNotes, X, Pause, Play, ArrowsClockwise, CircleNotch, WarningCircle } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth";
 import {
   useOpenLauncherPanel,
@@ -35,10 +35,12 @@ import {
 //   2. autoplay needs a user gesture — clicking a station IS that gesture, so
 //      the embed is allowed to start with sound.
 // `playsinline=1` + `rel=0` keep mobile + suggestions sane.
-// TODO(verify-in-browser): confirm each video ID is embeddable + autoplays.
-// If "tropical-rain" doesn't play, the video isn't embeddable — swap the ID.
+// `enablejsapi=1` lets us subscribe to the widget's postMessage events
+// (onStateChange / onError), so the panel reflects REAL playback state instead
+// of trusting local click state. A dead / non-embeddable / geo-blocked ID now
+// surfaces an honest error row instead of a silent fake "playing" UI.
 const EMBED = (id: string) =>
-  `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&playsinline=1&rel=0`;
+  `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`;
 
 const STATIONS = [
   {
@@ -48,8 +50,9 @@ const STATIONS = [
     // Was the Lofi Girl 24/7 LIVESTREAM (jfKfPfyJRdk) — YouTube livestreams
     // refuse embed-autoplay, which is why this one never played while the
     // other (regular-video) stations did. Swapped to a normal lofi mix.
-    // TODO(verify-in-browser): if this doesn't play, it's not embeddable —
-    // swap the ID for any regular (non-live) lofi video.
+    // A non-embeddable ID now surfaces as an error row at runtime (widget
+    // onError / start watchdog) instead of failing silently — swap the ID
+    // for any regular (non-live) lofi video if users hit the error state.
     src: EMBED("lTRiuFIWV54"),
   },
   {
@@ -68,6 +71,17 @@ const STATIONS = [
 
 type StationId = typeof STATIONS[number]["id"];
 
+// Real playback status, driven by the YouTube widget's postMessage events:
+//   loading — station picked, stream not confirmed playing yet
+//   playing — the widget reported playerState 1 (audio is actually flowing)
+//   error   — the widget reported onError, or playback never started in time
+type PlaybackStatus = "loading" | "playing" | "error";
+
+// If the widget never reports "playing" within this window (non-embeddable
+// video, region block, blocked autoplay, dead ID), flip to an honest error
+// state instead of showing a permanent fake "playing" row.
+const PLAYBACK_TIMEOUT_MS = 12_000;
+
 const STORAGE_KEY = "lionade-focus-music";
 
 interface PersistedState {
@@ -79,6 +93,9 @@ export default function FocusMusicToggle() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [station, setStation] = useState<StationId | null>(null);
+  const [playback, setPlayback] = useState<PlaybackStatus>("loading");
+  // Bumped to re-mount the iframe on "tap to retry" after an error.
+  const [attempt, setAttempt] = useState(0);
   const audioContainerRef = useRef<HTMLDivElement>(null);
 
   // ── LaunchDock integration ──
@@ -130,6 +147,55 @@ export default function FocusMusicToggle() {
     return () => document.removeEventListener("pointerdown", onDown);
   }, [open]);
 
+  // ── Real playback feedback ──
+  // Listen for the widget's postMessage events while a station is mounted.
+  // playerState 1 = actually playing; onError = the video can't play here.
+  useEffect(() => {
+    if (!station) return;
+    setPlayback("loading");
+
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== "https://www.youtube.com") return;
+      let data: unknown = e.data;
+      if (typeof data === "string") {
+        try { data = JSON.parse(data); } catch { return; }
+      }
+      const msg = data as { event?: string; info?: unknown };
+      if (msg.event === "onError") { setPlayback("error"); return; }
+      if (msg.event === "onStateChange" && msg.info === 1) { setPlayback("playing"); return; }
+      if (
+        msg.event === "infoDelivery" &&
+        typeof msg.info === "object" && msg.info !== null &&
+        (msg.info as { playerState?: number }).playerState === 1
+      ) {
+        setPlayback("playing");
+      }
+    };
+    window.addEventListener("message", onMsg);
+
+    // Watchdog: no "playing" signal in time means the stream never started.
+    const timer = setTimeout(() => {
+      setPlayback((p) => (p === "playing" ? p : "error"));
+    }, PLAYBACK_TIMEOUT_MS);
+
+    return () => {
+      window.removeEventListener("message", onMsg);
+      clearTimeout(timer);
+    };
+  }, [station, attempt]);
+
+  // Once the iframe loads, subscribe to the widget's event stream (the
+  // "listening" handshake is how the embed knows to start posting events).
+  const handleIframeLoad = (e: React.SyntheticEvent<HTMLIFrameElement>) => {
+    const win = e.currentTarget.contentWindow;
+    if (!win) return;
+    const post = (payload: Record<string, unknown>) =>
+      win.postMessage(JSON.stringify(payload), "https://www.youtube.com");
+    post({ event: "listening", id: "lionade-focus-music", channel: "widget" });
+    post({ event: "command", func: "addEventListener", args: ["onStateChange"] });
+    post({ event: "command", func: "addEventListener", args: ["onError"] });
+  };
+
   const currentStation = STATIONS.find(s => s.id === station) ?? null;
 
   // Hide on signed-out marketing pages — this is a study-mode tool,
@@ -161,12 +227,13 @@ export default function FocusMusicToggle() {
       >
         {currentStation && (
           <iframe
-            key={currentStation.id}
+            key={`${currentStation.id}-${attempt}`}
             src={currentStation.src}
             allow="autoplay; encrypted-media"
             title={currentStation.label}
             width="320"
             height="180"
+            onLoad={handleIframeLoad}
           />
         )}
       </div>
@@ -174,9 +241,19 @@ export default function FocusMusicToggle() {
       {open && (
         <Panel
           station={station}
+          playback={playback}
           // Toggle: tapping the station that's already playing stops it;
           // tapping a different one switches. (Tap-again-to-stop, per design.)
-          onPick={(s) => setStation((prev) => (prev === s ? null : s))}
+          // Exception: tapping an ERRORED station retries it (re-mounts the
+          // iframe) instead of stopping a stream that never started.
+          onPick={(s) => {
+            if (s === station) {
+              if (playback === "error") setAttempt((a) => a + 1);
+              else setStation(null);
+            } else {
+              setStation(s);
+            }
+          }}
           onStop={() => setStation(null)}
           onClose={() => setOpen(false)}
         />
@@ -187,9 +264,10 @@ export default function FocusMusicToggle() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 function Panel({
-  station, onPick, onStop, onClose,
+  station, playback, onPick, onStop, onClose,
 }: {
   station: StationId | null;
+  playback: PlaybackStatus;
   onPick: (s: StationId) => void;
   onStop: () => void;
   onClose: () => void;
@@ -221,27 +299,46 @@ function Panel({
       <ul className="flex flex-col gap-1.5 mb-3">
         {STATIONS.map(s => {
           const active = s.id === station;
+          const failed = active && playback === "error";
+          const starting = active && playback === "loading";
           return (
             <li key={s.id}>
               <button
                 type="button"
                 onClick={() => onPick(s.id)}
+                aria-label={
+                  failed ? `${s.label} could not start. Tap to retry.`
+                    : starting ? `${s.label}, starting`
+                    : active ? `${s.label}, playing. Tap to stop.`
+                    : `Play ${s.label}`
+                }
                 className={`
                   w-full text-left rounded-[8px] px-3 py-2 transition-colors
-                  ${active
-                    ? "bg-[#A855F7]/[0.12] border border-[#A855F7]/40"
-                    : "bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.12]"
+                  ${failed
+                    ? "bg-red-500/[0.08] border border-red-400/40"
+                    : active
+                      ? "bg-[#A855F7]/[0.12] border border-[#A855F7]/40"
+                      : "bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.12]"
                   }
                 `}
               >
                 <div className="flex items-center justify-between gap-2 mb-0.5">
                   <span className="font-syne font-semibold text-[13px] text-cream">{s.label}</span>
-                  {active
-                    ? <Pause size={11} className="text-[#A855F7] shrink-0" weight="fill" />
-                    : <Play size={11} className="text-cream/30 shrink-0" weight="fill" />
+                  {failed
+                    ? <WarningCircle size={12} className="text-red-400 shrink-0" weight="fill" />
+                    : starting
+                      ? <CircleNotch size={11} className="text-cream/40 shrink-0 motion-safe:animate-spin" weight="bold" />
+                      : active
+                        ? <Pause size={11} className="text-[#A855F7] shrink-0" weight="fill" />
+                        : <Play size={11} className="text-cream/30 shrink-0" weight="fill" />
                   }
                 </div>
                 <p className="text-[11px] text-cream/55 leading-snug">{s.description}</p>
+                {failed && (
+                  <p className="text-[10.5px] text-red-300/90 leading-snug mt-1" role="alert">
+                    This station couldn&apos;t start. Tap to retry, or pick another.
+                  </p>
+                )}
               </button>
             </li>
           );

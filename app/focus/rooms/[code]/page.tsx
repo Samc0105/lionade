@@ -219,14 +219,34 @@ export default function FocusRoomPage() {
   }, [room, me, remainingMs, fireClaim]);
 
   // ── Actions ──
+  // In-flight guard: a double-click on "Start the session" fires two POSTs and
+  // the second gets 409 "already started", which used to toast as an error for
+  // the host's own successful start. The 409 is also treated as success below
+  // (idempotent from the host's perspective — a realtime race can produce it
+  // even with the guard).
+  const [starting, setStarting] = useState(false);
   const handleStart = async () => {
-    const r = await apiPost<{ ok: boolean }>(`/api/focus-rooms/${code}/start`, {});
-    if (!r.ok) toastError(r.error ?? "Couldn't start the session.");
-    void refresh();
+    if (starting) return;
+    setStarting(true);
+    try {
+      const r = await apiPost<{ ok: boolean }>(`/api/focus-rooms/${code}/start`, {});
+      if (!r.ok && r.status !== 409) toastError(r.error ?? "Couldn't start the session.");
+      void refresh();
+    } finally {
+      setStarting(false);
+    }
   };
 
   const handleLeave = async () => {
-    await apiPost(`/api/focus-rooms/${code}/leave`, {}).catch(() => null);
+    const r = await apiPost(`/api/focus-rooms/${code}/leave`, {}).catch(() => null);
+    if (!r || !r.ok) {
+      // Don't navigate away on failure: the user would still be an active
+      // member (hub shows their room as open, create is blocked by the
+      // one-active-room rule) with zero explanation.
+      toastError("Couldn't leave the room. Try again.");
+      void refresh();
+      return;
+    }
     router.push("/focus/rooms");
   };
 
@@ -319,6 +339,7 @@ export default function FocusRoomPage() {
                 members={activeMembers}
                 isHost={isHost}
                 isMember={!!me && me.left_at === null}
+                starting={starting}
                 onStart={handleStart}
                 onLeave={() => void handleLeave()}
                 onJoin={async () => {
@@ -404,12 +425,13 @@ function MemberChip({
 // Lobby
 // ─────────────────────────────────────────────────────────────────────────────
 function LobbyView({
-  room, members, isHost, isMember, onStart, onLeave, onJoin, onCopyCode,
+  room, members, isHost, isMember, starting, onStart, onLeave, onJoin, onCopyCode,
 }: {
   room: FocusRoomRow;
   members: FocusRoomMember[];
   isHost: boolean;
   isMember: boolean;
+  starting: boolean;
   onStart: () => void;
   onLeave: () => void;
   onJoin: () => void;
@@ -476,9 +498,10 @@ function LobbyView({
             <button
               type="button"
               onClick={onStart}
-              className="btn-primary flex-1 py-3 rounded-full font-mono text-[11px] uppercase tracking-[0.25em]"
+              disabled={starting}
+              className="btn-primary flex-1 py-3 rounded-full font-mono text-[11px] uppercase tracking-[0.25em] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Start the session
+              {starting ? "Starting..." : "Start the session"}
             </button>
           ) : (
             <div className="flex-1 grid place-items-center rounded-full border border-white/[0.08] py-3">

@@ -14,6 +14,7 @@ import FeatureGate from "@/components/FeatureGate";
 import SpaceBackground from "@/components/SpaceBackground";
 import ImportCalendarSheet from "@/components/academia/ImportCalendarSheet";
 import { apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
+import { toastError } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 
 /**
@@ -538,6 +539,9 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
       setAnnounce(`${item.title} marked ${statusLabel(next)}.`);
     } catch (e) {
       console.error("[academia:agenda] status toggle failed", e);
+      // Visible toast for sighted users (rollbackOnError snaps the pill back
+      // with zero explanation otherwise) + the sr-only announce below.
+      toastError(`Couldn't update ${item.title}. Try again.`);
       setAnnounce(`Couldn't update ${item.title}. Try again.`);
     }
   };

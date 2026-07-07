@@ -41,7 +41,8 @@ type ArenaPhase =
   | "battle"
   | "results"
   | "no_opponents" // matchmaking timed out with an empty queue
-  | "match_error"; // match payload arrived broken (e.g. zero questions)
+  | "match_error" // match payload arrived broken (e.g. zero questions)
+  | "settle_failed"; // /api/arena/complete failed — hold for retry, never fake results
 
 interface ArenaPlayer {
   id: string;
@@ -177,6 +178,12 @@ function ArenaPage() {
   const [challengeError, setChallengeError] = useState("");
   const [challengeSent, setChallengeSent] = useState(false);
   const [incomingChallenges, setIncomingChallenges] = useState<IncomingChallenge[]>([]);
+  // Accept-challenge failure (e.g. the challenge expired between polls) —
+  // shown inline in the lobby's incoming-challenges section.
+  const [incomingError, setIncomingError] = useState<string | null>(null);
+  // Queue-join failure (e.g. "Not enough Fangs" with stale client stats) —
+  // shown in the lobby instead of 60s of fake "searching" theater.
+  const [queueError, setQueueError] = useState<string | null>(null);
 
   // Battle
   const [questions, setQuestions] = useState<ArenaQuestion[]>([]);

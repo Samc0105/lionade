@@ -234,11 +234,15 @@ export default function LandingPage() {
       const data = await res.json();
       if (res.ok) {
         setNewsletterStatus("success");
-        setNewsletterMsg(data.message || "You\u2019re subscribed.");
+        // Local copy on purpose: /api/waitlist replies with waitlist wording
+        // ("You're on the waitlist!") which contradicts this live-product
+        // newsletter form. The subscribe action is real; only the message
+        // needed to be honest for this source.
+        setNewsletterMsg("You\u2019re subscribed. Product updates will land in your inbox.");
         setNewsletterEmail("");
       } else if (res.status === 409) {
         setNewsletterStatus("duplicate");
-        setNewsletterMsg(data.error || "You\u2019re already subscribed.");
+        setNewsletterMsg("You\u2019re already subscribed.");
       } else {
         setNewsletterStatus("error");
         setNewsletterMsg(data.error || "Something went wrong.");
@@ -352,7 +356,10 @@ export default function LandingPage() {
 
         {/* Primary CTA */}
         <div className="mt-14 w-full max-w-[520px] animate-[fadeUp_0.8s_ease_0.4s_both] relative z-10">
-          <Link href="/login" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
+          {/* ?signup=true opens the Sign Up tab directly (honored in
+              app/login/page.tsx) — "start free" should never land a new
+              visitor on the Log In form. */}
+          <Link href="/login?signup=true" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
             START STUDYING FREE
           </Link>
           <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">
@@ -678,7 +685,7 @@ export default function LandingPage() {
           </h2>
         </div>
         <div className="max-w-[520px] mx-auto mt-12 reveal relative z-10">
-          <Link href="/login" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
+          <Link href="/login?signup=true" className="gold-btn block w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full text-center">
             START STUDYING FREE
           </Link>
           <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">

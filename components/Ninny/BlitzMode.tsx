@@ -39,7 +39,6 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
   const [secondsLeft, setSecondsLeft] = useState(BLITZ_DURATION_SEC);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   // Rolling window of the last RECENT_WINDOW answers, true = correct.
   // Renders below the options to give a quick "how's the run going" cue.
@@ -47,6 +46,12 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
   const completedRef = useRef(false);
   const finalCountRef = useRef(0); // total questions actually shown
   const longestStreakRef = useRef(0); // peak streak across the run
+  // The countdown effect mounts once (deps []), so its onComplete closure
+  // captures the FIRST render's state forever. Anything the final result
+  // reads must live in refs like the two above, or every completed run
+  // reports score 0 and no wrong answers (and pays zero Fangs).
+  const scoreRef = useRef(0); // mirrors `score` (state stays for the HUD)
+  const wrongAnswersRef = useRef<NinnyWrongAnswer[]>([]);
 
   const current = deck[pos % deck.length];
 
@@ -62,9 +67,9 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
             // Defer onComplete to avoid setState-in-render
             setTimeout(() => {
               onComplete({
-                score,
+                score: scoreRef.current,
                 total: Math.max(1, finalCountRef.current),
-                wrongAnswers,
+                wrongAnswers: wrongAnswersRef.current,
                 longestStreak: longestStreakRef.current,
               });
             }, 0);
@@ -84,6 +89,7 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
       finalCountRef.current += 1;
       const isCorrect = selectedIdx === current.correctIndex;
       if (isCorrect) {
+        scoreRef.current += 1;
         setScore((s) => s + 1);
         setStreak((s) => {
           const next = s + 1;
@@ -94,15 +100,15 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
       } else {
         setStreak(0);
         setFeedback("wrong");
-        setWrongAnswers((w) => [
-          ...w,
+        wrongAnswersRef.current = [
+          ...wrongAnswersRef.current,
           {
             question: current.question,
             correctAnswer: current.options[current.correctIndex],
             userAnswer: current.options[selectedIdx],
             explanation: current.explanation,
           },
-        ]);
+        ];
       }
       setRecent((r) => {
         const next = [...r, isCorrect];
