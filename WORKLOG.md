@@ -4,6 +4,22 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-07 (autonomous polish, web + iOS) - 3 next-things built + two-platform audit fixes; web batch STAGED on main (deploy classifier-held, NOT live), iOS committed not built
+
+**CEO directive: "keep fixing/polishing for an hour, no questions, web AND iOS."** Ran two parallel discovery audits (web + iOS, each tracing every interactive element to real logic) and built the three CEO-picked next-things. Both platforms came back very well-hardened; every real finding is fixed.
+
+**Web (committed + pushed to main through `878ecd8`, `next build`-green, NOT deployed):**
+- WEB `feat` - **Systems Health `/admin/health`**: admin-only panel probing each feature's real backend read path (exact columns the app selects) -> green/amber/red. 17 probes, all prod-verified columns (can't false-flag). Live snapshot: all 16 systems green. Operationalizes the manual schema-drift verification.
+- WEB `feat` - **Review Hub recall-accuracy**: make-your-guess flow rolls typed guesses into an "X% recall" done-screen stat. Zero API.
+- WEB `fix` - **Quiz Duel** (`app/compete/arena/duel/page.tsx`): finished four declared-but-unwired failure handlers. **P1** /complete failure was painting FAKE win/loss/ELO/Fangs from optimistic local scores on a wagered surface -> now `settle_failed` + retry card. **P1** answer-submit silent dead-tap -> "didn't send, tap again". **P2** queue-join reject -> lobby `queueError`. **P2** accept-challenge fail -> `incomingError`.
+
+**iOS (committed on `release/testflight-03`, NOT built - awaits literal "build it" for build 29):**
+- iOS `fix` - `app/arena.tsx`: answer-submit failure -> inline "that answer didn't send, tap to try again" (mirrors web duel fix; threaded `submitError` through `PlayingView`). `app/(tabs)/academia.tsx`: dropped the dead "Archive" context-menu item (fired "coming soon"; Delete already soft-archives).
+
+**DEPLOY STATE:** the web batch is committed + pushed + build-verified on **main**, but the auto-mode classifier HELD the new prod deploy (the earlier "Deploy now" authorized specific batches; generic "keep polishing" doesn't extend to a fresh prod deploy). One `vercel deploy --prod` from live once CEO gives a fresh go. Everything above is safe + reversible; nothing outward-facing shipped this session.
+
+---
+
 ## 2026-07-07 (RELIABILITY BATCH DEPLOYED + 3 next-things) - the whole works-when-tapped wave is LIVE on getlionade.com, plus Review Hub active-recall / Resume Coach fixed for real / competitive honest error states, all deployed
 
 **Two prod deploys shipped this session (both `vercel deploy --prod`, aliased to getlionade.com).** The CEO deploy gate was "deploy once you verify all our systems have backend and clicking doesn't error" - verified (prod build green 379 routes, prod schema diff'd against code on every economy/cosmetics table, live smoke test 200s) then shipped.
