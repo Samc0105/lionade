@@ -412,6 +412,13 @@ export default function QuizPage() {
     if (qSubject && qTopic) {
       setAutoStarted(true);
       startQuiz(qSubject as Subject, qTopic);
+    } else if (qSubject) {
+      // Subject-only deep link (e.g. Learn hub's "Practice Math" ->
+      // /quiz?subject=Math). Previously ignored, dropping the user on the
+      // picker with nothing happening. startQuiz's topic is optional, so
+      // start a whole-subject quiz directly.
+      setAutoStarted(true);
+      startQuiz(qSubject as Subject);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, phase]);

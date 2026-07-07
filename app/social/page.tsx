@@ -695,8 +695,10 @@ export default function SocialPage() {
         const newMsg = payload.new as Message;
         if (newMsg.sender_id === selectedFriend.id) {
           appendMessage(newMsg);
-          // Mark as read
-          supabase.from("messages").update({ read: true }).eq("id", newMsg.id);
+          // Mark as read. supabase-js query builders are lazy — without an
+          // awaited/.then() terminal the UPDATE never fires, so incoming DMs
+          // stayed unread forever. .then() forces execution (best-effort).
+          void supabase.from("messages").update({ read: true }).eq("id", newMsg.id).then(() => {});
         }
       })
       .subscribe();

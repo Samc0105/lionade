@@ -1263,7 +1263,14 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
           return;
         }
         console.error("[shop:fang-checkout] failed", res.error);
-        toastError("Couldn't open checkout. Try again.");
+        // "Pack unavailable" = this pack's Stripe price isn't configured yet,
+        // so retrying can never succeed. Say so honestly instead of a dead
+        // "try again" loop (mirrors the pricing page's gate).
+        toastError(
+          res.error === "Pack unavailable"
+            ? "Fang packs aren't on sale yet. We're finishing billing setup, so check back soon."
+            : "Couldn't open checkout. Try again.",
+        );
         setPending(null);
         return;
       }
