@@ -4,6 +4,20 @@ This is the handoff note between machines. When you pull on another computer and
 
 ---
 
+## 2026-07-06 (dead-button hunt) - CEO directive "no button not working": audited EVERY interactive element on both platforms (2301 traced), fixing dead/fake/broken/misleading ones - P0s + main-path P1s done, long tail tracked
+
+**Two systematic audits ran (web + iOS), each tracing every button/link/handler/Pressable to a real action against a ground-truth route list.** Web: 1346 elements, 68 findings. iOS: 955 tap targets, 42 findings. The fix + heal + review sub-agents hit a hard usage cap mid-run (resets 2026-07-12), so the FIXES were applied partly by the sub-agents before they died and partly BY HAND in the main loop afterward. Everything committed is tsc-clean; web also passed `next build` (needs `NODE_OPTIONS=--max-old-space-size=6144` - the default OOMs and fake-fails on /api/academia/agenda).
+
+**Commits (all on main, NOT deployed; DB migrations from earlier waves ARE applied):**
+- WEB `2a92dd5` - 29-file batch from the sub-agents. All 3 web P0s: BlitzMode read stale score from a mount-time closure (every Blitz run paid 0 Fangs) -> refs; contact form 3 of 6 categories 400'd (missing from API whitelist) -> added; pricing 'Plan unavailable' now honest 'billing setup' copy not a dead retry. Plus many P1/P2: quiz/drill/QuizCard answer-fail states, leaderboard retry, Focus Lock-In/music honesty, mastery+StudySheet 'Upgrade' -> /pricing (were no-ops), LaunchDock tooltip realign, classes plan refresh + deep link.
+- iOS `d2d9e44` - 10-file batch (rides build 29): quiz honest submit-error instead of fabricated reward, Bounties 'already claimed' not treated as failure, mastery chips/Socratic/delete failure states, party PLAY AGAIN + Sketch pick + RoomLobby close error feedback, vocab review + paths retry.
+- WEB `fcdad50` (by hand) - leaderboard 'Try again' was setFilter(filter) no-op -> real reloadKey refetch; arena challenge username validation stripped '%_' + rejected hyphens (same trap as friends) -> /^[a-z0-9._-]{3,31}$/; social accept/decline + cancel now surface errors; notification rows mark-read on tap (were dead for no-action_url notifs).
+- WEB `0065b28` (by hand) - profile Delete Account modal claimed immediate permanent deletion but the route SCHEDULES 24h out with a cancellable grace window -> honest copy + toast; shop 'Buy x5 save 10%' displayed a discounted price the server did NOT charge (user overpaid) -> server now applies the 10% for booster bundles >=5.
+
+**REMAINING (tracked long tail, mostly P2 'add a failure toast/state on !ok', a few P1):** WEB - shop Fang-pack Stripe honesty, competitive screens (zoom/spectrum/sabotage/arena FIND MATCH answer-fail), profile privacy/notif save-traps + personalization + download-data, waitlist copy, forgot-password. iOS - arena.tsx (leave-queue/answer-fail/results/quit), wallet cash-out gate, badges tap, profile subscription rows, app-icon fake 'Saved', notifications web-only action_urls, **login Google OAuth callback (BROKEN_ROUTE - no app/auth/callback.tsx; touch carefully, it's auth)**, settings subscription, chat presence dot, CosmeticLocker equip, Email/Password cards for OAuth-only accounts. Full finding lists in the two workflow outputs. Sub-agents resume 2026-07-12; until then this is hand-work.
+
+---
+
 ## 2026-07-06 (reliability wave) - CEO FEATURE FREEZE: works-when-tapped audit (344 interactions, 26 breaks) + cross-platform fix wave + live click-verification + SHOP PURCHASES REPAIRED (they had NEVER worked on prod) + avatar alignment (all on main, 3 migrations APPLIED to prod, web deploy still Sam-gated)
 
 **The headline: Sam called a feature freeze ("make everything that exists work when tapped"), and the wave surfaced + fixed real production breakage, including shop purchases, which had NEVER worked on prod.** Everything below is verified live and committed on **main**. **NOT yet deployed to web prod (the ONE deploy is Sam-gated), EXCEPT the three DB migrations, which ARE applied to prod** - so the DB-side fixes (shop, avatars, badges backend) are already live for prod and iOS build 28 with no deploy needed.
