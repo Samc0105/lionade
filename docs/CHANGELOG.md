@@ -4,6 +4,83 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-08 - Learn deep-audit: Mastery Mode "End session" (P0 — /complete was never callable, sessions ran forever + reward un-earnable) + learning-paths empty-state guard + vocab Fang-farm migration (branch fix/password-reset-resend, commit e76b58c, NOT deployed)
+
+**Context — full Learn deep-audit (6 lanes, verified against DEPLOYED main).** Ran an
+adversarial "is it actually working" pass across the Learn surface. **Verdict:** mostly
+airtight — the quiz reward path is atomic + idempotent (drift 0), and vocab review /
+Review Hub / Resume-Coach PDF (via `unpdf`) all round-trip correctly. The breaks were
+concentrated in Mastery Mode's session lifecycle and one unseeded route. This batch ships
+the two code fixes the audit surfaced plus one ready-not-applied migration, and files the
+rest into the vault Tech-Debt note.
+
+**What changed (code, commit `e76b58c`):**
+- **P0 — Mastery Mode had no "End session".** `/complete` is the ONLY session-closer and
+  the ONLY reward-crediter, and no UI ever called it — so Mastery sessions ran forever
+  (**6 stuck `active` sessions in prod**) and the completion reward was un-earnable
+  (**0 mastery credits ever granted**). Added an "End session" button → `ConfirmModal` →
+  `POST /complete` (the existing idempotent atomic close-claim) → confetti + wrapped
+  session view. The session can now actually end and pay out.
+- **P1 — `/learn/paths/[subject]` rendered a dead blank roadmap on valid slugs.**
+  `learning_paths` is empty in prod and the page only guarded `stages === null`, so a valid
+  subject slug painted a blank roadmap. Added a `stages.length === 0` "coming soon" guard so
+  the route degrades honestly instead of showing nothing.
+
+**Migration (READY, NOT applied — needs Sam's go):**
+- **P1 — `supabase/migrations/20260708120000_vocab_words_bank_unique.sql` closes a vocab
+  Fang-farming hole.** General banks with NULL langs let the SAME word be re-inserted and
+  re-credited (+5 Fangs) repeatedly. The migration moves the unique index to
+  `(user_id, bank_id, lower(word))` so the same word in the same bank can't re-insert +
+  re-credit. **Not applied — hold for Sam.**
+
+**Reviews:** `quality-code-reviewer` (approve — no double-credit, no stuck UI). `tsc` clean.
+
+**Migration required:** Yes (READY, NOT applied) — `supabase/migrations/20260708120000_vocab_words_bank_unique.sql`
+**Breaking changes:** None.
+
+**REMAINING (filed to the vault Tech-Debt note; next batch):**
+- P1-2: `ninny_sessions` concurrent `/complete` double-credit race — needs a unique index +
+  `ON CONFLICT`.
+- P2: `save-quiz-results` trusts the client `correctAnswers` count — needs a server-side
+  re-grade.
+- Ninny chat has **0 messages EVER in prod** — worth a manual test (possibly unused or
+  silently broken; no telemetry to tell).
+- Route ninny/vocab AI calls through `logAiCall` for telemetry + add a chat rate cap.
+- Seed `learning_paths` to activate the path reward.
+- Stale comments to sweep (`pdf-parse` / HELD-migration / check-answer).
+
+## 2026-07-08 - Academia deep-audit: honest archive copy + profile dropdown legacy-value fix (branch fix/password-reset-resend, commit 08cf9a5, NOT deployed)
+
+**Context — full Academia deep-audit (6 lanes, live-prod verified).** Ran an adversarial
+"is it actually working" pass across the whole Academia surface. **Verdict:** everything
+that SAVES is saving — syllabus PDF (2 real PDFs in the `class-syllabi` bucket, 1 fully
+parsed via `unpdf`, NOT the broken `pdf-parse`), photos, text notes, grades, assignments,
+and profile edits all round-trip in prod. The two breaks were honesty/UX bugs, not
+data-loss bugs.
+
+**What changed (code, commit `08cf9a5`):**
+- **FIX — archive "you can restore it later" was a lie.** There is no unarchive endpoint,
+  so the reassuring copy promised something the app can't do. Rewrote it to be honest:
+  notes and exam history stay saved, but a class can't be un-hidden yet.
+- **FIX — profile Education / Study-Goal dropdowns rendered BLANK for legacy stored
+  values** (e.g. `"College Senior"`), which silently OVERWROTE the stored value on Save
+  (the blank dropdown submitted empty). Now the stored value is injected as an option
+  (generic approach, preserves any legacy value), so opening + saving the profile no longer
+  wipes a value the dropdown didn't natively list.
+
+**Reviews:** `quality-code-reviewer` (approve). `tsc` clean.
+
+**Migration required:** No.
+**Breaking changes:** None.
+
+**REMAINING (filed to the vault Tech-Debt note):**
+- Flashcards: the fix `f824056` (class-flashcards `waitUntil`) is already on this branch but
+  needs a DEPLOY; also backfill the 2 eligible notes.
+- Syllabus `parsed_exams` + manual exams never reach the countdown — a `parsed_exams` /
+  `user_exams` disconnect, and the manual "add exam" path has no date field. P2 code.
+- Profile `bio` is never rendered anywhere (write-only).
+- `logAiCall` bare-void under-records telemetry.
+
 ## 2026-07-08 - Reliability batch: full-app "is it actually working" audit + public /forgot-password moved off dead SMTP onto Resend + class-flashcards waitUntil fix (branch fix/password-reset-resend, commit f824056, NOT deployed)
 
 > **⚠️ OPERATOR ACTION STILL REQUIRED — see the CONFIG checklist at the bottom of this
