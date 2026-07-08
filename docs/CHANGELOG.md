@@ -4,6 +4,77 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-08 - Reliability batch: full-app "is it actually working" audit + public /forgot-password moved off dead SMTP onto Resend + class-flashcards waitUntil fix (branch fix/password-reset-resend, commit f824056, NOT deployed)
+
+> **⚠️ OPERATOR ACTION STILL REQUIRED — see the CONFIG checklist at the bottom of this
+> entry.** The public reset is now repaired in CODE, but signup email confirmation and
+> email-change confirmation are STILL DOWN until Sam rotates the Supabase SMTP credential
+> (same root cause as the entry below). Signup confirmation being down is a BLOCKER: new
+> users can't verify and can't log in. Stripe purchases remain config-blocked (0
+> transactions ever).
+
+**Context — full-app health audit (12 surfaces, adversarially verified).** Ran an "is it
+actually working" pass across the whole app. **Verdict:** the game loop + Fangs core is
+solid; the breaks are concentrated in two places — auth-email (the SMTP twins: signup
+confirm + email-change still ride the dead Supabase SMTP) and Stripe (config-blocked, zero
+transactions ever). This batch fixes the two code-side breaks the audit surfaced and files
+the rest (config + remaining code) below so nothing is lost.
+
+**What changed (code, commit `f824056`):**
+- **P0 — public `/forgot-password` was still on the dead Supabase SMTP.** The public page
+  called the client `resetPasswordForEmail`, which routes through the same invalid
+  custom-SMTP credential as the entry below, so ordinary users could NOT recover their
+  accounts. Added a NEW PUBLIC route `app/api/auth/reset-password` that mints a one-time
+  recovery link via `generateLink({ type: "recovery" })` and delivers it over **Resend**
+  (same proven pattern as the admin reset). **Enumeration-safe:** the route always returns
+  an identical `200` regardless of whether the email exists, and the actual send runs in
+  `waitUntil(...)` so there is no timing oracle (a real vs unknown address takes the same
+  wall-clock time). Rate-limited in `middleware.ts` under a new `auth-reset` bucket
+  (5 requests / 15 min / IP). The `/forgot-password` page was rewired to call the new route
+  instead of the Supabase client.
+- **P2 — class flashcards never generated in prod (`class_flashcards` empty).** Saving a
+  class note fired `generateFlashcardsForNote` as a bare `void` expression; Vercel freezes
+  the serverless function the moment the response is returned, so the promise was killed
+  before the OpenAI call could resolve — no flashcards were ever written. Wrapped that call
+  (and `bumpClassStreak`) in `waitUntil(...)` from `@vercel/functions` so the work survives
+  past the response. Swept the identical bare-`void` bug in the quick-note route. Also
+  fixed the flashcard empty-state copy (was truncated at 50 chars → now 80).
+
+**Reviews:** `security-auth-guardian` (safe to ship — enumeration-safe identical-200,
+`waitUntil` send avoids the timing oracle, rate-limited) + `quality-code-reviewer`
+(approve). `tsc` clean.
+
+**Migration required:** No.
+**Breaking changes:** None.
+
+**CONFIG CHECKLIST (Sam only — dashboard actions; the code fixes above do NOT cover these):**
+1. **Rotate the Supabase Auth SMTP key** (Supabase Dashboard → Authentication → Emails →
+   SMTP Settings). This is what restores signup email confirmation + email-change — still
+   DOWN. Same blocker as the entry below.
+2. **Stripe go-live** — set `STRIPE_PRICE_ID_{PRO,PLATINUM}_{MONTHLY,ANNUAL}` +
+   `STRIPE_PRICE_ID_FANGS_{S,M,L,XL}` in Vercel, create the live Prices, register the
+   webhook, and set `STRIPE_WEBHOOK_SECRET`. **Do NOT enable purchases before the webhook
+   is registered.** (0 transactions have ever gone through.)
+3. **Verify the Supabase Redirect-URL allowlist includes BOTH**
+   `https://getlionade.com/reset-password` AND `https://app.getlionade.com/reset-password`
+   (the recovery link must land on our reset form on either host).
+4. **Verify `RESEND_API_KEY` + `EMAIL_FROM` are set in Vercel** and that the `EMAIL_FROM`
+   domain is still verified in Resend (the new public reset + the admin reset both depend
+   on Resend).
+5. **Toggle Supabase leaked-password protection ON** (Security Advisor flags it disabled).
+6. **Revoke `EXECUTE` on the `reward_referral` RPC from `anon`** (Security Advisor flag).
+7. **Apply migration `083` (streak_freezes).**
+8. **Run** `ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;` so live DM
+   receive works.
+9. **Seed `learning_paths`** (or guard the `[subject]` route) — see the remaining-code item.
+
+**REMAINING CODE (next batch — filed so it isn't lost):**
+- Port change-email to Resend + `generateLink({ type: "email_change_new" })`
+  (`settings/account:444` still calls the dead SMTP path and shows a false "sent" toast).
+- `arena_queue` freshness filter + reaper (stale queue rows).
+- Fang-pack availability probe — disable the buy buttons until the packs are priced.
+- learning-paths `[subject]` direct-slug guard (honest handling of an unseeded/unknown slug).
+
 ## 2026-07-08 - Auth-email outage: admin password reset delivered nothing (invalid Supabase SMTP key); admin reset re-routed off SMTP onto Resend + stuck-modal fix (branch fix/password-reset-resend, NOT deployed)
 
 > **⚠️ OPERATOR ACTION REQUIRED — the code fix alone does NOT restore all flows.** The
