@@ -4,6 +4,67 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-08 - Auth-email outage: admin password reset delivered nothing (invalid Supabase SMTP key); admin reset re-routed off SMTP onto Resend + stuck-modal fix (branch fix/password-reset-resend, NOT deployed)
+
+> **⚠️ OPERATOR ACTION REQUIRED — the code fix alone does NOT restore all flows.** The
+> admin reset is repaired in code, but signup email confirmation, the public
+> `/forgot-password` flow, and email-change confirmation are STILL DOWN until Sam
+> rotates the Supabase SMTP credential (see "Operator TODO" below). Signup confirmation
+> being down is a BLOCKER: new users can't verify and can't log in.
+
+**Symptom:** admin "Send password reset" at `getlionade.com/admin/users/[id]`
+delivered no email; the modal looked stuck on "Working..." with no way out.
+
+**Root cause (adversarially verified):** Supabase Auth's CUSTOM SMTP credential is
+invalid. Auth log `2026-07-08T04:34:01` shows `POST /recover -> 500`,
+`gomail: could not send email 1: 550 "API key is invalid"`. The `550` is the provider
+rejecting the key at SMTP login (rotated / revoked / placeholder). Every
+Supabase-RENDERED auth email flows through this SMTP config, so all of them were dead:
+
+- ❌ **Signup email confirmation** — BLOCKER, new users stranded, can't log in.
+- ❌ Public `/forgot-password` (`resetPasswordForEmail`, relies on Supabase-sent mail).
+- ❌ Admin "Send password reset" (was the same path).
+- ❌ Email-change confirmation.
+- ✅ NOT affected: team reset / team welcome / waitlist / contact — those already send
+  over Resend's HTTP API, bypassing SMTP entirely.
+
+**What changed (code, commit `6aa1493`):**
+- Ported the team-reset route's proven pattern to the user/support admin reset route
+  (`app/api/admin/users/[id]/reset-password/route.ts`): mint a one-time recovery link
+  via `supabaseAdmin.auth.admin.generateLink({ type: "recovery" })` and deliver it over
+  **Resend**, so the admin reset no longer depends on Supabase SMTP.
+- Extracted a shared `lib/emails/reset-password.ts` (`renderResetEmail` +
+  `sendResetEmail`) so both admin reset routes render + send from one place.
+- Added `assertTrustedOrigin` to the user route (security parity with the team route —
+  rejects cross-origin callers even though auth is Bearer-based).
+- Fixed the stuck-modal UX bug: `sendReset` now re-throws so `ConfirmModal` resets its
+  busy state; Cancel / Esc / backdrop were all disabled during the stuck "Working..."
+  state and are usable again.
+- Minor email-copy unification: the reset email now reads "a password reset was started
+  for your Lionade login" (was "an admin started a password reset") for both the team
+  and user reset routes.
+
+**Reviews:** `security-auth-guardian` (safe to ship — recovery link is bearer-equivalent,
+never logged, never written to the audit trail) + `quality-code-reviewer` (no blockers).
+
+**Migration required:** No.
+**Breaking changes:** None.
+
+**Operator TODO (Sam only — config, not code; this is what actually restores signup
+confirm + public reset + email-change):**
+1. Supabase Dashboard → Authentication → Emails → **SMTP Settings** → replace the SMTP
+   password with a fresh valid Resend API key (`550` = the provider rejected the key at
+   login — it was rotated / revoked / a placeholder).
+2. Confirm whether that SMTP key and the app's `RESEND_API_KEY` (Vercel) are the SAME
+   key, and whether it was revoked account-wide. If so, reissue `RESEND_API_KEY` too
+   (otherwise the Resend-based emails, including this admin-reset fix, break next).
+3. Verify Supabase Auth → **URL Configuration** has `https://getlionade.com/reset-password`
+   on the Redirect-URLs allowlist and Site URL = `https://getlionade.com` (the recovery
+   link must land on our reset form).
+4. Optional but recommended: a synthetic probe that mints + sends a recovery email to a
+   monitored inbox on a schedule, so the next silent key expiry is caught in minutes
+   instead of by a user report.
+
 ## 2026-07-06 - Reliability wave: works-when-tapped audit + fixes, shop purchases repaired (never worked on prod), avatar alignment (on main, NOT deployed; 3 migrations APPLIED)
 
 CEO directive: feature freeze, "make everything that exists work when
