@@ -15,6 +15,22 @@
  * callers.
  */
 
+import { waitUntil } from "@vercel/functions";
+
+// Keep best-effort telemetry alive past the response. A bare `void promise` is
+// frozen by Vercel the instant the route responds, so the ai_call_log inserts
+// below systematically under-recorded (which is exactly why audits couldn't
+// prove which AI features actually fire in prod). waitUntil holds the lambda
+// open until the insert settles; the try/catch keeps a non-request-context
+// caller (e.g. a script) from throwing.
+function keepAlive(p: Promise<unknown>): void {
+  try {
+    waitUntil(p);
+  } catch {
+    void p;
+  }
+}
+
 // ── Model constants ──────────────────────────────────────────────────────────
 export const LLM_MAIN  = "gpt-4o";
 export const LLM_CHEAP = "gpt-4o-mini";
@@ -128,12 +144,12 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
   } catch (e) {
     // Network / timeout — no tokens billed, log as failure with 0 cost.
     if (opts.telemetry) {
-      void logAiCall(
+      keepAlive(logAiCall(
         opts.telemetry,
         { model: opts.model, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 },
         false,
         `network: ${(e as Error).message}`,
-      );
+      ));
     }
     throw e;
   }
@@ -141,12 +157,12 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
     if (opts.telemetry) {
-      void logAiCall(
+      keepAlive(logAiCall(
         opts.telemetry,
         { model: opts.model, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 },
         false,
         `http ${res.status}: ${errText.slice(0, 160)}`,
-      );
+      ));
     }
     throw new Error(`OpenAI API ${res.status}: ${errText.slice(0, 200)}`);
   }
@@ -175,7 +191,7 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
   };
 
   if (opts.telemetry) {
-    void logAiCall(opts.telemetry, result, true, null);
+    keepAlive(logAiCall(opts.telemetry, result, true, null));
   }
 
   return result;
@@ -253,12 +269,12 @@ export async function callAIForJson<T>(
       // as success (the HTTP call succeeded + tokens billed). Re-log as a
       // schema failure so the table reflects the user-facing outcome.
       if (opts.telemetry) {
-        void logAiCall(
+        keepAlive(logAiCall(
           opts.telemetry,
           { model: raw.model, inputTokens: raw.inputTokens, outputTokens: raw.outputTokens, costMicroUsd: raw.costMicroUsd },
           false,
           `schema: ${issues.slice(0, 160)}`,
-        );
+        ));
       }
       throw new Error(`AI JSON schema mismatch: ${issues}`);
     }

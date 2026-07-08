@@ -168,43 +168,86 @@ export async function POST(req: NextRequest) {
     if (winnerId) {
       const loserId = winnerId === match.player1_id ? match.player2_id : match.player1_id;
       const loserProfile = loserId === match.player1_id ? p1Profile : p2Profile;
-      const loserDebit = Math.min(wager, loserProfile?.coins ?? 0);
+      const intendedDebit = Math.min(wager, loserProfile?.coins ?? 0);
 
-      const { error: winErr } = await supabaseAdmin.rpc("update_user_coins", {
-        p_user_id: winnerId,
-        p_delta: wager,
-        p_min_balance: 0,
-        p_source: "cashable",
-      });
-      if (winErr) console.error("[arena/complete] winner credit:", winErr.message);
-
-      if (loserDebit > 0) {
+      // CONSERVATION INVARIANT: the winner is credited EXACTLY what the loser is
+      // actually debited — never the nominal wager. Previously the winner was
+      // credited the full `wager` unconditionally while the loser's debit was
+      // clamped to their (stale-read) balance and skipped on 0-balance / RPC
+      // error — so any shortfall MINTED Fangs (winner +wager, loser -less). Now:
+      // debit FIRST, and only credit the amount the debit actually moved.
+      // update_user_coins raises P0001 rather than going negative, so a
+      // concurrent balance drop cleanly yields settledAmount=0 (no mint) instead
+      // of an unbacked winner credit.
+      let settledAmount = 0;
+      if (intendedDebit > 0) {
         const { error: loseErr } = await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: loserId,
-          p_delta: -loserDebit,
+          p_delta: -intendedDebit,
           p_min_balance: 0,
           p_source: "cashable",
         });
-        if (loseErr) console.error("[arena/complete] loser debit:", loseErr.message);
+        if (loseErr) {
+          console.error("[arena/complete] loser debit:", loseErr.message);
+        } else {
+          settledAmount = intendedDebit;
+        }
       }
 
-      // Audit rows reflect the EFFECTIVE amounts (loser debit may be clamped).
-      await Promise.all([
-        supabaseAdmin.from("coin_transactions").insert({
-          user_id: winnerId,
-          amount: wager,
-          type: "duel_win",
-          reference_id: matchId,
-          description: `Arena duel victory — won ${wager} Fangs`,
-        }),
-        supabaseAdmin.from("coin_transactions").insert({
-          user_id: loserId,
-          amount: -loserDebit,
-          type: "duel_loss",
-          reference_id: matchId,
-          description: `Arena duel defeat — lost ${loserDebit} Fangs`,
-        }),
-      ]);
+      if (settledAmount > 0) {
+        const { error: winErr } = await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: winnerId,
+          p_delta: settledAmount,
+          p_min_balance: 0,
+          p_source: "cashable",
+        });
+        if (winErr) {
+          console.error("[arena/complete] winner credit:", winErr.message);
+          // Credit failed AFTER we took the loser's Fangs — refund the loser so
+          // the wager never vanishes (no-loss-on-failure).
+          const { error: refundErr } = await supabaseAdmin.rpc("update_user_coins", {
+            p_user_id: loserId,
+            p_delta: settledAmount,
+            p_min_balance: 0,
+            p_source: "cashable",
+          });
+          if (refundErr) {
+            // Double failure (credit AND refund both errored): the loser is
+            // genuinely short with no auto-recovery. Rare (two RPC failures on
+            // the same primary) but a real money-desync needing manual repair —
+            // log it loudly with the specifics.
+            console.error(
+              "[arena/complete] MONEY-DESYNC: loser debited but winner not credited and refund failed",
+              refundErr.message,
+              { matchId, loserId, amount: settledAmount },
+            );
+          }
+          // Either way, zero it so the audit block never writes a phantom
+          // duel_win row for a credit that never landed in the balance.
+          settledAmount = 0;
+        }
+      }
+
+      // Audit rows reflect the EFFECTIVE settled amount (0 → no transfer, no
+      // rows). Winner +settledAmount and loser -settledAmount always balance.
+      if (settledAmount > 0) {
+        await Promise.all([
+          supabaseAdmin.from("coin_transactions").insert({
+            user_id: winnerId,
+            amount: settledAmount,
+            type: "duel_win",
+            reference_id: matchId,
+            description: `Arena duel victory — won ${settledAmount} Fangs`,
+          }),
+          supabaseAdmin.from("coin_transactions").insert({
+            user_id: loserId,
+            amount: -settledAmount,
+            type: "duel_loss",
+            reference_id: matchId,
+            description: `Arena duel defeat — lost ${settledAmount} Fangs`,
+          }),
+        ]);
+      }
     }
     // Draw: no Fang transfer.
 
