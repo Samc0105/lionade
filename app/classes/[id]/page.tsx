@@ -204,7 +204,7 @@ export default function ClassNotebookPage() {
   const handleArchive = async () => {
     const r = await apiDelete(`/api/classes/${cls.id}`);
     if (r.ok) {
-      toastSuccess("Class archived. You can restore it later.");
+      toastSuccess("Class archived. Your notes and exam history stay saved.");
       router.push("/classes");
     } else {
       toastError(r.error || "Couldn't archive class.");
@@ -405,7 +405,7 @@ export default function ClassNotebookPage() {
               setShowArchiveConfirm(false);
             }}
             title="Archive this class?"
-            message={`"${cls.name}" will be hidden from your list. You can restore it later.`}
+            message={`"${cls.name}" will be hidden from your list. Your notes and exam history stay saved, but the class can't be un-hidden yet.`}
             confirmLabel="Archive"
             destructive
           />

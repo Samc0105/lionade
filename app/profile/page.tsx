@@ -1011,6 +1011,12 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
             <select id="profile-education" value={education} onChange={e => setEducation(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
+              {/* Preserve a legacy/stored value that isn't in the current list —
+                  otherwise a controlled <select> with no matching <option>
+                  renders blank and a Save silently overwrites it with "". */}
+              {education && !EDUCATION_LEVELS.includes(education) && (
+                <option value={education}>{education}</option>
+              )}
               {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
@@ -1020,6 +1026,10 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
             <select id="profile-studygoal" value={studyGoal} onChange={e => setStudyGoal(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
+              {/* Same legacy-value preservation as Education Level above. */}
+              {studyGoal && !STUDY_GOALS.includes(studyGoal) && (
+                <option value={studyGoal}>{studyGoal}</option>
+              )}
               {STUDY_GOALS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
