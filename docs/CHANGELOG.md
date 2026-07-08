@@ -4,6 +4,83 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-07-08 - Compete deep-audit: P0 Arena V1 Fang-mint FIXED + daily-bet reaper + AI telemetry (commits e4943e5 + f76a1cd) · TWO migrations APPLIED TO PROD LIVE NOW (vocab Fang-farm index swap + coin-type allowlist)
+
+**Context — full Compete deep-audit (6 lanes, live-prod verified; audited code == deployed
+`origin/main`).** Ran an adversarial "are Fangs conserved" pass across the whole Compete
+money surface. **Verdict:** Fangs are CONSERVED in prod today — global dual-ledger drift 0,
+0 double-payouts, 0 negative balances. The newer money core (Competitive 5-mode, Daily Bet
+entry, Spin, Arena V2 ghost) is exemplary: atomic idempotent settle, engagement-gate voids,
+cooldown claims. **The rot is isolated to legacy Arena V1 + missing reapers.** This batch
+ships the fixes + files the remaining Compete debt into the vault Tech-Debt note.
+
+**⚠️ MIXED DEPLOY STATE — read carefully:**
+- **APPLIED TO PROD (LIVE NOW):**
+  - `supabase/migrations/20260708120000_vocab_words_bank_unique.sql` — the vocab
+    Fang-farming index swap. **The exploit is CLOSED in prod.** Verified:
+    `vocab_words_user_bank_word_unique` is live, the old lang-pair index is dropped,
+    0 data loss. (This is the migration that was READY-NOT-APPLIED in the Learn entry
+    below; it is now APPLIED.)
+  - `supabase/migrations/20260708130000_bet_refunded_type.sql` — adds `'bet_refunded'` to
+    the `coin_transactions` type allowlist so the daily-bet reaper's refund ledger insert
+    isn't rejected.
+- **COMMITTED, NOT DEPLOYED (needs the `fix/password-reset-resend` branch deploy to take
+  effect):** the Arena V1 settle fix, the AI telemetry fix, the daily-bet reaper route +
+  its `vercel.json` cron.
+
+**What changed (code, commits `e4943e5` + `f76a1cd`):**
+- **P0 — Arena V1 settle MINTED Fangs.** The winner was credited the full nominal wager
+  UNCONDITIONALLY, while the loser was debited only `min(wager, staleCoins)` and skipped
+  entirely on a 0-balance or an RPC error — so the winner's credit exceeded the loser's
+  debit, MINTING the shortfall into existence. Now **conserving:** debit the loser FIRST,
+  credit the winner EXACTLY what was actually debited (0 if it couldn't debit), and refund
+  on a credit-failure. Verified by `security-auth-guardian` across all 5 branches. **Latent
+  in prod** (Arena V1 has settled 0 real wagers), but deployed here it closes the hole
+  before Compete scales.
+- **P1-1 — daily-bet reaper.** New `app/api/cron/expire-daily-bets/route.ts` refunds bets
+  left unresolved past 12h, via the SAME `resolved_at IS NULL` compare-and-set the
+  quiz-settle path uses (exactly one caller flips `resolved_at`, the other is skipped — no
+  double-refund). A live victim existed: **10 Fangs locked for 33 days.** The cron is
+  already registered in `vercel.json` (`0 3 * * *`), so it starts running on the branch
+  deploy.
+- **AI telemetry — `lib/ai.ts` `logAiCall` under-recording.** The 4 bare-`void`
+  `logAiCall` calls were frozen by Vercel the instant the response returned (same
+  `waitUntil` family as the class-flashcards + `logAiCall` items in the entries below), so
+  `ai_call_log` under-recorded — which is exactly WHY prior audits couldn't prove AI
+  features fire. Wrapped in `waitUntil(...)` so the telemetry write survives past the
+  response.
+
+**Reviews:** `security-auth-guardian` (approve — Arena V1 now conserving, reaper CAS
+double-refund-safe). `tsc` clean.
+
+**Migration required:** Yes — TWO, both **APPLIED TO PROD LIVE NOW**:
+`supabase/migrations/20260708120000_vocab_words_bank_unique.sql` +
+`supabase/migrations/20260708130000_bet_refunded_type.sql`.
+**Breaking changes:** None.
+
+**CONFIG (standing Compete items for Sam):**
+- The daily-bet reaper cron ships in `vercel.json` and registers automatically on the branch
+  deploy (no manual step).
+- `pg_cron` is NOT installed — all Compete reapers are Vercel-cron only.
+- Arena V2 (`NEXT_PUBLIC_ARENA_V2_ENABLED`) is deliberately OFF. **Do NOT enable it without
+  first wiring `/api/arena/v2/complete` into `app/compete/arena/duel/page.tsx`.**
+
+**REMAINING Compete (filed to the vault Tech-Debt note; next batch):**
+- **P1-2 — Arena V1 has no reaper for stuck matches** (lost-payout only, no Fang loss — 1
+  match stuck `active` 83 days). Route the Arena settle through a competitive-style
+  single-txn marker RPC (the `settle.ts` pattern) so it's resumable + idempotent at the
+  ledger level.
+- **P2-1 — the competitive 5-mode ranked ladder is INVISIBLE.** The hub
+  (`app/compete/page.tsx:96`) reads `arena_wins/arena_losses` and `/api/me/elo-rank` ranks
+  `arena_elo`, but the competitive settler writes `competitive_elo` / `squad_elo` — needs a
+  two-ladder display design decision.
+- **P2-2 — the competitive suite has never run in prod.** Smoke-test with 2 accounts before
+  trusting it live.
+- **P2-3 — fold the best-effort bet/spin ledger inserts into the RPC.**
+- **P3 — tighten the `reap-stale-competitive` cadence from daily to ~10 min (NEEDS Vercel
+  Pro** — Hobby caps crons at daily); `arena_queue` freshness filter + sweep; daily-bet
+  reaper refund-fail durable-retry marker.
+
 ## 2026-07-08 - Learn deep-audit: Mastery Mode "End session" (P0 — /complete was never callable, sessions ran forever + reward un-earnable) + learning-paths empty-state guard + vocab Fang-farm migration (branch fix/password-reset-resend, commit e76b58c, NOT deployed)
 
 **Context — full Learn deep-audit (6 lanes, verified against DEPLOYED main).** Ran an
