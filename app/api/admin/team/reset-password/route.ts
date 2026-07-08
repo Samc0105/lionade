@@ -29,152 +29,12 @@
  *   RESEND_API_KEY, EMAIL_FROM.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireRole, isUuid } from "@/lib/admin-auth";
 import { assertTrustedOrigin, UntrustedOriginError } from "@/lib/team/origin-check";
 import { writeTeamAudit } from "@/lib/team/audit";
-import { BRAND } from "@/lib/emails";
-import { absoluteUrl, SITE_HOST, SUPPORT_EMAIL } from "@/lib/site-config";
-
-const FONT_STACK =
-  "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-
-/** HTML-escape a dynamic string before it lands in the email body. */
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-/**
- * Gold CTA button matching the rest of the email suite, with a passed-in href +
- * label. The exported render.ts `ctaButton()` uses {{ctaUrl}}/{{ctaLabel}}
- * template slots (template-author surface), so this operator email defines its
- * own arg-taking variant — same approach as lib/emails/team-welcome.tsx.
- */
-function ctaButton(url: string, label: string): string {
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
-  <tr>
-    <td align="center" style="border-radius:8px;background:${BRAND.goldDark};">
-      <a href="${url}"
-         style="display:inline-block;padding:14px 28px;font-family:${FONT_STACK};font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:8px;background:${BRAND.goldDark};">
-        ${label} &rarr;
-      </a>
-    </td>
-  </tr>
-</table>`;
-}
-
-/**
- * Renders the operator-facing "reset your Lionade password" email. Reuses the
- * shared BRAND palette + ctaButton so it matches the rest of the transactional
- * suite (no new email framework — per CLAUDE_AGENT.md). The reset URL is the
- * single sensitive value; callers must not log this html/text.
- */
-function renderResetEmail(args: {
-  fullName: string | null;
-  resetUrl: string;
-}): { subject: string; html: string; text: string } {
-  const safeName = (args.fullName || "").trim();
-  const greeting = safeName.length > 0 ? escapeHtml(safeName) : "there";
-  const subjectName = safeName.length > 0 ? safeName : "team";
-  const resetUrlEsc = escapeHtml(args.resetUrl);
-
-  const bodyHtml = `
-<h1 style="margin:0 0 16px 0;font-size:24px;line-height:1.25;font-weight:700;color:${BRAND.ink};">
-  Reset your Lionade password
-</h1>
-<p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:${BRAND.ink};">
-  Hi ${greeting}, an admin started a password reset for your Lionade login.
-  Click below to set a new password.
-</p>
-${ctaButton(args.resetUrl, "Set a new password")}
-<p style="margin:0 0 16px 0;font-size:13px;line-height:1.6;color:${BRAND.muted};">
-  This link is one-time use and expires shortly. If it has expired by the time
-  you click it, ask the admin who sent it for a fresh one.
-</p>
-<p style="margin:0 0 4px 0;font-size:13px;line-height:1.6;color:${BRAND.muted};">
-  If you didn't expect this, you can ignore the email and tell
-  <a href="mailto:${SUPPORT_EMAIL}" style="color:${BRAND.goldDark};text-decoration:underline;">${SUPPORT_EMAIL}</a>.
-  Your password won't change until you open the link and set one.
-</p>`;
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>Lionade</title>
-</head>
-<body style="margin:0;padding:0;background:${BRAND.cream};font-family:${FONT_STACK};color:${BRAND.ink};-webkit-font-smoothing:antialiased;">
-<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${BRAND.cream};">
-Set a new password for your Lionade login.
-</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.cream};padding:32px 16px;">
-  <tr>
-    <td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#FFFFFF;border:1px solid ${BRAND.border};border-radius:12px;overflow:hidden;">
-        <tr>
-          <td style="padding:28px 32px 20px 32px;border-bottom:1px solid ${BRAND.border};">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td align="left" valign="middle">
-                  <img src="${BRAND.logoUrl}" width="40" height="40" alt="Lionade" style="display:block;border:0;outline:none;text-decoration:none;height:40px;width:40px;" />
-                </td>
-                <td align="right" valign="middle" style="font-family:${FONT_STACK};font-size:14px;font-weight:600;color:${BRAND.goldDark};letter-spacing:0.12em;text-transform:uppercase;">
-                  Lionade
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="height:4px;background:linear-gradient(90deg, ${BRAND.gold} 0%, ${BRAND.goldDark} 100%);background-color:${BRAND.gold};font-size:0;line-height:0;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td style="padding:36px 32px 32px 32px;font-family:${FONT_STACK};font-size:16px;line-height:1.6;color:${BRAND.ink};">
-${bodyHtml}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:24px 32px;background:${BRAND.parchment};border-top:1px solid ${BRAND.border};font-family:${FONT_STACK};font-size:12px;line-height:1.6;color:${BRAND.muted};">
-            <p style="margin:0 0 8px 0;color:${BRAND.muted};font-size:12px;">
-              Questions? Email
-              <a href="mailto:${SUPPORT_EMAIL}" style="color:${BRAND.goldDark};text-decoration:underline;">${SUPPORT_EMAIL}</a>.
-            </p>
-            <p style="margin:0;color:${BRAND.muted};font-size:11px;opacity:0.8;">
-              You're receiving this because you're on the Lionade team. Lionade &middot; ${escapeHtml(SITE_HOST)}.
-            </p>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-</body>
-</html>`;
-
-  const text = `Reset your Lionade password
-
-Hi ${subjectName}, an admin started a password reset for your Lionade login.
-Open this one-time link to set a new password:
-
-${args.resetUrl}
-
-This link is one-time use and expires shortly. If it has expired, ask the admin who sent it for a fresh one.
-
-If you didn't expect this, ignore this email (your password won't change until you open the link) and tell ${SUPPORT_EMAIL}.
-
-Lionade · ${SITE_HOST}
-`;
-
-  return { subject: "Reset your Lionade password", html, text };
-}
+import { sendResetEmail } from "@/lib/emails/reset-password";
+import { absoluteUrl } from "@/lib/site-config";
 
 export async function POST(req: NextRequest) {
   // --- 1. Auth: admin only --------------------------------------------------
@@ -282,31 +142,17 @@ export async function POST(req: NextRequest) {
   const resetUrl = linkData.properties.action_link;
 
   // --- 7. Deliver the link via Resend --------------------------------------
-  const rendered = renderResetEmail({ fullName: row.full_name, resetUrl });
-  let emailSent = false;
-  try {
-    const resend = new Resend(resendKey);
-    const { error: sendErr } = await resend.emails.send({
-      from: emailFrom,
-      to: personalEmail,
-      replyTo: SUPPORT_EMAIL,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: rendered.text,
-    });
-    if (sendErr) {
-      // Don't echo provider detail to the client; log a safe summary only.
-      console.error("[team/reset-password] resend send failed:", JSON.stringify(sendErr));
-    } else {
-      emailSent = true;
-    }
-  } catch (sendEx) {
-    // Never include the link/exception body in the response.
-    console.error(
-      "[team/reset-password] resend threw:",
-      sendEx instanceof Error ? sendEx.message : "unknown",
-    );
-  }
+  // Shared helper (also used by the user-admin reset route). Renders + sends +
+  // logs a safe error summary; never logs the link/body.
+  const emailSent = await sendResetEmail({
+    resendKey,
+    emailFrom,
+    to: personalEmail,
+    fullName: row.full_name,
+    resetUrl,
+    receivingBecause: "You're receiving this because you're on the Lionade team.",
+    logTag: "team/reset-password",
+  });
 
   // If the admin asked to see the link, the email delivery is a convenience, so
   // a send failure is non-fatal. If they did NOT ask, the email is the only

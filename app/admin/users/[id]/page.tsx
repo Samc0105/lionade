@@ -152,6 +152,12 @@ export default function AdminUserDetailPage() {
       void mutate();
     } else {
       toastError(res.error ?? "Reset failed");
+      // Re-throw so ConfirmModal's handleConfirm catch resets `busy` (its only
+      // reset while open). Without this the confirm button stays stuck on
+      // "Working..." AND Cancel/Esc/backdrop are all disabled(busy) — trapping
+      // the operator until a page reload. Contract: throwing keeps the modal
+      // open (the toast above is the surfaced error) and re-enables retry.
+      throw new Error(res.error ?? "reset-failed");
     }
   };
 
