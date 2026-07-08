@@ -407,6 +407,30 @@ export default function RoadMapPage() {
                     />
                   ))}
                 </div>
+              ) : stages.length === 0 ? (
+                // learning_paths has no stages for this subject yet (the table
+                // is seeded per-subject). Without this an empty array fell
+                // through to the timeline below and rendered a dead 0% roadmap
+                // with nothing clickable. Honest coming-soon instead.
+                <div
+                  className="rounded-2xl border p-8 text-center"
+                  style={{ background: "var(--card-solid-bg)", borderColor: `${meta.color}30` }}
+                >
+                  <p className="font-bebas text-2xl tracking-wider text-cream mb-1">
+                    {meta.label} path is coming soon
+                  </p>
+                  <p className="text-sm text-cream/60 max-w-sm mx-auto">
+                    We're still building the stages for this track. Check back
+                    shortly, or keep leveling up with Quizzes and Mastery Mode.
+                  </p>
+                  <button
+                    onClick={() => router.push("/learn/paths")}
+                    className="mt-5 inline-block rounded-full px-5 py-2.5 text-sm font-bold text-navy"
+                    style={{ background: meta.color }}
+                  >
+                    Back to Paths
+                  </button>
+                </div>
               ) : (
                 <div className="relative">
                   {/* Vertical line */}

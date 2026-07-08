@@ -218,7 +218,11 @@ export async function POST(req: NextRequest) {
     };
   }
 
-  // 3. Insert. UNIQUE per (user_id, bank_id, lower(word)) — schema-enforced.
+  // 3. Insert. UNIQUE per (user_id, bank_id, lower(word)) — enforced by
+  //    vocab_words_user_bank_word_unique (migration 20260708120000). NOTE: this
+  //    23505 guard is only correct once that migration is applied; the older
+  //    lang-pair index let NULL-lang general banks re-insert + re-credit.
+
   const { data: inserted, error: insertErr } = await supabaseAdmin
     .from("vocab_words")
     .insert(insertPayload)

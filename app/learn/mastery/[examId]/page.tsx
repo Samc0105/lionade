@@ -13,6 +13,7 @@ import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import SubtopicRail, { type SubtopicRailItem } from "@/components/Mastery/SubtopicRail";
 import MasteryMessage, { type MessageShape } from "@/components/Mastery/MasteryMessage";
 import MasteryActionArea, { type LiveQuestion, type AnswerOutcome, type HintResult } from "@/components/Mastery/MasteryActionArea";
+import ConfirmModal from "@/components/ConfirmModal";
 import { useActiveTime } from "@/components/Mastery/useActiveTime";
 import SessionReportFab from "@/components/Mastery/StudySheetButton";
 import NinnyThinking, { MasteryNotesFooter } from "@/components/Mastery/NinnyThinking";
@@ -125,6 +126,8 @@ export default function MasterySessionPage() {
   // affordance. Distinct from bootError, which is a hard "couldn't start" wall.
   // Init null (not "") so the banner never flashes empty before data lands.
   const [actionError, setActionError] = useState<string | null>(null);
+  // Confirm gate for ending the session (grants the reward + closes it).
+  const [confirmEndOpen, setConfirmEndOpen] = useState(false);
 
   // Tier 3 refresh-resumable scratch state — restored from
   // /api/mastery/sessions/:id/state on mount and re-saved (debounced) on
@@ -711,6 +714,34 @@ export default function MasterySessionPage() {
     } finally { setBusy(false); }
   };
 
+  // End the session — the ONLY path that closes it + grants the completion
+  // reward (POST /complete). Previously unreachable: no UI ever called it, so
+  // sessions ran forever and the Fang reward was un-earnable. The route is
+  // idempotent (atomic close-claim) so a double-tap / retry can't double-credit.
+  // On success we mutate() so status flips off 'active' and the "Session
+  // Wrapped" summary (gated on `ended`) reveals with the reward already banked.
+  const doComplete = async () => {
+    if (!sessionId || busy) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      const r = await apiPost<{ coinsEarned?: number; alreadyClosed?: boolean }>(
+        `/api/mastery/sessions/${sessionId}/complete`,
+        {},
+      );
+      if (!r.ok) {
+        setActionError(r.error || "Couldn't end the session. Try again.");
+        return;
+      }
+      if ((r.data?.coinsEarned ?? 0) > 0) setCelebrateKey(k => k + 1);
+      await mutate();
+    } catch {
+      setActionError("Couldn't end the session. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ── Derived display values (MUST be computed before any early return so
   //    hook order stays stable across renders when data arrives) ────────────
   const stats = useStatsBits(data);
@@ -856,6 +887,19 @@ export default function MasterySessionPage() {
                   buildInput={buildStudySheet}
                   overallPct={data.overallDisplayPct}
                 />
+                {/* End session — the only way to close a session + bank the
+                    completion reward. Hidden once ended (the Wrapped view owns
+                    the exit then). */}
+                {!ended && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmEndOpen(true)}
+                    disabled={busy}
+                    className="shrink-0 rounded-full border border-gold/40 text-gold hover:bg-gold/10 disabled:opacity-50 disabled:cursor-not-allowed font-mono text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                  >
+                    End session
+                  </button>
+                )}
                 <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
                   <Clock size={12} weight="bold" aria-hidden="true" />
                   <span className="tabular-nums" aria-label={`Total study time: ${stats.timeLabel}`}>{stats.timeLabel}</span>
@@ -1107,6 +1151,20 @@ export default function MasterySessionPage() {
         trigger={celebrateKey > 0}
         origin="center"
         palette={["#FFD700", "#A855F7", "#4A90D9"]}
+      />
+
+      {/* End-session confirm — the reward is banked on confirm, and the session
+          closes (you can start a fresh one anytime). */}
+      <ConfirmModal
+        open={confirmEndOpen}
+        onClose={() => setConfirmEndOpen(false)}
+        onConfirm={async () => {
+          await doComplete();
+          setConfirmEndOpen(false);
+        }}
+        title="End this session?"
+        message="You'll bank your Fangs for this session and see your wrap-up. You can start a new session on this exam anytime."
+        confirmLabel="End & claim"
       />
     </div>
   );
