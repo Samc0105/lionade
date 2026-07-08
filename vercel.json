@@ -12,6 +12,10 @@
   },
   "crons": [
     {
+      "path": "/api/cron/expire-daily-bets",
+      "schedule": "0 3 * * *"
+    },
+    {
       "path": "/api/cron/reap-afk-presence",
       "schedule": "0 4 * * *"
     },
