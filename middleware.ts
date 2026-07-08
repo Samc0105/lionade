@@ -314,6 +314,15 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 15 * 60 * 1000,
     keyPrefix: "auth-clear",
   },
+  {
+    // Public self-serve password-reset request. Sends an email, so it's an
+    // abuse/spam vector — keep it strict. Enumeration-safe route (always 200).
+    test: (p) => p === "/api/auth/reset-password",
+    max: 5,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "auth-reset",
+    method: "POST",
+  },
 
   // AI endpoints — expensive, anti-abuse
   // Ninny generate: 5/15min per IP. Combined with the per-user 20/day cap

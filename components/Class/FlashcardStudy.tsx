@@ -111,7 +111,7 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
             No flashcards yet
           </p>
           <p className="text-[12px] text-cream/40">
-            Add a note (50+ chars) and Ninny will generate cards from it.
+            Add a note (80+ chars) and Ninny will generate cards from it.
           </p>
         </div>
       </section>

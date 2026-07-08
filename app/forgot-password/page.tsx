@@ -11,7 +11,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 
 const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
 const GOLD_BTN = "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)";
@@ -28,32 +27,35 @@ export default function ForgotPasswordPage() {
     if (!addr) return;
     setBusy(true);
     setSendError(null);
-    // resetPasswordForEmail does not reveal whether the address exists, and we
-    // show the same confirmation either way, so account enumeration is not
-    // possible here. The emailed link lands on /reset-password (the recovery
-    // back-half), which consumes the token and lets the user set a new password.
-    //
-    // We DO surface failures that are not account-specific: a thrown transport
-    // error (the request never left the browser) and resolved rate-limit /
-    // server errors (Supabase refused or failed to send for everyone). Those
-    // leak nothing about whether the account exists, and showing the "sent"
-    // confirmation for them leaves the user waiting on an email that will
-    // never arrive. Other resolved outcomes keep the identical success copy.
-    let failed = false;
+    // POST to /api/auth/reset-password, which mints a recovery link and sends
+    // it via Resend (NOT Supabase SMTP — that credential silently died and took
+    // the old client-side resetPasswordForEmail down with it). The route is
+    // enumeration-safe: it returns an identical 200 whether or not the address
+    // has an account, so we show the same confirmation on success either way.
+    // We only surface account-INDEPENDENT failures: 429 (rate-limited) and 503
+    // (email not configured / temporarily down). Those leak nothing about
+    // whether the account exists.
+    let status = 0;
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(addr, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: addr }),
       });
-      if (error && (error.status === 429 || (error.status ?? 0) >= 500)) failed = true;
+      status = res.status;
     } catch {
-      failed = true;
+      status = 0; // request never left the browser
     }
     setBusy(false);
-    if (failed) {
-      setSendError("Couldn't send right now. Check your connection and try again.");
+    if (status === 200) {
+      setSent(true);
       return;
     }
-    setSent(true);
+    if (status === 429) {
+      setSendError("Too many requests. Wait a few minutes and try again.");
+      return;
+    }
+    setSendError("Couldn't send right now. Check your connection and try again.");
   };
 
   return (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't save note." }, { status: 500 });
     }
     // Best-effort: only bump when a real class was attached.
-    if (classId) void bumpClassStreak(userId, classId);
+    if (classId) waitUntil(bumpClassStreak(userId, classId));
     return NextResponse.json({ note: shapeNote(data), aiCategorized: false });
   }
 
@@ -208,7 +209,7 @@ ${neutralizeTag(stripNoteImageTokens(noteBody).slice(0, 6000), "note")}
   }
 
   // Best-effort: only bump when AI/auto-categorize landed on a real class.
-  if (chosenClassId) void bumpClassStreak(userId, chosenClassId);
+  if (chosenClassId) waitUntil(bumpClassStreak(userId, chosenClassId));
 
   return NextResponse.json({
     note: shapeNote(data),

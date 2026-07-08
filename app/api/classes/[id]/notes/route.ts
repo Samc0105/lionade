@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { bumpClassStreak } from "@/lib/class-streaks";
@@ -137,18 +138,21 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     return NextResponse.json({ error: "Couldn't save note." }, { status: 500 });
   }
 
-  // Best-effort: bump the per-class streak. Never blocks the response.
-  void bumpClassStreak(userId, classId);
-
-  // Best-effort: generate AI flashcards from this note in the background.
+  // Best-effort background work — never blocks the response, but MUST be kept
+  // alive past it. On Vercel a bare `void promise` is frozen the instant the
+  // response returns, so the AI flashcard call never resolved (class_flashcards
+  // stayed empty in prod). waitUntil holds the lambda open until these settle.
+  waitUntil(bumpClassStreak(userId, classId));
   // Skips short notes internally (<80 chars). Failures are logged, never
   // surface to the user — the note save has already succeeded.
-  void generateFlashcardsForNote({
-    userId,
-    classId,
-    noteId: data.id,
-    noteBody: noteBody,
-  });
+  waitUntil(
+    generateFlashcardsForNote({
+      userId,
+      classId,
+      noteId: data.id,
+      noteBody,
+    }),
+  );
 
   return NextResponse.json({ note: shapeNotes([data])[0] });
 }
