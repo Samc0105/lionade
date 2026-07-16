@@ -18,8 +18,11 @@ function getStripe(): Stripe {
   }
   _stripe = new Stripe(secretKey, {
     apiVersion: "2026-02-25.clover",
-    typescript: true,
-    // 15s per-request timeout enforced by the SDK; 2 network retries on top.
+    // Use fetch instead of Node's http agent (which defaults keepAlive:true).
+    // Vercel warm Lambda containers reuse this singleton, but Stripe closes
+    // idle keep-alive sockets — causing ECONNRESET on the next invocation.
+    // Fetch has no persistent pool, so every call gets a fresh connection.
+    httpClient: Stripe.createFetchHttpClient(),
     timeout: 15_000,
     maxNetworkRetries: 2,
   });

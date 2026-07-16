@@ -8,6 +8,21 @@
     },
     "app/api/ninny/chat/route.ts": {
       "maxDuration": 30
+    },
+    "app/api/stripe/checkout/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/stripe/fang-purchase/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/stripe/usd-purchase/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/stripe/portal/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/stripe/webhook/route.ts": {
+      "maxDuration": 30
     }
   },
   "crons": [
