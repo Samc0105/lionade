@@ -20,7 +20,10 @@ ENV=production
 add() {
   local key=$1
   local val=$2
-  echo "$val" | vercel env add "$key" "$ENV" --force 2>/dev/null && echo "  ✓ $key" || echo "  ✗ $key (failed)"
+  # printf '%s' — NOT echo — echo appends \n which Vercel stores verbatim,
+  # corrupting the value (a sk_live_...\n Authorization header makes every
+  # Stripe SDK call throw StripeConnectionError).
+  printf '%s' "$val" | vercel env add "$key" "$ENV" --force 2>/dev/null && echo "  ✓ $key" || echo "  ✗ $key (failed)"
 }
 
 echo "Pushing Stripe env vars to Vercel ($ENV)..."
