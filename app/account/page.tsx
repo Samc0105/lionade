@@ -21,7 +21,7 @@ import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { useAuth } from "@/lib/auth";
 import { usePlan } from "@/lib/use-plan";
-import { useUserStats, mutateUserStats } from "@/lib/hooks";
+import { useUserStats, mutateUserStats, useBfcacheReset } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -90,6 +90,9 @@ function AccountInner() {
   const { plan, refresh: refreshPlan } = usePlan();
   const { stats } = useUserStats(user?.id);
   const [portalLoading, setPortalLoading] = useState(false);
+  // Back from the Stripe billing portal restores this page from bfcache with
+  // the Manage button still spinning — clear it.
+  useBfcacheReset(() => setPortalLoading(false));
 
   const swrKey = user?.id ? `subscription/${user.id}` : null;
   const { data: sub, isLoading, mutate: refreshSub } = useSWR<SubscriptionRow | null>(

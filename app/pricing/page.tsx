@@ -16,6 +16,7 @@ import { SUPPORT_EMAIL } from "@/lib/site-config";
 import { useAuth } from "@/lib/auth";
 import { usePlan } from "@/lib/use-plan";
 import { apiPost } from "@/lib/api-client";
+import { useBfcacheReset } from "@/lib/hooks";
 import { toastError, toastInfo } from "@/lib/toast";
 
 /**
@@ -166,6 +167,9 @@ export default function PricingPage() {
   // Tier currently in-flight to /api/stripe/checkout so we can disable the
   // exact button + show a spinner without locking the other plan's CTA.
   const [pendingTier, setPendingTier] = useState<"pro" | "platinum" | null>(null);
+  // Back from Stripe restores this page from bfcache with the spinner frozen
+  // on the CTA — clear it so the button is immediately usable again.
+  useBfcacheReset(() => setPendingTier(null));
 
   // Show a polite toast if the user returned from a canceled Stripe Checkout
   // session. Strip the query param so a back/forward navigation doesn't

@@ -1,8 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useSWR, { mutate } from "swr";
 import { cacheKeys } from "@lionade/core/cache/keys";
 import { supabase } from "@/lib/supabase";
 import { getLevelFromXp } from "@/lib/levels";
+
+/**
+ * Reset stale UI state when the page is restored from the browser's
+ * back/forward cache (bfcache). Safari + Chrome freeze the page in memory on
+ * navigation — including React state — so a "redirecting to Stripe" spinner
+ * set right before `window.location.href = checkoutUrl` is still spinning
+ * when the user hits Back from the checkout page. `pageshow` with
+ * `e.persisted` is the only signal that fires on a bfcache restore (a normal
+ * load runs effects fresh and never needs the reset).
+ */
+export function useBfcacheReset(reset: () => void) {
+  const resetRef = useRef(reset);
+  resetRef.current = reset;
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) resetRef.current();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+}
 
 interface UserStats {
   coins: number;

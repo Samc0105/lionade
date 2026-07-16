@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
-import { useUserStats } from "@/lib/hooks";
+import { useUserStats, useBfcacheReset } from "@/lib/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
@@ -1246,6 +1246,9 @@ function FounderBadgeCard({
 // ══════════════════════════════════════════════════
 function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauthed: () => void }) {
   const [pending, setPending] = useState<FangPackId | null>(null);
+  // Back from Stripe checkout restores this page from bfcache with the
+  // "Opening checkout" spinner still frozen on — clear it.
+  useBfcacheReset(() => setPending(null));
 
   async function handleBuyPack(pack: FangPack) {
     if (pending) return;
@@ -1484,19 +1487,33 @@ export default function ShopPage() {
 
   // Open Stripe Checkout for a premium USD item. The route is fail-closed, so
   // an unconfigured item returns 503 and we surface a friendly toast rather
-  // than a broken redirect.
+  // than a broken redirect. premiumPending guards double-clicks (two clicks =
+  // two Checkout Sessions) and is cleared on bfcache restore — Back from
+  // Stripe would otherwise revive the page with the flag frozen on.
+  const [premiumPending, setPremiumPending] = useState(false);
+  useBfcacheReset(() => setPremiumPending(false));
   const handleBuyPremium = async (itemId: string) => {
+    if (premiumPending) return;
     if (requireLogin()) return;
-    const res = await apiPost<{ url: string }>("/api/stripe/usd-purchase", { itemId });
-    if (res.ok && res.data?.url) {
-      window.location.href = res.data.url;
-      return;
+    setPremiumPending(true);
+    try {
+      const res = await apiPost<{ url: string }>("/api/stripe/usd-purchase", { itemId });
+      if (res.ok && res.data?.url) {
+        // Deliberately NOT cleared here — the flag guards the button while the
+        // browser navigates to Stripe; the bfcache reset clears it on Back.
+        window.location.href = res.data.url;
+        return;
+      }
+      if (res.status === 401) {
+        requireLogin();
+      } else {
+        toastError(res.error ?? "Couldn't open checkout. Try again.");
+      }
+    } catch (e) {
+      console.error("[shop:premium-checkout] threw", e);
+      toastError("Couldn't open checkout. Try again.");
     }
-    if (res.status === 401) {
-      requireLogin();
-      return;
-    }
-    toastError(res.error ?? "Couldn't open checkout. Try again.");
+    setPremiumPending(false);
   };
 
   // Page-level reduced-motion preference. Declared before any early return so
