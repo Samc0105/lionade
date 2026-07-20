@@ -52,15 +52,6 @@ const SCHEMA = [
       "Lionade: earn rewards for studying, battle friends in quiz duels, master any exam with AI.",
     inLanguage: "en",
     publisher: { "@type": "Organization", name: "Lionade" },
-    // Tells Google to show a sitelinks search box in SERP cards.
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   },
   {
     "@context": "https://schema.org",

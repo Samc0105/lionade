@@ -160,6 +160,7 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const prevUnreadRef = useRef<number | null>(null);
 
@@ -201,6 +202,7 @@ export default function Navbar() {
         if (typeof res.data.unreadCount === "number") {
           setUnreadCount(res.data.unreadCount);
         }
+        setNotificationsLoaded(true);
       },
     },
   );
@@ -758,7 +760,12 @@ export default function Navbar() {
                             </button>
                           )}
                         </div>
-                        {notifications.length === 0 ? (
+                        {!notificationsLoaded ? (
+                          <div className="py-8 text-center px-4">
+                            <div className="h-3 w-32 bg-white/10 rounded mx-auto mb-2 animate-pulse" />
+                            <div className="h-2 w-20 bg-white/[0.06] rounded mx-auto animate-pulse" />
+                          </div>
+                        ) : notifications.length === 0 ? (
                           <div className="py-8 text-center px-4">
                             <p className="text-cream/55 text-xs mb-1">You&apos;re all caught up</p>
                             <p className="text-cream/30 text-[10px]">New activity will show up here.</p>

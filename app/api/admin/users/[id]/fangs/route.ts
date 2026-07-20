@@ -31,6 +31,10 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
   }
 
+  if (params.id === staff.userId) {
+    return NextResponse.json({ error: "You cannot adjust your own Fang balance" }, { status: 400 });
+  }
+
   let body: { amount?: unknown; reason?: unknown };
   try {
     body = await req.json();

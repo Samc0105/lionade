@@ -28,6 +28,8 @@ import { settleClaimedMatch } from "@/lib/competitive/settle";
 import type { CompetitiveMatchRow } from "@/lib/competitive/types";
 import { putCronHeartbeat } from "@/lib/cloudwatch";
 
+export const maxDuration = 60;
+
 // Tuneable staleness windows.
 const RESPONSE_STALE_MS = 3 * 60 * 1000; // 3 min since the last answer
 const CREATED_STALE_MS = 20 * 60 * 1000; // 20 min since match creation (no-show)

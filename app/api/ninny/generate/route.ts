@@ -15,6 +15,7 @@ import {
 } from "@/lib/ninny";
 import { saveGeneratedQuestions } from "@/lib/question-bank";
 import { shuffleOptions } from "@/lib/shuffle-mcq";
+import { neutralizeTag } from "@/lib/prompt-safety";
 
 const MAX_CONTENT_BYTES = 20 * 1024; // 20 KB cap on user content
 const VALID_MODES: NinnyMode[] = Object.keys(NINNY_MODE_COSTS) as NinnyMode[];
@@ -247,7 +248,8 @@ export async function POST(req: NextRequest) {
     });
   };
 
-  const prompt = buildNinnyPrompt(sourceType, content, difficulty);
+  const sanitizedContent = neutralizeTag(content, "student-material");
+  const prompt = buildNinnyPrompt(sourceType, sanitizedContent, difficulty);
 
   try {
     // First attempt

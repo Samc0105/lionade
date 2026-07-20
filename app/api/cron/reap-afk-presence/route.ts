@@ -21,6 +21,8 @@ import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { putCronHeartbeat } from "@/lib/cloudwatch";
 
+export const maxDuration = 60;
+
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret) {

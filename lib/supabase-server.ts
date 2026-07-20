@@ -1,3 +1,5 @@
+import "server-only";
+
 // ⚠️  SERVER-ONLY — Never import this file in client components or pages.
 // It uses the service role key which bypasses all Row Level Security.
 // Only import in /app/api/* route handlers.

@@ -55,7 +55,8 @@ async function probe(p: (typeof PROBES)[number]): Promise<Check> {
     return { feature, category, status: "down", detail: `table "${table}" is missing (migration not applied)` };
   if (code === "42703")
     return { feature, category, status: "down", detail: `${table} is missing a column the app reads` };
-  return { feature, category, status: "degraded", detail: error.message.slice(0, 200) };
+  console.error("[admin/health] probe degraded:", feature, error.message);
+  return { feature, category, status: "degraded", detail: "check failed" };
 }
 
 export async function GET(req: NextRequest) {

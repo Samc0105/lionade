@@ -56,6 +56,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       .from("mastery_session_state")
       .select("user_id, session_id, current_question_id, partial_answer, answered_count, correct_count, last_active_at")
       .eq("session_id", sessionId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error) {

@@ -201,7 +201,7 @@ export default function CompetePage() {
                   background: "linear-gradient(145deg, #FFD700 0%, #B8960C 50%, #FFD700 100%)",
                   boxShadow: "0 2px 10px rgba(255,215,0,0.25), inset 0 1px 2px rgba(255,255,255,0.3)",
                 }}>
-                <span className="font-bebas text-base sm:text-lg text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bebas text-base sm:text-lg text-cream/85 tracking-[0.16em] leading-none">

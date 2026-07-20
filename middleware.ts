@@ -323,6 +323,15 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "auth-reset",
     method: "POST",
   },
+  {
+    // Welcome email fires on first sign-in. Strict cap (same envelope as reset)
+    // to prevent the Resend quota from being burned by a brute-forcer.
+    test: (p) => p === "/api/auth/welcome",
+    max: 5,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "auth-welcome",
+    method: "POST",
+  },
 
   // AI endpoints — expensive, anti-abuse
   // Ninny generate: 5/15min per IP. Combined with the per-user 20/day cap
@@ -690,6 +699,16 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "admin-team-write",
   },
+  // Vault secret reveal — decrypts and returns a plaintext secret. Must come
+  // BEFORE the broad admin-vault rule (first match wins) to enforce the tighter 3/min cap.
+  {
+    test: (p) => /^\/api\/admin\/vault\/[^/]+\/reveal$/.test(p),
+    method: "POST",
+    max: 3,
+    windowMs: 60 * 1000,
+    keyPrefix: "admin-vault-reveal",
+  },
+
   // Admin credential vault — per-credential ops at /api/admin/vault/<id>:
   // reveal (POST, returns a decrypted secret), update (PATCH), and delete
   // (DELETE). No method filter so all three mutating verbs get the same tight
@@ -768,6 +787,39 @@ const ROUTE_LIMITS: RouteLimit[] = [
     max: 20,
     windowMs: 60 * 1000,
     keyPrefix: "party-request-join",
+  },
+
+  // Social DMs — 10/min/IP so a hijacked account can't flood someone's inbox.
+  {
+    test: (p) => p === "/api/social/messages",
+    method: "POST",
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "social-dm",
+  },
+  // Social user search — 20/min/IP blocks scraping the user list.
+  {
+    test: (p) => p === "/api/social/search",
+    method: "GET",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "social-search",
+  },
+  // Library clone — deep-copies a study set. 5/min cap mirrors vocab-clone.
+  {
+    test: (p) => /^\/api\/library\/[^/]+\/clone$/.test(p),
+    method: "POST",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "library-clone",
+  },
+  // Competitive mode routes — matchmaking + gameplay actions. 30/min/IP
+  // covers normal play speed; blocks bot-assisted answer flooding.
+  {
+    test: (p) => p.startsWith("/api/competitive/"),
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "competitive",
   },
 
   // Blitz questions — static JSON pool, but returns up to 50 full MCQs WITH

@@ -63,9 +63,11 @@ export function resolvePayout(args: {
 }): PayoutResult {
   const base = PAYOUTS[args.mode];
   const scale = formatScale(args.format);
+  // Zero-sum: winner gains exactly what loser loses. No net Fang minting per match.
+  const loserDelta = Math.round((base.loss + base.partLoss) * scale);
   return {
-    winnerDelta: Math.round((base.win + base.partWin) * scale),
-    loserDelta: Math.round((base.loss + base.partLoss) * scale),
-    drawDelta: Math.round(base.partLoss * scale),
+    winnerDelta: -loserDelta,
+    loserDelta,
+    drawDelta: 0,
   };
 }

@@ -1165,7 +1165,7 @@ function DashboardContent() {
                           <button type="button" onClick={() => claimBounty(bounty.id)}
                             disabled={claimingId !== null}
                             aria-label={`Claim ${bounty.title} reward: ${bounty.coin_reward} Fangs and ${bounty.xp_reward} XP`}
-                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 hover:brightness-110 active:scale-95 breathe-glow disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)" }}>
                             {claimingId === bounty.id ? "Claiming..." : "Claim Reward"}
                           </button>

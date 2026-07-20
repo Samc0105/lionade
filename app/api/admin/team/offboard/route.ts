@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     assertTrustedOrigin(req);
   } catch (err) {
     if (err instanceof UntrustedOriginError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
+      return NextResponse.json({ error: "Forbidden" }, { status: err.status });
     }
     // Unexpected — fail closed.
     console.error("[admin/team/offboard] origin check error");

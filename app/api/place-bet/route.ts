@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const coinsStaked = Math.max(1, Math.min(10000, Number(body.coinsStaked) || 0));
+    const coinsStaked = Math.max(1, Math.min(500, Number(body.coinsStaked) || 0));
     const targetScore = Number(body.targetScore);
 
     if (!coinsStaked || !targetScore) {

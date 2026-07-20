@@ -21,6 +21,8 @@ import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { putCronHeartbeat } from "@/lib/cloudwatch";
 
+export const maxDuration = 60;
+
 // A daily bet should resolve same-session; unresolved past 12h is abandoned.
 const EXPIRE_MS = 12 * 60 * 60 * 1000;
 // Bound one invocation so a backlog can't run the lambda long.

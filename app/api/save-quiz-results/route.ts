@@ -446,7 +446,15 @@ export async function POST(req: NextRequest) {
 
       const count = recentCount ?? 0;
 
-      if (count > 0 && count % 3 === 0) {
+      const todayUTCBonus = new Date().toISOString().split("T")[0];
+      const { count: bonusTodayCount } = await supabaseAdmin
+        .from("coin_transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "streak_bonus")
+        .gte("created_at", `${todayUTCBonus}T00:00:00.000Z`);
+
+      if (count > 0 && count % 3 === 0 && (bonusTodayCount ?? 0) < 3) {
         bonusFangs = applyFangMultiplierFromTier(50, profile.plan as string | null, profile.subscription_status as string | null);
         // Atomic credit — see Step 3 rationale. Check the RPC error BEFORE
         // logging the audit row + reporting the bonus: a silent failure here
@@ -926,7 +934,7 @@ export async function POST(req: NextRequest) {
         const won = correctAnswers >= activeBet.target_score;
         const multipliers: Record<number, number> = { 7: 1.5, 8: 2, 9: 3, 10: 5 };
         const baseCoinsWon = won ? Math.floor(activeBet.coins_staked * (multipliers[activeBet.target_score] ?? 1)) : 0;
-        const coinsWon = applyFangMultiplierFromTier(baseCoinsWon, profile.plan as string | null, profile.subscription_status as string | null);
+        const coinsWon = Math.min(2500, applyFangMultiplierFromTier(baseCoinsWon, profile.plan as string | null, profile.subscription_status as string | null));
 
         // Conditional claim: only the FIRST submit whose UPDATE still sees
         // resolved_at IS NULL wins the bet. Concurrent submits match 0 rows and

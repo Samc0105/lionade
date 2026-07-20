@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/site-config";
 const OG_IMAGE = cdnUrl("/logo-full.png");
 
 export const metadata: Metadata = {
-  title: "Help Center · Lionade",
+  title: "Help Center",
   description:
     "Answers to common questions about Lionade. Learn how Fangs work, how to play games, how to use Mastery Mode, and how to manage your account.",
   alternates: { canonical: "/help" },
